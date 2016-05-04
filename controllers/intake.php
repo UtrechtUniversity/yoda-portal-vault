@@ -7,12 +7,21 @@ class Intake extends MY_Controller
     {
         parent::__construct();
 
+        $module = array();
+        include __DIR__ . "/../config/module.php";
+        $module['path'] = sprintf("%s/intake", $module['name']);
+        $module['basepath'] = sprintf("%s%s", base_url(), $module['name']);
+        $this->module = $module;
+
         // initially no rights for any study
         $this->permissions = (object)array(
             'assistant' => FALSE,
             'manager'   => FALSE,
         );
 
+        $this->data['userIsAllowed'] = TRUE;
+
+        // TODO: Auto load doesn't work in module?
         $this->load->model('study');
         $this->load->model('yodaprods');
         $this->load->model('dataset2');
@@ -33,83 +42,41 @@ class Intake extends MY_Controller
      * */
     public function index($studyID='', $studyFolder='')
     {
-        // studyID handling from session info
-        if(!$studyID){
-            if($tempID = $this->session->userdata('studyID') AND $tempID){
-                $studyID = $tempID;
-            }
-        }
-
-        if(!$this->study->validateStudy($this->studies, $studyID)){
-            // var_dump("Eerste");
-            // return showErrorOnPermissionExceptionByValidUser($this,'ACCESS_INVALID_STUDY','intake/intake/index');
-            $link = $module['name'] . '/intake/index/';
-            $link .= sizeof($studies) > 0 ? $studies[0] : "";
-            $this->session->set_flashdata('error', true);
-            $this->session->set_flashdata('alert', 'danger');
-            $this->session->set_flashdata('message', sprintf(lang('ERR_STUDY_NO_EXIST'), $studyID, $link));
-            $this->data['userIsAllowed'] = false; // will prevent access to the view part with all the relevant data
-        }
-
-        // study is validated. Put in session.
-        $this->session->set_userdata('studyID', $studyID);
-
-        // get study dependant rights for current user.
-        $this->permissions = $this->study->getIntakeStudyPermissions($studyID);
-
-        if(!($this->permissions->assistant OR $this->permissions->manager)){
-            // No access rights for this particular module
-            var_dump("Tweede");
-            $this->session->set_flashdata('danger', true);
-            $this->data['userIsAllowed'] = false;
-            // return showErrorOnPermissionExceptionByValidUser($this,'ACCESS_NO_ACCESS_ALLOWED', 'intake/intake/index');
-        }
-
-        $this->data['permissions']=$this->permissions;
-        $this->data['studies']=$this->studies;
-        $this->data['studyID']=$studyID;
+        $studyID = $this->validateStudyPermission($studyID);
 
         // study dependant intake path.
-        $this->intake_path = '/' . $this->config->item('rodsServerZone') . '/home/' . $this->config->item('intake-prefix') . $studyID;
-        $this->data['intakePath'] = $this->intake_path;
+        $this->intake_path = sprintf(
+                "/%s/home/%s%s", 
+                $this->config->item('rodsServerZone'),
+                $this->config->item('intake-prefix'),
+                $studyID
+            );
 
-        $this->data['currentDir'] = $this->intake_path;
-        if($studyFolder != '') $this->data['currentDir'] .= "/" . $studyFolder;
-
-        $rodsaccount = $this->rodsuser->getRodsAccount();
-        $this->data['rodsaccount'] = $rodsaccount;
-        $dir = new ProdsDir($rodsaccount, $this->intake_path);
-
-        $validFolders = array();
-        foreach($dir->getChildDirs() as $folder){
-            array_push($validFolders, $folder->getName());
-        }
-
-        if($studyFolder){ // change the actual folder when person selected a different point of reference.
-            $dir = new ProdsDir($rodsaccount, $this->intake_path . '/' . $studyFolder);
-        }
-
-        $this->data['directories'] = $dir->getChildDirs();
-        $this->data['files'] = $dir->getChildFiles();
-
-        $this->data['selectableScanFolders'] = $validFolders;  // folders that can be checked for scanning
-
-        $studyFolder = urldecode($studyFolder);
-
-        if($studyFolder AND !in_array($studyFolder,$validFolders)){
-            // invalid folder for this study
-            return showErrorOnPermissionExceptionByValidUser($this, 'ACCESS_INVALID_FOLDER', 'intake/intake/index');
-        }
-
-       
-        $this->data['userIsAllowed'] = TRUE;
-
-        $this->data['content'] = 'intake-ilab/file_overview';
-
-        $this->data['studyID'] = $studyID;
-        $this->data['studyFolder'] = $studyFolder;
-
-        $this->data['title'] = 'Study ' . $studyID . ($studyFolder?'/'.$studyFolder:'');
+        $validFolders = $this->validateStudyFolder($studyID, $studyFolder);
+        
+        // Prepare data for view
+        $dataArr = array(
+                "hasStudies" => $this->studies[0],
+                "rodsaccount" => $this->rodsuser->getRodsAccount(),
+                "permissions" => $this->permissions,
+                "studies" => $this->studies,
+                "studyID" => $studyID,
+                "title" => sprintf(
+                    "%s %s%s",
+                    ucfirst(lang('INTAKE_STUDY')),
+                    $studyID,
+                    ($studyFolder ? '/'. $studyFolder : '')
+                ),
+                "studyID" => $studyID,
+                "studyFolder" => $studyFolder,
+                "intakePath" => $this->intake_path,
+                "currentDir" => $this->current_path,
+                "content" => $this->module['name'] . '/file_overview',
+                "directories" => $this->dir->getChildDirs(),
+                "files" => $this->dir->getChildFiles(),
+                "selectableScanFolders" => $validFolders,
+            );
+        $this->data = array_merge($this->data, $dataArr);
 
         $this->load->view('common-start', array(
             'styleIncludes' => array('css/datatables.css', 'css/intake.css'),
@@ -119,10 +86,86 @@ class Intake extends MY_Controller
                 'username' => $this->rodsuser->getUsername(),
             ),
         ));
-
         $this->load->view('intake', $this->data);
-
         $this->load->view('common-end');
+    }
+
+    private function validateStudyPermission($studyID) {
+        // studyID handling from session info
+        if(!$studyID){
+            if($tempID = $this->session->userdata('studyID') AND $tempID){
+                $studyID = $tempID;
+            } else if($this->studies[0]){
+                $studyID = $this->studies[0];
+            }
+        }
+
+        // get study dependant rights for current user.
+        $this->permissions = $this->study->getIntakeStudyPermissions($studyID);
+
+        if(!$this->studies[0]) {
+            displayMessage($this, lang('ERROR_NO_INTAKE_ACCESS'), true);
+            return false;
+        }
+        else if(!$this->study->validateStudy($this->studies, $studyID)){
+            $message = sprintf(lang('ERR_STUDY_NO_EXIST'), $studyID, $this->getRedirect(), $this->studies[0]);
+            displayMessage($this, $message, true);
+            return false;
+        } else if(!($this->permissions->assistant OR $this->permissions->manager)){
+            // If the user doesn't have acces, this study doesn't appear in $this->studies,
+            // so the user won't get through the previous test, right?
+            $message = sprintf(lang('ERR_STUDY_NO_ACCESS'), $studyID, $this->getRedirect(), $this->studies[0]);
+            displayMessage($this, $message, true);
+            return false;
+        }
+
+        // study is validated. Put in session.
+        $this->session->set_userdata('studyID', $studyID);
+
+        return $studyID;
+    }
+
+    private function validateStudyFolder($studyID, $studyFolder) {
+        $this->current_path = $studyFolder ? sprintf("%s/%s", $this->intake_path, $studyFolder) : $this->intake_path;
+
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $this->dir = new ProdsDir($rodsaccount, $this->intake_path);
+
+        $validFolders = array();
+        foreach($this->dir->getChildDirs() as $folder){
+            array_push($validFolders, $folder->getName());
+        }
+
+        if($studyFolder AND !in_array($studyFolder, $validFolders)){
+            // invalid folder for this study
+            $message = sprintf(
+                    lang('ERROR_FOLDER_NOT_IN_STUDY'),
+                    $studyFolder,
+                    $studyFolder,
+                    $studyID,
+                    $this->getRedirect($studyID),
+                    $studyID
+                );
+            displayMessage($this, $message, true);
+            return false;
+        } else {
+            $this->dir = new ProdsDir($rodsaccount, $this->current_path);
+        }
+
+        return $validFolders;
+    }
+
+    public function getModuleConfig()
+    {
+        return $this->module;
+    }
+
+    private function getRedirect($studyID = '') {
+        $url = "/" . $this->module["name"] . "/intake/index";
+        if(!empty($this->studies)) {
+            $url .= "/" . ($studyID ? $studyID : $this->studies[0]);
+        }
+        return $url;
     }
 
 }
