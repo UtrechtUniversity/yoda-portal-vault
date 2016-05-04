@@ -37,9 +37,8 @@
 | in the URL cannot be matched to a valid route.
 |
 */
-
-$route['default_controller'] = "intake";
-$route['intake-ilab'] 				= "intake-ilab/intake";
+$route['default_controller'] 		= "intake";
+$route[$module] 				= $module . "/intake";
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */

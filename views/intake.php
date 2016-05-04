@@ -25,7 +25,7 @@
 						<div class="col-sm-6">
                             <?php if($userIsAllowed): ?>
                                 <h1>
-                                    <span class="glyphicon glyphicon-folder-open"></span>
+                                    <span class="glyphicon glyphicon-education"></span>
                                     <?php echo htmlentities($title); ?>
                                 </h1>
                                 <?php echo htmlentities($intakePath . ($studyFolder?'/'.$studyFolder:'')); ?>
@@ -44,7 +44,7 @@
 
 			<?php endif; ?>
 
-                <?php if(($alertData = $this->session->userdata('alertOnPageReload'))): ?>
+                <!-- <?php if(($alertData = $this->session->userdata('alertOnPageReload'))): ?>
                  <div class="row">
                     <div class="alert alert-<?php echo $alertData->alertType; ?>">
                         <button type="button" class="close" data-hide="alert">&times;</button>
@@ -74,16 +74,48 @@
                     </div>
                     <?php $this->session->unset_userdata('alertOnPageReload'); ?>
                  </div>
-                 <?php endif; ?>
+                 <?php endif; ?> -->
 
+                 <div class="alert alert-danger">
+                 Access denied
+                 </div>
+                <?php if($this->session->flashdata('error') == true):
+                ?>
+                    <div class="alert alert-<?=$this->session->flashdata('alert');?>">
+                        <?=$this->session->flashdata('message');?>
+                    </div>
+                <?php
+                endif;
+                ?>
+
+                <div>
+                    <ul>
+                        
+                    </ul>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" 
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Change study <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <?php foreach($studies as $study):
+                            $class = $study == $studyID ? 'glyphicon-ok' : 'pad-left';
+                            // $str = "<li><div class=\"glyphicon glyphicon-ok\"><a href=\"/intake-ilab/intake/index/%s\">%s</a></div></li>";
+                            $str = "<li ><a class=\"glyphicon %s\" href=\"/intake-ilab/intake/index/%s\">&nbsp;%s</a></li>";
+                            echo sprintf($str, $class, $study, $study);
+                        endforeach;
+                        ?>
+                    </ul>
+                </div>
 
 				<?php $this->load->view($content); ?>
 
 			</div>
-
-            <script src="<?php echo base_url(); ?>intake/static/scripts/jquery/jquery-1.11.2.min.js"></script>
-
 		</div>
+
+
 
         <div class="modal fade" id="dialog-ok" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
