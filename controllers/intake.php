@@ -35,6 +35,21 @@ class Intake extends MY_Controller
         $this->studies = $this->yodaprods->getStudies($this->rodsuser->getRodsAccount());
     }
 
+    /**
+     * Method to get the module configuration
+     * from the config/module.php file.
+     * The $module parameter is set in yoda as well,
+     * so loading that data may cause problems. The root
+     * controller of this module, however, does not have
+     * the yoda portal $module parameter in its scope.
+     * @return  Array containing module configuration,
+     *          as well as the basepath and path keys
+     */
+    public function getModuleConfig()
+    {
+        return $this->module;
+    }
+
     /*
      * @param string $studyID
      * @param string $studyFolder
@@ -90,6 +105,14 @@ class Intake extends MY_Controller
         $this->load->view('common-end');
     }
 
+    /**
+     * Private method that validates the study permissions for
+     * the current user and prepares data in the study
+     * @param $studyID      The identifying name of the study
+     * @return              false (bool) if the study is not valid,
+     *                      or the user doesn't have permission,
+     *                      the study ID otherwise
+     */
     private function validateStudyPermission($studyID) {
         // studyID handling from session info
         if(!$studyID){
@@ -125,6 +148,15 @@ class Intake extends MY_Controller
         return $studyID;
     }
 
+    /**
+     * Method that validates a directory inside a study folder
+     * and prepares the data for the view
+     * @param $studyID      The identifying name of the study
+     * @param $studyFolder  A name of a directory, which, if valid
+     *                      resides in the study root directory
+     * @return              false if the folder is not valid,
+     *                      an array of valid study folders otherwise
+     **/
     private function validateStudyFolder($studyID, $studyFolder) {
         $this->current_path = $studyFolder ? sprintf("%s/%s", $this->intake_path, $studyFolder) : $this->intake_path;
 
@@ -155,11 +187,16 @@ class Intake extends MY_Controller
         return $validFolders;
     }
 
-    public function getModuleConfig()
-    {
-        return $this->module;
-    }
-
+    /**
+     * Method that generates a redirect URL if the user has permissions
+     * to view other studies
+     * @param $studyID (optional)       The identifying name of the study 
+     *                                  that should be redirected to.
+     *                                  The first of the valid studies
+     *                                  is used if not provided
+     * @return  A relative URL that points back to the index of this
+     *          module and to a valid study, if one is available
+     */
     private function getRedirect($studyID = '') {
         $url = "/" . $this->module["name"] . "/intake/index";
         if(!empty($this->studies)) {
