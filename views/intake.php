@@ -2,7 +2,7 @@
 
 if ($header && $hasStudies): ?>
 
-<div class="container">
+<div class="container page-body">
   <div class="row page-header">
     <div class="col-sm-6">
       <h1>
@@ -43,7 +43,6 @@ if ($header && $hasStudies): ?>
     <ul class="dropdown-menu">
       <?php foreach($studies as $study):
       $class = $study == $studyID ? 'glyphicon-ok' : 'pad-left';
-// $str = "<li><div class=\"glyphicon glyphicon-ok\"><a href=\"/intake-ilab/intake/index/%s\">%s</a></div></li>";
       $str = "<li ><a class=\"glyphicon %s\" href=\"/intake-ilab/intake/index/%s\">&nbsp;%s</a></li>";
       echo sprintf($str, $class, $study, $study);
       endforeach;

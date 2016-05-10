@@ -1,5 +1,5 @@
 $(function() {
-	$('#files_overview').DataTable( {
+	$('.table.table-datatable').DataTable( {
 	    paging: false
 	} );
 

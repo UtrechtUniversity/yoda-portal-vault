@@ -1,3 +1,7 @@
 .dropdown-menu li a.glyphicon.pad-left {
 	padding-left: 33px;
 }
+
+.container.page-body {
+	margin-bottom: 150px;
+}

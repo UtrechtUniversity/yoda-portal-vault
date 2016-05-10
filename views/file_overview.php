@@ -2,7 +2,7 @@
 ?>
 
 <?php if($userIsAllowed): ?>
-<table id="files_overview" class="display">
+<table id="files_overview" class="display table table-datatable">
 	<thead>
 		<tr>
 			<th>Name</th>
@@ -30,11 +30,11 @@
 					$lnk = "<a href=\"/intake-ilab/intake/index/%1s/%2s\">%2s</a>";
 					echo $isSet ? sprintf(
 							$lnk,
-							$studyID, 
-							$dir->getName(),
-							$dir->getName()
+							htmlentities($studyID), 
+							htmlentities($dir->getName()),
+							htmlentities($dir->getName())
 						) :
-						$dir->getName();
+						htmlentities($dir->getName());
 				?>
 			</td>
 
@@ -46,55 +46,84 @@
 
 			<td> <!-- Created -->
 				&plusmn;
-				<?=explode(",",timespan($dir->stats->ctime))[0];?> ago
+				<?=explode(",",timespan(htmlentities($dir->stats->ctime)))[0];?> ago
 			</td>
 
 			<td> <!-- Modified -->
 				&plusmn;
-				<?=explode(",",timespan($dir->stats->mtime))[0];?> ago
+				<?=explode(",",timespan(htmlentities($dir->stats->mtime)))[0];?> ago
 			</td>
-			
-			<td> <!-- Comment -->
-				<?=$dir->stats->comments; ?>
+			<td>
+				<?=htmlentities($dir->stats->comments); ?>
 			</td>
 		</tr>
 <?php
 	endforeach;
+	if($studyFolder == '' && sizeof($files) > 0):
+?>
+	</tbody>
+</table>
+
+<div class="row page-header">
+    <div class="col-sm-6">
+      <h3>
+        <span class="glyphicon glyphicon-alert"></span>
+        <?=lang('HDR_FILES_NOT_RECOGNISED');?>
+      </h3>
+    </div>
+</div>
+
+<div class="alert alert-warning">
+	<?=lang('FILES_NOT_IN_DATASET');?>
+</div>
+
+<table id="unknown_files_overview" class="display table table-datatable">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Size</th>
+			<th>Files</th>
+			<th>Created</th>
+			<th>Modified</th>
+			<th>Comment</th>
+		</tr>
+	</thead>
+	
+	<tbody>
+
+<?php
+	endif;
 	foreach($files as $file): 
 		$inf = $this->dataset2->getFileInformation($rodsaccount, $currentDir, $file->getName());
 ?>
 	<tr>
 			<td> <!-- Name -->
 				<span class="glyphicon glyphicon-none" style="margin-right: 24px"></span>
-				<?=$file->getName(); ?>
+				<?=htmlentities($file->getName()); ?>
 			</td>
 
 			<td>
-				<?=human_filesize(intval($inf["*size"]));?>				
+				<?=human_filesize(intval(htmlentities($inf["*size"])));?>				
 			</td> <!-- Size -->
 
 			<td></td>
 
 			<td> <!-- Created -->
 				&plusmn;
-				<?=explode(",",timespan($file->stats->ctime))[0];?> ago
+				<?=explode(",",timespan(htmlentities($file->stats->ctime)))[0];?> ago
 			</td>
 
 			<td> <!-- Modified -->
 				&plusmn;
-				<?=explode(",",timespan($file->stats->mtime))[0];?> ago
+				<?=explode(",",timespan(htmlentities($file->stats->mtime)))[0];?> ago
 			</td>
 			<td>
-				<?=$file->stats->comments; ?>
+				<?=htmlentities($file->stats->comments); ?>
 			</td>
 		</tr>
 <?php
 	endforeach;
 ?>
-		
-		
-
-
 	</tbody>
 </table>
 
