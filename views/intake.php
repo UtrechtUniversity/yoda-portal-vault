@@ -66,14 +66,14 @@ if ($header && $hasStudies): ?>
 
 		<?php endif; ?>
 
-		<button type="submit" class="btn btn-default" formaction="/intake-ilab/actions/unlockAll">
+		<!-- <button type="submit" class="btn btn-default" formaction="/intake-ilab/actions/unlockAll">
 			<span class="glyphicon glyphicon-lock">Unlock all</span>
 		</button>
 
 		<button type="submit" class="btn btn-default" formaction="/intake-ilab/actions/testFunction">
 			<span class="glyphicon glyphicon-gift">Run test</span>
 		</button>
-
+ -->
 		<?php $this->load->view($content); ?>
 	<?=form_close();
 	$this->load->view($meta_editor); ?>
