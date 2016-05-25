@@ -5,3 +5,8 @@
 .container.page-body {
 	margin-bottom: 150px;
 }
+
+.glyphicon-button-disabled, .table-disabled, .table-disabled a, .table-row-disabled, .table-row-disabled a {
+	color: darkgrey;
+}
+

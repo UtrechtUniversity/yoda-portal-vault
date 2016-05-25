@@ -59,6 +59,7 @@ $module['name'] 		= "intake-ilab";
 $module['label'] 		= "Intake I-Lab";
 $module['glyph'] 		= "menu-right";
 $module['menu_order'] 	= 10;
+$module['hide_menu']	= false;
 
 if (file_exists(dirname(__FILE__) . '/module_local.php'))
 	include(    dirname(__FILE__) . '/module_local.php');

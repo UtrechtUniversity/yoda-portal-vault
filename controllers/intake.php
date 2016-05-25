@@ -26,9 +26,11 @@ class Intake extends MY_Controller
         $this->load->model('yodaprods');
         $this->load->model('dataset2');
         $this->load->model('rodsuser');
+        $this->load->model('metadata');
         $this->load->helper('date');
         $this->load->helper('language');
         $this->load->helper('intake');
+        $this->load->helper('form');
         $this->load->language('intake');
         $this->load->language('errors');
 
@@ -82,14 +84,16 @@ class Intake extends MY_Controller
                     $studyID,
                     ($studyFolder ? '/'. $studyFolder : '')
                 ),
-                "studyID" => $studyID,
                 "studyFolder" => $studyFolder,
                 "intakePath" => $this->intake_path,
                 "currentDir" => $this->current_path,
                 "content" => $this->module['name'] . '/file_overview',
+                "meta_editor" => $this->module['name'] . '/edit_meta',
                 "directories" => $this->dir->getChildDirs(),
                 "files" => $this->dir->getChildFiles(),
                 "selectableScanFolders" => $validFolders,
+                "currentViewLocked" => $this->currentViewLocked,
+                "currentViewFrozen" => $this->currentViewFrozen,
             );
         $this->data = array_merge($this->data, $dataArr);
 
@@ -182,6 +186,9 @@ class Intake extends MY_Controller
             return false;
         } else {
             $this->dir = new ProdsDir($rodsaccount, $this->current_path);
+            $currentViewLocked = $this->dataset2->getLockedStatus($rodsaccount, $this->current_path);
+            $this->currentViewLocked = $currentViewLocked['locked'];
+            $this->currentViewFrozen = $currentViewLocked['frozen'];
         }
 
         return $validFolders;

@@ -38,7 +38,8 @@
 |
 */
 $route['default_controller'] 		= "intake";
-$route[$module] 				= $module . "/intake";
+$route[$module] 					= $module . "/intake";
+$route[$module . '/actions']		= $module . "/actions";
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */
