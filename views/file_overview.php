@@ -1,6 +1,5 @@
 <?php
 ?>
-
 <?php if($userIsAllowed): ?>
 
 <table id="files_overview" class="display table table-datatable<?php if($currentViewLocked) echo " table-disabled";?>">
@@ -9,15 +8,15 @@
 		<?php if($studyFolder == ''): ?>
 			<th><input type="checkbox"/></th>
 		<?php endif; ?>
-			<th>Name</th>
-			<th>Size</th>
-			<th>Files</th>
-			<th>Created</th>
-			<th>Modified</th>
+			<th><?=lang('snapshot_name');?></th>
+			<th><?=lang('size');?></th>
+			<th><?=lang('files');?></th>
+			<th><?=lang('created');?></th>
+			<th><?=lang('modified');?></th>
 		<?php if($studyFolder == ''): ?>
-			<th>Latest snapshot</th>
+			<th><?=lang('snapshot_latest');?></th>
 		<?php endif; ?>
-			<th>Comment</th>
+			<th><?=lang('comment');?></th>
 		</tr>
 	</thead>
 	
@@ -27,7 +26,7 @@
 		<?php
 			$isSet = $studyFolder == ''; // Only directories in root of study are dataset
 			$glyph = ($studyFolder == '') ? "inbox" : "folder-open";
-			$glyphLabel = $dir->getName() . sprintf(" (%s)", $isSet ? "dataset" : "directory");
+			$glyphLabel = $dir->getName() . sprintf(" (%s)", $isSet ? lang("dataset") : lang("directory"));
         	$count = $this->dataset2->countSubFiles($rodsaccount, $intakePath . "/" . $dir->getName());
         	$lock = $this->dataset2->getLockedStatus($rodsaccount, $intakePath . "/" . $dir->getName(), true);
 
@@ -46,7 +45,7 @@
 					<span class="glyphicon glyphicon-lock glyphicon-button-disabled" title="<?=lang('file_frozen');?>"/>
 				<?php elseif($lock["locked"]) : ?>
 						<button class="btn btn-link" type="submit" name="unlock_study" value="<?=$dir->getName();?>"
-							formaction="/intake-ilab/actions/unlock">
+							formaction="<?=$url->module;?>/actions/unlock">
 							<span class="glyphicon glyphicon-lock" title="<?=lang('file_locked');?>"/>
 						</button>
 				<?php endif;?>
@@ -55,7 +54,7 @@
 			<th data-toggle="tool-tip" title="<?=$glyphLabel;?>" > <!-- Name -->
 				<span class="glyphicon glyphicon-<?=$glyph;?>" style="margin-right: 10px"></span>
 				<?php
-					$lnk = "<a href=\"/intake-ilab/intake/index/%1s/%2s\">%2s</a>";
+					$lnk = "<a href=\"" . $url->module . "/intake/index/%1s/%2s\">%2s</a>";
 					echo $isSet ? sprintf(
 							$lnk,
 							htmlentities($studyID), 
@@ -69,7 +68,7 @@
 			<td><?=human_filesize($count['totalSize']);?></td> <!-- Size -->
 
 			<td><!-- File / Dir information -->
-				<?=sprintf("%d (in %d directories)", $count['filecount'], $count['dircount']);?>
+				<?=sprintf(lang('files_in_dirs'), $count['filecount'], $count['dircount']);?>
 			</td>
 
 			<td> <!-- Created -->
@@ -83,10 +82,9 @@
 				<td>
 					<?php 
 						if($latestSnapshot) {
-							echo relativeTimeWithTooltip($latestSnapshot["datetime"]->getTimestamp(), true);
-							echo " by " . htmlentities($latestSnapshot["username"]);
+							echo sprintf(lang('latest_snapshot_by'), relativeTimeWithTooltip($latestSnapshot["datetime"]->getTimestamp(), true),htmlentities($latestSnapshot["username"]));
 						} else {
-							echo "None";
+							echo lang('no_snapshots');
 						}
 					?>
 				</td>
@@ -106,23 +104,23 @@
     <div class="col-sm-6">
       <h3>
         <span class="glyphicon glyphicon-alert"></span>
-        <?=lang('HDR_FILES_NOT_RECOGNISED');?>
+        <?=lang('header:files_not_recognised');?>
       </h3>
     </div>
 </div>
 
 <div class="alert alert-warning">
-	<?=lang('FILES_NOT_IN_DATASET');?>
+	<?=lang('header:files_not_in_dataset');?>
 </div>
 
 <table id="unknown_files_overview" class="display table table-datatable">
 	<thead>
 		<tr>
-			<th>Name</th>
-			<th>Size</th>
-			<th>Created</th>
-			<th>Modified</th>
-			<th>Comment</th>
+			<th><?=lang('dataset_name');?></th>
+			<th><?=lang('size');?></th>
+			<th><?=lang('created');?></th>
+			<th><?=lang('modified');?></th>
+			<th><?=lang('comment');?></th>
 		</tr>
 	</thead>
 	

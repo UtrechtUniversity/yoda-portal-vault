@@ -70,6 +70,11 @@ class Intake extends MY_Controller
             );
 
         $validFolders = $this->validateStudyFolder($studyID, $studyFolder);
+
+        $urls = (object) array(
+            "site" => site_url(), 
+            "module" => $this->getModuleBase()
+        );
         
         // Prepare data for view
         $dataArr = array(
@@ -94,6 +99,7 @@ class Intake extends MY_Controller
                 "selectableScanFolders" => $validFolders,
                 "currentViewLocked" => $this->currentViewLocked,
                 "currentViewFrozen" => $this->currentViewFrozen,
+                "url" => $urls
             );
         $this->data = array_merge($this->data, $dataArr);
 
@@ -205,11 +211,17 @@ class Intake extends MY_Controller
      *          module and to a valid study, if one is available
      */
     private function getRedirect($studyID = '') {
-        $url = "/" . $this->module["name"] . "/intake/index";
+        // $url = $this->getModuleBase() . "intake/index";
+        $segments = array($this->module['name'], "intake", "index");
         if(!empty($this->studies)) {
-            $url .= "/" . ($studyID ? $studyID : $this->studies[0]);
+            // $url .= "/" . ($studyID ? $studyID : $this->studies[0]);
+            array_push($segments, $studyID ? $studyID : $this->studies[0]);
         }
-        return $url;
+        return site_url($segments);
+    }
+
+    private function getModuleBase() {
+        return site_url($this->module['name']);
     }
 
 }

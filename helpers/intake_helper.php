@@ -19,7 +19,7 @@ function displayMessage($controller, $message, $error=false, $type="info") {
 			'type' => $error ? "danger" : $type,
 			'message' => $message
 		);
-	$controller->session->set_userdata('information', $messageObject);
+	$controller->session->set_flashdata('information', $messageObject);
 }
 
 /**

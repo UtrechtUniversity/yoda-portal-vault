@@ -3,7 +3,7 @@
 	    <div class="col-sm-6">
 	      <h3>
 	        <span class="glyphicon glyphicon-tags"></span>
-	        <?=lang('HDR_METADATA');?>
+	        <?=lang('header:metadata');?>
 	      </h3>
 	    </div>
 	</div>
@@ -13,13 +13,13 @@ $attrs = array(
 		"studyID" => $studyID,
 		"dataset" => ($studyFolder ? $studyFolder : false)
 	);
-	echo form_open("/intake-ilab/actions/updateMetadata", null, $attrs);
+	echo form_open($url->module . "/actions/updateMetadata", null, $attrs);
 ?>
 	<table id="files_overview" class="display table table-datatable">
 	<thead>
 		<tr>
-			<th width="100">Name</th>
-			<th>Value</th>
+			<th width="100"><?=lang('metadata_name');?></th>
+			<th><?=lang('metadata_value');?></th>
 			<th></th>
 		</tr>
 	</thead>
