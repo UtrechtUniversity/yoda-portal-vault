@@ -55,8 +55,8 @@
 | although this won't be harmful.
 */
 
-$module['name'] 		= "intake-ilab";
-$module['label'] 		= "Intake I-Lab";
+$module['name'] 		= "intake";
+$module['label'] 		= "Intake";
 $module['glyph'] 		= "menu-right";
 $module['menu_order'] 	= 10;
 $module['hide_menu']	= false;

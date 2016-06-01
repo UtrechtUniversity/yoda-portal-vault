@@ -107,7 +107,7 @@ class Intake extends MY_Controller
         $this->load->view('common-start', array(
             'styleIncludes' => array('css/datatables.css', 'css/intake.css'),
             'scriptIncludes' => array('js/datatables.js', 'js/intake.js'),
-            'activeModule'   => 'intake-ilab',
+            'activeModule'   => $this->module['name'],
             'user' => array(
                 'username' => $this->rodsuser->getUsername(),
             ),
