@@ -7,7 +7,7 @@ class Actions extends MY_Controller
     {
         parent::__construct();
 
-        $this->load->model("dataset2");
+        $this->load->model("dataset");
         $this->load->model("metadata");
         $this->load->model("rodsuser");
         $this->load->helper("intake");
@@ -23,7 +23,7 @@ class Actions extends MY_Controller
     	$datasets = array();
     	if(sizeof($snapOf) > 0) {
 	    	foreach($snapOf as $dataset) {
-	    		$result = $this->dataset2->prepareDatasetForSnapshot($rodsuser, $this->input->post("studyRoot"), $dataset);
+	    		$result = $this->dataset->prepareDatasetForSnapshot($rodsuser, $this->input->post("studyRoot"), $dataset);
 	    		if($result) {
 	    			array_push($datasets, $dataset);
 	    		} else {
@@ -61,7 +61,7 @@ class Actions extends MY_Controller
     	$rodsuser = $this->rodsuser->getRodsAccount();
     	$dataset = $this->input->post("unlock_study");
 
-    	if($this->dataset2->removeSnapshotLockFromDataset($rodsuser, $this->input->post("studyRoot"), $dataset)) {
+    	if($this->dataset->removeSnapshotLockFromDataset($rodsuser, $this->input->post("studyRoot"), $dataset)) {
 			$message = "Snapshot cancelled for " . $dataset;
 			$error = false;
 			$type = "info";
@@ -81,7 +81,7 @@ class Actions extends MY_Controller
 
     public function unlockAll() {
     	$rodsuser = $this->rodsuser->getRodsAccount();
-    	$result = $this->dataset2->unlockAll($rodsuser);
+    	$result = $this->dataset->unlockAll($rodsuser);
     	displayMessage($this, "Result: " . $result);
     	if(isset($_SERVER['HTTP_REFERER'])) {
 			redirect($_SERVER['HTTP_REFERER'], 'refresh');
@@ -93,7 +93,7 @@ class Actions extends MY_Controller
     public function testFunction() 
     {
     	$rodsuser = $this->rodsuser->getRodsAccount();
-    	$result = $this->dataset2->testFunction($rodsuser);
+    	$result = $this->dataset->testFunction($rodsuser);
     	displayMessage($this, "Result: " . $result);
     	if(isset($_SERVER['HTTP_REFERER'])) {
 			redirect($_SERVER['HTTP_REFERER'], 'refresh');

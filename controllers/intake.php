@@ -22,9 +22,10 @@ class Intake extends MY_Controller
         $this->data['userIsAllowed'] = TRUE;
 
         // TODO: Auto load doesn't work in module?
+        $this->load->model('dataset');
+        $this->load->model('debug');
+        $this->load->model('filesystem');
         $this->load->model('study');
-        $this->load->model('yodaprods');
-        $this->load->model('dataset2');
         $this->load->model('rodsuser');
         $this->load->model('metadata');
         $this->load->helper('date');
@@ -34,7 +35,7 @@ class Intake extends MY_Controller
         $this->load->language('intake');
         $this->load->language('errors');
 
-        $this->studies = $this->yodaprods->getStudies($this->rodsuser->getRodsAccount());
+        $this->studies = $this->dataset->getStudies($this->rodsuser->getRodsAccount());
     }
 
     /**
@@ -192,7 +193,7 @@ class Intake extends MY_Controller
             return false;
         } else {
             $this->dir = new ProdsDir($rodsaccount, $this->current_path);
-            $currentViewLocked = $this->dataset2->getLockedStatus($rodsaccount, $this->current_path);
+            $currentViewLocked = $this->dataset->getLockedStatus($rodsaccount, $this->current_path);
             $this->currentViewLocked = $currentViewLocked['locked'];
             $this->currentViewFrozen = $currentViewLocked['frozen'];
         }

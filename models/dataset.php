@@ -1,12 +1,23 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Dataset2 extends CI_Model {
+class Dataset extends CI_Model {
 
     public function __construct()
     {
         parent::__construct();
     }
 
+    /**
+     * Calls an iRods rule on a dataset, that recursively locks the dataset for
+     * copying a snapshot to the vault, and adds meta data for the user who
+     * requested the lock
+     * @param $iRodsAccount     Rods Account instance of current user
+     * @param $collection       Full iRods collection name of intake path the dataset
+     *                          resides in
+     * @param $dataset          Name of the dataset inside the collection $collection
+     *                          that requires locking
+     * @return                  Bool, indicating success
+     */
     static public function prepareDatasetForSnapshot($iRodsAccount, $collection, $dataset) {
         $ruleBody = '
         myRule {
@@ -32,6 +43,16 @@ class Dataset2 extends CI_Model {
         }
     }
 
+    /**
+     * Calls iRods rule that recursively removes a snapshot lock from a dataset, if it isn't
+     * already frozen
+     * @param $iRodsAccount     Rods Account instance of current user
+     * @param $collection       Full iRods collection name of intake path the dataset
+     *                          resides in
+     * @param $dataset          Name of the dataset inside the collection $collection
+     *                          that requires unlocking
+     * @return                  Bool, indicating success
+     */
     static public function removeSnapshotLockFromDataset($iRodsAccount, $collection, $dataset) {
         $ruleBody = '
         myRule {
@@ -95,125 +116,8 @@ class Dataset2 extends CI_Model {
         return false;
     }
 
-//  foreach(*row in SELECT COLL_NAME, META_COLL_ATTR_VALUE WHERE META_COLL_ATTR_NAME = "to_vault_lock") {
-                // uuYcDatasetUnlock(*row.COLL_NAME, *row.COLL_NAME, *status2);
-            // }
-            // *status2 = str(*status2);
-
-    static public function unlockAll($iRodsAccount) {
-        $ruleBody = '
-        myRule {
-            foreach(*row in SELECT COLL_NAME WHERE META_COLL_ATTR_NAME LIKE "uuLock%") {
-                uuUnlock(*row.COLL_NAME);
-            }
-
-            *result = "";
-
-            foreach(*row in SELECT COLL_NAME WHERE META_COLL_ATTR_NAME = "to_vault_freeze") {
-                uuChopPath(*row.COLL_NAME, *parent, *base);
-                uuYcDatasetMelt(*parent, *base, *s3);
-                *result = "*result (VaultMelt *parent/*base: *s3),  ";
-            }
-
-            foreach(*row in SELECT COLL_NAME WHERE META_COLL_ATTR_NAME = "to_snapshot_freeze") {
-                uuChopPath(*row.COLL_NAME, *parent, *base);
-                iiDatasetSnapshotMelt(*parent, *base, *s3);
-                *result = "*result (SnapshopMelt *parent/*base: *s3),  ";
-            }
-
-            foreach(*row in SELECT COLL_NAME WHERE META_COLL_ATTR_NAME = "to_vault_lock") {
-                uuChopPath(*row.COLL_NAME, *parent, *base);
-                uuYcDatasetUnlock(*parent, *base, *s3);
-                *result = "*result (VaultUnlock *parent/*base: *s3),  ";
-            }
-
-            foreach(*row in SELECT COLL_NAME WHERE META_COLL_ATTR_NAME = "to_snapshot_lock") {
-                uuChopPath(*row.COLL_NAME, *parent, *base);
-                iiDatasetSnapshotUnlock(*parent, *base, *s3);
-                *result = "*result (SnapshotUnlock *parent/*base: *s3),  ";
-            }
-
-            *status = str(*result);
-        }';
-
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(),
-                array("*status")
-            );
-
-            $result = $rule->execute();
-
-            var_dump($result);
-
-            return true;
-        } catch(RODSException $e) {
-            return false;
-        }
-
-        return false;
-    }
-
-    static public function testFunction($iRodsAccount) {
-        $ruleBody = '
-        myRule {
-            uuIiGetSnapshotHistory(*collection, *buffer)
-            *size = str(size(*buffer));
-        }';
-
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                        "*collection" => "/nluu10ot/home/grp-intake-testgroup/study1",
-                    ),
-                array("*size")
-                );
-
-            $result = $rule->execute();
-
-            var_dump($result);
-
-            return $result["*size"];
-        } catch(exception $e) {
-            echo $e->showStacktrace();
-            return false;
-        }
-    }
-
-    static public function countSubFiles($iRodsAccount, $path) {
-        $ruleBody = '
-            myRule {
-                iiFileCount(*path, *totalSize, *dircount, *filecount);
-                
-            }
-        ';
-
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array("*path" => $path),
-                array("*totalSize", "*dircount", "*filecount")
-            );
-
-            $result = $rule->execute();
-
-            return array(
-                    "dircount" => intval($result["*dircount"]),
-                    "filecount" => intval($result["*filecount"]),
-                    "totalSize" => intval($result["*totalSize"]),
-                );
-
-        } catch(RODSException $e) {
-            return false;
-        }
-
-        return false;
-    }
+    
+    
 
     static public function getLockedStatus($iRodsAccount, $path, $isCollection=True) {
        
@@ -255,35 +159,7 @@ class Dataset2 extends CI_Model {
         return false;
     }
 
-    static public function getFileInformation($iRodsAccount, $collection, $file) {
-        $ruleBody = '
-            myRule {
-                iiGetFileAttrs(*collectionName, *fileName, *size, *comment);
-            }';
-
-        
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*collectionName" => $collection,
-                    "*fileName" => $file,
-                ),
-                array("*size", "*comment")
-            );
-
-            $result = $rule->execute();
-
-            return $result;
-
-        } catch(RODSException $e) {
-            return false;
-        }
-
-        return false;
-    }
-
+    
     /**
      * Get the Date and Time, username and userzone for the latest 
      * snapshot, if any exist
@@ -333,6 +209,80 @@ class Dataset2 extends CI_Model {
 
         return false;
 
+    }
+
+    /**
+     * Get list of studies a user can view
+     *
+     * @param $iRodsAccount
+     * @return array|bool
+     */
+    static public function getStudies($iRodsAccount)
+    {
+        $ruleBody = "
+            myRule {
+                uuYcIntakerStudies(*studies);
+                *studies = str(*studies);
+        }";
+
+        try{
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(),
+                array(
+                    '*studies'
+                )
+            );
+            $result = $rule->execute();
+
+            $studies = explode(',',$result['*studies']);
+
+            return $studies;
+        }
+        catch(RODSException $e) {
+            // if erroneous => NO permission
+            //var_dump($e->getCodeAbbr());
+            return FALSE;
+        }
+        return FALSE;
+    }
+
+    /**
+     * Find whether a user is member of the given group.
+     *
+     * @param $iRodsAccount
+     * @param $groupName
+     * @param $userName
+     * @return bool
+     */
+    static public function isGroupMember($iRodsAccount,$groupName, $userName){
+        $ruleBody = "
+            myRule {
+                uuGroupUserExists(*group, *user, *member);
+                *member = str(*member);
+        }";
+
+        try{
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    '*group' => $groupName,
+                    '*user'  => $userName
+                ),
+                array(
+                    '*member'
+                )
+            );
+            $result = $rule->execute();
+            return ($result['*member'] === "true");
+        }
+        catch(RODSException $e) {
+            // if erroneous => NO permission
+            return FALSE;
+        }
+        return FALSE;
     }
 
 }

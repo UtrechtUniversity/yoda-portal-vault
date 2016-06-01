@@ -45,38 +45,16 @@ class Study extends CI_Model {
      */
     public function getIntakeStudyPermissions($studyID){
         return (object)array(
-            'assistant' => get_instance()->yodaprods->isGroupMember($this->rodsuser->getRodsAccount(), $this->PERM_GroupAssistant . $studyID ,  get_instance()->rodsuser->getUsername()),
-            'manager'   => get_instance()->yodaprods->isGroupMember($this->rodsuser->getRodsAccount(), $this->PERM_GroupDataManager . $studyID, get_instance()->rodsuser->getUsername()),
+            'assistant' => get_instance()->dataset->isGroupMember(
+                $this->rodsuser->getRodsAccount(), 
+                $this->PERM_GroupAssistant . $studyID ,  
+                get_instance()->rodsuser->getUsername()
+            ),
+            'manager' => get_instance()->dataset->isGroupMember(
+                $this->rodsuser->getRodsAccount(), 
+                $this->PERM_GroupDataManager . $studyID, 
+                get_instance()->rodsuser->getUsername()
+            ),
         );
-    }
-
-    /**
-     * @param       $studyID
-     * @param array $permissionsAllowed
-     * @param       $errorMessage
-     *
-     * @return bool
-     *
-     * Check if person has permissions for this study.
-     * One can pass an array of permissions that will return a valid access.
-     */
-    public function validateIntakeStudyPermissions($studyID, $permissionsAllowed=array(), &$errorMessage){
-        // user allowed to go into this study?
-        if(!$this->validateStudy(get_instance()->studies, $studyID)){
-            $errorMessage = self::PERMISSION_ERROR_Invalid_Study;
-            return FALSE;
-        }
-
-        get_instance()->permissions = $this->getIntakeStudyPermissions($studyID);
-
-        // user has required permissions for this study?
-        foreach($permissionsAllowed as $permission){
-            if(get_instance()->permissions->$permission){
-                return TRUE;
-            }
-        }
-
-        $errorMessage = self::PERMISSION_ERROR_No_Permission;
-        return FALSE;
     }
 }

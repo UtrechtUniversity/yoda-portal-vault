@@ -27,11 +27,11 @@
 			$isSet = $studyFolder == ''; // Only directories in root of study are dataset
 			$glyph = ($studyFolder == '') ? "inbox" : "folder-open";
 			$glyphLabel = $dir->getName() . sprintf(" (%s)", $isSet ? lang("dataset") : lang("directory"));
-        	$count = $this->dataset2->countSubFiles($rodsaccount, $intakePath . "/" . $dir->getName());
-        	$lock = $this->dataset2->getLockedStatus($rodsaccount, $intakePath . "/" . $dir->getName(), true);
+        	$count = $this->filesystem->countSubFiles($rodsaccount, $intakePath . "/" . $dir->getName());
+        	$lock = $this->dataset->getLockedStatus($rodsaccount, $intakePath . "/" . $dir->getName(), true);
 
         	if($isSet) {
-        		$latestSnapshot = $this->dataset2->getLatestSnapshotInfo($rodsaccount, $intakePath . "/" . $dir->getName());
+        		$latestSnapshot = $this->dataset->getLatestSnapshotInfo($rodsaccount, $intakePath . "/" . $dir->getName());
         	} else {
         		$latestSnapshot = false;
         	}
@@ -129,8 +129,8 @@
 <?php
 	endif;
 	foreach($files as $file): 
-		$inf = $this->dataset2->getFileInformation($rodsaccount, $currentDir, $file->getName());
-		$lock = $this->dataset2->getLockedStatus($rodsaccount, $currentDir . "/" . $file->getName(), false);
+		$inf = $this->filesystem->getFileInformation($rodsaccount, $currentDir, $file->getName());
+		$lock = $this->dataset->getLockedStatus($rodsaccount, $currentDir . "/" . $file->getName(), false);
 ?>
 	<tr>
 			<th> <!-- Name -->
