@@ -2,16 +2,9 @@
 
 class Intake extends MY_Controller
 {
-   
     public function __construct()
     {
         parent::__construct();
-
-        $module = array();
-        include __DIR__ . "/../config/module.php";
-        $module['path'] = sprintf("%s/intake", $module['name']);
-        $module['basepath'] = sprintf("%s%s", base_url(), $module['name']);
-        $this->module = $module;
 
         // initially no rights for any study
         $this->permissions = (object)array(
@@ -27,30 +20,17 @@ class Intake extends MY_Controller
         $this->load->model('filesystem');
         $this->load->model('study');
         $this->load->model('rodsuser');
-        $this->load->model('metadata');
+        $this->load->model('metadatamodel');
         $this->load->helper('date');
         $this->load->helper('language');
         $this->load->helper('intake');
         $this->load->helper('form');
         $this->load->language('intake');
         $this->load->language('errors');
+        $this->load->library('modulelibrary');
+        $this->load->library('metadatafields');
 
         $this->studies = $this->dataset->getStudies($this->rodsuser->getRodsAccount());
-    }
-
-    /**
-     * Method to get the module configuration
-     * from the config/module.php file.
-     * The $module parameter is set in yoda as well,
-     * so loading that data may cause problems. The root
-     * controller of this module, however, does not have
-     * the yoda portal $module parameter in its scope.
-     * @return  Array containing module configuration,
-     *          as well as the basepath and path keys
-     */
-    public function getModuleConfig()
-    {
-        return $this->module;
     }
 
     /*
@@ -61,6 +41,7 @@ class Intake extends MY_Controller
     public function index($studyID='', $studyFolder='')
     {
         $studyID = $this->validateStudyPermission($studyID);
+        $studyFolder = urldecode($studyFolder);
 
         // study dependant intake path.
         $this->intake_path = sprintf(
@@ -74,7 +55,7 @@ class Intake extends MY_Controller
 
         $urls = (object) array(
             "site" => site_url(), 
-            "module" => $this->getModuleBase()
+            "module" => $this->modulelibrary->getModuleBase()
         );
         
         // Prepare data for view
@@ -85,16 +66,15 @@ class Intake extends MY_Controller
                 "studies" => $this->studies,
                 "studyID" => $studyID,
                 "title" => sprintf(
-                    "%s %s%s",
+                    "%s %s",
                     ucfirst(lang('INTAKE_STUDY')),
-                    $studyID,
-                    ($studyFolder ? '/'. $studyFolder : '')
+                    $studyID
                 ),
                 "studyFolder" => $studyFolder,
                 "intakePath" => $this->intake_path,
                 "currentDir" => $this->current_path,
-                "content" => $this->module['name'] . '/file_overview',
-                "meta_editor" => $this->module['name'] . '/edit_meta',
+                "content" => $this->modulelibrary->name() . '/file_overview',
+                "meta_editor" => $this->modulelibrary->name() . '/edit_meta',
                 "directories" => $this->dir->getChildDirs(),
                 "files" => $this->dir->getChildFiles(),
                 "selectableScanFolders" => $validFolders,
@@ -107,7 +87,7 @@ class Intake extends MY_Controller
         $this->load->view('common-start', array(
             'styleIncludes' => array('css/datatables.css', 'css/intake.css'),
             'scriptIncludes' => array('js/datatables.js', 'js/intake.js'),
-            'activeModule'   => $this->module['name'],
+            'activeModule'   => $this->modulelibrary->name(),
             'user' => array(
                 'username' => $this->rodsuser->getUsername(),
             ),
@@ -213,7 +193,7 @@ class Intake extends MY_Controller
      */
     private function getRedirect($studyID = '') {
         // $url = $this->getModuleBase() . "intake/index";
-        $segments = array($this->module['name'], "intake", "index");
+        $segments = array($this->modulelibrary->name(), "intake", "index");
         if(!empty($this->studies)) {
             // $url .= "/" . ($studyID ? $studyID : $this->studies[0]);
             array_push($segments, $studyID ? $studyID : $this->studies[0]);
@@ -221,8 +201,33 @@ class Intake extends MY_Controller
         return site_url($segments);
     }
 
-    private function getModuleBase() {
-        return site_url($this->module['name']);
+    public function getGroupUsers($study) {
+        $query = $this->input->get('query');
+
+        $group = sprintf(
+                "%s%s", 
+                $this->config->item('intake-prefix'),
+                $study
+            );
+
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+
+        $results = 
+            array_values(array_filter(
+                $this->study->getGroupMembers($rodsaccount, $group), 
+                function($val) use($query) {
+                    return !(!empty($query) && strstr($val, $query) === FALSE);
+                }
+            ));
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(
+                json_encode(
+                    $results
+                )
+            );
     }
+
 
 }
