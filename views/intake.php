@@ -73,6 +73,7 @@ if ($header && $hasStudies): ?>
  -->
 		<?php $this->load->view($content); ?>
 	<?=form_close();
+
 	$this->load->view($meta_editor); ?>
 </div>
 

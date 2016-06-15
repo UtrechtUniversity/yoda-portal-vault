@@ -256,7 +256,7 @@ class Dataset extends CI_Model {
      * @param $userName
      * @return bool
      */
-    static public function isGroupMember($iRodsAccount,$groupName, $userName){
+    static public function isGroupMember($iRodsAccount, $groupName, $userName){
         $ruleBody = "
             myRule {
                 uuGroupUserExists(*group, *user, *member);
@@ -277,6 +277,36 @@ class Dataset extends CI_Model {
             );
             $result = $rule->execute();
             return ($result['*member'] === "true");
+        }
+        catch(RODSException $e) {
+            // if erroneous => NO permission
+            return FALSE;
+        }
+        return FALSE;
+    }
+
+    static public function isGroupManager($iRodsAccount, $groupName, $userName) {
+
+        $ruleBody = "
+            myRule {
+                uuGroupUserIsManager(*group, *user, *isManager);
+                *isManager = str(*isManager);
+        }";
+
+        try{
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    '*group' => $groupName,
+                    '*user'  => $userName
+                ),
+                array(
+                    '*isManager'
+                )
+            );
+            $result = $rule->execute();
+            return ($result['*isManager'] === "true");
         }
         catch(RODSException $e) {
             // if erroneous => NO permission

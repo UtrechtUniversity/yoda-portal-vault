@@ -10,53 +10,61 @@ class MetaData extends MY_Controller
         $this->load->model('rodsuser');
         $this->load->helper('intake');
         $this->load->library('metadatafields');
+        $this->load->model('study');
     }
 
  	public function update() {
- 		$metDat = $this->input->post('metadata');
-        $rodsuser = $this->rodsuser->getRodsAccount();
-        $collection = $this->input->post('studyRoot') . "/" . $this->input->post('dataset');
-        $fields = $this->metadatafields->getFields($collection, true);
+        $permissions = $this->study->getIntakeStudyPermissions($this->input->post('studyID'));
+        if($permissions->administrator) {
+     		$metDat = $this->input->post('metadata');
+            $rodsuser = $this->rodsuser->getRodsAccount();
+            $collection = $this->input->post('studyRoot') . "/" . $this->input->post('dataset');
+            $fields = $this->metadatafields->getFields($collection, true);
 
- 		if(sizeof($metDat) == 0) return $this->NotifyNoChange();
+     		if(sizeof($metDat) == 0) return $this->NotifyNoChange();
 
-        $failedFor = array();
+            $failedFor = array();
 
- 		foreach($metDat as $metKey => $metVal) {
-            $result = false;
+     		foreach($metDat as $metKey => $metVal) {
+                $result = false;
 
-            if($metVal == "") {
-                continue; // hack: deleting doesn't work yet.
-                // TODO: should not be allowed in most cases anyway?
-                $result = $this->metadatamodel->deleteAllValuesForKey(
-                    $rodsuser,
-                    $metKey,
-                    $collection,
-                    true
-                );
-            } else {
-                $result = $this->metadatamodel->setForKey(
-                        $rodsuser, 
-                        $metKey, 
-                        $metVal, 
+                if($metVal == "") {
+                    continue; // hack: deleting doesn't work yet.
+                    // TODO: should not be allowed in most cases anyway?
+                    $result = $this->metadatamodel->deleteAllValuesForKey(
+                        $rodsuser,
+                        $metKey,
                         $collection,
                         true
                     );
-            }
+                } else {
+                    $result = $this->metadatamodel->setForKey(
+                            $rodsuser, 
+                            $metKey, 
+                            $metVal, 
+                            $collection,
+                            true
+                        );
+                }
 
-            if(!$result) {
-                array_push($failedFor, $fields[$metKey]["label"]);
-            }
- 		}
+                if(!$result) {
+                    array_push($failedFor, $fields[$metKey]["label"]);
+                }
+     		}
 
-        if(sizeof($failedFor)) {
-            $message = sprintf("Meta data failed to update for %s", human_implode($failedFor, ", ", " and "));
-            $error = true;
-            $type = "error";
+            if(sizeof($failedFor)) {
+                $message = sprintf("Meta data failed to update for %s", human_implode($failedFor, ", ", " and "));
+                $error = true;
+                $type = "error";
+            } else {
+                $message = "Metadata updated succesfully";
+                $error = false;
+                $type = "info";
+            }
         } else {
-            $message = "Metadata updated succesfully";
-            $error = false;
-            $type = "info";
+            $message = "You do not have admin rights on the " . $this->input->post("studyID") . " study and can therefor not update metadata";
+            $error = true;
+            $type = "warning";
         }
 
         displayMessage($this, $message, $error, $type);

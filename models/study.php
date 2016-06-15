@@ -16,7 +16,7 @@ class Study extends CI_Model {
     public function __construct()
     {
         parent::__construct();
-
+        $this->load->model('dataset');
         $this->load->model('rodsuser');
     }
 
@@ -48,6 +48,11 @@ class Study extends CI_Model {
             'assistant' => get_instance()->dataset->isGroupMember(
                 $this->rodsuser->getRodsAccount(), 
                 $this->PERM_GroupAssistant . $studyID ,  
+                get_instance()->rodsuser->getUsername()
+            ),
+            'administrator' => get_instance()->dataset->isGroupManager(
+                $this->rodsuser->getRodsAccount(),
+                $this->PERM_GroupAssistant . $studyID,
                 get_instance()->rodsuser->getUsername()
             ),
             'manager' => get_instance()->dataset->isGroupMember(

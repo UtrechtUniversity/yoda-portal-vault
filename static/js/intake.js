@@ -85,8 +85,8 @@ function edit($element) {
 	input = $('table#metadata_edittable #input-' + $element);
 	editButton = $('table#metadata_edittable .button-' + $element + '.hideWhenEdit');
 	cancelButton = $('table#metadata_edittable .button-' + $element + '.showWhenEdit');
-	cancelAll = $("#cancelAll");
-	submit = $("#editMetaSubmit");
+	cancelAll = $(".metadata-btn-cancelAll");
+	submit = $(".metadata-btn-editMetaSubmit");
 
 	_hide(label);
 	_show(input);
@@ -104,9 +104,9 @@ function cancelEdit($element) {
 	input = $('table#metadata_edittable #input-' + $element);
 	editButton = $('table#metadata_edittable .button-' + $element + '.hideWhenEdit');
 	cancelButton = $('table#metadata_edittable .button-' + $element + '.showWhenEdit');
-	cancelAll = $("#cancelAll");
-	submit = $("#editMetaSubmit");
-	editAll = $("#editAll");
+	cancelAll = $(".metadata-btn-cancelAll");
+	submit = $(".metadata-btn-editMetaSubmit");
+	editAll = $(".metadata-btn-editAll");
 
 	_show(label);
 	_hide(input);
@@ -179,9 +179,9 @@ function _iterateAll(showWhenEdit) {
 		e.style.visibility = showWhenEdit ? "hidden" : "visible";
 	});
 
-	cancelAll = $("#cancelAll");
-	submit = $("#editMetaSubmit");
-	editAll = $("#editAll");
+	cancelAll = $(".metadata-btn-cancelAll");
+	submit = $(".metadata-btn-editMetaSubmit");
+	editAll = $(".metadata-btn-editAll");
 
 	inEdit = showWhenEdit ? inputEnable : inputDisable;
 	outEdit = showWhenEdit ? inputDisable : inputEnable;

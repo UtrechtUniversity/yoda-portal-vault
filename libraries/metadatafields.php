@@ -24,7 +24,7 @@ class metadataFields {
 		return $fields;
 	}
 
-	public function getHtmlForRow($key, $config, $value, $indent = 0) {
+	public function getHtmlForRow($key, $config, $value, $indent = 0, $permissions) {
 		
 
 		$indent = "";
@@ -53,11 +53,17 @@ class metadataFields {
 %6$s 		%5$s
 %6$s 	</td>
 %6$s 	<td width="50">
+EOT;
+		if($permissions->administrator):
+			$template .= <<<'EOT'
 %6$s 		<span type="button" class="btn btn-default glyphicon glyphicon-pencil hideWhenEdit button-%1$s" 
 %6$s			onclick="edit('%1$s')"></span>
 %6$s 		<span type="button"
 %6$s			class="btn btn-default glyphicon glyphicon-remove showWhenEdit button-%1$s"
 %6$s 			onclick="cancelEdit('%1$s')"></span>
+EOT;
+		endif;
+		$template .= <<<'EOT'
 %6$s 	</td>
 %6$s</tr>
 EOT;
@@ -65,16 +71,18 @@ EOT;
 
 		$input = "";
 
-		switch($config["type"]) {
-			case "text" :
-				$input = $this->getTextInput($key, $config, $value);
-				break;
-			case "custom" :
-				$input = $this->getCustomInput($key, $config, $value);
-				break;
-			default:
-				$input = "misc type";
-				break;
+		if($permissions->administrator){
+			switch($config["type"]) {
+				case "text" :
+					$input = $this->getTextInput($key, $config, $value);
+					break;
+				case "custom" :
+					$input = $this->getCustomInput($key, $config, $value);
+					break;
+				default:
+					$input = "misc type";
+					break;
+			}
 		}
 
 		return sprintf(
