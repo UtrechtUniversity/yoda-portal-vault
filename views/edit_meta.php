@@ -11,7 +11,8 @@
 $attrs = array(
 		"studyRoot" => $intakePath,
 		"studyID" => $studyID,
-		"dataset" => ($studyFolder ? $studyFolder : false)
+		"dataset" => ($studyFolder ? $studyFolder : false),
+		"intake_url" => $url->module
 	);
 	echo form_open($url->module . "/metadata/update", null, $attrs);
 ?>
@@ -27,8 +28,6 @@ $attrs = array(
 
 		<tbody>
 			<?php 
-				// foreach($this->metadatafields->fields as $key => $config) {
-
 				$fields = $this->metadatafields->getFields($currentDir, true);
 				foreach($fields as $key => $config){
 				echo $this->metadatafields->getHtmlForRow(

@@ -19,7 +19,8 @@ $(function() {
 		ajax: {
 			quietMillis: 400,
 			url:      function(params) {
-				var url = 'http://irods.foo.com/intake/getGroupUsers/';
+				var url = $("input[name=intake_url]").val();
+				url += '/getGroupUsers/';
 				url += $("input[name=studyID]").val();
 				return url;
 			},
