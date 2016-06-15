@@ -10,3 +10,21 @@
 	color: darkgrey;
 }
 
+table#metadata_edittable .showWhenEdit {
+	display: none;
+	width: 100%;
+}
+
+table#metadata_edittable .hideWhenEdit {
+	display: block;
+}
+
+div.metadata_form_buttons {
+	margin-top: 30px;
+}
+
+/*div.metadata_form_buttons .showWhenEdit {
+	visibility: hidden;
+}
+*/
+

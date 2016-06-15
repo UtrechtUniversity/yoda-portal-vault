@@ -8,7 +8,6 @@ class Actions extends MY_Controller
         parent::__construct();
 
         $this->load->model("dataset");
-        $this->load->model("metadata");
         $this->load->model("rodsuser");
         $this->load->helper("intake");
     }
@@ -52,7 +51,8 @@ class Actions extends MY_Controller
 		if(isset($_SERVER['HTTP_REFERER'])) {
 			redirect($_SERVER['HTTP_REFERER'], 'refresh');
 		} else {
-			redirect("/intake-ilab/intake/index", 'refresh');
+			$redir = $this->intake->getRedirect($this->input->post('studyId'));
+			redirect($redir, 'refresh');
 		}
     }
 
@@ -75,7 +75,8 @@ class Actions extends MY_Controller
 		if(isset($_SERVER['HTTP_REFERER'])) {
 			redirect($_SERVER['HTTP_REFERER'], 'refresh');
 		} else {
-			redirect("/intake-ilab/intake/index", 'refresh');
+			$redir = $this->intake->getRedirect($this->input->post('studyId'));
+			redirect($redir, 'refresh');
 		}
     }
 
@@ -86,7 +87,8 @@ class Actions extends MY_Controller
     	if(isset($_SERVER['HTTP_REFERER'])) {
 			redirect($_SERVER['HTTP_REFERER'], 'refresh');
 		} else {
-			redirect("/intake-ilab/intake/index", 'refresh');
+			$redir = $this->intake->getRedirect($this->input->post('studyId'));
+			redirect($redir, 'refresh');
 		}
     }
 
@@ -98,28 +100,8 @@ class Actions extends MY_Controller
     	if(isset($_SERVER['HTTP_REFERER'])) {
 			redirect($_SERVER['HTTP_REFERER'], 'refresh');
 		} else {
-			redirect("/intake-ilab/intake/index", 'refresh');
+			$redir = $this->intake->getRedirect($this->input->post('studyId'));
+			redirect($redir, 'refresh');
 		}
-    }
-
-    public function updateMetadata() {
-    	$rodsuser = $this->rodsuser->getRodsAccount();
-    	$newOwner = $this->input->post('owner');
-    	$collection = $this->input->post('studyRoot') . "/" . $this->input->post('studyID');
-    	if($this->metadata->setForKey($rodsuser, "dataset_owner", $newOwner, $collection, true)) {
-    		$message = "Meta data was successfuly updated";
-			$error = false;
-			$type = "info";
-    	} else {
-    		$message = "Updating of meta data failed";
-			$error = true;
-			$type = "error";
-    	}
-  //   	displayMessage($this, $message, $error, $type);
-  //   	if(isset($_SERVER['HTTP_REFERER'])) {
-		// 	redirect($_SERVER['HTTP_REFERER'], 'refresh');
-		// } else {
-		// 	redirect("/intake-ilab/intake/index/", 'refresh');
-		// }
     }
 }

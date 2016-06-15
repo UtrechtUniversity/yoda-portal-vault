@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Metadata extends CI_Model {
+class MetadataModel extends CI_Model {
 
     public function __construct()
     {
@@ -75,10 +75,8 @@ class Metadata extends CI_Model {
     		);
 
     		$result = $rule->execute();
-    		var_dump($result);
     		return $result["*status"] == "0";
     	} catch(RODSException $e) {
-    		echo $e->showStacktrace();
             return false;
         }
         return false;
@@ -134,7 +132,7 @@ class Metadata extends CI_Model {
 
                 *recursive = false;
                 
-    			uuIiRemoveKeyValueFromObject(*key, *object, *isColl, *recursive, *status);
+    			uuIiRemoveKeyFromObject(*key, *object, *isColl, *recursive, *status)
     			*status = str(*status);
     		}';
 

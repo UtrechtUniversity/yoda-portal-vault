@@ -57,4 +57,51 @@ class Study extends CI_Model {
             ),
         );
     }
+
+    public function getUsernameValid($iRodsAccount, $username) {
+        $ruleBody = "
+        myRule {
+            *valid = uuUserNameIsValid(*name);
+        }";
+
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array("*username" => $username),
+                array("*valid")
+            );
+
+            $result = $rule->execute();
+            return $result["*valid"] == true;
+        } catch(RODSException $e) {
+            return false;
+        }
+        return false;
+    }
+
+    public function getGroupMembers($iRodsAccount, $groupName) {
+        $ruleBody = "
+        myRule {
+            uuGroupGetMembers(*groupName, *members);
+            uuJoin(',', *members, *groupUsers);
+        }";
+
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array("*groupName" => $groupName),
+                array("*groupUsers")
+            );
+
+            $result = $rule->execute();
+
+            return explode(",", $result["*groupUsers"]);
+        } catch(RODSException $e) {
+            return false;
+        }
+
+        return false;
+    }
 }
