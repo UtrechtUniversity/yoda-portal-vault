@@ -75,10 +75,8 @@ class MetadataModel extends CI_Model {
     		);
 
     		$result = $rule->execute();
-    		var_dump($result);
     		return $result["*status"] == "0";
     	} catch(RODSException $e) {
-    		echo $e->showStacktrace();
             return false;
         }
         return false;
@@ -134,7 +132,7 @@ class MetadataModel extends CI_Model {
 
                 *recursive = false;
                 
-    			uuIiRemoveKeyValueFromObject(*key, *object, *isColl, *recursive, *status);
+    			uuIiRemoveKeyFromObject(*key, *object, *isColl, *recursive, *status)
     			*status = str(*status);
     		}';
 

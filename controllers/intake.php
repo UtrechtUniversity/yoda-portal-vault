@@ -192,10 +192,8 @@ class Intake extends MY_Controller
      *          module and to a valid study, if one is available
      */
     private function getRedirect($studyID = '') {
-        // $url = $this->getModuleBase() . "intake/index";
         $segments = array($this->modulelibrary->name(), "intake", "index");
         if(!empty($this->studies)) {
-            // $url .= "/" . ($studyID ? $studyID : $this->studies[0]);
             array_push($segments, $studyID ? $studyID : $this->studies[0]);
         }
         return site_url($segments);
@@ -203,6 +201,14 @@ class Intake extends MY_Controller
 
     public function getGroupUsers($study) {
         $query = $this->input->get('query');
+        $showAdmin = $this->input->get("showAdmin");
+        $showUsers = $this->input->get("showUsers");
+        $showReadonly = $this->input->get("showReadonly");
+
+        $showAdmin = (is_null($showAdmin) || $showAdmin == "0") ? false : true;
+        $showUsers = (is_null($showUsers) || $showUsers == "0") ? false : true;
+        $showReadonly = (is_null($showReadonly) || $showReadonly == "0") ? false : true;
+
 
         $group = sprintf(
                 "%s%s", 
@@ -211,6 +217,8 @@ class Intake extends MY_Controller
             );
 
         $rodsaccount = $this->rodsuser->getRodsAccount();
+
+        // TODO: use rules to extract proper roles
 
         $results = 
             array_values(array_filter(

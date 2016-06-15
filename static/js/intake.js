@@ -12,19 +12,25 @@ $(function() {
 	$('[data-toggle="tooltip"]').tooltip();
 
 	$el = $(".select-user-from-group");
-
 	$el.select2({
 		allowClear:  true,
 		openOnEnter: false,
 		minimumInputLength: 1,
 		ajax: {
 			quietMillis: 400,
-			url:      'http://irods.foo.com/intake/getGroupUsers/testgroup',
+			url:      function(params) {
+				var url = 'http://irods.foo.com/intake/getGroupUsers/';
+				url += $("input[name=studyID]").val();
+				return url;
+			},
 			type:     'get',
 			dataType: 'json',
 			data: function (term, page) {
 				return {
-					query: term
+					query: term,
+					showAdmins : $el.data()['displayrolesAdmins'],
+					showUsers : $el.data()['displayrolesUsers'],
+					showReadonly : $el.data()['displayrolesReadonly']
 				};
 			},
 			results: function (users) {
@@ -42,13 +48,31 @@ $(function() {
 						inputMatches = true;
 				});
 
+				if (!inputMatches && query.length && $el.data("allowcreate"))
+					results.push({
+						id:   query,
+						text: query,
+						exists: false
+					}
+				);
+
 				return { results: results };
 			},
+		},
+		formatResult: function(result, $container, query, escaper) {
+			return escaper(result.text)
+				+ (
+					'exists' in result && !result.exists
+					? ' <span class="grey">(create)</span>'
+					: ''
+				);
 		},
 		initSelection: function($el, callback) {
 			callback({ id: $el.val(), text: $el.val() });
 		},
-	})
+	});
+
+
 
 });
 
@@ -110,10 +134,20 @@ function cancelEdit($element) {
 
 var _show = function(elem){
 	elem.css("display", "block");
+	elem.css("visibility", "visible");
+	if(elem.hasClass("select-user-from-group") && 
+		!elem.attr('id').match("^s2")) {
+		_show($("#s2id_" + elem.attr('id')));
+	}
 };
 
 var _hide = function(elem){
 	elem.css("display", "none");
+	elem.css("visibility", "hidden");
+	if(elem.hasClass("select-user-from-group") && 
+		!elem.attr('id').match("^s2")) {
+		_hide($("#s2id_" + elem.attr('id')));
+	}
 	if(elem[0] != undefined){
 		elem.val(elem[0].dataset.defaultvalue).trigger("change");
 	}
@@ -130,6 +164,7 @@ function inputDisable(input) {
 function _iterateAll(showWhenEdit) {
 	$("table#metadata_edittable .showWhenEdit").each(function(i, e) {
 		e.style.display = showWhenEdit ? "block" : "none";
+		e.style.visibility = showWhenEdit ? "visible" : "hidden";
 		if(!showWhenEdit) {
 			defaultValue = e.dataset.defaultvalue;
 			if(defaultValue != undefined) {
@@ -140,6 +175,7 @@ function _iterateAll(showWhenEdit) {
 	});
 	$("table#metadata_edittable .hideWhenEdit").each(function(i, e) {
 		e.style.display = showWhenEdit ? "none" : "block";
+		e.style.visibility = showWhenEdit ? "hidden" : "visible";
 	});
 
 	cancelAll = $("#cancelAll");
@@ -163,15 +199,3 @@ function disableAllForEdit() {
 	_iterateAll(false);
 	inEditAllMode = false;
 }
-
-// function editOwner() {
-// 	$(".showWhenEdit").css("display", "block");
-// 	$(".hideWhenEdit").css("display", "none");
-// }
-
-// function cancelEdit() {
-// 	$(".showWhenEdit").css("display", "none");
-// 	$(".hideWhenEdit").css("display", "block");
-// 	$elown = $('[name="owner"]');
-// 	$elown.val($elown[0].dataset.defaultvalue).trigger("change");
-// }
