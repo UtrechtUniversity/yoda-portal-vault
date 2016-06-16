@@ -88,4 +88,17 @@ class MetaData extends MY_Controller
 		}
     }
 
+    public function metasuggestions($key) {
+        $query = $this->input->get('query');
+        $rodsAccount = $this->rodsuser->getRodsAccount();
+        $options = $this->metadatamodel->getMetadataForKeyLike($rodsAccount, $key, $query);
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(
+                json_encode(
+                    $options
+                )
+            );
+    }
+
 }

@@ -185,4 +185,38 @@ class MetadataModel extends CI_Model {
         }
         return false;
     }
+
+
+    public static function getMetadataForKeyLike($iRodsAccount, $key, $searchString) {
+        $ruleBody = '
+        myRule {
+            *isCollection = true;
+            uuIiGetAvailableValuesForKeyLike(*key, *searchString, *isCollection, *values);
+        }';
+
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*key" => $key,
+                    "*searchString" => $searchString
+                    ),
+                array("*values")
+            );
+
+            $result = $rule->execute();
+
+            if($result && array_key_exists("*values", $result)) {
+                $like = explode("#;#", $result["*values"]);
+                return array_slice($like, 1);
+            }
+
+        } catch(RODSException $e) {
+            return false;
+        }
+        return false;
+    }
+
+
 }

@@ -151,8 +151,80 @@ EOT;
 
 	}
 
-	public function getSelectInput() {
+	public function getSelectInput($key, $config, $value) {
+		// TODO work in progress
+		$exampleField = array(
+				"label" => "Example select",
+				"help" => "The select field can be used to provide multiple options",
+				"type" => "select",
+				"type_configuration" => array (
+					"restricted" => true,
+					"allow_create" => "*",
+					"begin" => 0,
+					"end" => 2016,
+					"step" => 1,
+					"options" => array(
+							"option 1",
+							"option 2",
+							"option 3",
+							"option 4",
+							"option 5",
+							"option 6",
+							"option 7"
+						)
+					),
+				"required" => true,
+				"allow_empty" => true,
+				"depends" => false
+			);
 
+		if($config["type_configuration"]["restricted"]) {
+			$template = '<input name="metadata[%1$s]" type="hidden"';
+			$template .= ' id="input-%1$s" value="%2$s"';
+			$template .= ' class="showWhenEdit meta-suggestions-field"';
+			$template .= ' data-defaultvalue="%2$s"';
+			$template .= ' data-placeholder--id="%2$s"';
+			$template .= ' data-placeholder--text="%2$s"';
+			$template .= ' %3$s';
+			$template .= '/>';
+
+			$displayroles .= 'data-allowcreate="%4$b"';
+
+			$extra = sprintf(
+				'data-allowcreate="%1$b"',
+				$config["type_configuration"]["allow_create"]
+			);
+
+			return sprintf(
+				$template, 
+				$key, 
+				$value,
+				$extra
+			);
+		} else {
+			$options = "";
+			$optTemplate = '<option value="%1$s"%2$s>%1$2</option>';
+			if(!array_key_exist("options", $config["type_configuration"]) || sizeof($config["type_configuration"]["options"]) == 0){
+				for($i = $config["type_configuration"]["begin"]; $i <= $config["type_configuration"]["end"]; $i += $config["type_configuration"]["step"]) {
+					$options .= sprintf($optTemplate, $i, $i == $value ? ' selected=""' : '');
+				}
+			} else {
+				foreach($config["type_configuration"]["options"] as $option) {
+					$options .= sprintf($optTemplate, $option, $option == $value ? ' selected=""' : '');
+				}
+			}
+			$select ='<select';
+			$select .= ' id="input-%1$s" name="metadata[%1$s]"';
+			$select .= ' data-defaultvalue="%2$s"';
+			$select .= ' %3$s class="showWhenEdit">%4$s</select>';
+
+			return sprintf(
+					$template,
+					$key,
+					$value,
+					$options
+				);
+		}
 	}
 
 	public function getBoolInput() {

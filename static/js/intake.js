@@ -73,6 +73,65 @@ $(function() {
 		},
 	});
 
+	$metaSuggestions = $(".meta-suggestions-field");
+	$metaSuggestions.select2({
+		allowClear:  true,
+		openOnEnter: false,
+		minimumInputLength: 1,
+		ajax: {
+			quietMillis: 400,
+			url:      function(params) {
+				var url = $("input[name=intake_url]").val();
+				url += '/metasuggestions/';
+				url += $el.attr('id');
+				return url;
+			},
+			type:     'get',
+			dataType: 'json',
+			data: function (term, page) {
+				return {
+					query: term
+				};
+			},
+			results: function (options) {
+				var query   = $el.data('select2').search.val();
+				var results = [];
+				var inputMatches = false;
+
+				users.forEach(function(userName) {
+					// Exclude users already in the group.
+					results.push({
+						id:   userName,
+						text: userName
+					});
+					if (query === userName)
+						inputMatches = true;
+				});
+
+				if (!inputMatches && query.length && $el.data("allowcreate"))
+					results.push({
+						id:   query,
+						text: query,
+						exists: false
+					}
+				);
+
+				return { results: results };
+			},
+		},
+		formatResult: function(result, $container, query, escaper) {
+			return escaper(result.text)
+				+ (
+					'exists' in result && !result.exists
+					? ' <span class="grey">(new)</span>'
+					: ''
+				);
+		},
+		initSelection: function($el, callback) {
+			callback({ id: $el.val(), text: $el.val() });
+		},
+	});
+
 
 
 });
