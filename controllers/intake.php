@@ -85,8 +85,8 @@ class Intake extends MY_Controller
         $this->data = array_merge($this->data, $dataArr);
 
         $this->load->view('common-start', array(
-            'styleIncludes' => array('css/datatables.css', 'css/intake.css'),
-            'scriptIncludes' => array('js/datatables.js', 'js/intake.js'),
+            'styleIncludes' => array('css/datatables.css', 'css/intake.css', 'lib/chosen-select/chosen.min.css'),
+            'scriptIncludes' => array('js/datatables.js', 'js/intake.js', 'lib/chosen-select/chosen.jquery.min.js'),
             'activeModule'   => $this->modulelibrary->name(),
             'user' => array(
                 'username' => $this->rodsuser->getUsername(),

@@ -11,6 +11,11 @@ $(function() {
 
 	$('[data-toggle="tooltip"]').tooltip();
 
+	$(".chosen").chosen({
+		inherit_select_classes : true,
+		width : "100%"
+	});
+
 	$el = $(".select-user-from-group");
 	$el.select2({
 		allowClear:  true,
@@ -82,8 +87,8 @@ $(function() {
 			quietMillis: 400,
 			url:      function(params) {
 				var url = $("input[name=intake_url]").val();
-				url += '/metasuggestions/';
-				url += $el.attr('id');
+				url += '/metadata/metasuggestions/';
+				url += $metaSuggestions.attr('id').substring(6);
 				return url;
 			},
 			type:     'get',
@@ -94,12 +99,12 @@ $(function() {
 				};
 			},
 			results: function (options) {
-				var query   = $el.data('select2').search.val();
+				var query   = $metaSuggestions.data('select2').search.val();
 				var results = [];
 				var inputMatches = false;
 
-				users.forEach(function(userName) {
-					// Exclude users already in the group.
+				options.forEach(function(userName) {
+					// Exclude options already in the group.
 					results.push({
 						id:   userName,
 						text: userName
@@ -108,7 +113,7 @@ $(function() {
 						inputMatches = true;
 				});
 
-				if (!inputMatches && query.length && $el.data("allowcreate"))
+				if (!inputMatches && query.length && $metaSuggestions.data("allowcreate"))
 					results.push({
 						id:   query,
 						text: query,
@@ -195,23 +200,43 @@ function cancelEdit($element) {
 var _show = function(elem){
 	elem.css("display", "block");
 	elem.css("visibility", "visible");
-	if(elem.hasClass("select-user-from-group") && 
-		!elem.attr('id').match("^s2")) {
+	if( _attrIsSelect2(elem) ) {
 		_show($("#s2id_" + elem.attr('id')));
 	}
+
+	if( _attrIsChosen(elem) ) {
+		_hide(elem);
+		_show($("#" + elem.attr('id').split("-").join("_") + "_chosen"));
+	}
+	$("#input_example_select_chosen").css('display', 'block');
 };
 
 var _hide = function(elem){
 	elem.css("display", "none");
 	elem.css("visibility", "hidden");
-	if(elem.hasClass("select-user-from-group") && 
-		!elem.attr('id').match("^s2")) {
+	if( _attrIsSelect2(elem) ) {
 		_hide($("#s2id_" + elem.attr('id')));
 	}
 	if(elem[0] != undefined){
 		elem.val(elem[0].dataset.defaultvalue).trigger("change");
 	}
 };
+
+function _attrIsChosen(elem) {
+	var val = elem.hasClass("chosen") && !elem.attr('id').match("_chosen$");
+	return val;
+}
+
+function _attrIsSelect2(elem) {
+	var val = 
+		(
+			elem.hasClass("select-user-from-group") || 
+			elem.hasClass('meta-suggestions-field')
+		) 
+		&& !elem.attr('id').match("^s2");
+
+	return val;
+}
 
 function inputEnable(input) {
 	input.prop('disabled', false);

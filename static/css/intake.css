@@ -23,6 +23,10 @@ div.metadata_form_buttons {
 	margin-top: 30px;
 }
 
+div.chosen-container {
+	width: 100%;
+}
+
 /*div.metadata_form_buttons .showWhenEdit {
 	visibility: hidden;
 }
