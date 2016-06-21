@@ -218,11 +218,9 @@ class Intake extends MY_Controller
 
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
-        // TODO: use rules to extract proper roles
-
         $results = 
             array_values(array_filter(
-                $this->study->getGroupMembers($rodsaccount, $group), 
+                $this->study->getGroupMembers($rodsaccount, $group, $showAdmin, $showUsers, $showReadonly),
                 function($val) use($query) {
                     return !(!empty($query) && strstr($val, $query) === FALSE);
                 }

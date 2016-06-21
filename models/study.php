@@ -85,28 +85,53 @@ class Study extends CI_Model {
         return false;
     }
 
-    public function getGroupMembers($iRodsAccount, $groupName) {
-        $ruleBody = "
-        myRule {
-            uuGroupGetMembers(*groupName, *members);
-            uuJoin(',', *members, *groupUsers);
-        }";
+    public function getGroupMembers($iRodsAccount, $groupName, $showAdmins, $showUsers, $showReadonly) {
+        $ruleBody = 
+        'myRule {
+            if(*showadmins == "1") {
+                *showAdmins = true;
+            } else {
+                *showAdmins = false;
+            }
+
+            if(*showusers == "1") {
+                *showUsers = true;
+            } else {
+                *showUsers = false;
+            }
+
+            if(*showreadonly == "1") {
+                *showReadonly = true;
+            } else {
+                *showReadonly = false;
+            }
+
+            uuIiGetFilteredMembers(*groupName, *showAdmins, *showUsers, *showReadonly, *memberList)
+
+            uuJoin(";", *memberList, *memberList);
+        }';
 
         try {
             $rule = new ProdsRule(
                 $iRodsAccount,
                 $ruleBody,
-                array("*groupName" => $groupName),
-                array("*groupUsers")
+                array(
+                    "*groupName" => $groupName,
+                    "*showadmins" => $showAdmins,
+                    "*showusers" => $showUsers,
+                    "*showreadonly" => $showReadonly
+                ),
+                array("*memberList")
             );
 
             $result = $rule->execute();
 
-            return explode(",", $result["*groupUsers"]);
+            return explode(";", $result["*memberList"]);
         } catch(RODSException $e) {
-            return false;
+            echo $e->showStacktrace();
+            return array();
         }
 
-        return false;
+        return array();
     }
 }
