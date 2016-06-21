@@ -201,7 +201,7 @@ class Intake extends MY_Controller
 
     public function getGroupUsers($study) {
         $query = $this->input->get('query');
-        $showAdmin = $this->input->get("showAdmin");
+        $showAdmin = $this->input->get("showAdmins");
         $showUsers = $this->input->get("showUsers");
         $showReadonly = $this->input->get("showReadonly");
 
