@@ -27,6 +27,11 @@ div.chosen-container {
 	width: 100%;
 }
 
+ul.multi-value-list{
+	padding-left: 15px;
+	list-style: square;
+}
+
 /*div.metadata_form_buttons .showWhenEdit {
 	visibility: hidden;
 }

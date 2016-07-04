@@ -315,4 +315,29 @@ class Dataset extends CI_Model {
         return FALSE;
     }
 
+    static public function testFunction($iRodsAccount) {
+        $ruleBody = <<<'RULE'
+myRule {
+    *test = "hello world";
+    *result = list("This","is","a","list");
+    *item = hd(*result);
+    *int = 1;
+}
+RULE;
+
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(),
+                array("*test", "*item", "*int")
+            );
+
+            $result = $rule->execute();
+            var_dump($result);
+        } catch(RODSException $e) {
+            echo $e->showStacktrace();
+        }
+    }
+
 }

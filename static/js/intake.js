@@ -16,7 +16,20 @@ $(function() {
 		width : "100%"
 	});
 
-	$el = $(".select-user-from-group");
+
+
+	createSelect2Inputs();
+	
+
+
+});
+
+var currentlyEditing = 0;
+var inEditAllMode = false;
+
+function createSelect2Inputs() {
+	$el = $("input.select-user-from-group");
+	
 	$el.select2({
 		allowClear:  true,
 		openOnEnter: false,
@@ -32,6 +45,7 @@ $(function() {
 			type:     'get',
 			dataType: 'json',
 			data: function (term, page) {
+				console.log($el.data());
 				return {
 					query: term,
 					showAdmins : $el.data()['displayrolesAdmins'],
@@ -136,26 +150,24 @@ $(function() {
 			callback({ id: $el.val(), text: $el.val() });
 		},
 	});
-
-
-
-});
-
-var currentlyEditing = 0;
-var inEditAllMode = false;
+}
 
 function edit($element) {
+	createSelect2Inputs();
 	label = $('table#metadata_edittable #label-' + $element);
-	input = $('table#metadata_edittable #input-' + $element);
+	// input = $('table#metadata_edittable #input-' + $element);
+	input = $('table#metadata_edittable .input-' + $element);
 	editButton = $('table#metadata_edittable .button-' + $element + '.hideWhenEdit');
 	cancelButton = $('table#metadata_edittable .button-' + $element + '.showWhenEdit');
 	cancelAll = $(".metadata-btn-cancelAll");
 	submit = $(".metadata-btn-editMetaSubmit");
+	addRowBtn = $("table#metadata_edittable #addRow-" + $element);
 
 	_hide(label);
 	_show(input);
 	_hide(editButton);
 	_show(cancelButton);
+	_show(addRowBtn);
 
 	inputEnable(cancelAll);
 	inputEnable(submit);
@@ -165,17 +177,22 @@ function edit($element) {
 
 function cancelEdit($element) {
 	label = $('table#metadata_edittable #label-' + $element);
-	input = $('table#metadata_edittable #input-' + $element);
+	// input = $('table#metadata_edittable #input-' + $element);
+	input = $('table#metadata_edittable .input-' + $element);
 	editButton = $('table#metadata_edittable .button-' + $element + '.hideWhenEdit');
 	cancelButton = $('table#metadata_edittable .button-' + $element + '.showWhenEdit');
 	cancelAll = $(".metadata-btn-cancelAll");
 	submit = $(".metadata-btn-editMetaSubmit");
 	editAll = $(".metadata-btn-editAll");
+	addRowBtn = $("table#metadata_edittable #addRow-" + $element);
+	addedRows = $("table#metadata_edittable .row-" + $element);
+	addedRows.remove();
 
 	_show(label);
 	_hide(input);
 	_show(editButton);
 	_hide(cancelButton);
+	_hide(addRowBtn);
 
 	currentlyEditing -= 1;
 
@@ -195,6 +212,29 @@ function cancelEdit($element) {
 	} else {
 		inputEnable(editAll);
 	}
+}
+
+function addValueRow($element) {
+	addRowBtn = $("table#metadata_edittable #addRow-" + $element);
+	template = addRowBtn[0].dataset['template'].replace("__row_input_id__", addRowBtn[0].dataset['nextindex']);
+	template = "<div class='row showWhenEdit row-" + $element + 
+		"' id='row-" + $element + "-" + addRowBtn[0].dataset['nextindex'] + "'>" +
+		"<span class='col-md-11'>" + template + "</span>" +
+		"<span class='btn btn-default col-md-1 glyphicon glyphicon-minus' " +
+		"onclick='removeRow(\"#row-" + $element + "-" + addRowBtn[0].dataset['nextindex'] + 
+		"\");'></span></div>";
+	addRowBtn.before(template);
+	// input = $('table#metadata_edittable #input-' + $element);
+	input = $('table#metadata_edittable .input-' + $element);
+	row = $('table#metadata_edittable .row-' + $element);
+	_show(input);
+	_show(row);
+	addRowBtn[0].dataset['nextindex']++;
+	createSelect2Inputs();
+}
+
+function removeRow(row) {
+	$(row).remove();
 }
 
 var _show = function(elem){
@@ -217,9 +257,9 @@ var _hide = function(elem){
 	if( _attrIsSelect2(elem) ) {
 		_hide($("#s2id_" + elem.attr('id')));
 	}
-	if(elem[0] != undefined){
-		elem.val(elem[0].dataset.defaultvalue).trigger("change");
-	}
+	elem.each(function(i, e) {
+		$(e).val(e.dataset.defaultvalue).trigger("change");
+	});
 };
 
 function _attrIsChosen(elem) {
@@ -243,7 +283,7 @@ function inputEnable(input) {
 }
 
 function inputDisable(input) {
-	input.prop('disabled', true)
+	input.prop('disabled', true);
 }
 
 function _iterateAll(showWhenEdit) {
@@ -255,6 +295,7 @@ function _iterateAll(showWhenEdit) {
 			if(defaultValue != undefined) {
 				$(e).val(defaultValue).trigger("change");
 			}
+			if($(e).hasClass('row')) $(e).remove();
 		}
 		
 	});

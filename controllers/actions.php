@@ -92,16 +92,15 @@ class Actions extends MY_Controller
 		}
     }
 
-    public function testFunction() 
-    {
+    public function testFunction() {
     	$rodsuser = $this->rodsuser->getRodsAccount();
     	$result = $this->dataset->testFunction($rodsuser);
-    	displayMessage($this, "Result: " . $result);
-    	if(isset($_SERVER['HTTP_REFERER'])) {
-			redirect($_SERVER['HTTP_REFERER'], 'refresh');
-		} else {
-			$redir = $this->intake->getRedirect($this->input->post('studyId'));
-			redirect($redir, 'refresh');
-		}
+  //   	displayMessage($this, "Result: " . $result);
+  //   	if(isset($_SERVER['HTTP_REFERER'])) {
+		// 	redirect($_SERVER['HTTP_REFERER'], 'refresh');
+		// } else {
+		// 	$redir = $this->intake->getRedirect($this->input->post('studyId'));
+		// 	redirect($redir, 'refresh');
+		// }
     }
 }

@@ -9,16 +9,22 @@ class metadataFields {
 	public function getFields($object, $isCollection) {
 		$iRodsAccount = $this->CI->rodsuser->getRodsAccount();
 		$fields = array();
-		if($this->fields != null && sizeof($this->fields)) {
-			foreach($this->fields as $key => $arr) {
-				$arr["value"] = 
-					$this->CI->metadatamodel->getValueForKey(
-						$iRodsAccount,
-						$key,
-						$object,
-						$isCollection);
-					$fields[$key] = $arr;
+		$keys = array_keys($this->fields);
+		$values = $this->CI->metadatamodel->getValuesForKeys2($iRodsAccount, $keys, $object);
+
+		if(!$values) return false;
+
+		foreach($this->fields as $key => $arr) {
+			if(array_key_exists("multiple", $arr)) {
+				$arr["value"] = $values[$key];
+			} else {
+				if(sizeof($values[$key]) > 0) {
+					$arr["value"] = $values[$key][0];
+				} else {
+					$arr["value"] = "";
+				}
 			}
+			$fields[$key] = $arr;
 		}
 
 		return $fields;
@@ -39,47 +45,97 @@ class metadataFields {
 		 * 3) Label
 		 * 4) Help text
 		 * 5) input
-		 * 6) indent
+		 * 6) shadowInput
+		 * 7) template
+		 * 8) indent
 		 */
 		$template =  <<<'EOT'
-%6$s<tr>
-%6$s	<td>
-%6$s		<span data-toggle="tooltip" data-placement="top" title="%4$s">
-%6$s			%3$s
-%6$s 		</span>
-%6$s	</td>
-%6$s	<td>
-%6$s 		<span class="hideWhenEdit" id="label-%1$s">%2$s</span>
-%6$s 		%5$s
-%6$s 	</td>
-%6$s 	<td width="50">
+%9$s<tr>
+%9$s	<td>
+%9$s		<span data-toggle="tooltip" data-placement="top" title="%4$s">
+%9$s			%3$s
+%9$s 		</span>
+%9$s	</td>
+%9$s	<td>
+%9$s 		<span class="hideWhenEdit" id="label-%1$s">%2$s</span>
+%9$s 		%5$s
+%9$s 		%6$s
 EOT;
-		if($permissions->administrator):
+		if(array_key_exists("multiple", $config)):
 			$template .= <<<'EOT'
-%6$s 		<span type="button" class="btn btn-default glyphicon glyphicon-pencil hideWhenEdit button-%1$s" 
-%6$s			onclick="edit('%1$s')"></span>
-%6$s 		<span type="button"
-%6$s			class="btn btn-default glyphicon glyphicon-remove showWhenEdit button-%1$s"
-%6$s 			onclick="cancelEdit('%1$s')"></span>
+%9$s 		<span class="btn btn-default glyphicon glyphicon-plus showWhenEdit" 
+%9$s 			data-template="%7$s" data-nextindex="%8$d" onclick="addValueRow('%1$s')" id="addRow-%1$s">
+%9$s 			Add value
+%9$s 		</span>
 EOT;
 		endif;
 		$template .= <<<'EOT'
-%6$s 	</td>
-%6$s</tr>
+%9$s 	</td>
+%9$s 	<td width="50">
+EOT;
+		if($permissions->administrator):
+			$template .= <<<'EOT'
+%9$s 		<span type="button" class="btn btn-default glyphicon glyphicon-pencil hideWhenEdit button-%1$s" 
+%9$s			onclick="edit('%1$s')"></span>
+%9$s 		<span type="button"
+%9$s			class="btn btn-default glyphicon glyphicon-remove showWhenEdit button-%1$s"
+%9$s 			onclick="cancelEdit('%1$s')"></span>
+EOT;
+		endif;
+		$template .= <<<'EOT'
+%9$s 	</td>
+%9$s</tr>
 EOT;
 
 		$input = "";
-
+		$inputName = 'metadata[%1$s]';
+		$inputArrayName = $inputName . '[%2$s]';
 		if($permissions->administrator){
 			switch($config["type"]) {
 				case "text" :
-					$input = $this->getTextInput($key, $config, $value);
+					if (!array_key_exists("multiple", $config) && is_string($value)) {
+						$input = $this->getTextInput($key, sprintf($inputName, $key), $config, $value);
+						$rowInputTemplate = $this->getTextInput($key, sprintf($inputName, $key), $config, "");
+					} else {
+						$rowInputTemplate = $this->getTextInput($key, sprintf($inputArrayName, $key, "__row_input_id__"), $config, "");
+						if(array_key_exists("multiple", $config) && is_string($value)) {
+							$input = $this->getTextInput($key, sprintf($inputArrayName, $key, 0), $config, $value);
+						} else {
+							for($i = 0; $i < sizeof($value); $i++) {
+								$input .= $this->getTextInput($key, sprintf($inputArrayName, $key, $i), $config, $value[$i]);
+							}
+						}
+					}
 					break;
 				case "select" :
-					$input = $this->getSelectInput($key, $config, $value);
+					if (!array_key_exists("multiple", $config) && is_string($value)) {
+						$input = $this->getSelectInput($key, sprintf($inputName, $key), $config, $value);
+						$rowInputTemplate = $this->getSelectInput($key, sprintf($inputName, $key), $config, "");
+					} else {
+						$rowInputTemplate = $this->getSelectInput($key, sprintf($inputArrayName, $key, "__row_input_id__"), $config, "");
+						if(array_key_exists("multiple", $config) && is_string($value)) {
+							$input = $this->getSelectInput($key, sprintf($inputArrayName, $key, 0), $config, $value);
+						}  else {
+							for($i = 0; $i < sizeof($value); $i++) {
+								$input .= $this->getSelectInput($key, sprintf($inputArrayName, $key, $i), $config, $value[$i]);
+							}
+						}
+					}
 					break;
 				case "custom" :
-					$input = $this->getCustomInput($key, $config, $value);
+					if (!array_key_exists("multiple", $config) && is_string($value)) {
+						$input = $this->getCustomInput($key, sprintf($inputName, $key), $config, $value);
+						$rowInputTemplate = $this->getCustomInput($key, sprintf($inputName, $key), $config, "");
+					} else {
+						$rowInputTemplate = $this->getCustomInput($key, sprintf($inputArrayName, $key, "__row_input_id__"), $config, "");
+						if(array_key_exists("multiple", $config) && is_string($value)) {
+							$input = $this->getCustomInput($key, sprintf($inputArrayName, $key, 0), $config, $value);
+						} else {
+							for($i = 0; $i < sizeof($value); $i++) {
+								$input .= $this->getCustomInput($key, sprintf($inputArrayName, $key, $i), $config, $value[$i]);
+							}
+						}
+					}
 					break;
 				default:
 					$input = "misc type";
@@ -87,26 +143,42 @@ EOT;
 			}
 		}
 
+		if(array_key_exists("multiple", $config)) {
+			$v = "<ul class=\"multi-value-list\">";
+			if(is_string($value)) {
+				$v .= "<li>" . $value . "</li>";
+			} else {
+				foreach($value as $val) {
+					$v .= "<li>" . $val . "</li>";
+				}
+			}
+			$v .= "</ul>";
+			$multiValueList = $v;
+		}
+
 		return sprintf(
 			$template,
 			$key,
-			$value,
+			array_key_exists("multiple", $config) ? $multiValueList : $value,
 			$config["label"],
 			$config["help"],
 			$input,
+			$this->getShadowInput($key, $config, $value),
+			htmlentities($rowInputTemplate),
+			is_array($value) ? sizeof($value) : 1,
 			$indent
 		);
 
 	}
 
-	private function getCustomInput($key, $config, $value) {
+	private function getCustomInput($key, $inputName, $config, $value) {
 		if(!array_key_exists("custom_type", $config)) {
 			return "Field configuration with custom field needs 'custom_type' key";
 		}
 		$input = "";
 		switch($config["custom_type"]) {
 			case "userlist" : 
-				$input = $this->getUserlistInput($key, $config, $value);
+				$input = $this->getUserlistInput($key, $inputName, $config, $value);
 				break;
 			default :
 				$input = "custom (default)";
@@ -116,20 +188,53 @@ EOT;
 		return $input;
 	}
 
-	public function getTextInput($key, $config, $value) {
+	private function getShadowInput($key, $config, $value) {
+		if(is_array($value)) {
+			$input = "";
+			for($i = 0; $i < sizeof($value); $i++) {
+				$input .= sprintf(
+					'<input type="hidden" name="metadata-shadow[%1$s][%2$d]" value="%3$s"/>',
+					$key,
+					$i,
+					$value[$i]
+				);
+			}
+		} else if(array_key_exists("multiple", $config)) {
+			$input = sprintf(
+					'<input type="hidden" name="metadata-shadow[%1$s][0]" value="%2$s"/>',
+					$key,
+					$value
+				);
+		} else {
+			$input = sprintf(
+				'<input type="hidden" name="metadata-shadow[%1$s]" value="%2$s"/>',
+				$key,
+				$value
+			);
+		}
+
+		return $input;
+	}
+
+
+
+	public function getTextInput($key, $inputName, $config, $value) {
 		/**
 		 * Template params:
 		 * 1) field key (same as metadata key)
-		 * 2) Current value
-		 * 3) length="<length>" if not false, "" otherwise
+		 * 2) Input name
+		 * 3) Current value
+		 * 4) length="<length>" if not false, "" otherwise
 		 */
 		if($config["type_configuration"]["longtext"])
-			return $this->getLongtextInput($key, $config, $value);
+			return $this->getLongtextInput($key, $inputName, $config, $value);
 
 		$template ='<input type="text"';
-		$template .= ' id="input-%1$s" name="metadata[%1$s]"';
-		$template .= ' data-defaultvalue="%2$s"';
-		$template .= ' %3$s class="showWhenEdit" value="%2$s"/>';
+		// $template .= ' id="input-%1$s" name="%2$s"';
+		$template .= ' name="%2$s"';
+		$template .= ' data-defaultvalue="%3$s"';
+		// $template .= ' %4$s class="showWhenEdit" value="%3$s"/>';
+		$template .= ' %4$s class="showWhenEdit input-%1$s" value="%3$s"/>';
 
 		$length = $config["type_configuration"]["length"] ? 
 			sprintf(
@@ -138,32 +243,35 @@ EOT;
 			)
 			: "";
 
-		return sprintf($template, $key, $value, $length);
+		return sprintf($template, $key, $inputName, $value, $length);
 	}
 
-	public function getLongtextInput($key, $config, $value) {
-		$template = '<textarea id="input-%1$s" name="metadata[%1$s]"';
-		$template .= ' data-defaultvalue="%2$s"';
-		$template .= ' class="showWhenEdit">%2$s</textarea>';
+	public function getLongtextInput($key, $inputName, $config, $value) {
+		// $template = '<textarea id="input-%1$s" name="%2$s"';
+		$template = '<textarea name="%2$s"';
+		$template .= ' data-defaultvalue="%3$s"';
+		// $template .= ' class="showWhenEdit">%3$s</textarea>';
+		$template .= ' class="showWhenEdit input-%1$s">%3$s</textarea>';
 
-		return sprintf($template, $key, $value);
+		return sprintf($template, $key, $inputName, $value);
 	}
 
 	public function getTimeInput() {
 
 	}
 
-	public function getSelectInput($key, $config, $value) {
+	public function getSelectInput($key, $inputName, $config, $value) {
 		$tc = $config["type_configuration"]; // tc = TypeConfiguration;
-
 		if($tc["restricted"]) {
-			$template = '<input name="metadata[%1$s]" type="hidden"';
-			$template .= ' id="input-%1$s" value="%2$s"';
-			$template .= ' class="showWhenEdit meta-suggestions-field"';
-			$template .= ' data-defaultvalue="%2$s"';
-			$template .= ' data-placeholder--id="%2$s"';
-			$template .= ' data-placeholder--text="%2$s"';
-			$template .= ' %3$s';
+			$template = '<input name="%2$s" type="hidden"';
+			// $template .= ' id="input-%1$s" value="%3$s"';
+			$template .= ' value="%3$s"';
+			// $template .= ' class="showWhenEdit meta-suggestions-field"';
+			$template .= ' class="showWhenEdit meta-suggestions-field input-%1$s"';
+			$template .= ' data-defaultvalue="%3$s"';
+			$template .= ' data-placeholder--id="%3$s"';
+			$template .= ' data-placeholder--text="%3$s"';
+			$template .= ' %4$s';
 			$template .= '/>';
 
 			$extra = sprintf(
@@ -173,7 +281,8 @@ EOT;
 
 			return sprintf(
 				$template, 
-				$key, 
+				$key,
+				$inputName,
 				$value,
 				$extra
 			);
@@ -196,13 +305,15 @@ EOT;
 			}
 			
 			$select ='<select';
-			$select .= ' id="input-%1$s" name="metadata[%1$s]"';
-			$select .= ' data-defaultvalue="%2$s"';
-			$select .= ' class="showWhenEdit chosen">%3$s</select>';
+			// $select .= ' id="input-%1$s" name="%2$s';
+			$select .= ' name="%2$s';
+			$select .= ' data-defaultvalue="%3$s"';
+			$select .= ' class="showWhenEdit chosen input-%1$s">%4$s</select>';
 
 			return sprintf(
 					$select,
 					$key,
+					$inputName,
 					$value,
 					$options
 				);
@@ -221,14 +332,16 @@ EOT;
 		
 	}
 
-	public function getUserlistInput($key, $config, $value) {
-		$template = '<input name="metadata[%1$s]" type="hidden"';
-		$template .= ' id="input-%1$s" value="%2$s"';
-		$template .= ' class="showWhenEdit select-user-from-group"';
-		$template .= ' data-defaultvalue="%2$s"';
-		$template .= ' data-placeholder--id="%2$s"';
-		$template .= ' data-placeholder--text="%2$s"';
-		$template .= ' %3$s';
+	public function getUserlistInput($key, $inputName, $config, $value) {
+		$template = '<input name="%2$s" type="hidden"';
+		// $template .= ' id="input-%1$s" value="%3$s"';
+		$template .= ' value="%3$s"';
+		// $template .= ' class="showWhenEdit select-user-from-group"';
+		$template .= ' class="showWhenEdit select-user-from-group input-%1$s"';
+		$template .= ' data-defaultvalue="%3$s"';
+		$template .= ' data-placeholder--id="%3$s"';
+		$template .= ' data-placeholder--text="%3$s"';
+		$template .= ' %4$s';
 		$template .= '/>';
 
 		$displayroles = 'data-displayroles--admins="%1$b"';
@@ -247,6 +360,7 @@ EOT;
 		return sprintf(
 			$template, 
 			$key, 
+			$inputName,
 			$value,
 			$extra
 		);
@@ -295,7 +409,12 @@ EOT;
 					),
 				"required" => true,
 				"allow_empty" => true,
-				"depends" => false
+				"depends" => false,
+				"multiple" => array(
+						"min" => 0,
+						"max" => 100,
+						"infinite" => false
+					)
 			),
 
 
@@ -324,7 +443,12 @@ EOT;
 					),
 				"required" => true,
 				"allow_empty" => true,
-				"depends" => false
+				"depends" => false,
+				"multiple" => array(
+						"min" => 0,
+						"max" => 100,
+						"infinite" => false
+					)
 			),
 
 		// TODO: allow repeat
@@ -341,7 +465,12 @@ EOT;
 				),
 				"required" => true,
 				"allow_empty" => false,
-				"depends" => false
+				"depends" => false,
+				"multiple" => array(
+						"min" => 0,
+						"max" => 100,
+						"infinite" => false
+					)
 			),
 
 		"discipline" => array(
