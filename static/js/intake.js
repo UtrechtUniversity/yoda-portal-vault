@@ -16,17 +16,28 @@ $(function() {
 		width : "100%"
 	});
 
-	createSelect2Inputs();
+	$el = $("input.select-user-from-group");
+	createUserFromGroupInput($el);
+
+	$metaSuggestions = $(".meta-suggestions-field");
+	createMetaSuggestionsInput($metaSuggestions);
 
 });
 
 var currentlyEditing = 0;
 var inEditAllMode = false;
 
-function createSelect2Inputs() {
-	$el = $("input.select-user-from-group");
-	
-	$el.select2({
+/** 
+ * Transforms the called element in a select2 input box,
+ * where users can be selected.
+ * Uses data-attributes to detect which users to show as
+ * suggestions
+ *
+ * @param elem 	The transformed element
+ */
+function createUserFromGroupInput(elem) {
+	if(!elem.hasClass('select-user-from-group')) return;
+	elem.select2({
 		allowClear:  true,
 		openOnEnter: false,
 		minimumInputLength: 1,
@@ -41,16 +52,16 @@ function createSelect2Inputs() {
 			type:     'get',
 			dataType: 'json',
 			data: function (term, page) {
-				console.log($el.data());
+				console.log(elem.data());
 				return {
 					query: term,
-					showAdmins : $el.data()['displayrolesAdmins'],
-					showUsers : $el.data()['displayrolesUsers'],
-					showReadonly : $el.data()['displayrolesReadonly']
+					showAdmins : elem.data()['displayrolesAdmins'],
+					showUsers : elem.data()['displayrolesUsers'],
+					showReadonly : elem.data()['displayrolesReadonly']
 				};
 			},
 			results: function (users) {
-				var query   = $el.data('select2').search.val();
+				var query   = elem.data('select2').search.val();
 				var results = [];
 				var inputMatches = false;
 
@@ -64,7 +75,7 @@ function createSelect2Inputs() {
 						inputMatches = true;
 				});
 
-				if (!inputMatches && query.length && $el.data("allowcreate"))
+				if (!inputMatches && query.length && elem.data("allowcreate"))
 					results.push({
 						id:   query,
 						text: query,
@@ -87,9 +98,17 @@ function createSelect2Inputs() {
 			callback({ id: $el.val(), text: $el.val() });
 		},
 	});
+}
 
-	$metaSuggestions = $(".meta-suggestions-field");
-	$metaSuggestions.select2({
+/**
+ * Creates a select2 input from the element given as argument
+ * which provides meta data suggestions. The suggestions are
+ * previously used values for the key on the same object
+ */
+function createMetaSuggestionsInput(elem) {
+	if(!elem.hasClass('meta-suggestions-field')) return;
+
+	elem.select2({
 		allowClear:  true,
 		openOnEnter: false,
 		minimumInputLength: 1,
@@ -98,7 +117,7 @@ function createSelect2Inputs() {
 			url:      function(params) {
 				var url = $("input[name=intake_url]").val();
 				url += '/metadata/metasuggestions/';
-				url += $metaSuggestions.attr('id').substring(6);
+				url += elem.attr('id').substring(6);
 				return url;
 			},
 			type:     'get',
@@ -109,7 +128,7 @@ function createSelect2Inputs() {
 				};
 			},
 			results: function (options) {
-				var query   = $metaSuggestions.data('select2').search.val();
+				var query   = elem.data('select2').search.val();
 				var results = [];
 				var inputMatches = false;
 
@@ -123,7 +142,7 @@ function createSelect2Inputs() {
 						inputMatches = true;
 				});
 
-				if (!inputMatches && query.length && $metaSuggestions.data("allowcreate"))
+				if (!inputMatches && query.length && elem.data("allowcreate"))
 					results.push({
 						id:   query,
 						text: query,
@@ -149,7 +168,6 @@ function createSelect2Inputs() {
 }
 
 function edit($element) {
-	createSelect2Inputs();
 	label = $('table#metadata_edittable #label-' + $element);
 	row = $('table#metadata_edittable .fixed-row-' + $element);
 	input = $('table#metadata_edittable .input-' + $element);
@@ -226,8 +244,13 @@ function addValueRow($element) {
 	row = $('table#metadata_edittable .row-' + $element);
 	_show(input);
 	_show(row);
+	newElem = $('input[name="metadata[' + $element + '][' + addRowBtn[0].dataset['nextindex'] + ']"]');
+	newElem.each(function(i, e) {
+		e = $(e);
+		createMetaSuggestionsInput(e);
+		createUserFromGroupInput(e);
+	});
 	addRowBtn[0].dataset['nextindex']++;
-	createSelect2Inputs();
 }
 
 function removeRow(row) {
