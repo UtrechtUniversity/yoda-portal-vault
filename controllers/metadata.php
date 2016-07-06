@@ -30,6 +30,10 @@ class MetaData extends MY_Controller
             $deletedValues = $this->findDeletedItems($formdata, $shadowData, $fields);
             $addedValues = $this->findChangedItems($formdata, $shadowData, $fields);
 
+            $this->dumpKeyVals($deletedValues, "These items will be deleted");
+            $this->dumpKeyVals($addedValues, "These items will be added");
+
+
             // Update results
             $rodsaccount = $this->rodsuser->getRodsAccount();
             $status = $this->metadatamodel->processResults($rodsaccount, $collection, $deletedValues, $addedValues); 
@@ -50,13 +54,13 @@ class MetaData extends MY_Controller
 
         displayMessage($this, $message, $error, $type);
         if(isset($_SERVER['HTTP_REFERER'])) {
-            redirect($_SERVER['HTTP_REFERER'], 'refresh');
+            // redirect($_SERVER['HTTP_REFERER'], 'refresh');
         } else {
             $redir = $this->modulelibrary->getRedirect(
                 $this->input->post('studyId'), 
                 $this->input->post('dataset')
             );
-            redirect($redir, 'refresh');
+            // redirect($redir, 'refresh');
         }
     }
 
@@ -144,11 +148,14 @@ class MetaData extends MY_Controller
                     $i = 0;
                     foreach($value as $index => $value_part) {
                         if(
-                            !array_key_exists($index, $shadowdata[$key]) || 
-                            ($value_part != "" && $value_part != $shadowdata[$key][$index])
+                            $value_part != "" && (
+                                // !array_key_exists($index, $shadowdata) ||
+                                !array_key_exists($index, $shadowdata[$key]) || 
+                                $value_part != $shadowdata[$key][$index]
+                            )
                         ) {
                             if(!array_key_exists($i, $addedValues)) {
-                                $deletedValues[$i] = array();
+                                $addedValues[$i] = array();
                             }
                             $addedValues[$i][] = (object)array("key" => $key, "value" => $value_part);
                             $i++;

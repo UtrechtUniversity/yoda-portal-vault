@@ -57,6 +57,7 @@ class MetadataModel extends CI_Model {
             );
 
             $result = $rule->execute();
+            var_dump($result);
             $deleteStatus = $result["*error1"] == "0" ? 0 : -1;
             $addStatus = $result["*error2"] == "0" ? 0 : -2;
 

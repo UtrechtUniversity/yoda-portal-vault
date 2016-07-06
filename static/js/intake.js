@@ -16,11 +16,7 @@ $(function() {
 		width : "100%"
 	});
 
-
-
 	createSelect2Inputs();
-	
-
 
 });
 
@@ -155,7 +151,7 @@ function createSelect2Inputs() {
 function edit($element) {
 	createSelect2Inputs();
 	label = $('table#metadata_edittable #label-' + $element);
-	// input = $('table#metadata_edittable #input-' + $element);
+	row = $('table#metadata_edittable .fixed-row-' + $element);
 	input = $('table#metadata_edittable .input-' + $element);
 	editButton = $('table#metadata_edittable .button-' + $element + '.hideWhenEdit');
 	cancelButton = $('table#metadata_edittable .button-' + $element + '.showWhenEdit');
@@ -168,6 +164,7 @@ function edit($element) {
 	_hide(editButton);
 	_show(cancelButton);
 	_show(addRowBtn);
+	_show(row);
 
 	inputEnable(cancelAll);
 	inputEnable(submit);
@@ -177,8 +174,8 @@ function edit($element) {
 
 function cancelEdit($element) {
 	label = $('table#metadata_edittable #label-' + $element);
-	// input = $('table#metadata_edittable #input-' + $element);
 	input = $('table#metadata_edittable .input-' + $element);
+	row = $('table#metadata_edittable .fixed-row-' + $element);
 	editButton = $('table#metadata_edittable .button-' + $element + '.hideWhenEdit');
 	cancelButton = $('table#metadata_edittable .button-' + $element + '.showWhenEdit');
 	cancelAll = $(".metadata-btn-cancelAll");
@@ -193,6 +190,7 @@ function cancelEdit($element) {
 	_show(editButton);
 	_hide(cancelButton);
 	_hide(addRowBtn);
+	_hide(row);
 
 	currentlyEditing -= 1;
 
@@ -224,7 +222,6 @@ function addValueRow($element) {
 		"onclick='removeRow(\"#row-" + $element + "-" + addRowBtn[0].dataset['nextindex'] + 
 		"\");'></span></div>";
 	addRowBtn.before(template);
-	// input = $('table#metadata_edittable #input-' + $element);
 	input = $('table#metadata_edittable .input-' + $element);
 	row = $('table#metadata_edittable .row-' + $element);
 	_show(input);
@@ -258,9 +255,27 @@ var _hide = function(elem){
 		_hide($("#s2id_" + elem.attr('id')));
 	}
 	elem.each(function(i, e) {
-		$(e).val(e.dataset.defaultvalue).trigger("change");
+		restoreValueFromShadow(e);
 	});
 };
+
+function restoreValueFromShadow(elem) {
+	name = $(elem).attr('name');
+	if(name == undefined || !name.startsWith("metadata") || name.startsWith("metadata-shadow")) return;
+	names = name.substr(8).split("]");
+	targetstr = "metadata-shadow";
+	$(names).each(function(index, selector) {
+		if(selector != "") {
+			targetstr += selector + "]";
+		}
+	});
+
+	shadowElem = $("input[name=\"" + targetstr + "\"]");
+	if(shadowElem == undefined || shadowElem.length == 0) return;
+
+	$(elem).val(shadowElem.val()).trigger("change");
+		
+}
 
 function _attrIsChosen(elem) {
 	var val = elem.hasClass("chosen") && !elem.attr('id').match("_chosen$");
@@ -290,11 +305,9 @@ function _iterateAll(showWhenEdit) {
 	$("table#metadata_edittable .showWhenEdit").each(function(i, e) {
 		e.style.display = showWhenEdit ? "block" : "none";
 		e.style.visibility = showWhenEdit ? "visible" : "hidden";
+
 		if(!showWhenEdit) {
-			defaultValue = e.dataset.defaultvalue;
-			if(defaultValue != undefined) {
-				$(e).val(defaultValue).trigger("change");
-			}
+			restoreValueFromShadow(e);
 			if($(e).hasClass('row')) $(e).remove();
 		}
 		
