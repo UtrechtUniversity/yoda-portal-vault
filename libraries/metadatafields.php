@@ -15,7 +15,7 @@ class metadataFields {
 		if(!$values) return false;
 
 		foreach($this->fields as $key => $arr) {
-			if(array_key_exists("multiple", $arr)) {
+			if(array_key_exists("multiple", $arr) || $arr["type"] == "checkbox") {
 				$arr["value"] = $values[$key];
 			} else {
 				if(sizeof($values[$key]) > 0) {
@@ -97,11 +97,10 @@ EOT;
 		$inputArrayName = $inputName . '[%2$s]';
 
 		if($permissions->administrator){
-			if (!array_key_exists("multiple", $config) && is_string($value)) {
+			if (!array_key_exists("multiple", $config) && is_string($value) || $config["type"] == "checkbox") {
 				$input = $this->findProperInput($key, sprintf($inputName, $key), $config, $value);
 				$rowInputTemplate = $this->findProperInput($key, sprintf($inputName, $key), $config, "");
 			} else {
-
 				// 1) key
 				// 2) index
 				// 3) input
@@ -117,7 +116,7 @@ EOT;
 
 
 				$rowInputTemplate = $this->findProperInput($key, sprintf($inputArrayName, $key, "__row_input_id__"), $config, "");
-				if(array_key_exists("multiple", $config) && is_string($value)) {
+				if((array_key_exists("multiple", $config) || $config["type"] == "checkbox") && is_string($value)) {
 					$input = sprintf(
 						$deleteRowButtonTemplate,
 						$key,
@@ -137,7 +136,7 @@ EOT;
 			}
 		}
 
-		if(array_key_exists("multiple", $config)) {
+		if(array_key_exists("multiple", $config) || $config["type"] == "checkbox") {
 			$v = "<ul class=\"multi-value-list\">";
 			if(is_string($value)) {
 				$v .= "<li>" . $value . "</li>";
@@ -153,7 +152,7 @@ EOT;
 		return sprintf(
 			$template,
 			$key,
-			array_key_exists("multiple", $config) ? $multiValueList : $value,
+			array_key_exists("multiple", $config) || $config["type"] == "checkbox" ? $multiValueList : $value,
 			$config["label"],
 			$config["help"],
 			$input,
@@ -173,12 +172,21 @@ EOT;
 			case "select":
 				$input = $this->getSelectInput($key, $inputName, $config, $value);
 				break;
+			case "radio":
+				$input = $this->getRadioInput($key, $inputName, $config, $value);
+				break;
+			case "checkbox":
+				$input = $this->getCheckboxesInput($key, $inputName, $config, $value);
+				break;
+			case "bool":
+				$input = $this->getBoolInput($key, $inputName, $config, $value);
+				break;
 			case "custom":
 				$input = $this->getCustomInput($key, $inputName, $config, $value);
 				break;
 			default:
 				var_dump($key);
-				$input = "<p>default value</p>";
+				$input = "<p>default value (no type found)</p>";
 				break;
 		}
 		return $input;
@@ -212,7 +220,7 @@ EOT;
 					$value[$i]
 				);
 			}
-		} else if(array_key_exists("multiple", $config)) {
+		} else if(array_key_exists("multiple", $config) || $config["type"] == "checkbox") {
 			if(is_array($value)) $value = "";
 			$input = sprintf(
 					'<input type="hidden" name="metadata-shadow[%1$s][0]" value="%2$s"/>',
@@ -323,16 +331,59 @@ EOT;
 		}
 	}
 
-	public function getBoolInput() {
-		
+	public function getBoolInput($key, $inputName, $config, $value) {
+		if(!array_key_exists("type_configuration", $config)) $config["type_configuration"] = array();
+
+		$yesVal = array_key_exists("true_val", $config["type_configuration"]) ? 
+			$config["type_configuration"]["true_val"] : "Yes";
+		$noVal = array_key_exists("false_val", $config["type_configuration"]) ? 
+			$config["type_configuration"]["false_val"] : "No";
+
+		$config["type_configuration"]["options"] = array($yesVal, $noVal);
+
+		return $this->getOptionsInput($key, $inputName, $config, $value, "radio");
+
 	}
 
-	public function getCheckboxesInput() {
-		
+	public function getCheckboxesInput($key, $inputName, $config, $value) {
+		return $this->getOptionsInput($key, $inputName, $config, $value, "checkbox");
 	}
 
-	public function getRadioInput() {
+	public function getRadioInput($key, $inputName, $config, $value) {
+		return $this->getOptionsInput($key, $inputName, $config, $value, "radio");
+	}
+
+	private function getOptionsInput($key, $inputName, $config, $value, $type="radio") {
 		
+		// 1) key
+		// 2) inputName
+		// 3) value
+		// 4) extra
+		// 5) type
+		$template = '<div class="%5$s showWhenEdit input-%1$s">';
+		$template .= '	<label>';
+		$template .= '		<input type="%5$s" name="%2$s"%4$s value="%3$s"/>';
+		$template .= '		%3$s';
+		$template .= '	</label>';
+		$template .= '</div>';
+		
+		$input = '';
+		foreach($config["type_configuration"]["options"] as $option) {
+			$input .= sprintf(
+				$template,
+				$key,
+				$type == "checkbox" ? $inputName . '[]' : $inputName,
+				$option,
+				$value == $option 
+					|| (is_array($value) && 
+						in_array($option, $value)) 
+					? ' checked="checked"' : 
+					'',
+				$type
+			);
+		};
+
+		return $input;
 	}
 
 	public function getUserlistInput($key, $inputName, $config, $value) {
@@ -373,6 +424,58 @@ EOT;
 			
 
 	public $fields = array (
+		"example_checkbox" => array(
+			"label" => "Example checkboxes",
+			"help" => "The checkbox field can be used to provide multiple options, of which zero or more can be selected. Generally used with only few options",
+			"type" => "checkbox",
+			"type_configuration" => array (
+				"options" => array(
+						"option 1",
+						"option 2",
+						"option 3",
+						"option 4",
+						"option 5",
+						"option 6",
+						"option 7"
+					),
+				"min" => false, // TODO min and max values check if enough and not too many are selected
+				"max" => false
+				),
+			"required" => true,
+			"allow_empty" => true,
+			"depends" => false,
+		),
+		"example_radios" => array(
+			"label" => "Example radio buttons",
+			"help" => "The radio field can be used to provide multiple options, of which exactly one can be selected. Generally used with only few options",
+			"type" => "radio",
+			"type_configuration" => array (
+				"options" => array(
+						"option 1",
+						"option 2",
+						"option 3",
+						"option 4",
+						"option 5",
+						"option 6",
+						"option 7"
+					),
+				),
+			"required" => true,
+			"allow_empty" => true,
+			"depends" => false
+		),
+		"example_bool" => array(
+			"label" => "Publish dataset",
+			"help" => "Will this dataset be published?",
+			"type" => "bool",
+			"type_configuration" => array(
+				"true_val" => "yes",
+				"false_val" => "no"
+			),
+			"required" => true,
+			"allow_empty" => true,
+			"depends" => false
+		),
 		"example_select" => array(
 				"label" => "Example select",
 				"help" => "The select field can be used to provide multiple options",
@@ -783,6 +886,5 @@ EOT;
 				"depends" => false
 			)
 	);
-
 
 }

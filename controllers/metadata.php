@@ -21,6 +21,7 @@ class MetaData extends MY_Controller
 
         $permissions = $this->study->getIntakeStudyPermissions($this->input->post('studyID'));
         if($permissions->administrator) {
+
             $formdata = $this->input->post('metadata');
             $shadowData = $this->input->post('metadata-shadow');
             $collection = $this->input->post('studyRoot') . "/" . $this->input->post('dataset');
@@ -60,6 +61,12 @@ class MetaData extends MY_Controller
         }
     }
 
+    /**
+     * Dumps an array of key-value pairs in the findDeletedItems or findAddedItems
+     * format in a readible manner
+     * @param $keyValueList     List of key value pairs
+     * @param $header           H1 tag to be shown above the dump
+     */
     private function dumpKeyVals($keyValList, $header) {
         echo "<h1>" . $header . "</h1>";
         echo "<ul>";
@@ -89,7 +96,7 @@ class MetaData extends MY_Controller
         $deletedValues = array(array());
 
         foreach($shadowdata as $key => $value) {
-            if(array_key_exists("multiple", $fields[$key])) {
+            if(array_key_exists("multiple", $fields[$key]) || $fields[$key]["type"] == "checkbox") {
                 if(is_array($value)) {
                     $i = 0;
                     foreach($value as $index => $value_part) {
@@ -109,8 +116,9 @@ class MetaData extends MY_Controller
                     }
                 } else {
                     // TODO, this shouldn't happen, but it's a nice check
+                    var_dump($value);
                     echo "Value of multiple-value-key $key is not of type array, but of type " . 
-                        typeof($value) . "<br/>";
+                        gettype($value) . "<br/>";
                 }
             } else {
                 if($formdata[$key] != $value && $value != "") {
@@ -142,7 +150,7 @@ class MetaData extends MY_Controller
         $addedValues = array(array());
 
         foreach($formdata as $key => $value) {
-            if(array_key_exists("multiple", $fields[$key])) {
+            if(array_key_exists("multiple", $fields[$key]) || $fields[$key]["type"] == "checkbox") {
                 if(is_array($value)) {
                     $i = 0;
                     foreach($value as $index => $value_part) {
@@ -160,6 +168,7 @@ class MetaData extends MY_Controller
                         }
                     }
                 } else {
+                    var_dump($value);
                     // TODO, this shouldn't happen, but it's a nice check
                     echo "Value of multiple-value-key $key is not of type array, but of type " 
                         . gettype($value) . "<br/>";
