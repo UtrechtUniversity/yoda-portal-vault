@@ -32,6 +32,11 @@ ul.multi-value-list{
 	list-style: square;
 }
 
+div.fixed-row-removed.showWhenEdit {
+	display: none !important;
+	visibility: hidden !important;
+}
+
 /*div.metadata_form_buttons .showWhenEdit {
 	visibility: hidden;
 }

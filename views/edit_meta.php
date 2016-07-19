@@ -8,13 +8,18 @@
 	    </div>
 	</div>
 <?php
-$attrs = array(
+
+$formAttrs = array(
+	"id" => "metadata_form"
+);
+
+$hidden = array(
 		"studyRoot" => $intakePath,
 		"studyID" => $studyID,
 		"dataset" => ($studyFolder ? $studyFolder : false),
 		"intake_url" => $url->module
 	);
-	echo form_open($url->module . "/metadata/update", null, $attrs);
+	echo form_open($url->module . "/metadata/update", $formAttrs, $hidden);
 ?>
 
 <?php if($permissions->administrator): ?>

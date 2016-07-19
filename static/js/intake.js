@@ -22,10 +22,16 @@ $(function() {
 	$metaSuggestions = $(".meta-suggestions-field");
 	createMetaSuggestionsInput($metaSuggestions);
 
+	$('#metadata_form').submit(function(e){
+		$('.fixed-row-removed').remove();
+	});
+	
+
 });
 
 var currentlyEditing = 0;
 var inEditAllMode = false;
+
 
 /** 
  * Transforms the called element in a select2 input box,
@@ -203,6 +209,9 @@ function cancelEdit($element) {
 	addedRows = $("table#metadata_edittable .row-" + $element);
 	addedRows.remove();
 
+	fixedRows = $("table#metadata_edittable .fixed-row-" + $element);
+	fixedRows.removeClass("fixed-row-removed");
+
 	_show(label);
 	_hide(input);
 	_show(editButton);
@@ -236,9 +245,9 @@ function addValueRow($element) {
 	template = "<div class='row showWhenEdit row-" + $element + 
 		"' id='row-" + $element + "-" + addRowBtn[0].dataset['nextindex'] + "'>" +
 		"<span class='col-md-11'>" + template + "</span>" +
-		"<span class='btn btn-default col-md-1 glyphicon glyphicon-minus' " +
+		"<span class='col-md-1'><span class='btn btn-default glyphicon glyphicon-trash' " +
 		"onclick='removeRow(\"#row-" + $element + "-" + addRowBtn[0].dataset['nextindex'] + 
-		"\");'></span></div>";
+		"\");'></span></span></div>";
 	addRowBtn.before(template);
 	input = $('table#metadata_edittable .input-' + $element);
 	row = $('table#metadata_edittable .row-' + $element);
@@ -255,6 +264,10 @@ function addValueRow($element) {
 
 function removeRow(row) {
 	$(row).remove();
+}
+
+function removeFixedRow(row) {
+	$(row).addClass("fixed-row-removed");
 }
 
 var _show = function(elem){

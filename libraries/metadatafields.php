@@ -33,10 +33,11 @@ class metadataFields {
 	public function getHtmlForRow($key, $config, $value, $indent = 0, $permissions) {
 		
 
-		$indent = "";
+		$idn = "";
 		for($i = 0; $i < $indent; $i++) {
-			$indent .= "\t";
+			$idn .= "\t";
 		}
+		$indent = $idn;
 
 		/**
 		 * Template params
@@ -73,6 +74,7 @@ EOT;
 		$template .= <<<'EOT'
 %9$s 	</td>
 %9$s 	<td width="50">
+
 EOT;
 		if($permissions->administrator):
 			$template .= <<<'EOT'
@@ -81,32 +83,55 @@ EOT;
 %9$s 		<span type="button"
 %9$s			class="btn btn-default glyphicon glyphicon-remove showWhenEdit button-%1$s"
 %9$s 			onclick="cancelEdit('%1$s')"></span>
+
 EOT;
 		endif;
 		$template .= <<<'EOT'
 %9$s 	</td>
 %9$s</tr>
+
 EOT;
 
 		$input = "";
 		$inputName = 'metadata[%1$s]';
 		$inputArrayName = $inputName . '[%2$s]';
 
-		$removeRowTemplate = '<div id="row-%2$s-%3$s" class="row showWhenEdit fixed-row-%2$s">';
-		$removeRowTemplate .= '<span class="col-md-11">%1$s</span><span class="btn btn-default glyphicon glyphicon-minus col-md-1"';
-		$removeRowTemplate .= ' onclick="removeExistingRow(\'#row-%2$s-%3$s\');"></span></div>';
-
 		if($permissions->administrator){
 			if (!array_key_exists("multiple", $config) && is_string($value)) {
 				$input = $this->findProperInput($key, sprintf($inputName, $key), $config, $value);
 				$rowInputTemplate = $this->findProperInput($key, sprintf($inputName, $key), $config, "");
 			} else {
+
+				// 1) key
+				// 2) index
+				// 3) input
+				$deleteRowButtonTemplate = <<<'EOT'
+<div id="row-%1$s-%2$d" class="row showWhenEdit fixed-row-%1$s">
+	<span class="col-md-11">
+		%3$s
+	</span>
+	<span class="col-md-1"><span class="btn btn-default glyphicon glyphicon-trash" onclick="removeFixedRow('#row-%1$s-%2$d');"></span></span>
+</div>
+EOT;
+
+
+
 				$rowInputTemplate = $this->findProperInput($key, sprintf($inputArrayName, $key, "__row_input_id__"), $config, "");
 				if(array_key_exists("multiple", $config) && is_string($value)) {
-					$input = $this->findProperInput($key, sprintf($inputArrayName, $key, 0), $config, $value);
+					$input = sprintf(
+						$deleteRowButtonTemplate,
+						$key,
+						0,
+						$this->findProperInput($key, sprintf($inputArrayName, $key, 0), $config, $value)
+					);
 				} else {
 					for($i = 0; $i < sizeof($value); $i++) {
-						$input .= $this->findProperInput($key, sprintf($inputArrayName, $key, $i), $config, $value[$i]);
+						$input .= sprintf(
+							$deleteRowButtonTemplate,
+							$key,
+							$i,
+							$this->findProperInput($key, sprintf($inputArrayName, $key, $i), $config, $value[$i])
+						);
 					}
 				}
 			}
