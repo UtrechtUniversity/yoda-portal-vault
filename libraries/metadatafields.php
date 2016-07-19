@@ -30,6 +30,77 @@ class metadataFields {
 		return $fields;
 	}
 
+	public function verifyManyFields($value, $definition, $final = false) {
+		if(array_key_exists("multiple", $definition)) {
+			$mult = $definition["multiple"];
+			if($final && array_key_exists("min", $mult) && $mult["min"] > 0 && $mult["min"] > sizeof($value))
+				return false;
+
+			if(!array_key_exists("infinite", $mult) && $mult["infinite"] !== false && array_key_exists("max", $mult) && $mult["max"] < sizeof($value))
+				return false;
+		} else {
+			if(typeof($value) == typeof(array()) && sizeof($value) > 1) return false;
+			return $this->verifyField($value, $definition, $final);
+		}
+	}
+
+	/** 
+	 * Function that checks if a field satisfies all constraints
+	 * defined in the meta data schema.
+	 * @param $value 		The value, or value list, of the 
+	 * 						field as submitted by the user
+	 * @param $definition 	The field definition as defined in the 
+	 * 						meta data schema
+	 * @param $final (opt) 	True if the final check should be 
+	 * 						performed (more strict)
+	 * @return bool 		True iff the value satisfies all 
+	 * 						constraints
+	 */
+	public function verifyField($value, $definition, $final = false) {
+		if($final && $definition["required"] === True && !isset($value))
+			return false;
+
+		$conf = $definition["type_configuration"];
+		if(!isset($conf)) return true;
+
+		// Check maximum length
+		if(array_key_exists("length", $conf) && sizeof($value) > $conf["length"])
+			return false;
+
+		// Todo: verify this
+		if(array_key_exists("pattern", $conf) && !preg_match($conf["pattern"], $value))
+			return false;
+
+		if(array_key_exists("restricted", $conf) && $conf["restricted"] === true) {
+			if(!array_key_exists("allow_create", $conf) || $conf["allow_create"] === false) {
+				// TODO: check if the value exists for the key
+			}
+		}
+
+		if(array_key_exists("begin", $conf)) {
+			if(
+				array_key_exists("step", $conf) && 
+				$conf["step"] < 0 &&
+				$conf["begin"] < $value
+			) return false;
+			else if($conf["begin"] > $value) return false;
+		}
+
+		if(array_key_exists("end", $conf)) {
+			if(
+				array_key_exists("step", $conf) && 
+				$conf["step"] < 0 &&
+				$conf["end"] > $value
+			) return false;
+			else if($conf["end"] < $value) return false;
+		}
+
+		if(array_key_exists("options", $conf) && !in_array($value, $conf["options"]))
+			return false;
+
+		return true
+	}
+
 	public function getHtmlForRow($key, $config, $value, $indent = 0, $permissions) {
 		
 
@@ -112,8 +183,6 @@ EOT;
 	<span class="col-md-1"><span class="btn btn-default glyphicon glyphicon-trash" onclick="removeFixedRow('#row-%1$s-%2$d');"></span></span>
 </div>
 EOT;
-
-
 
 				$rowInputTemplate = $this->findProperInput($key, sprintf($inputArrayName, $key, "__row_input_id__"), $config, "");
 				if((array_key_exists("multiple", $config) || $config["type"] == "checkbox") && is_string($value)) {
