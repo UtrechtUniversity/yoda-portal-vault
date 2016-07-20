@@ -25,12 +25,35 @@ $(function() {
 	$('#metadata_form').submit(function(e){
 		$('.fixed-row-removed').remove();
 	});
+
+	handleDependencyFields();
 	
 
 });
 
 var currentlyEditing = 0;
 var inEditAllMode = false;
+
+var operators = {
+	'==' : function(a, b) {return a == b},
+	'!=' : function(a, b) {return a != b},
+	'>' : function(a, b) {return a > b},
+	'<' : function(a, b) {return a < b},
+	'<=' : function(a, b) {return a <= b},
+	'>=' : function(a, b) {return a >= b}
+}
+
+function handleDependencyFields() {
+	$("#metadata_edittable > tbody > tr").each(function(i, e) {
+		elem = $(e);
+		if(elem.data('depends') != undefined && elem.data('depends') != "\"false\"") {
+			objstr = elem.data('depends').substr(1,elem.data('depends').length - 2);
+			console.log(objstr);
+			var obj = JSON.parse(objstr);
+			console.log(obj);
+		}
+	});
+}
 
 
 /** 
@@ -374,3 +397,4 @@ function disableAllForEdit() {
 	_iterateAll(false);
 	inEditAllMode = false;
 }
+

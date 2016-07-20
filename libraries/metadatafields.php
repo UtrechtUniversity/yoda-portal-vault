@@ -181,46 +181,47 @@ class metadataFields {
 		 * 7) template
 		 * 8) next index for multiple
 		 * 9) error class
-		 * 9) indent
+		 * 10) data-attributes for row (depends options)
+		 * 11) indent
 		 */
 		$template =  <<<'EOT'
-%10$s<tr class="form-group%9$s">
-%10$s	<td>
-%10$s		<span data-toggle="tooltip" data-placement="top" title="%4$s">
-%10$s			%3$s
-%10$s 		</span>
-%10$s	</td>
-%10$s	<td>
-%10$s 		<span class="hideWhenEdit" id="label-%1$s">%2$s</span>
-%10$s 		%5$s
-%10$s 		%6$s
+%11$s<tr class="form-group%9$s"%10$s>
+%11$s	<td>
+%11$s		<span data-toggle="tooltip" data-placement="top" title="%4$s">
+%11$s			%3$s
+%11$s 		</span>
+%11$s	</td>
+%11$s	<td>
+%11$s 		<span class="hideWhenEdit" id="label-%1$s">%2$s</span>
+%11$s 		%5$s
+%11$s 		%6$s
 EOT;
 		if(array_key_exists("multiple", $config)):
 			$template .= <<<'EOT'
-%10$s 		<span class="btn btn-default glyphicon glyphicon-plus showWhenEdit" 
-%10$s 			data-template="%7$s" data-nextindex="%8$d" onclick="addValueRow('%1$s')" id="addRow-%1$s">
-%10$s 			Add value
-%10$s 		</span>
+%11$s 		<span class="btn btn-default glyphicon glyphicon-plus showWhenEdit" 
+%11$s 			data-template="%7$s" data-nextindex="%8$d" onclick="addValueRow('%1$s')" id="addRow-%1$s">
+%11$s 			Add value
+%11$s 		</span>
 EOT;
 		endif;
 		$template .= <<<'EOT'
-%10$s 	</td>
-%10$s 	<td width="50">
+%11$s 	</td>
+%11$s 	<td width="50">
 
 EOT;
 		if($permissions->administrator):
 			$template .= <<<'EOT'
-%10$s 		<span type="button" class="btn btn-default glyphicon glyphicon-pencil hideWhenEdit button-%1$s" 
-%10$s			onclick="edit('%1$s')"></span>
-%10$s 		<span type="button"
-%10$s			class="btn btn-default glyphicon glyphicon-remove showWhenEdit button-%1$s"
-%10$s 			onclick="cancelEdit('%1$s')"></span>
+%11$s 		<span type="button" class="btn btn-default glyphicon glyphicon-pencil hideWhenEdit button-%1$s" 
+%11$s			onclick="edit('%1$s')"></span>
+%11$s 		<span type="button"
+%11$s			class="btn btn-default glyphicon glyphicon-remove showWhenEdit button-%1$s"
+%11$s 			onclick="cancelEdit('%1$s')"></span>
 
 EOT;
 		endif;
 		$template .= <<<'EOT'
-%10$s 	</td>
-%10$s</tr>
+%11$s 	</td>
+%11$s</tr>
 
 EOT;
 
@@ -287,6 +288,12 @@ EOT;
 			$multiValueList = $v;
 		}
 
+		$rowDepends = "";
+
+		if(array_key_exists("depends", $config)) {
+			$rowDepends .= htmlentities(" data-depends=\"" . json_encode($config["depends"]) . "\"");
+		}
+
 		return sprintf(
 			$template,
 			$key,
@@ -298,6 +305,7 @@ EOT;
 			htmlentities($rowInputTemplate),
 			is_array($value) ? sizeof($value) : 1,
 			$hasError ? " has-error" : "",
+			$rowDepends,
 			$indent
 		);
 
@@ -563,6 +571,61 @@ EOT;
 			
 
 	public $fields = array (
+		"start_year" => array(
+			"label" => "Start year",
+			"help" => "Enter the start year of the project",
+			"type" => "text",
+			"type_configuration" => array(
+				"length" => 4,
+				"pattern" => "^[0-9]{4}$",
+				"longtext" => false
+			),
+			"required" => true,
+			"depends" => false
+		),
+		"end_year" => array(
+			"label" => "End year",
+			"help" => "Enter the end year of the project",
+			"type" => "text",
+			"type_configuration" => array(
+				"length" => 4,
+				"pattern" => "^[0-9]{4}$",
+				"longtext" => false
+			),
+			"required" => true,
+			"depends" => false
+		),
+	    "depends_example" => array (
+	        "label" => "Example",
+	        "help" => "This field shows how to use the depends object",
+	        "type" => "text",
+	        "type_configuration" => array(
+	            "length" => 10,
+	            "pattern" => "*",
+	            "longtext" => false
+	        ),
+	        "required" => true,
+	        "depends" => array(
+	            "action" => "show",
+	            "if" => "any",
+	            "fields" => array(
+	                array(
+	                    "field_name" => "start_year",
+	                    "operator" => ">=",
+	                    "value" => array(
+	                        "fixed" => 2000
+	                    )
+	                ),
+	                array(
+	                    "field_name" => "end_year",
+	                    "operator" => "<",
+	                    "value" => array(
+	                        "fixed" => 2016
+	                    )
+	                )
+	            )
+	        )
+	    ),
 		"example_checkbox" => array(
 			"label" => "Example checkboxes",
 			"help" => "The checkbox field can be used to provide multiple options, of which zero or more can be selected. Generally used with only few options",
