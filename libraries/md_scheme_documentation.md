@@ -100,13 +100,90 @@ The user list is a specific type of selectbox, that allows selecting an existing
     "type" => "custom",
     "custom_type" => "userlist",
     "type_configuration" => array (
-    	"allow_create" => false,
-    	"show_admins" => true,
-    	"show_users" => true,
-    	"show_readonly" => true
+        "allow_create" => false,
+        "show_admins" => true,
+        "show_users" => true,
+        "show_readonly" => true
     ),
     "required" => true,
     "depends" => false
 )
 ...
 ```
+## Conditional Logic
+The form supports conditional logic, meaning you can show or hide fields depending on the value entered on other fields. 
+To use conditional logic, you can use the *depends* key of the field object. The value for the *depends* key is an object, consisting of 3 fields: 
+ * **action**: either `hide` or `show`
+ * **if**: one of `none`, `all`, `any` (meaning at least one)
+ * **fields**: A list of field names the current field depends on.
+
+### *Fields* object
+The *fields* object takes another three keys:
+* **field_name**: The field key of the field the current field depends on
+* **operator**: One of `==` (equals), `!=` (does not equal), `>` (is larger than), `>=` (is larger than or equal to), `<` (is less than) or `<=` (is less than or equal to)
+* **fixed**: An object containing the value that is checked against
+
+### *Value* object
+The value object takes one of three keys: **regex**, **like** or **value**. 
+
+In the case of the key **regex** the value is a regex that is matched against. In the **operator** key in the object described above, only `==` or `!=` can be used, because a regex works on a string and it either matches, or it does not.
+
+In the case of the key **like** you give a substring. For example, *vascr* is like *javascript* but not like *java*. In this case, again only the `==` and `!=` operators can be used in the **operator** key in the object described above, for the same reason.
+
+In the case of the key **value**, you give a value that should be matched entirely. This can be a string, an integer or any other value. All operators can be used. 
+
+## How to use these objects
+Each of the keys described in this section take exactly one value. You should read the keys as follows (replace the key names with their corresponding value):
+
+`action` this field, if `if` of the following are true:\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*(for each field):*\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The value of `field_name` `operator`s `value`
+    
+Where value is either matched against a regular expression, a substring or a fixed value, depening on what key s chosen on the **value** object.
+
+## Example
+For example:
+```php
+...
+$fields = array(
+    "start_year" => array(
+        ...
+    ),
+    "end_year" => array(
+        ...
+    ),
+    "depends_example" => array (
+        "label" => "Example",
+        "help" => "This field shows how to use the depends object",
+        "type" => "text",
+        "type_configuration" => array(
+            "length" => 10,
+            "pattern" => "*",
+            "longtext" => false
+        ),
+        "required" => true,
+        "depends" => array(
+            "action" => "show",
+            "if" => "any",
+            "fields" => array(
+                array(
+                    "field_name" => "start_year",
+                    "operator" => ">=",
+                    "value" => array(
+                        "fixed" => 2000
+                    )
+                ),
+                array(
+                    "field_name" => "end_year",
+                    "operator" => "<",
+                    "value" => array(
+                        "fixed" => 2016
+                    )
+                )
+            )
+        )
+    )
+);  
+...
+```
+This example only shows the field **depends_example** if the start_year is equal to or larger than 2000 and the end year is (strictly) less than 2016.
