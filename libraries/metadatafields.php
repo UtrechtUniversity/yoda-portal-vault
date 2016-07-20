@@ -30,17 +30,45 @@ class metadataFields {
 		return $fields;
 	}
 
-	public function verifyManyFields($value, $definition, $final = false) {
-		if(array_key_exists("multiple", $definition)) {
-			$mult = $definition["multiple"];
-			if($final && array_key_exists("min", $mult) && $mult["min"] > 0 && $mult["min"] > sizeof($value))
+	/**
+	 * Function that checks the values for a key to see if all values
+	 * satisfy all constraints
+	 * @param $values 		The value, or value list, of the 
+	 * 						field as submitted by the user
+	 * @param $definition 	The field definition as defined in the 
+	 * 						meta data schema
+	 * @param $final (opt) 	True if the final check should be 
+	 * 						performed (more strict)
+	 * @return bool 		True iff the values satisfie all 
+	 * 						constraints
+	 */
+	public function verifyKey($values, $definition, $final = false) {
+		if(array_key_exists("multiple", $definition) || $definition["type"] == "checkbox") {
+			$mult = array_key_exists("multiple", $definition) ? $definition["multiple"] : $definition["type_configuration"];
+			if($final && array_key_exists("min", $mult) && $mult["min"] > 0 && $mult["min"] > sizeof($values)){
 				return false;
+			}
 
-			if(!array_key_exists("infinite", $mult) && $mult["infinite"] !== false && array_key_exists("max", $mult) && $mult["max"] < sizeof($value))
+			if(
+				(!array_key_exists("infinite", $mult) || $mult["infinite"] === false) && 
+				array_key_exists("max", $mult) && $mult["max"] !== false && $mult["max"] < sizeof($values)) {
 				return false;
+			}
+
+			foreach($values as $value) {
+				if(!$this->verifyField($value, $definition, $final))
+					return false;
+			}
+
+			return true;
+
 		} else {
-			if(typeof($value) == typeof(array()) && sizeof($value) > 1) return false;
-			return $this->verifyField($value, $definition, $final);
+			if(gettype($values) == gettype(array()) && sizeof($values) > 1) {
+				var_dump($values); echo " fail because it should be a single value but doesn't seem to be single";
+				return false;
+			}
+			$returnVal = $this->verifyField($values, $definition, $final);
+			return $returnVal;
 		}
 	}
 
@@ -56,20 +84,37 @@ class metadataFields {
 	 * @return bool 		True iff the value satisfies all 
 	 * 						constraints
 	 */
-	public function verifyField($value, $definition, $final = false) {
-		if($final && $definition["required"] === True && !isset($value))
+	private function verifyField($value, $definition, $final = false) {
+		if($final && $definition["required"] === True && !isset($value)) {
 			return false;
+		}
 
 		$conf = $definition["type_configuration"];
-		if(!isset($conf)) return true;
+		if(!isset($conf)) {
+			echo $value . " fails because $conf is not set<br/>";
+			return true;
+		}
 
 		// Check maximum length
-		if(array_key_exists("length", $conf) && sizeof($value) > $conf["length"])
+		if(array_key_exists("length", $conf) && $conf["length"] !== false && sizeof($value) > $conf["length"]){
+			echo $value . " fails because the max length (" . $conf["length"] . ") is less than the input length (" . sizeof($value) . ")<br/>";
 			return false;
+		}
 
 		// Todo: verify this
-		if(array_key_exists("pattern", $conf) && !preg_match($conf["pattern"], $value))
-			return false;
+		if(array_key_exists("pattern", $conf) && $conf["pattern"] != "*") {
+			$patt = $conf["pattern"];
+
+			if($patt[0] != "/") $patt = "/" . $patt;
+			if(substr($patt, -1) != "/") $patt .= "/";
+
+			echo $patt;
+			
+			if( ($final || sizeof($value) > 0) && preg_match($patt, $value) === 0) {
+				echo $value . " fails because the pattern " . $conf["pattern"] . " does not match the value";
+				return false;	
+			}
+		}
 
 		if(array_key_exists("restricted", $conf) && $conf["restricted"] === true) {
 			if(!array_key_exists("allow_create", $conf) || $conf["allow_create"] === false) {
@@ -82,8 +127,14 @@ class metadataFields {
 				array_key_exists("step", $conf) && 
 				$conf["step"] < 0 &&
 				$conf["begin"] < $value
-			) return false;
-			else if($conf["begin"] > $value) return false;
+			) {
+				echo $value . " fails because the value is not in the specified range";
+				return false;
+			}
+			else if($conf["begin"] > $value) {
+				echo $value . " fails because the value is not in the specified range";
+				return false;
+			}
 		}
 
 		if(array_key_exists("end", $conf)) {
@@ -91,14 +142,22 @@ class metadataFields {
 				array_key_exists("step", $conf) && 
 				$conf["step"] < 0 &&
 				$conf["end"] > $value
-			) return false;
-			else if($conf["end"] < $value) return false;
+			) {
+				echo $value . " fails because the value is not in the specified range";
+				return false;
+			}
+			else if($conf["end"] < $value) {
+				echo $value . " fails because the value is not in the specified range";
+				return false;
+			}
 		}
 
-		if(array_key_exists("options", $conf) && !in_array($value, $conf["options"]))
+		if(array_key_exists("options", $conf) && !in_array($value, $conf["options"])) {
+			echo $value . " fails because the value is not in the specified range";
 			return false;
+		}
 
-		return true
+		return true;
 	}
 
 	public function getHtmlForRow($key, $config, $value, $indent = 0, $permissions) {
@@ -508,7 +567,7 @@ EOT;
 						"option 7"
 					),
 				"min" => false, // TODO min and max values check if enough and not too many are selected
-				"max" => false
+				"max" => false,
 				),
 			"required" => true,
 			"allow_empty" => true,
@@ -576,7 +635,7 @@ EOT;
 				"type" => "text",
 				"type_configuration" => array (
 					"length" => false,
-					"pattern" => "*",
+					"pattern" => "^[0-9]+",
 					"longtext" => false
 					),
 				"required" => true,
@@ -588,8 +647,6 @@ EOT;
 						"infinite" => false
 					)
 			),
-
-
 		"project_name" => array(
 				"label" => "Project name",
 				"help" => "Enter a descriptive name for the project",
