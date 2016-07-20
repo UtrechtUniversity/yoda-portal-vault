@@ -324,7 +324,7 @@ function _attrIsSelect2(elem) {
 			elem.hasClass("select-user-from-group") || 
 			elem.hasClass('meta-suggestions-field')
 		) 
-		&& !elem.attr('id').match("^s2");
+		&& elem.attr('id') != undefined && !elem.attr('id').match("^s2");
 
 	return val;
 }
