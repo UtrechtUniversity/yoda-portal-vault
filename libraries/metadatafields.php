@@ -119,6 +119,8 @@ class metadataFields {
 		if(array_key_exists("restricted", $conf) && $conf["restricted"] === true) {
 			if(!array_key_exists("allow_create", $conf) || $conf["allow_create"] === false) {
 				// TODO: check if the value exists for the key
+				// Q: This requires another connection to iRODS for each field that uses restricted
+				// values. Is this worth it?
 			}
 		}
 

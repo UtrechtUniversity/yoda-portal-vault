@@ -65,18 +65,20 @@ class MetaData extends MY_Controller
         }
     }
 
+    /**
+     * Method checks for each meta data key wether the input satisfies the constraints
+     * @param $formData         The posted data from the form
+     * @param $fields           The field definitions defined in the meta data schema
+     * @return array            Containing all keys for which the values do not satisfy
+     *                          all the contstraints
+     */
     private function veryInput($formdata, $fields) {
         $wrongFields = array();
         foreach($formdata as $inputKey => $inputValues) {
             if(!$this->metadatafields->verifyKey($inputValues, $fields[$inputKey], false))
                 array_push($wrongFields, $inputKey);
         }
-        // var_dump($wrongFields);
-        echo "<h1>The following " . sizeof($wrongFields) . " fields do not satisfy their condition:</h1><ul>";
-        foreach($wrongFields as $wf) {
-            echo "<li>" . $wf . "</li>";
-        }
-        echo "</ul>";
+        return $wrongFields;
     }
 
     /**
