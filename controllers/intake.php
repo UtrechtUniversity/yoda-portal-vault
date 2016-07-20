@@ -40,6 +40,37 @@ class Intake extends MY_Controller
      * */
     public function index($studyID='', $studyFolder='')
     {
+        $this->verifyPageArguments($studyID, $studyFolder, true);
+
+        $this->load->view('common-start', array(
+            'styleIncludes' => array('css/datatables.css', 'css/intake.css', 'lib/chosen-select/chosen.min.css'),
+            'scriptIncludes' => array('js/datatables.js', 'js/intake.js', 'lib/chosen-select/chosen.jquery.min.js'),
+            'activeModule'   => $this->modulelibrary->name(),
+            'user' => array(
+                'username' => $this->rodsuser->getUsername(),
+            ),
+        ));
+        $this->load->view('intake', $this->data);
+        $this->load->view('common-end');
+    }
+
+    public function metadata($studyID, $studyFolder) {
+        $this->verifyPageArguments($studyID, $studyFolder, false);
+
+        $this->load->view('common-start', array(
+            'styleIncludes' => array('css/datatables.css', 'css/intake.css', 'lib/chosen-select/chosen.min.css'),
+            'scriptIncludes' => array('js/datatables.js', 'js/intake.js', 'lib/chosen-select/chosen.jquery.min.js'),
+            'activeModule'   => $this->modulelibrary->name(),
+            'user' => array(
+                'username' => $this->rodsuser->getUsername(),
+            ),
+        ));
+
+        $this->load->view('edit_meta', $this->data);
+        $this->load->view('common-end');
+    }
+
+    private function verifyPageArguments($studyID, $studyFolder, $isFolderOptional = true) {
         $studyID = $this->validateStudyPermission($studyID);
         $studyFolder = urldecode($studyFolder);
 
@@ -74,7 +105,6 @@ class Intake extends MY_Controller
                 "intakePath" => $this->intake_path,
                 "currentDir" => $this->current_path,
                 "content" => $this->modulelibrary->name() . '/file_overview',
-                "meta_editor" => $this->modulelibrary->name() . '/edit_meta',
                 "directories" => $this->dir->getChildDirs(),
                 "files" => $this->dir->getChildFiles(),
                 "selectableScanFolders" => $validFolders,
@@ -83,17 +113,6 @@ class Intake extends MY_Controller
                 "url" => $urls
             );
         $this->data = array_merge($this->data, $dataArr);
-
-        $this->load->view('common-start', array(
-            'styleIncludes' => array('css/datatables.css', 'css/intake.css', 'lib/chosen-select/chosen.min.css'),
-            'scriptIncludes' => array('js/datatables.js', 'js/intake.js', 'lib/chosen-select/chosen.jquery.min.js'),
-            'activeModule'   => $this->modulelibrary->name(),
-            'user' => array(
-                'username' => $this->rodsuser->getUsername(),
-            ),
-        ));
-        $this->load->view('intake', $this->data);
-        $this->load->view('common-end');
     }
 
     /**

@@ -11,12 +11,16 @@ class MetaData extends MY_Controller
         $this->load->helper('intake');
         $this->load->library('metadatafields');
         $this->load->model('study');
+        $this->load->library('modulelibrary');
     }
 
     public function update() {
         $message = "";
         $error = false;
         $type = "info";
+
+        $redirectTemplate = $this->modulelibrary->getModuleBase() . '/intake/%1$s/' . 
+            $this->input->post('studyID') . "/" . $this->input->post("dataset");
 
 
         $permissions = $this->study->getIntakeStudyPermissions($this->input->post('studyID'));
@@ -27,42 +31,46 @@ class MetaData extends MY_Controller
             $collection = $this->input->post('studyRoot') . "/" . $this->input->post('dataset');
             $fields = $this->metadatafields->getFields($collection, true);
 
-            $this->veryInput($formdata, $fields);
+            $wrongFields = $this->veryInput($formdata, $fields);
+            if(sizeof($wrongFields) == 0) {
 
-            exit;
+                // Process results
+                $deletedValues = $this->findDeletedItems($formdata, $shadowData, $fields);
+                $addedValues = $this->findChangedItems($formdata, $shadowData, $fields);
 
-            // Process results
-            $deletedValues = $this->findDeletedItems($formdata, $shadowData, $fields);
-            $addedValues = $this->findChangedItems($formdata, $shadowData, $fields);
+                // Update results
+                $rodsaccount = $this->rodsuser->getRodsAccount();
+                $status = $this->metadatamodel->processResults($rodsaccount, $collection, $deletedValues, $addedValues); 
 
-            // Update results
-            $rodsaccount = $this->rodsuser->getRodsAccount();
-            $status = $this->metadatamodel->processResults($rodsaccount, $collection, $deletedValues, $addedValues); 
-            // $status = 0;
-            if($status == UPDATE_SUCCESS) {
-                $message = "ntl:The metadata was updated successfully";
+                if($status == UPDATE_SUCCESS) {
+                    $referUrl = sprintf($redirectTemplate, "index");
+                    $message = "ntl:The metadata was updated successfully";
+                } else {
+                    $referUrl = sprintf($redirectTemplate, "metadata");
+                    $message = "ntl:Something went wrong updating the metadata. Please check all your metadata. The error code was " . 
+                        $status . " if it helps";
+                    $error = true;
+                    $type = "danger";
+                }
             } else {
-                $message = "ntl:Something went wrong updating the metadata. Please check all your metadata. The error code was " . $status . " if it helps";
+                $referUrl = sprintf($redirectTemplate, "metadata");
+                $message = "ntl: Incorrect input";
                 $error = true;
-                $type = "danger";
+                $type = "warning";
+
+                $this->session->set_flashdata('incorrect_fields', $wrongFields);
+                $this->session->set_flashdata('form_data', $formdata);
             }
            
         } else {
+            $referUrl = sprintf($redirectTemplate, "index");
             $message = "ntl:You do not have admin rights on the " . $this->input->post("studyID") . " study and can therefor not update metadata";
             $error = true;
             $type = "warning";
         }
 
         displayMessage($this, $message, $error, $type);
-        if(isset($_SERVER['HTTP_REFERER'])) {
-            redirect($_SERVER['HTTP_REFERER'], 'refresh');
-        } else {
-            $redir = $this->modulelibrary->getRedirect(
-                $this->input->post('studyId'), 
-                $this->input->post('dataset')
-            );
-            redirect($redir, 'refresh');
-        }
+        redirect($referUrl, 'refresh');
     }
 
     /**
@@ -141,7 +149,7 @@ class MetaData extends MY_Controller
                         gettype($value) . "<br/>";
                 }
             } else {
-                if($formdata[$key] != $value && $value != "") {
+                if(array_key_exists($key, $formdata) && $formdata[$key] != $value && $value != "") {
                     $deletedValues[0][] = (object)array("key" => $key, "value" => $value);
                 }
             }

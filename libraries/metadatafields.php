@@ -18,7 +18,7 @@ class metadataFields {
 			if(array_key_exists("multiple", $arr) || $arr["type"] == "checkbox") {
 				$arr["value"] = $values[$key];
 			} else {
-				if(sizeof($values[$key]) > 0) {
+				if(sizeof($values[$key]) > 0 && sizeof($values[$key]) > 0) {
 					$arr["value"] = $values[$key][0];
 				} else {
 					$arr["value"] = "";
@@ -64,11 +64,10 @@ class metadataFields {
 
 		} else {
 			if(gettype($values) == gettype(array()) && sizeof($values) > 1) {
-				var_dump($values); echo " fail because it should be a single value but doesn't seem to be single";
+				// var_dump($values); echo " fail because it should be a single value but doesn't seem to be single";
 				return false;
 			}
-			$returnVal = $this->verifyField($values, $definition, $final);
-			return $returnVal;
+			return $this->verifyField($values, $definition, $final);
 		}
 	}
 
@@ -91,13 +90,13 @@ class metadataFields {
 
 		$conf = $definition["type_configuration"];
 		if(!isset($conf)) {
-			echo $value . " fails because $conf is not set<br/>";
+			// echo $value . " fails because $conf is not set<br/>";
 			return true;
 		}
 
 		// Check maximum length
 		if(array_key_exists("length", $conf) && $conf["length"] !== false && sizeof($value) > $conf["length"]){
-			echo $value . " fails because the max length (" . $conf["length"] . ") is less than the input length (" . sizeof($value) . ")<br/>";
+			// echo $value . " fails because the max length (" . $conf["length"] . ") is less than the input length (" . sizeof($value) . ")<br/>";
 			return false;
 		}
 
@@ -108,10 +107,11 @@ class metadataFields {
 			if($patt[0] != "/") $patt = "/" . $patt;
 			if(substr($patt, -1) != "/") $patt .= "/";
 
-			echo $patt;
-			
-			if( ($final || sizeof($value) > 0) && preg_match($patt, $value) === 0) {
-				echo $value . " fails because the pattern " . $conf["pattern"] . " does not match the value";
+			if(preg_match($patt, $value) === 0 && !(!$final && (
+					(is_array($value) && sizeof($value) === 0) ||
+					(is_string($value) && strlen($value) === 0)
+				))) {
+				// echo "\"" . $value . "\" fails because the pattern " . $conf["pattern"] . " does not match the value";
 				return false;	
 			}
 		}
@@ -130,11 +130,11 @@ class metadataFields {
 				$conf["step"] < 0 &&
 				$conf["begin"] < $value
 			) {
-				echo $value . " fails because the value is not in the specified range";
+				// echo $value . " fails because the value is not in the specified range";
 				return false;
 			}
 			else if($conf["begin"] > $value) {
-				echo $value . " fails because the value is not in the specified range";
+				// echo $value . " fails because the value is not in the specified range";
 				return false;
 			}
 		}
@@ -145,25 +145,24 @@ class metadataFields {
 				$conf["step"] < 0 &&
 				$conf["end"] > $value
 			) {
-				echo $value . " fails because the value is not in the specified range";
+				// echo $value . " fails because the value is not in the specified range";
 				return false;
 			}
 			else if($conf["end"] < $value) {
-				echo $value . " fails because the value is not in the specified range";
+				// echo $value . " fails because the value is not in the specified range";
 				return false;
 			}
 		}
 
 		if(array_key_exists("options", $conf) && !in_array($value, $conf["options"])) {
-			echo $value . " fails because the value is not in the specified range";
+			// echo $value . " fails because the value is not in the specified range";
 			return false;
 		}
 
 		return true;
 	}
 
-	public function getHtmlForRow($key, $config, $value, $indent = 0, $permissions) {
-		
+	public function getHtmlForRow($key, $config, $value, $indent = 0, $permissions, $hasError = false, $formdata) {
 
 		$idn = "";
 		for($i = 0; $i < $indent; $i++) {
@@ -181,46 +180,47 @@ class metadataFields {
 		 * 6) shadowInput
 		 * 7) template
 		 * 8) next index for multiple
+		 * 9) error class
 		 * 9) indent
 		 */
 		$template =  <<<'EOT'
-%9$s<tr>
-%9$s	<td>
-%9$s		<span data-toggle="tooltip" data-placement="top" title="%4$s">
-%9$s			%3$s
-%9$s 		</span>
-%9$s	</td>
-%9$s	<td>
-%9$s 		<span class="hideWhenEdit" id="label-%1$s">%2$s</span>
-%9$s 		%5$s
-%9$s 		%6$s
+%10$s<tr class="form-group%9$s">
+%10$s	<td>
+%10$s		<span data-toggle="tooltip" data-placement="top" title="%4$s">
+%10$s			%3$s
+%10$s 		</span>
+%10$s	</td>
+%10$s	<td>
+%10$s 		<span class="hideWhenEdit" id="label-%1$s">%2$s</span>
+%10$s 		%5$s
+%10$s 		%6$s
 EOT;
 		if(array_key_exists("multiple", $config)):
 			$template .= <<<'EOT'
-%9$s 		<span class="btn btn-default glyphicon glyphicon-plus showWhenEdit" 
-%9$s 			data-template="%7$s" data-nextindex="%8$d" onclick="addValueRow('%1$s')" id="addRow-%1$s">
-%9$s 			Add value
-%9$s 		</span>
+%10$s 		<span class="btn btn-default glyphicon glyphicon-plus showWhenEdit" 
+%10$s 			data-template="%7$s" data-nextindex="%8$d" onclick="addValueRow('%1$s')" id="addRow-%1$s">
+%10$s 			Add value
+%10$s 		</span>
 EOT;
 		endif;
 		$template .= <<<'EOT'
-%9$s 	</td>
-%9$s 	<td width="50">
+%10$s 	</td>
+%10$s 	<td width="50">
 
 EOT;
 		if($permissions->administrator):
 			$template .= <<<'EOT'
-%9$s 		<span type="button" class="btn btn-default glyphicon glyphicon-pencil hideWhenEdit button-%1$s" 
-%9$s			onclick="edit('%1$s')"></span>
-%9$s 		<span type="button"
-%9$s			class="btn btn-default glyphicon glyphicon-remove showWhenEdit button-%1$s"
-%9$s 			onclick="cancelEdit('%1$s')"></span>
+%10$s 		<span type="button" class="btn btn-default glyphicon glyphicon-pencil hideWhenEdit button-%1$s" 
+%10$s			onclick="edit('%1$s')"></span>
+%10$s 		<span type="button"
+%10$s			class="btn btn-default glyphicon glyphicon-remove showWhenEdit button-%1$s"
+%10$s 			onclick="cancelEdit('%1$s')"></span>
 
 EOT;
 		endif;
 		$template .= <<<'EOT'
-%9$s 	</td>
-%9$s</tr>
+%10$s 	</td>
+%10$s</tr>
 
 EOT;
 
@@ -228,9 +228,15 @@ EOT;
 		$inputName = 'metadata[%1$s]';
 		$inputArrayName = $inputName . '[%2$s]';
 
+		if($formdata && array_key_exists($key, $formdata)) {
+			$currentValue = $formdata[$key];
+		} else {
+			$currentValue = $value;
+		}
+
 		if($permissions->administrator){
-			if (!array_key_exists("multiple", $config) && is_string($value) || $config["type"] == "checkbox") {
-				$input = $this->findProperInput($key, sprintf($inputName, $key), $config, $value);
+			if (!array_key_exists("multiple", $config) && is_string($currentValue) || $config["type"] == "checkbox") {
+				$input = $this->findProperInput($key, sprintf($inputName, $key), $config, $currentValue);
 				$rowInputTemplate = $this->findProperInput($key, sprintf($inputName, $key), $config, "");
 			} else {
 				// 1) key
@@ -246,32 +252,34 @@ EOT;
 EOT;
 
 				$rowInputTemplate = $this->findProperInput($key, sprintf($inputArrayName, $key, "__row_input_id__"), $config, "");
-				if((array_key_exists("multiple", $config) || $config["type"] == "checkbox") && is_string($value)) {
+				if((array_key_exists("multiple", $config) || $config["type"] == "checkbox") && is_string($currentValue)) {
 					$input = sprintf(
 						$deleteRowButtonTemplate,
 						$key,
 						0,
-						$this->findProperInput($key, sprintf($inputArrayName, $key, 0), $config, $value)
+						$this->findProperInput($key, sprintf($inputArrayName, $key, 0), $config, $currentValue)
 					);
 				} else {
-					for($i = 0; $i < sizeof($value); $i++) {
+					for($i = 0; $i < sizeof($currentValue); $i++) {
 						$input .= sprintf(
 							$deleteRowButtonTemplate,
 							$key,
 							$i,
-							$this->findProperInput($key, sprintf($inputArrayName, $key, $i), $config, $value[$i])
+							$this->findProperInput($key, sprintf($inputArrayName, $key, $i), $config, $currentValue[$i])
 						);
 					}
 				}
 			}
 		}
 
+		
+
 		if(array_key_exists("multiple", $config) || $config["type"] == "checkbox") {
 			$v = "<ul class=\"multi-value-list\">";
-			if(is_string($value)) {
-				$v .= "<li>" . $value . "</li>";
+			if(is_string($currentValue)) {
+				$v .= "<li>" . $currentValue . "</li>";
 			} else {
-				foreach($value as $val) {
+				foreach($currentValue as $val) {
 					$v .= "<li>" . $val . "</li>";
 				}
 			}
@@ -282,13 +290,14 @@ EOT;
 		return sprintf(
 			$template,
 			$key,
-			array_key_exists("multiple", $config) || $config["type"] == "checkbox" ? $multiValueList : $value,
+			array_key_exists("multiple", $config) || $config["type"] == "checkbox" ? $multiValueList : $currentValue,
 			$config["label"],
 			$config["help"],
 			$input,
 			$this->getShadowInput($key, $config, $value),
 			htmlentities($rowInputTemplate),
 			is_array($value) ? sizeof($value) : 1,
+			$hasError ? " has-error" : "",
 			$indent
 		);
 
@@ -753,7 +762,7 @@ EOT;
 				"type" => "text",
 				"type_configuration" => array (
 					"length" => false,
-					"pattern" => "*",
+					"pattern" => "^[0-9]+",
 					"longtext" => false
 					),
 				"required" => true,
