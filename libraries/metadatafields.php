@@ -113,13 +113,34 @@ class metadataFields {
 				$value, 
 				$fieldRequirements["value"]["fixed"]
 			);
+		} else if(array_key_exists("like", $fieldRequirements["value"])) {
+			return $this->checkLikeOperator(
+				$fieldRequirements["operator"],
+				$value,
+				$fieldRequirements["value"]["like"]
+			);
+		} else if(array_key_exists("regex", $fieldRequirements["value"])) {
+			return $this->checkRegexOperator(
+				$fieldRequirements["operator"],
+				$value,
+				$fieldRequirements["value"]["regex"]
+			);
 		}
 
 		return true;
 	}
 
+	private function checkLikeOperator($operator, $a, $b) {
+		return call_user_func(array($this, $this->likeOperators[$operator]), $a, $b);
+	}
+
+	private function checkRegexOperator($operator, $a, $b) {
+		if($b[0] != "/") $b = "/" . $b;
+		if(substr($b, -1) != "/") $b .= "/";
+		return call_user_func(array($this, $this->regexOperators[$operator]), $a, $b);
+	}
+
 	private function checkOperator($operator, $a, $b) {
-		// return $this->equals($a, $b);
 		return call_user_func(array($this, $this->operators[$operator]), $a, $b);
 	}
 
@@ -136,6 +157,20 @@ class metadataFields {
 	private function all($arr) {return count(array_unique($arr)) === 1 && current($arr) === true;}
 	private function none($arr) {return count(array_unique($arr)) === 1 && current($arr) === false;}
 	private function any($arr) {return in_array(true, $arr); }
+	private function is_like($a, $b) {return strpos(strtolower($a), strtolower($b)) !== false; }
+	private function is_not_like($a, $b) {return strpos(strtolower($a), strtolower($b)) === false; }
+	private function matches_regex($a, $b) {return preg_match($b, $a) > 0; }
+	private function not_matches_regex($a, $b) {return preg_match($b, $a) === 0; }
+
+	private $likeOperators = array(
+		"==" => "is_like",
+		"!=" => "is_not_like"
+	);
+
+	private $regexOperators = array(
+		"==" => "matches_regex",
+		"!=" => "not_matches_regex"
+	);
 
 	private $operators = array(
 		"==" => "equals",
@@ -347,8 +382,6 @@ EOT;
 				}
 			}
 		}
-
-		
 
 		if(array_key_exists("multiple", $config) || $config["type"] == "checkbox") {
 			$v = "<ul class=\"multi-value-list\">";
@@ -685,9 +718,11 @@ EOT;
 	            "fields" => array(
 	                array(
 	                    "field_name" => "start_year",
-	                    "operator" => ">=",
+	                    "operator" => "!=",
 	                    "value" => array(
-	                        "fixed" => 2000
+	                        // "fixed" => 2000
+	                        // "like" => "18"
+	                        "regex" => "^[0-9]{2}18$"
 	                    )
 	                ),
 	                array(

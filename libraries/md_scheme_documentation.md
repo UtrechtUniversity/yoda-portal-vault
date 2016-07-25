@@ -121,16 +121,18 @@ To use conditional logic, you can use the *depends* key of the field object. The
 The *fields* object takes another three keys:
 * **field_name**: The field key of the field the current field depends on
 * **operator**: One of `==` (equals), `!=` (does not equal), `>` (is larger than), `>=` (is larger than or equal to), `<` (is less than) or `<=` (is less than or equal to)
-* **fixed**: An object containing the value that is checked against
+* **value**: An object containing the value that is checked against
 
 ### *Value* object
-The value object takes one of three keys: **regex**, **like** or **value**. 
+The value object takes one of three keys: **fixed**, **regex** or **like**. 
 
-In the case of the key **regex** the value is a regex that is matched against. In the **operator** key in the object described above, only `==` or `!=` can be used, because a regex works on a string and it either matches, or it does not.
+In the case of the key **fixed**, you give a value that should be matched entirely. This can be a string, an integer or any other value. All operators can be used. 
 
 In the case of the key **like** you give a substring. For example, *vascr* is like *javascript* but not like *java*. In this case, again only the `==` and `!=` operators can be used in the **operator** key in the object described above, for the same reason.
 
-In the case of the key **value**, you give a value that should be matched entirely. This can be a string, an integer or any other value. All operators can be used. 
+In the case of the key **regex** the value is a regex that is matched against. In the **operator** key in the object described above, only `==` or `!=` can be used, because a regex works on a string and it either matches, or it does not.
+
+If a combination of any of these three keys is used inside the *value* object, only one is checked. This happens in the order as they appear above.
 
 ## How to use these objects
 Each of the keys described in this section take exactly one value. You should read the keys as follows (replace the key names with their corresponding value):

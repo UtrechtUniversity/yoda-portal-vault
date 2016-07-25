@@ -41,13 +41,23 @@ var operators = {
 	'<' : function(a, b) {return a < b},
 	'<=' : function(a, b) {return a <= b},
 	'>=' : function(a, b) {return a >= b}
+};
+
+var likeOperators = {
+	'==' : function(a, b) {return a.toLowerCase().indexOf(b.toLowerCase()) >= 0; },
+	'!=' : function(a, b) {return a.toLowerCase().indexOf(b.toLowerCase()) < 0; }
+};
+
+var regexOperators = {
+	'==' : function(a, b) {return RegExp(b).exec(a); },
+	'!=' : function(a, b) {return !RegExp(b).exec(a); }
 }
 
 var comparors = {
 	'none' : function(lst) { return !lst.reduce(function(a,b){return a || b}, false); },
 	'all' : function(lst) { return lst.reduce(function(a,b){return a && b}, true); },
 	'any' : function(lst) { return lst.reduce(function(a,b) {return a || b}, false); }
-}
+};
 
 
 function handleDependencyFields() {
@@ -60,7 +70,7 @@ function handleDependencyFields() {
 				var selector = "input[name=\"metadata[" + field.field_name + "]\"]";
 				$(selector).bind('input', (function(el, dep){
 					return function(){
-						checkRowForDependency(el, dep, 1000);
+						checkRowForDependency(el, dep, 300);
 					};
 				}(elem, obj)));
 			});
@@ -93,6 +103,12 @@ function evaluateOneField(fieldRequirements) {
 	var field = $(selector);
 	if(fieldRequirements.value.fixed != undefined) {
 		return operators[fieldRequirements.operator](field.val(), fieldRequirements.value.fixed);
+	} else if(fieldRequirements.value.like != undefined) {
+		return likeOperators[fieldRequirements.operator](field.val(), fieldRequirements.value.like);
+	} else if(fieldRequirements.value.regex != undefined) {
+		return regexOperators[fieldRequirements.operator](field.val(), fieldRequirements.value.regex);
+	} else {
+		return true;
 	}
 }
 

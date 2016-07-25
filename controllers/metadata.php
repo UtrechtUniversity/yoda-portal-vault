@@ -40,8 +40,8 @@ class MetaData extends MY_Controller
                 $deletedValues = $this->findDeletedItems($formdata, $shadowData, $fields);
                 $addedValues = $this->findChangedItems($formdata, $shadowData, $fields);
 
-                // $this->dumpKeyVals($deletedValues, "These items will be deleted:");
-                // $this->dumpKeyVals($addedValues, "These items will be (re)added");
+                $this->dumpKeyVals($deletedValues, "These items will be deleted:");
+                $this->dumpKeyVals($addedValues, "These items will be (re)added");
 
                 // Update results
                 $rodsaccount = $this->rodsuser->getRodsAccount();
