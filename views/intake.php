@@ -48,33 +48,28 @@ if ($header && $hasStudies): ?>
 		</div>
 	<?php else: ?>
 		<button type="submit" class="btn btn-default" formaction="<?=$url->module;?>/intake/index/<?=$studyID;?>" >
-		<span class="glyphicon glyphicon-arrow-left"></span>
+			<span class="glyphicon glyphicon-arrow-left"></span>
 		</button>
 	<?php endif;
 		if(!$currentViewLocked): ?>
 			<button type="submit" class="btn btn-default" formaction="<?=$url->module;?>/actions/snapshot"<?php if(sizeof($directories) == 0 && $studyFolder == '') echo " disabled";?>>
-				<span class="glyphicon glyphicon-camera"></span> <?=lang('create_snapshot');?>
+				<span class="glyphicon glyphicon-camera"></span>&nbsp;<?=lang('create_snapshot');?>
 			</button>
 	<?php elseif($studyFolder && !$currentViewFrozen): ?>
 			<button type="submit" class="btn btn-default"  name="unlock_study" value="<?=$studyFolder;?>"
 				formaction="<?=$url->module;?>/actions/unlock">
-				<span class="glyphicon glyphicon-lock" title="<?=lang('file_locked');?>"></span> <?=lang('unlock_snapshot');?>
+				<span class="glyphicon glyphicon-lock" title="<?=lang('file_locked');?>"></span>&nbsp;<?=lang('unlock_snapshot');?>
 			</button>
 
-		<?php endif; ?>
-
-		<!-- <button type="submit" class="btn btn-default" formaction="<?=$url->module;?>/actions/unlockAll">
-			<span class="glyphicon glyphicon-lock">Unlock all</span>
-		</button>
-
-		<button type="submit" class="btn btn-default" formaction="<?=$url->module;?>/actions/testFunction">
-			<span class="glyphicon glyphicon-gift">Run test</span>
-		</button>
- -->
+	<?php endif; ?>
+	<?php if($studyFolder): ?>
+		<a type="button" class="btn btn-default" href="<?=$url->module;?>/intake/metadata/<?=$studyID;?>/<?=$studyFolder;?>">
+			<span class="glyphicon glyphicon-tags"></span> Meta data
+		</a>
+	<?php endif; ?>
 		<?php $this->load->view($content); ?>
 	<?=form_close();
-
-	$this->load->view($meta_editor); ?>
+?>
 </div>
 
 

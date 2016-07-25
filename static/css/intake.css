@@ -32,8 +32,19 @@ ul.multi-value-list{
 	list-style: square;
 }
 
-/*div.metadata_form_buttons .showWhenEdit {
-	visibility: hidden;
+div.fixed-row-removed.showWhenEdit {
+	display: none !important;
+	visibility: hidden !important;
 }
-*/
+
+table#metadata_edittable > tbody > tr.form-group.has-error > td:first-child > span:first-child:before {
+	font-family: 'Glyphicons Halflings';
+	content: "\e107";
+	font-size: 1.5em;
+	left: -25px;
+	position: absolute;
+	color: #F52A01;
+}
+
+
 
