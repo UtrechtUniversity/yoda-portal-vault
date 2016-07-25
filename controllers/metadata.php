@@ -30,6 +30,8 @@ class MetaData extends MY_Controller
             $shadowData = $this->input->post('metadata-shadow');
             $collection = $this->input->post('studyRoot') . "/" . $this->input->post('dataset');
             $fields = $this->metadatafields->getFields($collection, true);
+            
+            $this->checkDependencyProperties($fields, $formdata);
 
             $wrongFields = $this->veryInput($formdata, $fields);
             if(sizeof($wrongFields) == 0) {
@@ -37,6 +39,9 @@ class MetaData extends MY_Controller
                 // Process results
                 $deletedValues = $this->findDeletedItems($formdata, $shadowData, $fields);
                 $addedValues = $this->findChangedItems($formdata, $shadowData, $fields);
+
+                // $this->dumpKeyVals($deletedValues, "These items will be deleted:");
+                // $this->dumpKeyVals($addedValues, "These items will be (re)added");
 
                 // Update results
                 $rodsaccount = $this->rodsuser->getRodsAccount();
@@ -70,7 +75,28 @@ class MetaData extends MY_Controller
         }
 
         displayMessage($this, $message, $error, $type);
-        redirect($referUrl, 'refresh');
+        // redirect($referUrl, 'refresh');
+    }
+
+    /**
+     * Adds a new key "dependencyMet" to the fields definition array,
+     * which indicates if the field was visible according to the dependencies.
+     * The form data should only be processed if this is the case.
+     * If no dependencies are specified, the requirements are automatically
+     * met
+     * @param $formdata         Posted form data
+     * @param $fields           Array of field definitions
+     */
+    private function checkDependencyProperties(&$fields, $formdata ) {
+        foreach($fields as $key => $field) {
+            if(array_key_exists("depends", $field) && $field["depends"] !== false) {
+                $field["dependencyMet"] = 
+                    $this->metadatafields->evaluateRowDependencies($field["depends"], $formdata);
+            } else {
+                $field["dependencyMet"] = true;
+            }
+            $fields[$key] = $field;
+        }
     }
 
     /**
@@ -83,7 +109,9 @@ class MetaData extends MY_Controller
     private function veryInput($formdata, $fields) {
         $wrongFields = array();
         foreach($formdata as $inputKey => $inputValues) {
-            if(!$this->metadatafields->verifyKey($inputValues, $fields[$inputKey], false))
+            if(
+                $fields[$inputKey]["dependencyMet"] && 
+                !$this->metadatafields->verifyKey($inputValues, $fields[$inputKey], false))
                 array_push($wrongFields, $inputKey);
         }
         return $wrongFields;
@@ -124,6 +152,8 @@ class MetaData extends MY_Controller
         $deletedValues = array(array());
 
         foreach($shadowdata as $key => $value) {
+            if($fields[$key]["dependencyMet"] === false)
+                continue;
             if(array_key_exists("multiple", $fields[$key]) || $fields[$key]["type"] == "checkbox") {
                 if(is_array($value)) {
                     $i = 0;
@@ -178,6 +208,8 @@ class MetaData extends MY_Controller
         $addedValues = array(array());
 
         foreach($formdata as $key => $value) {
+            if($fields[$key]["dependencyMet"] === false)
+                continue;
             if(array_key_exists("multiple", $fields[$key]) || $fields[$key]["type"] == "checkbox") {
                 if(is_array($value)) {
                     $i = 0;

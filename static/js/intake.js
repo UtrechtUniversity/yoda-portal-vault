@@ -43,16 +43,57 @@ var operators = {
 	'>=' : function(a, b) {return a >= b}
 }
 
+var comparors = {
+	'none' : function(lst) { return !lst.reduce(function(a,b){return a || b}, false); },
+	'all' : function(lst) { return lst.reduce(function(a,b){return a && b}, true); },
+	'any' : function(lst) { return lst.reduce(function(a,b) {return a || b}, false); }
+}
+
+
 function handleDependencyFields() {
 	$("#metadata_edittable > tbody > tr").each(function(i, e) {
 		elem = $(e);
 		if(elem.data('depends') != undefined && elem.data('depends') != "\"false\"") {
 			objstr = elem.data('depends').substr(1,elem.data('depends').length - 2);
-			console.log(objstr);
 			var obj = JSON.parse(objstr);
-			console.log(obj);
+			$(obj.fields).each(function(f_i, field) {
+				var selector = "input[name=\"metadata[" + field.field_name + "]\"]";
+				$(selector).bind('input', (function(el, dep){
+					return function(){
+						checkRowForDependency(el, dep, 1000);
+					};
+				}(elem, obj)));
+			});
+			checkRowForDependency(elem, obj, 0);
 		}
 	});
+}
+
+var checkRowForDependency = function(row, fieldDepends, speed) {
+	if(fieldDepends == undefined || fieldDepends === false) 
+		return;
+
+	var truthVals = new Array();
+
+	$(fieldDepends.fields).each(function(i, e) {
+		truthVals.push(evaluateOneField(e));
+	});
+
+	var condition = comparors[fieldDepends.if](truthVals);
+	if(condition === false || fieldDepends.action === 'hide') {
+		row.hide(speed);
+	} else {
+		row.show(speed);
+	}
+
+}
+
+function evaluateOneField(fieldRequirements) {
+	var selector = "input[name=\"metadata[" + fieldRequirements.field_name + "]\"]";
+	var field = $(selector);
+	if(fieldRequirements.value.fixed != undefined) {
+		return operators[fieldRequirements.operator](field.val(), fieldRequirements.value.fixed);
+	}
 }
 
 

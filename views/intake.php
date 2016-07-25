@@ -63,9 +63,9 @@ if ($header && $hasStudies): ?>
 
 	<?php endif; ?>
 	<?php if($studyFolder): ?>
-		<button type="submit" class="btn btn-default" formaction="<?=$url->module;?>/intake/metadata/<?=$studyID;?>/<?=$studyFolder;?>">
+		<a type="button" class="btn btn-default" href="<?=$url->module;?>/intake/metadata/<?=$studyID;?>/<?=$studyFolder;?>">
 			<span class="glyphicon glyphicon-tags"></span> Meta data
-		</button>
+		</a>
 	<?php endif; ?>
 		<?php $this->load->view($content); ?>
 	<?=form_close();

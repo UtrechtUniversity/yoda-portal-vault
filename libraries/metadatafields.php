@@ -71,6 +71,81 @@ class metadataFields {
 		}
 	}
 
+	/**
+	 * Function that checks the dependency properties for a field
+	 * @param fieldDependencies 	The dependency object in the field
+	 * 								definitions of the field that is to
+	 * 								be checked
+	 * @param formData 				The posted form data
+	 * @return bool 				True iff dependency indicates field
+	 * 									was visible
+	 */
+	public function evaluateRowDependencies($fieldDependencies, $formData){
+		if($fieldDependencies == null || $fieldDependencies == false)
+			return true;
+
+		$truthVals = array();
+
+		foreach($fieldDependencies["fields"] as $field) {
+			array_push($truthVals, $this->evaluateSingleFieldDependency($field, $formData));
+		}
+
+		$condition = $this->checkCondition($fieldDependencies["if"], $truthVals);
+
+		return !($condition === false || $fieldDependencies["action"] === "hide");
+	}
+
+	/**
+	 * Function that checks if a single dependency for a field is met
+	 * @param fieldRequirements 	The requirements for the single field
+	 * @param formData 	 			The posted form data
+	 * @return Bool 				True iff the single requirement is met
+	 */
+	private function evaluateSingleFieldDependency($fieldRequirements, $formData){
+		if($fieldRequirements == null) return true;
+
+		$value = (array_key_exists($fieldRequirements["field_name"], $formData)) ?
+			$formData[$fieldRequirements["field_name"]] : "";
+
+		if(array_key_exists("fixed", $fieldRequirements["value"])) {
+			return $this->checkOperator(
+				$fieldRequirements["operator"], 
+				$value, 
+				$fieldRequirements["value"]["fixed"]
+			);
+		}
+
+		return true;
+	}
+
+	private function checkOperator($operator, $a, $b) {
+		// return $this->equals($a, $b);
+		return call_user_func(array($this, $this->operators[$operator]), $a, $b);
+	}
+
+	private function checkCondition($condition, $arr) {
+		return call_user_func(array($this, $condition), $arr);
+	}
+
+	private function equals($a, $b) { return $a == $b; }
+	private function does_not_equal($a, $b) {return $a != $b; }
+	private function is_larger_than($a, $b) {return $a > $b; }
+	private function is_larger_than_or_equal($a, $b) {return $a >= $b;}
+	private function is_less_than($a, $b) {return $a < $b; }
+	private function is_less_than_or_equal($a, $b) {return $a <= $b; }
+	private function all($arr) {return count(array_unique($arr)) === 1 && current($arr) === true;}
+	private function none($arr) {return count(array_unique($arr)) === 1 && current($arr) === false;}
+	private function any($arr) {return in_array(true, $arr); }
+
+	private $operators = array(
+		"==" => "equals",
+		"!=" => "does_not_equal",
+		">" => "is_larger_than",
+		">=" => "is_larger_than_or_equal",
+		"<" => "is_less_than",
+		"<=" => "is_less_than_or_equal"
+	);
+
 	/** 
 	 * Function that checks if a field satisfies all constraints
 	 * defined in the meta data schema.
@@ -185,7 +260,7 @@ class metadataFields {
 		 * 11) indent
 		 */
 		$template =  <<<'EOT'
-%11$s<tr class="form-group%9$s"%10$s>
+%11$s<tr class="form-group%9$s"%10$s id="metadata-row-%1$s">
 %11$s	<td>
 %11$s		<span data-toggle="tooltip" data-placement="top" title="%4$s">
 %11$s			%3$s
@@ -568,7 +643,6 @@ EOT;
 		
 	} // all? in study?
 
-			
 
 	public $fields = array (
 		"start_year" => array(
