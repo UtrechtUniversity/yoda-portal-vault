@@ -81,6 +81,62 @@ To show the list counting backwards, the *step* parameter can be negative. The *
 ),
 ...
 ```
+## Date/Time
+The date/time input allows the user to enter a date and/or time in a text field, or select one from a date/time picker. The custom configuration for this field requires 4 keys and provides two optional ones:
+ * **show_years**: Boolean indicating wether or not the field accepts years
+ * **show_months** Boolean indicating wether or not the field accepts months
+ * **show_days** Boolean indicating wether or not the field accepts days
+ * **show_time** Boolean indicating wether or not to accept time
+ * **min_date_time** (optional): Object providing a minimum date and/or time
+ * **max_date_time** (optional) Object proividing a maximum date and/or time
+
+The first view parameters can be toggled independantly, but is is usually a good idea to not display any smaller units if a larger unit is not shown. So if you say *show_year* but not *show_month*, it's good practice to also not to *show_days* and *show_time*.
+
+The date/time picker automatically adepts its view on what precision is used for selecting a moment. The format is 'YYYY-MM-DD HH:ii' (2016-06-23 09:00), where parts that are disabled in the type configuration are omitted.
+
+### Minimum and maximum date time
+The minimum and maximum date time both are optional objects (or could have the value `false` which will do the same as not instantiating them), which have either of two keys (not both):
+ * **fixed**: A fixed date-time in the above format
+ * **linked**: A key name of another date time field
+
+In the case of *fixed*, a user cannot select a date and/or time earlier (in the case of *min_date_time*) or greater (in the case of *max_date_time*) than the provided time. In the case of *linked* a user cannot select a date and/or time earlier (in the case of *min_date_time*) or later (in the case of *max_date_time*) than the current value of the linked field. If the value in that field is changed, this restriction changes along. The *linked* option is great when two fields are used to specify a range
+
+### Example
+```php
+...
+"date_time_example" => array(
+    "label" => "datetime example",
+    "help" => "This is an example of how to use the date time field",
+    "type" => "datetime",
+    "type_configuration" => array(
+        "show_years" => true,
+        "show_months" => true,
+        "show_days" => true,
+        "show_time" => true,
+        "min_date_time" => array(
+            "fixed" => "2016-07-25"
+        ),
+        "max_date_time" => false
+    )
+),
+"date_time_example2" => array(
+    "label" => "datetime example",
+    "help" => "This is an example of how to use the date time field",
+    "type" => "datetime",
+    "type_configuration" => array(
+        "show_years" => true,
+        "show_months" => true,
+        "show_days" => true,
+        "show_time" => true,
+        "min_date_time" => array(
+            "linked" => "date_time_example"
+        ),
+        "max_date_time" => false
+    )
+)
+...
+```
+In the above example, two date/time input fields are generated. In both fields, the complete YYYY-MM-DD HH:ii format is used. The first field does not accept any dates earlier than 25 July 2016, while the second field accepts no date/time inputs earlier than the date/time selected in the first field.
 
 ## User list 
 The user list is a specific type of selectbox, that allows selecting an existing user in the Yoda environment. The type configuration for the user list should be '*custom*' and the custom_type should be *'userlist'*. The type configuration requires the following keys:

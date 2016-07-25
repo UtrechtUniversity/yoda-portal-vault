@@ -436,6 +436,9 @@ EOT;
 			case "bool":
 				$input = $this->getBoolInput($key, $inputName, $config, $value);
 				break;
+			case "datetime":
+				$input = $this->getTimeInput($key, $inputName, $config, $value);
+				break;
 			case "custom":
 				$input = $this->getCustomInput($key, $inputName, $config, $value);
 				break;
@@ -527,7 +530,22 @@ EOT;
 		return sprintf($template, $key, $inputName, $value);
 	}
 
-	public function getTimeInput() {
+	public function getTimeInput($key, $inputName, $config, $value) {
+		$tc = $config["type_configuration"];
+		$template = '<div class="input-group date showWhenEdit input-%1$s" id="metadata-datepicker-%1$s">';
+		$template .= '<input type="text" class="form-control metadata-datepicker input-%1$s" ';
+		$template .= 'value="%3$s" name="%2$s" %4$s/>';
+		$template .= '</div>';
+
+		$extra = "data-typeconfiguration=\"" . htmlentities(json_encode($config["type_configuration"])) . "\"";
+
+		return sprintf(
+			$template, 
+			$key,
+			$inputName,
+			$value,
+			$extra
+		);
 
 	}
 
@@ -678,6 +696,38 @@ EOT;
 
 
 	public $fields = array (
+		"date_time_example" => array(
+			"label" => "datetime example",
+			"help" => "This is an example of how to use the date time field",
+			"type" => "datetime",
+			"type_configuration" => array(
+				"show_years" => true,
+				"show_months" => true,
+				"show_days" => true,
+				"show_time" => true,
+				"min_date_time" => array(
+					"fixed" => "2016-07-25"
+					// "linked" => date_time_example2
+				),
+				"max_date_time" => false
+			)
+		),
+		"date_time_example2" => array(
+			"label" => "datetime example",
+			"help" => "This is an example of how to use the date time field",
+			"type" => "datetime",
+			"type_configuration" => array(
+				"show_years" => true,
+				"show_months" => true,
+				"show_days" => true,
+				"show_time" => true,
+				"min_date_time" => array(
+					// "fixed" => "2016-07-25"
+					"linked" => "date_time_example"
+				),
+				"max_date_time" => false
+			)
+		),
 		"start_year" => array(
 			"label" => "Start year",
 			"help" => "Enter the start year of the project",

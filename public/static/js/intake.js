@@ -22,12 +22,17 @@ $(function() {
 	$metaSuggestions = $(".meta-suggestions-field");
 	createMetaSuggestionsInput($metaSuggestions);
 
+	var dateTimePickers = $(".metadata-datepicker");
+	dateTimePickers.each(function(i, e){
+		elem = $(e);
+		createDateTimePickerInput(elem);
+	});
+
 	$('#metadata_form').submit(function(e){
 		$('.fixed-row-removed').remove();
 	});
 
 	handleDependencyFields();
-	
 
 });
 
@@ -185,6 +190,74 @@ function createUserFromGroupInput(elem) {
 		},
 	});
 }
+
+function createDateTimePickerInput(elem) {
+	var config = elem.data('typeconfiguration');
+
+	var pickerConfig = {format : ''}
+
+	var viewMode;
+	var format = '';
+
+	if(config.show_years) {
+		pickerConfig.format += "YYYY";
+		pickerConfig.viewMode = 'years';
+	}
+	if(config.show_months) {
+		if(RegExp(".+[^ -\/:]$").test(pickerConfig.format)){
+			pickerConfig.format += "-";
+		}
+		pickerConfig.format += "MM";
+		pickerConfig.viewMode = pickerConfig.viewMode || 'months';
+	}
+	if(config.show_days) {
+		if(RegExp(".+[^ -\/:]$").test(pickerConfig.format)){
+			pickerConfig.format += "-";
+		}
+		pickerConfig.format += "DD";
+		pickerConfig.viewMode = pickerConfig.viewMode || 'days';
+	}
+	
+	if(config.show_time) {
+		if(RegExp(".+[^ -\/:]$").test(pickerConfig.format)){
+			pickerConfig.format += " ";
+		}
+		pickerConfig.format += "HH:mm";
+	}
+
+	elem.datetimepicker(pickerConfig);
+
+	if(config.min_date_time != undefined && config.min_date_time !== false) {
+		// pickerConfig.
+		elem.data("DateTimePicker").useCurrent = false;
+		if(config.min_date_time.fixed != undefined){
+			elem.data("DateTimePicker").minDate(config.min_date_time.fixed);
+		} else if(config.min_date_time.linked != undefined) {
+			var link = $("input.input-" + config.min_date_time.linked);
+			console.log(link);
+			link.on("dp.change", function(e){
+				elem.data("DateTimePicker").minDate(e.date);
+			});
+			link.trigger("dp.change");
+		}
+	}
+
+	if(config.max_date_time != undefined && config.max_date_time !== false) {
+		// pickerConfig.
+		elem.data("DateTimePicker").useCurrent = false;
+		if(config.max_date_time.fixed != undefined){
+			elem.data("DateTimePicker").maxDate(config.max_date_time.fixed);
+		} else if(config.max_date_time.linked != undefined) {
+			var link = $("input.input-" + config.max_date_time.linked);
+			link.on("dp.change", function(e){
+				elem.data("DateTimePicker").maxDate(e.date);
+			});
+			link.trigger("dp.change");
+		}
+	}
+
+}
+
 
 /**
  * Creates a select2 input from the element given as argument
