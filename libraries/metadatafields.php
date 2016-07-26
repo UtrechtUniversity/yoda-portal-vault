@@ -551,6 +551,9 @@ EOT;
 			case "userlist" : 
 				$input = $this->getUserlistInput($key, $inputName, $config, $value);
 				break;
+			case "directorylist" :
+				$input = $this->getStudielistInput($key, $inputName, $config, $value);
+				break;
 			default :
 				$input = "custom (default)";
 				break;
@@ -780,14 +783,48 @@ EOT;
 			$value,
 			$extra
 		);
-	}// all? in study? allow create? show admins/edit/readonly
+	}
 
-	public function getStudielistInput() {
-		
-	} // all? in study?
+	public function getStudielistInput($key, $inputName, $config, $value) {
+		$template = '<input name="%2$s" type="hidden"';
+		$template .= ' value="%3$s"';
+		$template .= ' class="showWhenEdit select-dir-from-group input-%1$s"';
+		$template .= ' %4$s/>';
+
+		$extra = 'data-typeconfiguration="' . htmlentities(json_encode($config["type_configuration"])) . '"';
+
+		return sprintf(
+			$template,
+			$key,
+			$inputName,
+			$value,
+			$extra
+		);
+	}
 
 
 	public $fields = array (
+		"example_dirlist" => array (
+				"label" => "Directory",
+				"help" => "Select a directory from the list",
+				"type" => "custom",
+				"custom_type" => "directorylist",
+				"type_configuration" => array (
+					"showProjects" => true,
+					"showStudies" => true,
+					"showDatasets" => true,
+					"requireContribute" => true,
+					"requireManager" => false
+				),
+				"required" => true,
+				"allow_empty" => false,
+				"depends" => false,
+				"multiple" => array(
+						"min" => 0,
+						"max" => 100,
+						"infinite" => false
+					)
+			),
 		"date_time_example" => array(
 			"label" => "datetime example",
 			"help" => "This is an example of how to use the date time field",
@@ -802,6 +839,13 @@ EOT;
 					// "linked" => date_time_example2
 				),
 				"max_date_time" => false
+			),
+			"required" => true,
+			"depends" => false,
+			"multiple" => array(
+				"min" => 3,
+				"max" => 100,
+				"infinite" => false
 			)
 		),
 		"date_time_example2" => array(

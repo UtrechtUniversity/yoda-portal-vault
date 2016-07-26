@@ -19,6 +19,9 @@ $(function() {
 	$el = $("input.select-user-from-group");
 	createUserFromGroupInput($el);
 
+	$dirSelectors = $("input.select-dir-from-group");
+	createDirectoryListSelectInput($dirSelectors);
+
 	$metaSuggestions = $(".meta-suggestions-field");
 	createMetaSuggestionsInput($metaSuggestions);
 
@@ -184,6 +187,71 @@ function createUserFromGroupInput(elem) {
 					? ' <span class="grey">(create)</span>'
 					: ''
 				);
+		},
+		initSelection: function($el, callback) {
+			callback({ id: $el.val(), text: $el.val() });
+		},
+	});
+}
+
+function createDirectoryListSelectInput(elem) {
+	if(!elem.hasClass('select-dir-from-group')) return;
+	elem.select2({
+		allowClear:  true,
+		openOnEnter: false,
+		minimumInputLength: 1,
+		ajax: {
+			quietMillis: 400,
+			url:      function(params) {
+				var url = $("input[name=intake_url]").val();
+				url += '/getDirectories/';
+				url += $("input[name=studyID]").val();
+				return url;
+			},
+			type:     'get',
+			dataType: 'json',
+			data: function (term, page) {
+				console.log(elem.data('typeconfiguration'));
+				json = elem.data('typeconfiguration');
+				json.query = term;
+				return json;
+			},
+			results: function (directories) {
+				var query   = elem.data('select2').search.val();
+				var results = [];
+				var inputMatches = false;
+
+				directories.forEach(function(dirname) {
+					// Exclude users already in the group.
+					results.push({
+						id:   dirname,
+						text: dirname
+					});
+					if (query === dirname)
+						inputMatches = true;
+				});
+
+				return { results: results };
+			},
+		},
+		formatResult: function(result, $container, query, escaper) {
+			console.log(query);
+			var rArr = result.text.split("/");
+			var rText = '<span class="grey">';
+			console.log(rArr.slice(0,-1));
+			rText += rArr.slice(0,-1).join("/");
+			rText += "/</span>";
+
+			rText += rArr[rArr.length - 1].replace(query.term, '<span class="select2-match">' + query.term + '</span>');
+
+			return rText;
+
+			// return escaper(result.text)
+			// 	+ (
+			// 		'exists' in result && !result.exists
+			// 		? ' <span class="grey">(create)</span>'
+			// 		: ''
+			// 	);
 		},
 		initSelection: function($el, callback) {
 			callback({ id: $el.val(), text: $el.val() });
@@ -411,6 +479,8 @@ function addValueRow($element) {
 		e = $(e);
 		createMetaSuggestionsInput(e);
 		createUserFromGroupInput(e);
+		createDirectoryListSelectInput(e);
+		createDateTimePickerInput(e);
 	});
 	addRowBtn[0].dataset['nextindex']++;
 }

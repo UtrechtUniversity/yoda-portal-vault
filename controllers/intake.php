@@ -265,5 +265,40 @@ class Intake extends MY_Controller
             );
     }
 
+    public function getDirectories() {
+        $query = $this->input->get('query');
+        $showProjects = $this->input->get('showProjects');
+        $showStudies = $this->input->get('showStudies');
+        $showDatasets = $this->input->get('showDatasets');
+        $requireContribute = $this->input->get('requireContribute');
+        $requireManager = $this->input->get('requireManager');
+
+        $showProjects = (is_null($showProjects) || $showProjects == "0" || strtolower($showProjects) !== "true") ? false : true;
+        $showStudies = (is_null($showStudies) || $showStudies == "0" || strtolower($showStudies) !== "true") ? false : true;
+        $showDatasets = (is_null($showDatasets) || $showDatasets == "0" || strtolower($showDatasets) !== "true") ? false : true;
+        $requireContribute = (is_null($requireContribute) || $requireContribute == "0" || strtolower($requireContribute) !== "true") ? false : true;
+        $requireManager = (is_null($requireManager) || $requireManager == "0" || strtolower($requireManager) !== "true") ? false : true;
+
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+
+        $results = array_values(array_filter(
+            $this->study->getDirectories($rodsaccount, $showProjects, $showStudies, $showDatasets, $requireContribute, $requireManager),
+            function($val) use ($query) {
+                $dirArr = explode("/", $val);
+                $dirName = $dirArr[sizeof($dirArr) - 1];
+
+                return !(!empty($query) && strstr($dirName, $query) === FALSE);
+            }
+        ));
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(
+                json_encode(
+                    $results
+                )
+            );
+    }
+
 
 }
