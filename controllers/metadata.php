@@ -111,7 +111,7 @@ class MetaData extends MY_Controller
         foreach($formdata as $inputKey => $inputValues) {
             if(
                 $fields[$inputKey]["dependencyMet"] && 
-                !$this->metadatafields->verifyKey($inputValues, $fields[$inputKey], false))
+                !$this->metadatafields->verifyKey($inputValues, $fields[$inputKey], $formdata, false))
                 array_push($wrongFields, $inputKey);
         }
         return $wrongFields;

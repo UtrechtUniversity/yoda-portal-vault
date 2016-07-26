@@ -188,12 +188,13 @@ class metadataFields {
 	 * 						field as submitted by the user
 	 * @param $definition 	The field definition as defined in the 
 	 * 						meta data schema
+	 * @param $formdata 	The posted formdata for reference
 	 * @param $final (opt) 	True if the final check should be 
 	 * 						performed (more strict)
 	 * @return bool 		True iff the value satisfies all 
 	 * 						constraints
 	 */
-	private function verifyField($value, $definition, $final = false) {
+	private function verifyField($value, $definition, $formdata, $final = false) {
 		if($final && $definition["required"] === True && !isset($value)) {
 			return false;
 		}
@@ -264,9 +265,100 @@ class metadataFields {
 			}
 		}
 
+		if($definition["type"] == "datetime") {
+			if(!$this->verifyDateTime($value, $definition, $formdata, $final)) return false;
+		}
+
 		if(array_key_exists("options", $conf) && !in_array($value, $conf["options"])) {
 			// echo $value . " fails because the value is not in the specified range";
 			return false;
+		}
+
+		return true;
+	}
+
+	private function verifyDateTime($value, $definition, $formdata, $final = false){
+		$needsDashReg = "/.+[^:\/ -]$/";
+		$regex = "/^";
+		$format = "";
+		$conf = $definition["type_configuration"];
+		if(array_key_exists("show_years", $conf) && $conf["show_years"] !== false){
+			$regex .= "\d{4}";
+			$format .= "YYYY";
+		}
+		if(array_key_exists("show_months", $conf) && $conf["show_months"] !== false) {
+			if(preg_match($needsDashReg, $regex)){
+				$regex .= "-";
+				$format .= "-";
+			}
+			$regex .= "(?:(?:0[1-9])|(?:1(?:1|2)))";
+			$format .= "MM";
+		}
+		if(array_key_exists("show_days", $conf) && $conf["show_days"] !== false) {
+			if(preg_match($needsDashReg, $regex)){
+				$regex .= "-";
+				$format .= "-";
+			}
+			$regex .= "(?:(?:0[1-9])|(?:[1-2][0-9])|(?:3[0-1]))";
+			$format .= "DD";
+		}
+		if(array_key_exists("show_time", $conf) && $conf["show_time"] !== false) {
+			if(preg_match($needsDashReg, $regex)){
+				$regex .= " ";
+				$format .= "  ";
+			}
+			$regex .= "(?:[0-1][0-9]|2[0-3]):[0-5][0-9]";
+			$format .= "HH:ii";
+		}
+		$regex .= "$/";
+
+		if(!preg_match($regex, $value))
+			return false;
+
+		if(array_key_exists("min_date_time", $conf) && $conf["min_date_time"] !== false) {
+			if(array_key_exists("fixed", $conf["min_date_time"]) && $conf["min_date_time"]["fixed"] !== false) {
+				try{
+					$valDate = DateTime::createFromFormat($format, $value);
+					$referenceDate = DateTime::createFromFormat($format, $conf["min_date_time"]["fixed"]);
+					if($valDate < $referenceDate) return false;
+				} catch(exception $e) {
+					// do nothing
+					var_dump($e);
+				}
+			} else if(array_key_exists("linked", $conf["min_date_time"]) && $conf["min_date_time"]["linked"] !== false) {
+				if(array_key_exists($conf["min_date_time"]["linked"], $formdata)) {
+					try{
+						$valDate = DateTime::createFromFormat($format, $value);
+						$referenceDate = DateTime::createFromFormat($format, $formdata[$conf["min_date_time"]["linked"]]);
+						if($valDate < $referenceDate) return false;
+					} catch(exception $e) {
+						// do nothing
+						var_dump($e);
+					}
+				}
+			}
+		}
+
+		if(array_key_exists("max_date_time", $conf) && $conf["max_date_time"] !== false) {
+			if(array_key_exists("fixed", $conf["max_date_time"]) && $conf["max_date_time"]["fixed"] !== false) {
+				try{
+					$valDate = DateTime::createFromFormat($format, $value);
+					$referenceDate = DateTime::createFromFormat($format, $conf["max_date_time"]["fixed"]);
+					if($valDate > $referenceDate) return false;
+				} catch(exception $e) {
+					// do nothing
+				}
+			} else if(array_key_exists("linked", $conf["max_date_time"]) && $conf["max_date_time"]["linked"] !== false) {
+				if(array_key_exists($conf["max_date_time"]["linked"], $formdata)) {
+					try{
+						$valDate = DateTime::createFromFormat($format, $value);
+						$referenceDate = DateTime::createFromFormat($format, $formdata[$conf["max_date_time"]["linked"]]);
+						if($valDate > $referenceDate) return false;
+					} catch(exception $e) {
+						// do nothing
+					}
+				}
+			}
 		}
 
 		return true;
