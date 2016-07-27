@@ -30,10 +30,11 @@ class MetaData extends MY_Controller
             $shadowData = $this->input->post('metadata-shadow');
             $collection = $this->input->post('studyRoot') . "/" . $this->input->post('dataset');
             $fields = $this->metadatafields->getFields($collection, true);
-            
+
             $this->checkDependencyProperties($fields, $formdata);
 
             $wrongFields = $this->veryInput($formdata, $fields);
+
             if(sizeof($wrongFields) == 0) {
 
                 // Process results
@@ -75,7 +76,7 @@ class MetaData extends MY_Controller
         }
 
         displayMessage($this, $message, $error, $type);
-        // redirect($referUrl, 'refresh');
+        redirect($referUrl, 'refresh');
     }
 
     /**
@@ -109,10 +110,14 @@ class MetaData extends MY_Controller
     private function veryInput($formdata, $fields) {
         $wrongFields = array();
         foreach($formdata as $inputKey => $inputValues) {
-            if(
-                $fields[$inputKey]["dependencyMet"] && 
-                !$this->metadatafields->verifyKey($inputValues, $fields[$inputKey], $formdata, false))
-                array_push($wrongFields, $inputKey);
+            if($fields[$inputKey]["dependencyMet"]) {
+                $errors = $this->metadatafields->verifyKey($inputValues, $fields[$inputKey], $formdata, false);
+                if(sizeof($errors) > 0) {
+                    // array_push($wrongFields, var)
+                    $wrongFields[$inputKey] = $errors;
+                }
+                // array_push($wrongFields, $inputKey);
+            }
         }
         return $wrongFields;
     }

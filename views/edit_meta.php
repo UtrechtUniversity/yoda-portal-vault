@@ -95,7 +95,7 @@ if($userIsAllowed && $studyFolder != ''):
 					$config["value"],
 					2,
 					$permissions,
-					in_array($key, $wrongFields),
+					array_key_exists($key, $wrongFields) ? $wrongFields[$key] : array(), // in_array($key, $wrongFields),
 					$this->session->flashdata('form_data')
 				);
 				echo "\n";

@@ -9,7 +9,9 @@ $(function() {
 	    ]
 	} );
 
-	$('[data-toggle="tooltip"]').tooltip();
+	$('[data-toggle="tooltip"]').tooltip({
+		"html" : true
+	});
 
 	$(".chosen").chosen({
 		inherit_select_classes : true,
@@ -211,7 +213,6 @@ function createDirectoryListSelectInput(elem) {
 			type:     'get',
 			dataType: 'json',
 			data: function (term, page) {
-				console.log(elem.data('typeconfiguration'));
 				json = elem.data('typeconfiguration');
 				json.query = term;
 				return json;
@@ -235,23 +236,14 @@ function createDirectoryListSelectInput(elem) {
 			},
 		},
 		formatResult: function(result, $container, query, escaper) {
-			console.log(query);
 			var rArr = result.text.split("/");
 			var rText = '<span class="grey">';
-			console.log(rArr.slice(0,-1));
 			rText += rArr.slice(0,-1).join("/");
 			rText += "/</span>";
 
 			rText += rArr[rArr.length - 1].replace(query.term, '<span class="select2-match">' + query.term + '</span>');
 
 			return rText;
-
-			// return escaper(result.text)
-			// 	+ (
-			// 		'exists' in result && !result.exists
-			// 		? ' <span class="grey">(create)</span>'
-			// 		: ''
-			// 	);
 		},
 		initSelection: function($el, callback) {
 			callback({ id: $el.val(), text: $el.val() });
@@ -260,6 +252,8 @@ function createDirectoryListSelectInput(elem) {
 }
 
 function createDateTimePickerInput(elem) {
+	if(!elem.hasClass('metadata-datepicker')) return;
+
 	var config = elem.data('typeconfiguration');
 
 	var pickerConfig = {format : ''}
@@ -302,7 +296,6 @@ function createDateTimePickerInput(elem) {
 			elem.data("DateTimePicker").minDate(config.min_date_time.fixed);
 		} else if(config.min_date_time.linked != undefined) {
 			var link = $("input.input-" + config.min_date_time.linked);
-			console.log(link);
 			link.on("dp.change", function(e){
 				elem.data("DateTimePicker").minDate(e.date);
 			});

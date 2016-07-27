@@ -1,6 +1,22 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+define("WARNING_NO_CONF", -1);
+define("OK", 0);
+define("ERROR_MIN_ENTRIES", -2);
+define("ERROR_MAX_ENTRIES", -3);
+define("ERROR_SINGLE_ENTRY", -4);
+define("ERROR_REQUIRED", -5);
+define("ERROR_MAX_LENGTH", -6);
+define("ERROR_REGEX", -7);
+define("ERROR_NOT_IN_RANGE", -8);
+define("ERROR_INVALID_DATETIME_FORMAT", -9);
+define("ERROR_DATE_LESS_THAN_FIXED", -10);
+define("ERROR_DATE_LESS_THAN_LINKED", -11);
+define("ERROR_DATE_HIGHER_THAN_FIXED", -10);
+define("ERROR_DATE_HIGHER_THAN_LINKED", -11);
+
 class metadataFields {
+
 
 	public function __construct() {
 		$this->CI =& get_instance();
@@ -28,47 +44,6 @@ class metadataFields {
 		}
 
 		return $fields;
-	}
-
-	/**
-	 * Function that checks the values for a key to see if all values
-	 * satisfy all constraints
-	 * @param $values 		The value, or value list, of the 
-	 * 						field as submitted by the user
-	 * @param $definition 	The field definition as defined in the 
-	 * 						meta data schema
-	 * @param $final (opt) 	True if the final check should be 
-	 * 						performed (more strict)
-	 * @return bool 		True iff the values satisfie all 
-	 * 						constraints
-	 */
-	public function verifyKey($values, $definition, $final = false) {
-		if(array_key_exists("multiple", $definition) || $definition["type"] == "checkbox") {
-			$mult = array_key_exists("multiple", $definition) ? $definition["multiple"] : $definition["type_configuration"];
-			if($final && array_key_exists("min", $mult) && $mult["min"] > 0 && $mult["min"] > sizeof($values)){
-				return false;
-			}
-
-			if(
-				(!array_key_exists("infinite", $mult) || $mult["infinite"] === false) && 
-				array_key_exists("max", $mult) && $mult["max"] !== false && $mult["max"] < sizeof($values)) {
-				return false;
-			}
-
-			foreach($values as $value) {
-				if(!$this->verifyField($value, $definition, $final))
-					return false;
-			}
-
-			return true;
-
-		} else {
-			if(gettype($values) == gettype(array()) && sizeof($values) > 1) {
-				// var_dump($values); echo " fail because it should be a single value but doesn't seem to be single";
-				return false;
-			}
-			return $this->verifyField($values, $definition, $final);
-		}
 	}
 
 	/**
@@ -181,6 +156,53 @@ class metadataFields {
 		"<=" => "is_less_than_or_equal"
 	);
 
+	/**
+	 * Function that checks the values for a key to see if all values
+	 * satisfy all constraints
+	 * @param $values 		The value, or value list, of the 
+	 * 						field as submitted by the user
+	 * @param $definition 	The field definition as defined in the 
+	 * 						meta data schema
+	 * @param $final (opt) 	True if the final check should be 
+	 * 						performed (more strict)
+	 * @return bool 		True iff the values satisfie all 
+	 * 						constraints
+	 */
+	public function verifyKey($values, $definition, $final = false) {
+
+		if(array_key_exists("multiple", $definition) || $definition["type"] == "checkbox") {
+			$errors = array();
+
+			$mult = array_key_exists("multiple", $definition) ? $definition["multiple"] : $definition["type_configuration"];
+			if($final && array_key_exists("min", $mult) && $mult["min"] > 0 && $mult["min"] > sizeof($values)){
+				$errors[] = ERROR_MIN_ENTRIES;
+			}
+
+			if(
+				(!array_key_exists("infinite", $mult) || $mult["infinite"] === false) && 
+				array_key_exists("max", $mult) && $mult["max"] !== false && $mult["max"] < sizeof($values)) {
+				$errors[] = ERROR_MAX_ENTRIES;
+			}
+
+			foreach($values as $value) {
+				$errors = array_merge($errors, $this->verifyField($value, $definition, $final));
+				// $err = $this->verifyField($value, $definition, $final);
+				// if($err < OK) {
+				// 	return $errC;
+				// }
+			}
+
+			return $errors;
+
+		} else {
+			if(gettype($values) == gettype(array()) && sizeof($values) > 1) {
+				// var_dump($values); echo " fail because it should be a single value but doesn't seem to be single";
+				return array(ERROR_SINGLE_ENTRY);
+			}
+			return $this->verifyField($values, $definition, $final);
+		}
+	}
+
 	/** 
 	 * Function that checks if a field satisfies all constraints
 	 * defined in the meta data schema.
@@ -195,20 +217,24 @@ class metadataFields {
 	 * 						constraints
 	 */
 	private function verifyField($value, $definition, $formdata, $final = false) {
+		$errors = array();
+
 		if($final && $definition["required"] === True && !isset($value)) {
-			return false;
+			$errors[] = ERROR_REQUIRED;
+			// return false;
 		}
 
 		$conf = $definition["type_configuration"];
 		if(!isset($conf)) {
 			// echo $value . " fails because $conf is not set<br/>";
-			return true;
+			$errors[] = WARNING_NO_CONF;
 		}
 
 		// Check maximum length
 		if(array_key_exists("length", $conf) && $conf["length"] !== false && sizeof($value) > $conf["length"]){
 			// echo $value . " fails because the max length (" . $conf["length"] . ") is less than the input length (" . sizeof($value) . ")<br/>";
-			return false;
+			// return false;
+			$errors[] = ERROR_MAX_LENGTH;
 		}
 
 		// Todo: verify this
@@ -222,8 +248,10 @@ class metadataFields {
 					(is_array($value) && sizeof($value) === 0) ||
 					(is_string($value) && strlen($value) === 0)
 				))) {
-				// echo "\"" . $value . "\" fails because the pattern " . $conf["pattern"] . " does not match the value";
-				return false;	
+				echo "\"" . $value . "\" fails because the pattern " . $conf["pattern"] . " does not match the value";
+
+				$errors[] = ERROR_REGEX;
+				// return false;	
 			}
 		}
 
@@ -242,11 +270,12 @@ class metadataFields {
 				$conf["begin"] < $value
 			) {
 				// echo $value . " fails because the value is not in the specified range";
-				return false;
+				// return false;
+				$errors[] = ERROR_NOT_IN_RANGE;
 			}
 			else if($conf["begin"] > $value) {
 				// echo $value . " fails because the value is not in the specified range";
-				return false;
+				$errors[] = ERROR_NOT_IN_RANGE;
 			}
 		}
 
@@ -257,27 +286,43 @@ class metadataFields {
 				$conf["end"] > $value
 			) {
 				// echo $value . " fails because the value is not in the specified range";
-				return false;
+				// return false;
+				$errors[] = ERROR_NOT_IN_RANGE;
 			}
 			else if($conf["end"] < $value) {
 				// echo $value . " fails because the value is not in the specified range";
-				return false;
+				// return false;
+				$errors[] = ERROR_NOT_IN_RANGE;
 			}
 		}
 
 		if($definition["type"] == "datetime") {
-			if(!$this->verifyDateTime($value, $definition, $formdata, $final)) return false;
+			$err = $this->verifyDateTime($value, $definition, $formdata, $final);
+			if($err != OK) {
+				// echo $value . " fails because the value does not meet datetime standards?";
+				$errors[] = $err;
+			}
 		}
 
 		if(array_key_exists("options", $conf) && !in_array($value, $conf["options"])) {
 			// echo $value . " fails because the value is not in the specified range";
-			return false;
+			// return false;
+			$errors[] = ERROR_NOT_IN_RANGE;
 		}
 
-		return true;
+		return $errors;
+	}
+
+	function callback_isNotEmpty($var) {
+		return $var !== null && !empty($var) && $var !== "" && !(is_array($var) && sizeof($var) === 0);
 	}
 
 	private function verifyDateTime($value, $definition, $formdata, $final = false){
+
+		if(!$this->callback_isNotEmpty($value)) {
+			return OK;
+		}
+
 		$needsDashReg = "/.+[^:\/ -]$/";
 		$regex = "/^";
 		$format = "";
@@ -312,26 +357,47 @@ class metadataFields {
 		}
 		$regex .= "$/";
 
-		if(!preg_match($regex, $value))
-			return false;
+		if(!preg_match($regex, $value)){
+			// echo "<p>$regex doesn't match $value</p>";
+			// return false;
+			return ERROR_INVALID_DATETIME_FORMAT;
+		}
 
 		if(array_key_exists("min_date_time", $conf) && $conf["min_date_time"] !== false) {
 			if(array_key_exists("fixed", $conf["min_date_time"]) && $conf["min_date_time"]["fixed"] !== false) {
 				try{
 					$valDate = DateTime::createFromFormat($format, $value);
 					$referenceDate = DateTime::createFromFormat($format, $conf["min_date_time"]["fixed"]);
-					if($valDate < $referenceDate) return false;
+					if($valDate < $referenceDate) {
+						// echo "<p>$valDate is less than fixed $referenceDate</p>";
+						// return false;
+						return ERROR_DATE_LESS_THAN_FIXED;
+					}
 				} catch(exception $e) {
 					// do nothing
-					var_dump($e);
+					// var_dump($e);
 				}
 			} else if(array_key_exists("linked", $conf["min_date_time"]) && $conf["min_date_time"]["linked"] !== false) {
 				if(array_key_exists($conf["min_date_time"]["linked"], $formdata)) {
 					try{
 						$valDate = DateTime::createFromFormat($format, $value);
-						$referenceDate = DateTime::createFromFormat($format, $formdata[$conf["min_date_time"]["linked"]]);
-						if($valDate < $referenceDate) return false;
-					} catch(exception $e) {
+						$refVal = array_filter(
+							$formdata[$conf["min_date_time"]["linked"]], 
+							array($this, "callback_isNotEmpty")
+						);
+						if(is_array($refVal)) {
+							if(!$this->callback_isNotEmpty($refVal)) $refVal = array("");
+							$refVal = min($refVal);
+						}
+						$referenceDate = DateTime::createFromFormat($format, $refVal);
+						if($refVal == "" && $final) {
+							// return false;
+							return ERROR_REQUIRED;
+						} else if($refVal != "" && $valDate < $referenceDate) {
+							// return false;
+							return ERROR_DATE_LESS_THAN_LINKED;
+						}
+					} catch(Exception $e) {
 						// do nothing
 						var_dump($e);
 					}
@@ -344,7 +410,10 @@ class metadataFields {
 				try{
 					$valDate = DateTime::createFromFormat($format, $value);
 					$referenceDate = DateTime::createFromFormat($format, $conf["max_date_time"]["fixed"]);
-					if($valDate > $referenceDate) return false;
+					if($valDate > $referenceDate) {
+						// return false;
+						return ERROR_DATE_HIGHER_THAN_FIXED;
+					}
 				} catch(exception $e) {
 					// do nothing
 				}
@@ -352,8 +421,21 @@ class metadataFields {
 				if(array_key_exists($conf["max_date_time"]["linked"], $formdata)) {
 					try{
 						$valDate = DateTime::createFromFormat($format, $value);
-						$referenceDate = DateTime::createFromFormat($format, $formdata[$conf["max_date_time"]["linked"]]);
-						if($valDate > $referenceDate) return false;
+						$refVal = array_filter(
+							$formdata[$conf["min_date_time"]["linked"]], 
+							array($this, "callback_isNotEmpty")
+						);
+						if(is_array($refVal)) {
+							if(!$this->callback_isNotEmpty($refVal)) $refVal = array("");
+							$refVal = min($refVal);
+						}
+						$referenceDate = DateTime::createFromFormat($format, $refVal);
+						if($refVal == "" && $final) {
+							return ERROR_REQUIRED;
+						} else if($refVal != "" && $valDate > $referenceDate) {
+							// return false;
+							return ERROR_DATE_HIGHER_THAN_LINKED;
+						}
 					} catch(exception $e) {
 						// do nothing
 					}
@@ -361,10 +443,10 @@ class metadataFields {
 			}
 		}
 
-		return true;
+		return OK;
 	}
 
-	public function getHtmlForRow($key, $config, $value, $indent = 0, $permissions, $hasError = false, $formdata) {
+	public function getHtmlForRow($key, $config, $value, $indent = 0, $permissions, $errors = false, $formdata) {
 
 		$idn = "";
 		for($i = 0; $i < $indent; $i++) {
@@ -389,7 +471,7 @@ class metadataFields {
 		$template =  <<<'EOT'
 %11$s<tr class="form-group%9$s"%10$s id="metadata-row-%1$s">
 %11$s	<td>
-%11$s		<span data-toggle="tooltip" data-placement="top" title="%4$s">
+%11$s		<span data-toggle="tooltip" data-placement="top" title="%4$s" data-html="true">
 %11$s			%3$s
 %11$s 		</span>
 %11$s	</td>
@@ -494,12 +576,19 @@ EOT;
 			$rowDepends .= htmlentities(" data-depends=\"" . json_encode($config["depends"]) . "\"");
 		}
 
+		$hasError = sizeof($errors) > 0;
+
+		$errorHelperText = $this->buildErrorExplanation($key, $config, $errors);
+
+		$help = $errorHelperText === "" ? $config["help"] : sprintf("<p>%s</p>%s", $config["help"], $errorHelperText);
+
 		return sprintf(
 			$template,
 			$key,
 			array_key_exists("multiple", $config) || $config["type"] == "checkbox" ? $multiValueList : $currentValue,
 			$config["label"],
-			$config["help"],
+			// $config["help"],
+			$help,
 			$input,
 			$this->getShadowInput($key, $config, $value),
 			htmlentities($rowInputTemplate),
@@ -508,7 +597,142 @@ EOT;
 			$rowDepends,
 			$indent
 		);
+	}
 
+	function buildErrorExplanation($key, $definitions, $errors) {
+		if(sizeof($errors) === 0) return "";
+
+		$errArr = array();
+		if(in_array(ERROR_MIN_ENTRIES, $errors)) {
+			if(array_key_exists("multiple", $definitions) && array_key_exists("min", $definitions["multiple"])) {
+				$min = $definitions["multiple"]["min"];
+			} else {
+				$min = 0;
+			}
+			$errArr[] = sprintf(lang('formError_min_entries'), $min);
+		}
+
+		if(in_array(ERROR_MAX_ENTRIES, $errors)) {
+			if(array_key_exists("multiple", $definitions) && array_key_exists("max", $definitions["multiple"])) {
+				$max = $definitions["multiple"]["max"];
+			} else {
+				$max = 0;
+			}
+
+			$errArr[] = sprintf(lang('formError_max_entries'), $max);
+		}
+
+		if(in_array(ERROR_SINGLE_ENTRY, $errors)) {
+			$errArr[] = lang('formError_single_entry');
+		}
+
+		if(in_array(ERROR_REQUIRED, $errors)) {
+			$errArr[] = lang('formError_required');
+		}
+
+		if(in_array(ERROR_MAX_LENGTH, $errors)) {
+			echo ERROR_MAX_LENGTH;
+			var_dump(in_array(ERROR_MAX_LENGTH, $errors));
+			echo "<p>Errors with max length in there: ";
+			var_dump($errors);
+			echo "</p>";
+			if(
+				in_array("type_configuration", $definitions) 
+				&& in_array("length", $definitions["type_configuration"])
+				AND $definitions["type_configuration"]["length"] !== false
+			) {
+				$length = $definitions["type_configuration"]["length"];
+			} else {
+				$length = 0;
+			}
+
+			$errArr[] = sprintf(lang('formError_max_length'), $length);
+		}
+
+		if(in_array(ERROR_REGEX, $errors)) {
+			$errArr[] = lang('formError_regex');
+		}
+
+		if(in_array(ERROR_NOT_IN_RANGE, $errors)) {
+			$errArr[] = lang('formError_not_in_range');
+		}
+
+		if(in_array(ERROR_INVALID_DATETIME_FORMAT, $errors)) {
+			$errArr[] = lang('formError_datetime_format');
+		}
+
+		if(in_array(ERROR_DATE_LESS_THAN_FIXED, $errors)) {
+			if(
+				array_key_exists("type_configuration", $definitions) &&
+				array_key_exists("min_date_time", $definitions["type_configuration"]) &&
+				$definitions["type_configuration"]["min_date_time"] !== false &&
+				array_key_exists("fixed", $definitions["type_configuration"]["min_date_time"])
+
+			) {
+				$mindatetime = $definitions["type_configuration"]["min_date_time"]["fixed"];
+			} else {
+				$mindatetime = "<INVALID>";
+			}
+
+			$errArr[] = sprintf(lang('formError_datetime_less_fixed'), $mindatetime);
+		}
+
+		if(in_array(ERROR_DATE_LESS_THAN_LINKED, $errors)) {
+			if(
+				array_key_exists("type_configuration", $definitions) &&
+				array_key_exists("min_date_time", $definitions["type_configuration"]) &&
+				$definitions["type_configuration"]["min_date_time"] !== false &&
+				array_key_exists("linked", $definitions["type_configuration"]["min_date_time"])
+
+			) {
+				$mindatetime = $definitions["type_configuration"]["min_date_time"]["linked"];
+			} else {
+				$mindatetime = "<INVALID>";
+			}
+
+			$errArr[] = sprintf(lang('formError_datetime_less_linked'), $mindatetime);
+		}
+
+
+		if(in_array(ERROR_DATE_HIGHER_THAN_FIXED, $errors)) {
+			if(
+				array_key_exists("type_configuration", $definitions) &&
+				array_key_exists("max_date_time", $definitions["type_configuration"]) &&
+				$definitions["type_configuration"]["max_date_time"] !== false &&
+				array_key_exists("fixed", $definitions["type_configuration"]["max_date_time"])
+
+			) {
+				$maxdatetime = $definitions["type_configuration"]["maxn_date_time"]["fixed"];
+			} else {
+				$maxdatetime = "<INVALID>";
+			}
+
+			$errArr[] = sprintf(lang('formError_datetime_higher_fixed'), $maxdatetime);
+		}
+
+		if(in_array(ERROR_DATE_HIGHER_THAN_LINKED, $errors)) {
+			if(
+				array_key_exists("type_configuration", $definitions) &&
+				array_key_exists("max_date_time", $definitions["type_configuration"]) &&
+				$definitions["type_configuration"]["max_date_time"] !== false &&
+				array_key_exists("linked", $definitions["type_configuration"]["max_date_time"])
+
+			) {
+				$maxdatetime = $definitions["type_configuration"]["maxn_date_time"]["linked"];
+			} else {
+				$maxdatetime = "<INVALID>";
+			}
+
+			$errArr[] = sprintf(lang('formError_datetime_higher_linked'), $maxdatetime);
+		}
+
+		$html = sprintf("<b>%s</b><ul>", lang('formError_heading'));
+		foreach($errArr as $ea) {
+			$html .= sprintf("<li>%s</li>", $ea);
+		}
+		$html .= "</ul>";
+
+		return $html;
 	}
 
 	function findProperInput($key, $inputName, $config, $value) {

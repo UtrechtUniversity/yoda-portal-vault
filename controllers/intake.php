@@ -27,6 +27,7 @@ class Intake extends MY_Controller
         $this->load->helper('form');
         $this->load->language('intake');
         $this->load->language('errors');
+        $this->load->language('form_errors');
         $this->load->library('modulelibrary');
         $this->load->library('metadatafields');
 
