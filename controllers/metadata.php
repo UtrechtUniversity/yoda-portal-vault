@@ -41,12 +41,13 @@ class MetaData extends MY_Controller
                 $deletedValues = $this->findDeletedItems($formdata, $shadowData, $fields);
                 $addedValues = $this->findChangedItems($formdata, $shadowData, $fields);
 
-                $this->dumpKeyVals($deletedValues, "These items will be deleted:");
-                $this->dumpKeyVals($addedValues, "These items will be (re)added");
+                // $this->dumpKeyVals($deletedValues, "These items will be deleted:");
+                // $this->dumpKeyVals($addedValues, "These items will be (re)added");
 
                 // Update results
                 $rodsaccount = $this->rodsuser->getRodsAccount();
                 $status = $this->metadatamodel->processResults($rodsaccount, $collection, $deletedValues, $addedValues); 
+                // $status = UPDATE_SUCCESS;
 
                 if($status == UPDATE_SUCCESS) {
                     $referUrl = sprintf($redirectTemplate, "index");
@@ -166,8 +167,7 @@ class MetaData extends MY_Controller
                         if(
                             $value_part != "" && (
                                 !array_key_exists($key, $formdata) ||
-                                !array_key_exists($index, $formdata[$key]) || 
-                                $value_part != $formdata[$key][$index]
+                                !in_array($value_part, $formdata[$key])
                             )
                         ) {
                             if(!array_key_exists($i, $deletedValues)) {
@@ -221,15 +221,17 @@ class MetaData extends MY_Controller
                     foreach($value as $index => $value_part) {
                         if(
                             $value_part != "" && (
-                                !array_key_exists($index, $shadowdata[$key]) || 
-                                $value_part != $shadowdata[$key][$index]
+                                !in_array($value_part, $shadowdata[$key])
                             )
                         ) {
                             if(!array_key_exists($i, $addedValues)) {
                                 $addedValues[$i] = array();
                             }
-                            $addedValues[$i][] = (object)array("key" => $key, "value" => $value_part);
-                            $i++;
+                            $addedObject = (object)array("key" => $key, "value" => $value_part); echo "<br/><br/>";
+                            if(!in_array($addedObject, $addedValues[$i])){
+                                $addedValues[$i][] = $addedObject;
+                                $i++;
+                            }
                         }
                     }
                 } else {

@@ -458,8 +458,8 @@ function addValueRow($element) {
 	template = addRowBtn[0].dataset['template'].replace("__row_input_id__", addRowBtn[0].dataset['nextindex']);
 	template = "<div class='row showWhenEdit row-" + $element + 
 		"' id='row-" + $element + "-" + addRowBtn[0].dataset['nextindex'] + "'>" +
-		"<span class='col-md-11'>" + template + "</span>" +
-		"<span class='col-md-1'><span class='btn btn-default glyphicon glyphicon-trash' " +
+		"<span class='col-xs-11'>" + template + "</span>" +
+		"<span class='col-xs-1'><span class='btn btn-default glyphicon glyphicon-trash' " +
 		"onclick='removeRow(\"#row-" + $element + "-" + addRowBtn[0].dataset['nextindex'] + 
 		"\");'></span></span></div>";
 	addRowBtn.before(template);

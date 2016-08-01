@@ -177,6 +177,11 @@
 		</type_configuration>
 		<required>true</required>
 		<allow_empty>true</allow_empty>
+		<multiple>
+			<min>0</min>
+			<max>100</max>
+			<infinite>false</infinite>
+		</multiple>
 		<depends>false</depends>
 	</example_select>
 	<project_id>

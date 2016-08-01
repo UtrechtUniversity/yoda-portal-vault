@@ -372,7 +372,7 @@ class metadataFields {
 				$regex .= "-";
 				$format .= "-";
 			}
-			$regex .= "(?:(?:0[1-9])|(?:1(?:1|2)))";
+			$regex .= "(?:(?:0[1-9])|(?:1(?:0|1|2)))";
 			$format .= "MM";
 		}
 		if(array_key_exists("show_days", $conf) && $conf["show_days"] !== false) {
@@ -565,10 +565,10 @@ EOT;
 				// 3) input
 				$deleteRowButtonTemplate = <<<'EOT'
 <div id="row-%1$s-%2$d" class="row showWhenEdit fixed-row-%1$s">
-	<span class="col-md-11">
+	<span class="col-xs-11">
 		%3$s
 	</span>
-	<span class="col-md-1"><span class="btn btn-default glyphicon glyphicon-trash" onclick="removeFixedRow('#row-%1$s-%2$d');"></span></span>
+	<span class="col-xs-1"><span class="btn btn-default glyphicon glyphicon-trash" onclick="removeFixedRow('#row-%1$s-%2$d');"></span></span>
 </div>
 EOT;
 
@@ -581,7 +581,7 @@ EOT;
 						$this->findProperInput($key, sprintf($inputArrayName, $key, 0), $config, $currentValue)
 					);
 				} else {
-					for($i = 0; $i < sizeof($currentValue); $i++) {
+					foreach(array_keys($currentValue) as $i) {
 						$input .= sprintf(
 							$deleteRowButtonTemplate,
 							$key,
@@ -627,7 +627,7 @@ EOT;
 			$input,
 			$this->getShadowInput($key, $config, $value),
 			htmlentities($rowInputTemplate),
-			is_array($value) ? sizeof($value) : 1,
+			is_array($currentValue) && sizeof($currentValue) > 0 ? max(array_keys($currentValue)) + 1 : 1,
 			$hasError ? " has-error" : "",
 			$rowDepends,
 			$indent
