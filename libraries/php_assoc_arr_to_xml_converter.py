@@ -40,6 +40,8 @@ for l in lines:
 			if value in replaceVals.keys():
 				for char in replaceVals.keys():
 					value = value.replace(char, replaceVals[char])
+			if value.endswith(","):
+				value = value[0:-1]
 			xml.append("%s<%s>%s</%s>" %(getIndents(indent), elems[0][0], value, elems[0][0]))
 		elif ")" in l and len(lastKey) > 0:
 			indent -= 1

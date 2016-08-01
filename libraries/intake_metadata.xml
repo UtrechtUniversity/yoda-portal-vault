@@ -5,18 +5,18 @@
 		<type>custom</type>
 		<custom_type>directorylist</custom_type>
 		<type_configuration>
-			<showProjects>true,</showProjects>
-			<showStudies>true,</showStudies>
-			<showDatasets>true,</showDatasets>
-			<requireContribute>true,</requireContribute>
+			<showProjects>true</showProjects>
+			<showStudies>true</showStudies>
+			<showDatasets>true</showDatasets>
+			<requireContribute>true</requireContribute>
 			<requireManager>false</requireManager>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>false,</allow_empty>
-		<depends>false,</depends>
+		<required>true</required>
+		<allow_empty>false</allow_empty>
+		<depends>false</depends>
 		<multiple>
-			<min>0,</min>
-			<max>100,</max>
+			<min>0</min>
+			<max>100</max>
 			<infinite>false</infinite>
 		</multiple>
 	</example_dirlist>
@@ -25,20 +25,20 @@
 		<help>This is an example of how to use the date time field</help>
 		<type>datetime</type>
 		<type_configuration>
-			<show_years>true,</show_years>
-			<show_months>true,</show_months>
-			<show_days>true,</show_days>
-			<show_time>true,</show_time>
+			<show_years>true</show_years>
+			<show_months>true</show_months>
+			<show_days>true</show_days>
+			<show_time>true</show_time>
 			<min_date_time>
 				<fixed>2016-07-25</fixed>
 			</min_date_time>
 			<max_date_time>false</max_date_time>
 		</type_configuration>
-		<required>true,</required>
-		<depends>false,</depends>
+		<required>true</required>
+		<depends>false</depends>
 		<multiple>
-			<min>3,</min>
-			<max>100,</max>
+			<min>3</min>
+			<max>100</max>
 			<infinite>false</infinite>
 		</multiple>
 	</date_time_example>
@@ -47,10 +47,10 @@
 		<help>This is an example of how to use the date time field</help>
 		<type>datetime</type>
 		<type_configuration>
-			<show_years>true,</show_years>
-			<show_months>true,</show_months>
-			<show_days>true,</show_days>
-			<show_time>true,</show_time>
+			<show_years>true</show_years>
+			<show_months>true</show_months>
+			<show_days>true</show_days>
+			<show_time>true</show_time>
 			<min_date_time>
 				<linked>date_time_example</linked>
 			</min_date_time>
@@ -62,11 +62,11 @@
 		<help>Enter the start year of the project</help>
 		<type>text</type>
 		<type_configuration>
-			<length>4,</length>
+			<length>4</length>
 			<pattern>^[0-9]{4}$</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
+		<required>true</required>
 		<depends>false</depends>
 	</start_year>
 	<end_year>
@@ -74,11 +74,11 @@
 		<help>Enter the end year of the project</help>
 		<type>text</type>
 		<type_configuration>
-			<length>4,</length>
+			<length>4</length>
 			<pattern>^[0-9]{4}$</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
+		<required>true</required>
 		<depends>false</depends>
 	</end_year>
 	<depends_example>
@@ -86,11 +86,11 @@
 		<help>This field shows how to use the depends object</help>
 		<type>text</type>
 		<type_configuration>
-			<length>10,</length>
+			<length>10</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
+		<required>true</required>
 		<depends>
 			<action>show</action>
 			<if>any</if>
@@ -127,11 +127,11 @@
 				<option>option 7</option>
 			</options>
 			<min>false, // TODO min and max values check if enough and not too many are selected</min>
-			<max>false,</max>
+			<max>false</max>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
-		<depends>false,</depends>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
+		<depends>false</depends>
 	</example_checkbox>
 	<example_radios>
 		<label>Example radio buttons</label>
@@ -148,8 +148,8 @@
 				<option>option 7</option>
 			</options>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</example_radios>
 	<example_bool>
@@ -160,8 +160,8 @@
 			<true_val>yes</true_val>
 			<false_val>no</false_val>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</example_bool>
 	<example_select>
@@ -169,14 +169,14 @@
 		<help>The select field can be used to provide multiple options</help>
 		<type>select</type>
 		<type_configuration>
-			<restricted>true,</restricted>
-			<allow_create>false,</allow_create>
-			<begin>0,</begin>
-			<end>2016,</end>
-			<step>1,</step>
+			<restricted>true</restricted>
+			<allow_create>true</allow_create>
+			<begin>0</begin>
+			<end>2016</end>
+			<step>1</step>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</example_select>
 	<project_id>
@@ -184,16 +184,16 @@
 		<help>The unique identifier of this project</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>^[0-9]+</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
-		<depends>false,</depends>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
+		<depends>false</depends>
 		<multiple>
-			<min>0,</min>
-			<max>100,</max>
+			<min>0</min>
+			<max>100</max>
 			<infinite>false</infinite>
 		</multiple>
 	</project_id>
@@ -202,12 +202,12 @@
 		<help>Enter a descriptive name for the project</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</project_name>
 	<project_description>
@@ -215,16 +215,16 @@
 		<help>Enter a short description for the project</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>true</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
-		<depends>false,</depends>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
+		<depends>false</depends>
 		<multiple>
-			<min>0,</min>
-			<max>100,</max>
+			<min>0</min>
+			<max>100</max>
 			<infinite>false</infinite>
 		</multiple>
 	</project_description>
@@ -234,17 +234,17 @@
 		<type>custom</type>
 		<custom_type>userlist</custom_type>
 		<type_configuration>
-			<allow_create>false,</allow_create>
-			<show_admins>true,</show_admins>
-			<show_users>true,</show_users>
+			<allow_create>false</allow_create>
+			<show_admins>true</show_admins>
+			<show_users>true</show_users>
 			<show_readonly>true</show_readonly>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>false,</allow_empty>
-		<depends>false,</depends>
+		<required>true</required>
+		<allow_empty>false</allow_empty>
+		<depends>false</depends>
 		<multiple>
-			<min>0,</min>
-			<max>100,</max>
+			<min>0</min>
+			<max>100</max>
 			<infinite>false</infinite>
 		</multiple>
 	</dataset_owner>
@@ -253,12 +253,12 @@
 		<help>Enter the discipline for this project</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</discipline>
 	<study_id>
@@ -266,12 +266,12 @@
 		<help>Enter the unique identifier for this study</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</study_id>
 	<study_name>
@@ -279,12 +279,12 @@
 		<help>Enter a descriptive name for this study</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</study_name>
 	<dataset_id>
@@ -292,12 +292,12 @@
 		<help>The unique identifier for this dataset</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>^[0-9]+</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</dataset_id>
 	<dataset_title>
@@ -305,12 +305,12 @@
 		<help>Enter a descriptive title for this dataset</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</dataset_title>
 	<dataset_description>
@@ -318,12 +318,12 @@
 		<help>Enter a short description of the dataset</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</dataset_description>
 	<dataset_collectiondate_start>
@@ -331,12 +331,12 @@
 		<help>Enter the date the collection process started</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</dataset_collectiondate_start>
 	<dataset_collectiondate_end>
@@ -344,12 +344,12 @@
 		<help>Enter the date the collection process was finished</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</dataset_collectiondate_end>
 	<dataset_version>
@@ -357,12 +357,12 @@
 		<help>Enter the version of the dataset</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</dataset_version>
 	<predecessor>
@@ -370,12 +370,12 @@
 		<help>Enter the name of the dataset this dataset was derived from</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</predecessor>
 	<creator>
@@ -384,13 +384,13 @@
 		<type>custom</type>
 		<custom_type>userlist</custom_type>
 		<type_configuration>
-			<allow_create>false,</allow_create>
-			<show_admins>true,</show_admins>
-			<show_users>true,</show_users>
+			<allow_create>false</allow_create>
+			<show_admins>true</show_admins>
+			<show_users>true</show_users>
 			<show_readonly>true</show_readonly>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>false,</allow_empty>
+		<required>true</required>
+		<allow_empty>false</allow_empty>
 		<depends>false</depends>
 	</creator>
 	<unit_analysis>
@@ -398,12 +398,12 @@
 		<help>E.g. groups, individuals (select from list</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</unit_analysis>
 	<region_name>
@@ -411,12 +411,12 @@
 		<help>Enter the name of the region this dataset was collected</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</region_name>
 	<dataset_period_start>
@@ -424,12 +424,12 @@
 		<help>Enter the year the dataset starts in</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</dataset_period_start>
 	<dataset_period_end>
@@ -437,12 +437,12 @@
 		<help>Enter the year the dataset ends in</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</dataset_period_end>
 	<dataset_contact>
@@ -451,13 +451,13 @@
 		<type>custom</type>
 		<custom_type>userlist</custom_type>
 		<type_configuration>
-			<allow_create>false,</allow_create>
-			<show_admins>true,</show_admins>
-			<show_users>true,</show_users>
+			<allow_create>false</allow_create>
+			<show_admins>true</show_admins>
+			<show_users>true</show_users>
 			<show_readonly>true</show_readonly>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>false,</allow_empty>
+		<required>true</required>
+		<allow_empty>false</allow_empty>
 		<depends>false</depends>
 	</dataset_contact>
 	<dataset_language>
@@ -465,12 +465,12 @@
 		<help>Enter the language of the dataset contents</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</dataset_language>
 	<subject>
@@ -478,12 +478,12 @@
 		<help>Enter the subject of the dataset</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</subject>
 	<aggregate_level>
@@ -491,12 +491,12 @@
 		<help>Enter the aggragate level of the dataset</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</aggregate_level>
 	<location>
@@ -504,12 +504,12 @@
 		<help>Enter the location of the dataset</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</location>
 	<time>
@@ -517,12 +517,12 @@
 		<help>Enter the time this dataset was created</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</time>
 	<method>
@@ -530,12 +530,12 @@
 		<help>Explain the method used to create this dataset</help>
 		<type>text</type>
 		<type_configuration>
-			<length>false,</length>
+			<length>false</length>
 			<pattern>*</pattern>
 			<longtext>true</longtext>
 		</type_configuration>
-		<required>true,</required>
-		<allow_empty>true,</allow_empty>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
 		<depends>false</depends>
 	</method>
 </schema>

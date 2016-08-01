@@ -166,6 +166,7 @@ class MetadataModel extends CI_Model {
         myRule {
             *isCollection = true;
             uuIiGetAvailableValuesForKeyLike(*key, *searchString, *isCollection, *values);
+            uuJoin("#;#", *values, *str);
         }';
 
         try {
@@ -176,13 +177,13 @@ class MetadataModel extends CI_Model {
                     "*key" => $key,
                     "*searchString" => $searchString
                     ),
-                array("*values")
+                array("*str")
             );
 
             $result = $rule->execute();
 
-            if($result && array_key_exists("*values", $result)) {
-                $like = explode("#;#", $result["*values"]);
+            if($result && array_key_exists("*str", $result)) {
+                $like = explode("#;#", $result["*str"]);
                 return array_slice($like, 1);
             }
 

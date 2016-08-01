@@ -905,6 +905,7 @@ EOT;
 			$template .= ' class="showWhenEdit meta-suggestions-field input-%1$s"';
 			$template .= ' data-placeholder--id="%3$s"';
 			$template .= ' data-placeholder--text="%3$s"';
+			$template .= ' data-for="%1$s"';
 			$template .= ' %4$s';
 			$template .= '/>';
 
