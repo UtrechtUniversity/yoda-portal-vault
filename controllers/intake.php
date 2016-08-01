@@ -66,7 +66,7 @@ class Intake extends MY_Controller
                 'username' => $this->rodsuser->getUsername(),
             ),
         ));
-        // $this->load->view('intake', $this->data);
+        $this->load->view('intake', $this->data);
         $this->load->view('common-end');
     }
 
@@ -98,14 +98,16 @@ class Intake extends MY_Controller
     }
 
     private function verifyPageArguments2() {
-        $arg = $this->input->get('dir');
-        $studyIDBegin = strpos(
-            sprintf(
+        $this->current_path = $this->input->get('dir');
+        $pathStart = sprintf(
                 "/%s/home/%s", 
                 $this->config->item('rodsServerZone'), 
                 $this->config->item('intake-prefix')
-            ), 
-            $arg
+            );
+
+        $studyIDBegin = strpos(
+            $this->current_path,
+            $pathStart
         );
         
         if($studyIDBegin !== 0) {
@@ -114,12 +116,75 @@ class Intake extends MY_Controller
         } else {
             $rodsaccount = $this->rodsuser->getRodsAccount();
             try {
-                $this->dir = new ProdsDir($rodsaccount, $arg, true);
-                echo $this->dir->getName();
+                $this->dir = new ProdsDir($rodsaccount, $this->current_path, true);
+
+                $segments = explode("/", substr($this->current_path, strlen($pathStart)));
+                $studyID = $this->validateStudyPermission($segments[0]);
+
+                // study dependant intake path.
+                $this->intake_path = sprintf(
+                        "/%s/home/%s%s", 
+                        $this->config->item('rodsServerZone'),
+                        $this->config->item('intake-prefix'),
+                        $studyID
+                    );
+
+                $validFolders = $this->validateFolder();
+
+                $this->getTitle($segments);
+
+                $urls = (object) array(
+                    "site" => site_url(), 
+                    "module" => $this->modulelibrary->getModuleBase()
+                );
+                
+                // Prepare data for view
+                $dataArr = array(
+                        "hasStudies" => $this->studies[0],
+                        "rodsaccount" => $this->rodsuser->getRodsAccount(),
+                        "permissions" => $this->permissions,
+                        "studies" => $this->studies,
+                        "rootName" => $this->studyID,
+                        "segments" => $this->segments,
+                        // "studyID" => $studyID,
+                        // "title" => sprintf(
+                        //     "%s %s",
+                        //     ucfirst(lang('INTAKE_STUDY')),
+                        //     $studyID
+                        // ),
+                        // "studyFolder" => '',// $studyFolder,
+                        "title" => $this->title,
+                        "intakePath" => $this->intake_path,
+                        "currentDir" => $this->current_path,
+                        "content" => $this->modulelibrary->name() . '/file_overview',
+                        "directories" => $this->dir->getChildDirs(),
+                        "files" => $this->dir->getChildFiles(),
+                        "selectableScanFolders" => $validFolders,
+                        "currentViewLocked" => $this->currentViewLocked,
+                        "currentViewFrozen" => $this->currentViewFrozen,
+                        "url" => $urls
+                    );
+                $this->data = array_merge($this->data, $dataArr);
+
 
             } catch(RODSException $e) {
                 echo $e->showStacktrace();
             }
+        }
+    }
+
+    private function getTitle($segments) {
+        $levs = $this->config->item('level-hierarchy');
+        if(sizeof($levs) >= sizeof($segments)) {
+            $lev = $levs[sizeof($segments) - 1];
+            $this->title = sprintf(
+                '<span class="glyphicon glyphicon-%1$s">%2$s</span> <i>%3$s</i>',
+                htmlentities($lev["glyphicon"]),
+                ucfirst(htmlentities($lev["title"])),
+                ucfirst(htmlentities(array_pop($segments)))
+            );
+        } else {
+            $this->title = array_pop($segments);
         }
     }
 
@@ -209,6 +274,24 @@ class Intake extends MY_Controller
         $this->session->set_userdata('studyID', $studyID);
 
         return $studyID;
+    }
+
+    private function validateFolder() {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+
+        $validFolders = array();
+        $dir = new ProdsDir($rodsaccount, $this->intake_path);
+        foreach($dir->getChildDirs() as $folder) {
+            array_push($validFolders, $folder->getName());
+        }
+
+        $this->dir = new ProdsDir($rodsaccount, $this->current_path);
+        $currentViewLocked = $this->dataset->getLockedStatus($rodsaccount, $this->current_path);
+        $this->currentViewLocked = $currentViewLocked['locked'];
+        $this->currentViewFrozen = $currentViewLocked['frozen'];
+
+        return $validFolders;
+
     }
 
     /**

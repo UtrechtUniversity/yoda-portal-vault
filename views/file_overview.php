@@ -54,11 +54,15 @@
 			<th data-toggle="tool-tip" title="<?=$glyphLabel;?>" > <!-- Name -->
 				<span class="glyphicon glyphicon-<?=$glyph;?>" style="margin-right: 10px"></span>
 				<?php
-					$lnk = "<a href=\"" . $url->module . "/intake/index/%1s/%2s\">%2s</a>";
+					// $lnk = "<a href=\"" . $url->module . "/intake/index/%1s/%2s\">%2s</a>";
+					$lnk = '<a href="%1$s/intake/index?dir=%2$s/%3$s">%3$s</a>';
 					echo $isSet ? sprintf(
 							$lnk,
-							htmlentities($studyID), 
-							htmlentities($dir->getName()),
+							// htmlentities($studyID), 
+							// htmlentities($dir->getName()),
+							// htmlentities($dir->getName())
+							htmlentities($url->module),
+							htmlentities($currentDir),
 							htmlentities($dir->getName())
 						) :
 						htmlentities($dir->getName());

@@ -4,8 +4,7 @@ if ($header && $hasStudies): ?>
 		<div class="row page-header">
 			<div class="col-sm-6">
 				<h1>
-					<span class="glyphicon glyphicon-education"></span>
-					<?php echo htmlentities($title); ?>
+					<?php echo ($title); ?>
 				</h1>
 				<?php if($userIsAllowed) echo htmlentities($intakePath . ($studyFolder?'/'.$studyFolder:'')); ?>
 			</div>
@@ -40,8 +39,10 @@ if ($header && $hasStudies): ?>
 			<ul class="dropdown-menu">
 				<?php foreach($studies as $study):
 					$class = $study == $studyID ? 'glyphicon-ok' : 'pad-left';
-					$str = "<li ><a class=\"glyphicon %s\" href=\"" . $url->module . "/intake/index/%s\">&nbsp;%s</a></li>";
-					echo sprintf($str, $class, $study, $study);
+					// $str = "<li ><a class=\"glyphicon %s\" href=\"" . $url->module . "/intake/index/%s\">&nbsp;%s</a></li>";
+					// echo sprintf($str, $class, $study, $study);
+					$str = '<li><a class="glyphicon %5%s" href="%1$s/intake?dir=/%2$s/home/%3$s%4$s">&nbsp;%4$s</a><li>';
+					echo sprintf($str, $url->module, $this->config->item('rodsServerZone'), $this->config->item('intake-prefix'), $study, $class);
 				endforeach;
 				?>
 			</ul>
@@ -67,7 +68,7 @@ if ($header && $hasStudies): ?>
 			<span class="glyphicon glyphicon-tags"></span> Meta data
 		</a>
 	<?php endif; ?>
-		<?php $this->load->view($content); ?>
+		<?php //$this->load->view($content); ?>
 	<?=form_close();
 ?>
 </div>
