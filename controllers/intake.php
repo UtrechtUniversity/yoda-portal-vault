@@ -39,11 +39,26 @@ class Intake extends MY_Controller
      * @param string $studyFolder
      *
      * */
-    public function index($studyID='', $studyFolder='')
-    {
-        $this->verifyPageArguments($studyID, $studyFolder, true);
+    // public function index($studyID='', $studyFolder='')
+    // {
+    //     $this->verifyPageArguments($studyID, $studyFolder, true);
 
-        $this->load->view('common-start', array(
+    //     $this->load->view('common-start', array(
+    //         'styleIncludes' => array('css/datatables.css', 'css/intake.css', 'lib/chosen-select/chosen.min.css'),
+    //         'scriptIncludes' => array('js/datatables.js', 'js/intake.js', 'lib/chosen-select/chosen.jquery.min.js'),
+    //         'activeModule'   => $this->modulelibrary->name(),
+    //         'user' => array(
+    //             'username' => $this->rodsuser->getUsername(),
+    //         ),
+    //     ));
+    //     $this->load->view('intake', $this->data);
+    //     $this->load->view('common-end');
+    // }
+
+    public function index(){
+        $this->verifyPageArguments2();
+
+         $this->load->view('common-start', array(
             'styleIncludes' => array('css/datatables.css', 'css/intake.css', 'lib/chosen-select/chosen.min.css'),
             'scriptIncludes' => array('js/datatables.js', 'js/intake.js', 'lib/chosen-select/chosen.jquery.min.js'),
             'activeModule'   => $this->modulelibrary->name(),
@@ -51,7 +66,7 @@ class Intake extends MY_Controller
                 'username' => $this->rodsuser->getUsername(),
             ),
         ));
-        $this->load->view('intake', $this->data);
+        // $this->load->view('intake', $this->data);
         $this->load->view('common-end');
     }
 
@@ -80,6 +95,32 @@ class Intake extends MY_Controller
 
         $this->load->view('edit_meta', $this->data);
         $this->load->view('common-end');
+    }
+
+    private function verifyPageArguments2() {
+        $arg = $this->input->get('dir');
+        $studyIDBegin = strpos(
+            sprintf(
+                "/%s/home/%s", 
+                $this->config->item('rodsServerZone'), 
+                $this->config->item('intake-prefix')
+            ), 
+            $arg
+        );
+        
+        if($studyIDBegin !== 0) {
+            // error
+            echo "Not a valid intake folder";
+        } else {
+            $rodsaccount = $this->rodsuser->getRodsAccount();
+            try {
+                $this->dir = new ProdsDir($rodsaccount, $arg, true);
+                echo $this->dir->getName();
+
+            } catch(RODSException $e) {
+                echo $e->showStacktrace();
+            }
+        }
     }
 
     private function verifyPageArguments($studyID, $studyFolder, $isFolderOptional = true) {
