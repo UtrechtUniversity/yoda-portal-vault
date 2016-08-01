@@ -134,4 +134,87 @@ class Study extends CI_Model {
 
         return array();
     }
+
+    public function getDirectories(
+        $iRodsAccount, 
+        $showProjects, 
+        $showStudies, 
+        $showDatasets, 
+        $requiresContribute, 
+        $requiresManager
+    ) {
+        $ruleBody = 
+        'myRule {
+            if(*showprojects == "1") {
+                *showProjects = true;
+            } else {
+                *showProjects = false;
+            }
+
+            if(*showstudies == "1") {
+                *showStudies = true;
+            } else {
+                *showStudies = false;
+            }
+
+            if(*showdatasets == "1") {
+                *showDatasets = true;
+            } else {
+                *showDatasets = false;
+            }
+
+            if(*requirescontribute == "1") {
+                *requiresContribute = true;
+            } else {
+                *requiresContribute = false;
+            }
+
+            if(*requiresmanager == "1") {
+                *requiresManager = true;
+            } else {
+                *requiresManager = false;
+            }
+            
+            uuIiGetDirectories(
+                *showProjects, 
+                *showStudies, 
+                *showDatasets, 
+                *requiresContribute, 
+                *requiresManager,
+                *directoryList
+            );
+
+            uuJoin(";", *directoryList, *directoryList);
+            #*directoryList = "lol;jolo";
+            
+        }';
+
+        
+
+        
+
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*showprojects" => $showProjects,
+                    "*showstudies" => $showStudies,
+                    "*showdatasets" => $showDatasets,
+                    "*requirescontribute" => $requiresContribute,
+                    "*requiresmanager" => $requiresManager
+                ),
+                array("*directoryList")
+            );
+
+            $result = $rule->execute();
+
+            return explode(";", $result["*directoryList"]);
+        } catch(RODSException $e) {
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
+    }
 }

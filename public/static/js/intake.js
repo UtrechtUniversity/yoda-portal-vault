@@ -9,7 +9,9 @@ $(function() {
 	    ]
 	} );
 
-	$('[data-toggle="tooltip"]').tooltip();
+	$('[data-toggle="tooltip"]').tooltip({
+		"html" : true
+	});
 
 	$(".chosen").chosen({
 		inherit_select_classes : true,
@@ -19,15 +21,23 @@ $(function() {
 	$el = $("input.select-user-from-group");
 	createUserFromGroupInput($el);
 
+	$dirSelectors = $("input.select-dir-from-group");
+	createDirectoryListSelectInput($dirSelectors);
+
 	$metaSuggestions = $(".meta-suggestions-field");
 	createMetaSuggestionsInput($metaSuggestions);
+
+	var dateTimePickers = $(".metadata-datepicker");
+	dateTimePickers.each(function(i, e){
+		elem = $(e);
+		createDateTimePickerInput(elem);
+	});
 
 	$('#metadata_form').submit(function(e){
 		$('.fixed-row-removed').remove();
 	});
 
 	handleDependencyFields();
-	
 
 });
 
@@ -138,7 +148,6 @@ function createUserFromGroupInput(elem) {
 			type:     'get',
 			dataType: 'json',
 			data: function (term, page) {
-				console.log(elem.data());
 				return {
 					query: term,
 					showAdmins : elem.data()['displayrolesAdmins'],
@@ -186,6 +195,130 @@ function createUserFromGroupInput(elem) {
 	});
 }
 
+function createDirectoryListSelectInput(elem) {
+	if(!elem.hasClass('select-dir-from-group')) return;
+	elem.select2({
+		allowClear:  true,
+		openOnEnter: false,
+		minimumInputLength: 1,
+		ajax: {
+			quietMillis: 400,
+			url:      function(params) {
+				var url = $("input[name=intake_url]").val();
+				url += '/getDirectories/';
+				url += $("input[name=studyID]").val();
+				return url;
+			},
+			type:     'get',
+			dataType: 'json',
+			data: function (term, page) {
+				json = elem.data('typeconfiguration');
+				json.query = term;
+				return json;
+			},
+			results: function (directories) {
+				var query   = elem.data('select2').search.val();
+				var results = [];
+				var inputMatches = false;
+
+				directories.forEach(function(dirname) {
+					// Exclude users already in the group.
+					results.push({
+						id:   dirname,
+						text: dirname
+					});
+					if (query === dirname)
+						inputMatches = true;
+				});
+
+				return { results: results };
+			},
+		},
+		formatResult: function(result, $container, query, escaper) {
+			var rArr = result.text.split("/");
+			var rText = '<span class="grey">';
+			rText += rArr.slice(0,-1).join("/");
+			rText += "/</span>";
+
+			rText += rArr[rArr.length - 1].replace(query.term, '<span class="select2-match">' + query.term + '</span>');
+
+			return rText;
+		},
+		initSelection: function($el, callback) {
+			callback({ id: $el.val(), text: $el.val() });
+		},
+	});
+}
+
+function createDateTimePickerInput(elem) {
+	if(!elem.hasClass('metadata-datepicker')) return;
+
+	var config = elem.data('typeconfiguration');
+
+	var pickerConfig = {format : ''}
+
+	var viewMode;
+	var format = '';
+
+	if(config.show_years) {
+		pickerConfig.format += "YYYY";
+		pickerConfig.viewMode = 'years';
+	}
+	if(config.show_months) {
+		if(RegExp(".+[^ -\/:]$").test(pickerConfig.format)){
+			pickerConfig.format += "-";
+		}
+		pickerConfig.format += "MM";
+		pickerConfig.viewMode = pickerConfig.viewMode || 'months';
+	}
+	if(config.show_days) {
+		if(RegExp(".+[^ -\/:]$").test(pickerConfig.format)){
+			pickerConfig.format += "-";
+		}
+		pickerConfig.format += "DD";
+		pickerConfig.viewMode = pickerConfig.viewMode || 'days';
+	}
+	
+	if(config.show_time) {
+		if(RegExp(".+[^ -\/:]$").test(pickerConfig.format)){
+			pickerConfig.format += " ";
+		}
+		pickerConfig.format += "HH:mm";
+	}
+
+	elem.datetimepicker(pickerConfig);
+
+	if(config.min_date_time != undefined && config.min_date_time !== false) {
+		// pickerConfig.
+		elem.data("DateTimePicker").useCurrent = false;
+		if(config.min_date_time.fixed != undefined){
+			elem.data("DateTimePicker").minDate(config.min_date_time.fixed);
+		} else if(config.min_date_time.linked != undefined) {
+			var link = $("input.input-" + config.min_date_time.linked);
+			link.on("dp.change", function(e){
+				elem.data("DateTimePicker").minDate(e.date);
+			});
+			link.trigger("dp.change");
+		}
+	}
+
+	if(config.max_date_time != undefined && config.max_date_time !== false) {
+		// pickerConfig.
+		elem.data("DateTimePicker").useCurrent = false;
+		if(config.max_date_time.fixed != undefined){
+			elem.data("DateTimePicker").maxDate(config.max_date_time.fixed);
+		} else if(config.max_date_time.linked != undefined) {
+			var link = $("input.input-" + config.max_date_time.linked);
+			link.on("dp.change", function(e){
+				elem.data("DateTimePicker").maxDate(e.date);
+			});
+			link.trigger("dp.change");
+		}
+	}
+
+}
+
+
 /**
  * Creates a select2 input from the element given as argument
  * which provides meta data suggestions. The suggestions are
@@ -201,9 +334,10 @@ function createMetaSuggestionsInput(elem) {
 		ajax: {
 			quietMillis: 400,
 			url:      function(params) {
+				console.log(elem);
 				var url = $("input[name=intake_url]").val();
 				url += '/metadata/metasuggestions/';
-				url += elem.attr('id').substring(6);
+				url += elem.data('for');
 				return url;
 			},
 			type:     'get',
@@ -217,7 +351,7 @@ function createMetaSuggestionsInput(elem) {
 				var query   = elem.data('select2').search.val();
 				var results = [];
 				var inputMatches = false;
-
+				console.log(options);
 				options.forEach(function(userName) {
 					// Exclude options already in the group.
 					results.push({
@@ -324,8 +458,8 @@ function addValueRow($element) {
 	template = addRowBtn[0].dataset['template'].replace("__row_input_id__", addRowBtn[0].dataset['nextindex']);
 	template = "<div class='row showWhenEdit row-" + $element + 
 		"' id='row-" + $element + "-" + addRowBtn[0].dataset['nextindex'] + "'>" +
-		"<span class='col-md-11'>" + template + "</span>" +
-		"<span class='col-md-1'><span class='btn btn-default glyphicon glyphicon-trash' " +
+		"<span class='col-xs-11'>" + template + "</span>" +
+		"<span class='col-xs-1'><span class='btn btn-default glyphicon glyphicon-trash' " +
 		"onclick='removeRow(\"#row-" + $element + "-" + addRowBtn[0].dataset['nextindex'] + 
 		"\");'></span></span></div>";
 	addRowBtn.before(template);
@@ -338,6 +472,8 @@ function addValueRow($element) {
 		e = $(e);
 		createMetaSuggestionsInput(e);
 		createUserFromGroupInput(e);
+		createDirectoryListSelectInput(e);
+		createDateTimePickerInput(e);
 	});
 	addRowBtn[0].dataset['nextindex']++;
 }

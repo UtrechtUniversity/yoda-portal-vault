@@ -46,5 +46,9 @@ table#metadata_edittable > tbody > tr.form-group.has-error > td:first-child > sp
 	color: #F52A01;
 }
 
+.grey{
+	color: grey;
+}
+
 
 

@@ -21,9 +21,9 @@ class MetadataModel extends CI_Model {
             for($i = 0; $i < sizeof($deleteArr); $i++){
                 $kvp .= $alphabet[$i % 25];
                 foreach($deleteArr[$i] as $kv) {
-                    $ruleBody .= "msiAddKeyVal(" . $kvp . ", '" . $kv->key . "', '" . $kv->value . "');\n\t";
+                    $ruleBody .= "msiAddKeyVal(" . $kvp . ", '" . $kv->key . "', '" . str_replace("$", "&#36;", $kv->value) . "');\n\t";
                     $ruleBody .= "writeLine(\"serverLog\", \"Added call to remove key value pair ";
-                    $ruleBody .= $kv->key . ":" . $kv->value . ", resulting in " . $kvp . "\");\n\t";
+                    $ruleBody .= $kv->key . ":" . str_replace("$", "&#36;", $kv->value) . ", resulting in " . $kvp . "\");\n\t";
                 }
                 $ruleBody .= "*error1a = *error1a + errorcode(msiRemoveKeyValuePairsFromObj(" . $kvp . ", *objectPath, *t));\n\t";
             }
@@ -34,9 +34,9 @@ class MetadataModel extends CI_Model {
             for($i = 0; $i < sizeof($addArr); $i++){
                 $kvp .= $alphabet[$i % 25];
                 foreach($addArr[$i] as $kv) {
-                    $ruleBody .= "msiAddKeyVal(" . $kvp . ", '" . $kv->key . "', '" . $kv->value . "');\n\t";
+                    $ruleBody .= "msiAddKeyVal(" . $kvp . ", '" . $kv->key . "', '" . str_replace("$", "&#36;", $kv->value) . "');\n\t";
                     $ruleBody .= "writeLine(\"serverLog\", \"Added call to add key value pair ";
-                    $ruleBody .= $kv->key . ":" . $kv->value . "\");\n\t";
+                    $ruleBody .= $kv->key . ":" . str_replace("$", "&#36;", $kv->value) . "\");\n\t";
                 }
                 $ruleBody .= "*error2a = *error2a + errorcode(msiAssociateKeyValuePairsToObj(" . $kvp . ", *objectPath, *t));\n\t";
             }
@@ -78,9 +78,9 @@ class MetadataModel extends CI_Model {
 
             foreach($metadatas as $key => $val) {
                 if(array_key_exists($val->name, $rodsKVPairs)) {
-                    $rodsKVPairs[$val->name][] = htmlentities($val->value);
+                    $rodsKVPairs[$val->name][] = htmlentities(str_replace("&#36;", "$", $val->value));
                 } else {
-                    $rodsKVPairs[$val->name] = array(htmlentities($val->value));
+                    $rodsKVPairs[$val->name] = array(htmlentities(str_replace("&#36;", "$", $val->value)));
                 }
             }
             
@@ -166,6 +166,7 @@ class MetadataModel extends CI_Model {
         myRule {
             *isCollection = true;
             uuIiGetAvailableValuesForKeyLike(*key, *searchString, *isCollection, *values);
+            uuJoin("#;#", *values, *str);
         }';
 
         try {
@@ -176,13 +177,13 @@ class MetadataModel extends CI_Model {
                     "*key" => $key,
                     "*searchString" => $searchString
                     ),
-                array("*values")
+                array("*str")
             );
 
             $result = $rule->execute();
 
-            if($result && array_key_exists("*values", $result)) {
-                $like = explode("#;#", $result["*values"]);
+            if($result && array_key_exists("*str", $result)) {
+                $like = explode("#;#", $result["*str"]);
                 return array_slice($like, 1);
             }
 
