@@ -20,17 +20,20 @@ class metadataFields {
 
 	public function __construct() {
 		$this->CI =& get_instance();
+		$parser = xml_parser_create();
+		$fdir = "/var/www/html/yoda/yoda-portal/modules/intake/libraries/intake_metadata.xml";
+		$this->fields = json_decode(json_encode(simplexml_load_file($fdir)), true);
 	}
 
 	public function getFields($object, $isCollection) {
 		$iRodsAccount = $this->CI->rodsuser->getRodsAccount();
-		$fields = array();
 		$keys = array_keys($this->fields);
 		$values = $this->CI->metadatamodel->getValuesForKeys2($iRodsAccount, $keys, $object);
 
 		if(!$values) return false;
 
 		foreach($this->fields as $key => $arr) {
+			$this->castToValues($arr);
 			if(array_key_exists("multiple", $arr) || $arr["type"] == "checkbox") {
 				$arr["value"] = $values[$key];
 			} else {
@@ -44,6 +47,39 @@ class metadataFields {
 		}
 
 		return $fields;
+	}
+
+	/**
+	 * Function that recursivily casts int and bool values hidden
+	 * in strings inside an (associative) array to their correct
+	 * types
+	 * @param $arr 	The array to recursively fix (pass by reference)
+	 */
+	private function castToValues(&$arr) {
+		if(is_string($arr)) {
+			if (preg_match("/^[0-9]+$/", $arr))
+				$arr = (int)$arr;
+			elseif (strtolower($arr) == "true")
+				$arr = true;
+			elseif (strtolower($arr) == "false")
+				$arr = false;
+			elseif ($arr == "&lt;")
+				$arr = str_replace("&lt;", "<", $arr);
+			elseif ($arr == "&gt")
+				$arr = str_replace("&gt;", ">", $arr);
+		} else if(is_array($arr)) {
+			if(sizeof($arr) == 0 && $arr[0] === "")
+				$arr = "";
+			else {
+				if(sizeof($arr) == 1 && array_key_exists("option", $arr)) {
+					$arr = $arr["option"];
+				}
+				foreach($arr as $key => $value) {
+					$this->castToValues($value);
+					$arr[$key] = $value;
+				}
+			}
+		}
 	}
 
 	/**
@@ -248,7 +284,7 @@ class metadataFields {
 					(is_array($value) && sizeof($value) === 0) ||
 					(is_string($value) && strlen($value) === 0)
 				))) {
-				echo "\"" . $value . "\" fails because the pattern " . $conf["pattern"] . " does not match the value";
+				// echo "\"" . $value . "\" fails because the pattern " . $conf["pattern"] . " does not match the value";
 
 				$errors[] = ERROR_REGEX;
 				// return false;	
@@ -336,7 +372,7 @@ class metadataFields {
 				$regex .= "-";
 				$format .= "-";
 			}
-			$regex .= "(?:(?:0[1-9])|(?:1(?:1|2)))";
+			$regex .= "(?:(?:0[1-9])|(?:1(?:0|1|2)))";
 			$format .= "MM";
 		}
 		if(array_key_exists("show_days", $conf) && $conf["show_days"] !== false) {
@@ -529,10 +565,10 @@ EOT;
 				// 3) input
 				$deleteRowButtonTemplate = <<<'EOT'
 <div id="row-%1$s-%2$d" class="row showWhenEdit fixed-row-%1$s">
-	<span class="col-md-11">
+	<span class="col-xs-11">
 		%3$s
 	</span>
-	<span class="col-md-1"><span class="btn btn-default glyphicon glyphicon-trash" onclick="removeFixedRow('#row-%1$s-%2$d');"></span></span>
+	<span class="col-xs-1"><span class="btn btn-default glyphicon glyphicon-trash" onclick="removeFixedRow('#row-%1$s-%2$d');"></span></span>
 </div>
 EOT;
 
@@ -545,7 +581,7 @@ EOT;
 						$this->findProperInput($key, sprintf($inputArrayName, $key, 0), $config, $currentValue)
 					);
 				} else {
-					for($i = 0; $i < sizeof($currentValue); $i++) {
+					foreach(array_keys($currentValue) as $i) {
 						$input .= sprintf(
 							$deleteRowButtonTemplate,
 							$key,
@@ -587,12 +623,11 @@ EOT;
 			$key,
 			array_key_exists("multiple", $config) || $config["type"] == "checkbox" ? $multiValueList : $currentValue,
 			$config["label"],
-			// $config["help"],
 			$help,
 			$input,
 			$this->getShadowInput($key, $config, $value),
 			htmlentities($rowInputTemplate),
-			is_array($value) ? sizeof($value) : 1,
+			is_array($currentValue) && sizeof($currentValue) > 0 ? max(array_keys($currentValue)) + 1 : 1,
 			$hasError ? " has-error" : "",
 			$rowDepends,
 			$indent
@@ -631,11 +666,6 @@ EOT;
 		}
 
 		if(in_array(ERROR_MAX_LENGTH, $errors)) {
-			echo ERROR_MAX_LENGTH;
-			var_dump(in_array(ERROR_MAX_LENGTH, $errors));
-			echo "<p>Errors with max length in there: ";
-			var_dump($errors);
-			echo "</p>";
 			if(
 				in_array("type_configuration", $definitions) 
 				&& in_array("length", $definitions["type_configuration"])
@@ -759,7 +789,6 @@ EOT;
 				$input = $this->getCustomInput($key, $inputName, $config, $value);
 				break;
 			default:
-				var_dump($key);
 				$input = "<p>default value (no type found)</p>";
 				break;
 		}
@@ -876,6 +905,7 @@ EOT;
 			$template .= ' class="showWhenEdit meta-suggestions-field input-%1$s"';
 			$template .= ' data-placeholder--id="%3$s"';
 			$template .= ' data-placeholder--text="%3$s"';
+			$template .= ' data-for="%1$s"';
 			$template .= ' %4$s';
 			$template .= '/>';
 
@@ -958,17 +988,18 @@ EOT;
 		$template .= '		%3$s';
 		$template .= '	</label>';
 		$template .= '</div>';
-		
+
 		$input = '';
+
 		foreach($config["type_configuration"]["options"] as $option) {
 			$input .= sprintf(
 				$template,
 				$key,
 				$type == "checkbox" ? $inputName . '[]' : $inputName,
 				$option,
-				$value == $option 
-					|| (is_array($value) && 
-						in_array($option, $value)) 
+				((is_string($value) && $value == $option)
+					|| ((is_array($value) && 
+						in_array($option, $value)))) 
 					? ' checked="checked"' : 
 					'',
 				$type
@@ -1025,585 +1056,5 @@ EOT;
 			$extra
 		);
 	}
-
-
-	public $fields = array (
-		"example_dirlist" => array (
-				"label" => "Directory",
-				"help" => "Select a directory from the list",
-				"type" => "custom",
-				"custom_type" => "directorylist",
-				"type_configuration" => array (
-					"showProjects" => true,
-					"showStudies" => true,
-					"showDatasets" => true,
-					"requireContribute" => true,
-					"requireManager" => false
-				),
-				"required" => true,
-				"allow_empty" => false,
-				"depends" => false,
-				"multiple" => array(
-						"min" => 0,
-						"max" => 100,
-						"infinite" => false
-					)
-			),
-		"date_time_example" => array(
-			"label" => "datetime example",
-			"help" => "This is an example of how to use the date time field",
-			"type" => "datetime",
-			"type_configuration" => array(
-				"show_years" => true,
-				"show_months" => true,
-				"show_days" => true,
-				"show_time" => true,
-				"min_date_time" => array(
-					"fixed" => "2016-07-25"
-					// "linked" => date_time_example2
-				),
-				"max_date_time" => false
-			),
-			"required" => true,
-			"depends" => false,
-			"multiple" => array(
-				"min" => 3,
-				"max" => 100,
-				"infinite" => false
-			)
-		),
-		"date_time_example2" => array(
-			"label" => "datetime example",
-			"help" => "This is an example of how to use the date time field",
-			"type" => "datetime",
-			"type_configuration" => array(
-				"show_years" => true,
-				"show_months" => true,
-				"show_days" => true,
-				"show_time" => true,
-				"min_date_time" => array(
-					// "fixed" => "2016-07-25"
-					"linked" => "date_time_example"
-				),
-				"max_date_time" => false
-			)
-		),
-		"start_year" => array(
-			"label" => "Start year",
-			"help" => "Enter the start year of the project",
-			"type" => "text",
-			"type_configuration" => array(
-				"length" => 4,
-				"pattern" => "^[0-9]{4}$",
-				"longtext" => false
-			),
-			"required" => true,
-			"depends" => false
-		),
-		"end_year" => array(
-			"label" => "End year",
-			"help" => "Enter the end year of the project",
-			"type" => "text",
-			"type_configuration" => array(
-				"length" => 4,
-				"pattern" => "^[0-9]{4}$",
-				"longtext" => false
-			),
-			"required" => true,
-			"depends" => false
-		),
-	    "depends_example" => array (
-	        "label" => "Example",
-	        "help" => "This field shows how to use the depends object",
-	        "type" => "text",
-	        "type_configuration" => array(
-	            "length" => 10,
-	            "pattern" => "*",
-	            "longtext" => false
-	        ),
-	        "required" => true,
-	        "depends" => array(
-	            "action" => "show",
-	            "if" => "any",
-	            "fields" => array(
-	                array(
-	                    "field_name" => "start_year",
-	                    "operator" => "!=",
-	                    "value" => array(
-	                        // "fixed" => 2000
-	                        // "like" => "18"
-	                        "regex" => "^[0-9]{2}18$"
-	                    )
-	                ),
-	                array(
-	                    "field_name" => "end_year",
-	                    "operator" => "<",
-	                    "value" => array(
-	                        "fixed" => 2016
-	                    )
-	                )
-	            )
-	        )
-	    ),
-		"example_checkbox" => array(
-			"label" => "Example checkboxes",
-			"help" => "The checkbox field can be used to provide multiple options, of which zero or more can be selected. Generally used with only few options",
-			"type" => "checkbox",
-			"type_configuration" => array (
-				"options" => array(
-						"option 1",
-						"option 2",
-						"option 3",
-						"option 4",
-						"option 5",
-						"option 6",
-						"option 7"
-					),
-				"min" => false, // TODO min and max values check if enough and not too many are selected
-				"max" => false,
-				),
-			"required" => true,
-			"allow_empty" => true,
-			"depends" => false,
-		),
-		"example_radios" => array(
-			"label" => "Example radio buttons",
-			"help" => "The radio field can be used to provide multiple options, of which exactly one can be selected. Generally used with only few options",
-			"type" => "radio",
-			"type_configuration" => array (
-				"options" => array(
-						"option 1",
-						"option 2",
-						"option 3",
-						"option 4",
-						"option 5",
-						"option 6",
-						"option 7"
-					),
-				),
-			"required" => true,
-			"allow_empty" => true,
-			"depends" => false
-		),
-		"example_bool" => array(
-			"label" => "Publish dataset",
-			"help" => "Will this dataset be published?",
-			"type" => "bool",
-			"type_configuration" => array(
-				"true_val" => "yes",
-				"false_val" => "no"
-			),
-			"required" => true,
-			"allow_empty" => true,
-			"depends" => false
-		),
-		"example_select" => array(
-				"label" => "Example select",
-				"help" => "The select field can be used to provide multiple options",
-				"type" => "select",
-				"type_configuration" => array (
-					"restricted" => true,
-					"allow_create" => false,
-					"begin" => 0,
-					"end" => 2016,
-					"step" => 1,
-					// "options" => array(
-					// 		"option 1",
-					// 		"option 2",
-					// 		"option 3",
-					// 		"option 4",
-					// 		"option 5",
-					// 		"option 6",
-					// 		"option 7"
-					// 	)
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"project_id" => array (
-				"label" => "Project ID",
-				"help" => "The unique identifier of this project",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "^[0-9]+",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false,
-				"multiple" => array(
-						"min" => 0,
-						"max" => 100,
-						"infinite" => false
-					)
-			),
-		"project_name" => array(
-				"label" => "Project name",
-				"help" => "Enter a descriptive name for the project",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"project_description" => array(
-				"label" => "Project description",
-				"help" => "Enter a short description for the project",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => true
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false,
-				"multiple" => array(
-						"min" => 0,
-						"max" => 100,
-						"infinite" => false
-					)
-			),
-
-		// TODO: allow repeat
-		"dataset_owner" => array (
-				"label" => "Primary Investigator",
-				"help" => "Enter the username of the primary investigator or contact person for this dataset",
-				"type" => "custom",
-				"custom_type" => "userlist",
-				"type_configuration" => array (
-					"allow_create" => false,
-					"show_admins" => true,
-					"show_users" => true,
-					"show_readonly" => true
-				),
-				"required" => true,
-				"allow_empty" => false,
-				"depends" => false,
-				"multiple" => array(
-						"min" => 0,
-						"max" => 100,
-						"infinite" => false
-					)
-			),
-
-		"discipline" => array(
-				"label" => "Discipline",
-				"help" => "Enter the discipline for this project",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"study_id" => array(
-				"label" => "Study ID",
-				"help" => "Enter the unique identifier for this study",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-
-			),
-
-		"study_name" => array(
-				"label" => "Study name",
-				"help" => "Enter a descriptive name for this study",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"dataset_id" => array(
-				"label" => "Dataset ID",
-				"help" => "The unique identifier for this dataset",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "^[0-9]+",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-
-			),
-
-		"dataset_title" => array(
-				"label" => "Dataset title",
-				"help" => "Enter a descriptive title for this dataset",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"dataset_description" => array(
-				"label" => "Dataset description",
-				"help" => "Enter a short description of the dataset",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"dataset_collectiondate_start" => array(
-				"label" => "Start collection date",
-				"help" => "Enter the date the collection process started",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"dataset_collectiondate_end" => array(
-				"label" => "End collection date",
-				"help" => "Enter the date the collection process was finished",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"dataset_version" => array(
-				"label" => "Dataset version",
-				"help" => "Enter the version of the dataset",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"predecessor" => array(
-				"label" => "Underlying dataset",
-				"help" => "Enter the name of the dataset this dataset was derived from",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"creator" => array(
-				"label" => "Creator",
-				"help" => "Select the user that led the collection process. This person should know all the ins and outs of the dataset",
-				"type" => "custom",
-				"custom_type" => "userlist",
-				"type_configuration" => array (
-					"allow_create" => false,
-					"show_admins" => true,
-					"show_users" => true,
-					"show_readonly" => true
-				),
-				"required" => true,
-				"allow_empty" => false,
-				"depends" => false
-			),
-
-		"unit_analysis" => array(
-				"label" => "Unit analysis",
-				"help" => "E.g. groups, individuals (select from list",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"region_name" => array(
-				"label" => "Region name",
-				"help" => "Enter the name of the region this dataset was collected",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"dataset_period_start" => array(
-				"label" => "Start date",
-				"help" => "Enter the year the dataset starts in",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"dataset_period_end" => array(
-				"label" => "End date",
-				"help" => "Enter the year the dataset ends in",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"dataset_contact" => array(
-				"label" => "Contact person",
-				"help" => "Select the username from the contact person for this dataset",
-				"type" => "custom",
-				"custom_type" => "userlist",
-				"type_configuration" => array (
-					"allow_create" => false,
-					"show_admins" => true,
-					"show_users" => true,
-					"show_readonly" => true
-				),
-				"required" => true,
-				"allow_empty" => false,
-				"depends" => false
-			),
-
-		"dataset_language" => array(
-				"label" => "Dataset language",
-				"help" => "Enter the language of the dataset contents",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-
-		"subject" => array (
-				"label" => "Subject",
-				"help" => "Enter the subject of the dataset",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-		"aggregate_level" => array (
-				"label" => "Aggragate level",
-				"help" => "Enter the aggragate level of the dataset",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-		"location" => array (
-				"label" => "Location",
-				"help" => "Enter the location of the dataset",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-		"time" => array (
-				"label" => "Time",
-				"help" => "Enter the time this dataset was created",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => false
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			),
-		"method" => array (
-				"label" => "Method",
-				"help" => "Explain the method used to create this dataset",
-				"type" => "text",
-				"type_configuration" => array (
-					"length" => false,
-					"pattern" => "*",
-					"longtext" => true
-					),
-				"required" => true,
-				"allow_empty" => true,
-				"depends" => false
-			)
-	);
 
 }

@@ -148,7 +148,6 @@ function createUserFromGroupInput(elem) {
 			type:     'get',
 			dataType: 'json',
 			data: function (term, page) {
-				console.log(elem.data());
 				return {
 					query: term,
 					showAdmins : elem.data()['displayrolesAdmins'],
@@ -335,9 +334,10 @@ function createMetaSuggestionsInput(elem) {
 		ajax: {
 			quietMillis: 400,
 			url:      function(params) {
+				console.log(elem);
 				var url = $("input[name=intake_url]").val();
 				url += '/metadata/metasuggestions/';
-				url += elem.attr('id').substring(6);
+				url += elem.data('for');
 				return url;
 			},
 			type:     'get',
@@ -351,7 +351,7 @@ function createMetaSuggestionsInput(elem) {
 				var query   = elem.data('select2').search.val();
 				var results = [];
 				var inputMatches = false;
-
+				console.log(options);
 				options.forEach(function(userName) {
 					// Exclude options already in the group.
 					results.push({
@@ -458,8 +458,8 @@ function addValueRow($element) {
 	template = addRowBtn[0].dataset['template'].replace("__row_input_id__", addRowBtn[0].dataset['nextindex']);
 	template = "<div class='row showWhenEdit row-" + $element + 
 		"' id='row-" + $element + "-" + addRowBtn[0].dataset['nextindex'] + "'>" +
-		"<span class='col-md-11'>" + template + "</span>" +
-		"<span class='col-md-1'><span class='btn btn-default glyphicon glyphicon-trash' " +
+		"<span class='col-xs-11'>" + template + "</span>" +
+		"<span class='col-xs-1'><span class='btn btn-default glyphicon glyphicon-trash' " +
 		"onclick='removeRow(\"#row-" + $element + "-" + addRowBtn[0].dataset['nextindex'] + 
 		"\");'></span></span></div>";
 	addRowBtn.before(template);
