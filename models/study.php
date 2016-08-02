@@ -45,23 +45,58 @@ class Study extends CI_Model {
      * @return object
      */
     public function getIntakeStudyPermissions($studyID){
+        $rodsaccount = $this->rodsuser->getRodsAccount();
         return array(
             $this->config->item('role:contributor') => get_instance()->dataset->isGroupMember(
-                $this->rodsuser->getRodsAccount(), 
+                $rodsaccount, 
                 $this->PERM_GroupAssistant . $studyID ,  
                 get_instance()->rodsuser->getUsername()
             ),
             $this->config->item('role:administrator') => get_instance()->dataset->isGroupManager(
-                $this->rodsuser->getRodsAccount(),
+                $rodsaccount,
                 $this->PERM_GroupAssistant . $studyID,
                 get_instance()->rodsuser->getUsername()
             ),
             'datamanager' => get_instance()->dataset->isGroupMember(
-                $this->rodsuser->getRodsAccount(), 
+                $rodsaccount, 
                 $this->PERM_GroupDataManager . $studyID, 
                 get_instance()->rodsuser->getUsername()
             ),
         );
+    }
+
+    public function getPermissionsForLevel($depth, $studyID) {
+
+        $level = 
+                sizeof($this->config->item('level-hierarchy')) > $depth ?
+                $this->config->item('level-hierarchy')[$depth] : 
+                $this->config->item('default-level');
+
+        $permissions = $this->getIntakeStudyPermissions($studyID);
+
+        $levelPermissions = array();
+
+        $levelPermissions["canEditMeta"] = $level["metadata"] !== false && is_array($level["metadata"]) && array_key_exists("form", $level["metadata"]) && 
+            (array_key_exists("canEdit", $level["metadata"]) && $level["metadata"]["canEdit"] !== false
+                && array_key_exists($level["metadata"]["canEdit"], $permissions) && $permissions[$level["metadata"]["canEdit"]]
+            );
+
+        $levelPermissions["canViewMeta"] = $level["metadata"] !== false && is_array($level["metadata"]) && array_key_exists("form", $level["metadata"]) && 
+            (array_key_exists("canView", $level["metadata"]) && $level["metadata"]["canView"] !== false 
+                && array_key_exists($level["metadata"]["canView"], $permissions) && $permissions[$level["metadata"]["canView"]]
+            );
+
+        $levelPermissions["canSnapshot"] = 
+            $level["canSnapshot"] !== false && 
+            array_key_exists($level["canSnapshot"], $permissions) && 
+            $permissions[$level['canSnapshot']];
+
+        $levelPermissions["canArchive"] = 
+            $level["canArchive"] !== false && 
+            array_key_exists($level["canArchive"], $permissions) && 
+            $permissions[$level['canArchive']];
+
+        return (object)$levelPermissions;
     }
 
     public function getUsernameValid($iRodsAccount, $username) {

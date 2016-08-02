@@ -31,6 +31,7 @@ class Intake extends MY_Controller
         $this->load->language('form_errors');
         $this->load->library('modulelibrary');
         $this->load->library('metadatafields');
+        $this->load->library('pathlibrary');
 
         $this->studies = $this->dataset->getStudies($this->rodsuser->getRodsAccount());
     }
@@ -58,74 +59,50 @@ class Intake extends MY_Controller
     */
     private function loadDirectory() {
         $this->current_path = $this->input->get('dir');
+        
+        $rodsaccount = $this->rodsuser->getRodsAccount();
 
-        $pathStart = sprintf(
-                "/%s/home/%s", 
-                $this->config->item('rodsServerZone'), 
-                $this->config->item('intake-prefix')
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $this->current_path, $this->dir);
+
+        if(!is_array($segments)) {
+            var_dump("todo: error");
+            $this->data["folderValid"] = false;
+        } else {
+            $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $this->head, $this->level_depth);
+
+            $studyID = $this->validateStudyPermission($segments[0]);
+            $this->getLockedStatus();
+            $this->breadcrumbs = $this->getBreadcrumbLinks($pathStart, $segments);
+
+            $urls = (object) array(
+                "site" => site_url(), 
+                "module" => $this->modulelibrary->getModuleBase()
             );
 
-        $studyIDBegin = strpos(
-            $this->current_path,
-            $pathStart
-        );
-        
-        if($studyIDBegin !== 0) {
-            // error
-            echo "Not a valid intake folder";
-        } else {
-            $rodsaccount = $this->rodsuser->getRodsAccount();
-            try {
-                $this->dir = new ProdsDir($rodsaccount, $this->current_path, true);
+            $dataArr = array(
+                "folderValid" => true,
+                "url" => $urls,
+                "head" => $this->head,
+                "studies" => $this->studies,
+                "studyID" => $studyID,
+                "breadcrumbs" => $this->breadcrumbs,
+                "current_dir" => $this->current_path,
+                "currentViewLocked" => $this->currentViewLocked,
+                "currentViewFrozen" => $this->currentViewFrozen,
+                "permissions" => (array) $this->permissions,
+                "directories" => $this->dir->getChildDirs(),
+                "files" => $this->dir->getChildFiles(),
+                "content" => "file_overview",
+                "levelPermissions" => $this->levelPermissions,
+                "nextLevelPermissions" => $this->nextLevelPermissions,
+                "level_depth" => $this->level_depth,
+                "level_depth_start" => $this->level_depth_start
+            );
+            $this->data = array_merge($this->data, $dataArr);
 
-                $segments = explode("/", substr($this->current_path, strlen($pathStart)));
-                $this->getTitle($segments);
-
-                $studyID = $this->validateStudyPermission($segments[0]);
-
-                $this->getLockedStatus();
-                $this->breadcrumbs = $this->getBreadcrumbLinks($pathStart, $segments);
-
-            } catch(RODSException $e) {
-                echo "Not a valid directory";
-            }
         }
 
-        $urls = (object) array(
-            "site" => site_url(), 
-            "module" => $this->modulelibrary->getModuleBase()
-        );
-
-        $dataArr = array(
-            "url" => $urls,
-            "head" => $this->head,
-            "studies" => $this->studies,
-            "studyID" => $studyID,
-            "breadcrumbs" => $this->breadcrumbs,
-            "current_dir" => $this->current_path,
-            "currentViewLocked" => $this->currentViewLocked,
-            "currentViewFrozen" => $this->currentViewFrozen,
-            "permissions" => (array) $this->permissions,
-            "directories" => $this->dir->getChildDirs(),
-            "files" => $this->dir->getChildFiles(),
-            "content" => "file_overview",
-            "levelPermissions" => $this->levelPermissions,
-            "nextLevelPermissions" => $this->nextLevelPermissions,
-            "level_depth" => $this->level_depth,
-            "level_depth_start" => $this->level_depth_start
-        );
-
-        $this->data = array_merge($this->data, $dataArr);
-    }
-
-    private function getTitle($segments) {
-        $this->level_depth = sizeof($segments) - 1;
-
-        if(sizeof($this->config->item('level-hierarchy')) >= sizeof($segments)) {
-            $this->head = $this->config->item('level-hierarchy')[$this->level_depth];
-        } else {
-            $this->head = $this->config->item('default-level');
-        }
     }
 
     private function getLockedStatus() {
@@ -160,7 +137,7 @@ class Intake extends MY_Controller
             $segmentBuilder[] = $seg;
             $breadCrumbs[] = (object)array(
                 "segment" => $seg, 
-                "link" => $link . (implode("/", $segmentBuilder)),
+                "link" => ($i === sizeof($segments) -1) ? false : $link . (implode("/", $segmentBuilder)),
                 "prefix" => ($i == 0) ? $this->config->item('intake-prefix') : false,
                 "postfix" => false,
                 "is_current" => (bool)($i === sizeof($segments) - 1)
@@ -192,13 +169,8 @@ class Intake extends MY_Controller
 
         // get study dependant rights for current user.
         $this->permissions = $this->study->getIntakeStudyPermissions($studyID);
-        $this->levelPermissions = $this->getPermissionsForLevel($this->head);
-        $this->nextLevelPermissions = 
-            $this->getPermissionsForLevel(
-                sizeof($this->config->item('level-hierarchy')) > $this->level_depth + 1 ?
-                $this->config->item('level-hierarchy')[$this->level_depth+1] : 
-                $this->config->item('default-level')
-            );
+        $this->levelPermissions = $this->study->getPermissionsForLevel($this->level_depth, $studyID);
+        $this->nextLevelPermissions = $this->study->getPermissionsForLevel($this->level_depth + 1, $studyID);
 
         if(!$this->studies[0]) {
             displayMessage($this, lang('ERROR_NO_INTAKE_ACCESS'), true);
@@ -223,32 +195,6 @@ class Intake extends MY_Controller
         $this->session->set_userdata('studyID', $studyID);
 
         return $studyID;
-    }
-
-    private function getPermissionsForLevel($level) {
-        $levelPermissions = array();
-
-        $levelPermissions["canEditMeta"] = $level["metadata"] !== false && is_array($level["metadata"]) && array_key_exists("form", $level["metadata"]) && 
-            (array_key_exists("canEdit", $level["metadata"]) && $level["metadata"]["canEdit"] !== false
-                && array_key_exists($level["metadata"]["canEdit"], $this->permissions) && $this->permissions[$level["metadata"]["canEdit"]]
-            );
-
-        $levelPermissions["canViewMeta"] = $level["metadata"] !== false && is_array($level["metadata"]) && array_key_exists("form", $level["metadata"]) && 
-            (array_key_exists("canView", $level["metadata"]) && $level["metadata"]["canView"] !== false 
-                && array_key_exists($level["metadata"]["canView"], $this->permissions) && $this->permissions[$level["metadata"]["canView"]]
-            );
-
-        $levelPermissions["canSnapshot"] = 
-            $level["canSnapshot"] !== false && 
-            array_key_exists($level["canSnapshot"], $this->permissions) && 
-            $this->permissions[$level['canSnapshot']];
-
-        $levelPermissions["canArchive"] = 
-            $level["canArchive"] !== false && 
-            array_key_exists($level["canArchive"], $this->permissions) && 
-            $this->permissions[$level['canArchive']];
-
-        return (object)$levelPermissions;
     }
 
     /**

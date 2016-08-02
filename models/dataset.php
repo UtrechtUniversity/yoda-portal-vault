@@ -18,10 +18,10 @@ class Dataset extends CI_Model {
      *                          that requires locking
      * @return                  Bool, indicating success
      */
-    static public function prepareDatasetForSnapshot($iRodsAccount, $collection, $dataset) {
+    static public function prepareDatasetForSnapshot($iRodsAccount, $collection) {
         $ruleBody = '
         myRule {
-            iiDatasetSnapshotLock(*collection, *datasetId, *status);
+            iiDatasetSnapshotLock(*collection, *status);
             *status = str(*status);
         }';
 
@@ -30,8 +30,7 @@ class Dataset extends CI_Model {
                 $iRodsAccount,
                 $ruleBody,
                 array(
-                        "*collection" => $collection,
-                        "*datasetId" => $dataset,
+                        "*collection" => $collection
                     ),
                 array("*status")
             );
@@ -53,10 +52,10 @@ class Dataset extends CI_Model {
      *                          that requires unlocking
      * @return                  Bool, indicating success
      */
-    static public function removeSnapshotLockFromDataset($iRodsAccount, $collection, $dataset) {
+    static public function removeSnapshotLockFromDataset($iRodsAccount, $collection) {
         $ruleBody = '
         myRule {
-            iiDatasetSnapshotUnlock(*collection, *datasetId, *status);
+            iiDatasetSnapshotUnlock(*collection, *status);
             *status = str(*status);
         }';
 
@@ -65,8 +64,7 @@ class Dataset extends CI_Model {
                 $iRodsAccount,
                 $ruleBody,
                 array(
-                        "*collection" => $collection,
-                        "*datasetId" => $dataset,
+                        "*collection" => $collection
                     ),
                 array("*status")
             );

@@ -9,35 +9,73 @@ class Actions extends MY_Controller
 
         $this->load->model("dataset");
         $this->load->model("rodsuser");
+        $this->load->model("study");
         $this->load->helper("intake");
+        $this->load->library('pathlibrary');
     }
 
     public function snapshot()
     {
-    	$rodsuser = $this->rodsuser->getRodsAccount();
-    	$snapOf = $this->input->post("dataset") ? 
-    		array(0 => $this->input->post("dataset")) : $this->input->post("checked_studies");
+    	$rodsaccount = $this->rodsuser->getRodsAccount();
+    	$directory = $this->input->post('directory');
+    	$snapOf = array();
+
+    	$pathStart = $this->pathlibrary->getPathStart($this->config);
+    	$segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $directory, $dir);
+    	$studyID = $segments[0];
 
     	$success = true;
-    	$datasets = array();
-    	if(sizeof($snapOf) > 0) {
-	    	foreach($snapOf as $dataset) {
-	    		$result = $this->dataset->prepareDatasetForSnapshot($rodsuser, $this->input->post("studyRoot"), $dataset);
-	    		if($result) {
-	    			array_push($datasets, $dataset);
-	    		} else {
-	    			$success = false;
+
+    	if(!is_array($segments)) {
+    		// TODO 
+    		$success = false;
+    		return false;
+    	}
+
+    	$this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $currentLevel, $currentDepth);
+
+    	if($this->input->post('checked_studies')) {
+    		$nextLevelPermissions = $this->study->getPermissionsForLevel($currentDepth + 1, $studyID);
+    		if($nextLevelPermissions->canSnapshot === false) {
+    			// TODO
+    			$success = false;
+    			return false;
+    		} else {
+	    		foreach($this->input->post('checked_studies') as $study) {
+	    			$snapOf[] = sprintf("%s/%s", $directory, $study);
 	    		}
 	    	}
-	    }
+    	} else {
+    		$levelPermissions = $this->study->getPermissionsForLevel($currentDepth, $studyID);
+    		if($levelPermissions->canSnapshot === false) {
+    			// TODO 
+    			$success = false;
+    			return false;
+    		} else {
+    			$snapOf[] = $directory;
+    		}
+    	}
+
+    	$succes_directories = array();
+
+    	if(sizeof($snapOf) > 0) {
+    		foreach($snapOf as $dir) {
+    			$result = $this->dataset->prepareDatasetForSnapshot($rodsaccount, $dir);
+    			if($result) {
+    				array_push($succes_directories, $dir);
+    			} else {
+    				$success = false;
+    			}
+    		}
+    	}
 
     	if($success) {
-			if(sizeof($datasets) > 1) {
+			if(sizeof($succes_directories) > 1) {
     			$message = "Snapshots of the studies " . human_implode($datasets, ", ", " and ") . " are currently being created. This might take a while";
-			} else if (sizeof($datasets) == 0) {
+			} else if (sizeof($succes_directories) == 0) {
 				$message = "No dataset selected";
 			} else {
-				$message = $datasets[0] . " is currently being snapshotted";
+				$message = $succes_directories[0] . " is currently being snapshotted";
 			}
 			$error = false;
 			$type = "info";
@@ -48,12 +86,9 @@ class Actions extends MY_Controller
 		}
 
 		displayMessage($this, $message, $error, $type);
-		if(isset($_SERVER['HTTP_REFERER'])) {
-			redirect($_SERVER['HTTP_REFERER'], 'refresh');
-		} else {
-			$redir = $this->intake->getRedirect($this->input->post('studyId'));
-			redirect($redir, 'refresh');
-		}
+		$redir = (isset($_SERVER['HTTP_REFERER'])) ? $_SERVER['HTTP_REFERER'] : $this->intake->getRedirect($studyID);
+		redirect($redir, 'refresh');
+
     }
 
     public function unlock()

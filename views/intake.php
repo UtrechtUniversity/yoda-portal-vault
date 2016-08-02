@@ -1,10 +1,19 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+if($folderValid === false) {
+	if($information = $this->session->flashdata('information')){ ?>
+		<div class="alert alert-<?=$information->type;?>">
+			<?=$information->message;?>
+		</div>
+<?php
+	}
+} else {
+
 if ($header && sizeof($studies) > 0): ?>
 	<div class="container page-body">
 		<div class="row page-header">
 			<div class="col-sm-6">
 				<h1>
-					<!-- <?php echo ($title); ?> -->
 					<?php 
 						$title = "<h1>";
 						if($head["glyphicon"] !== false)
@@ -48,6 +57,10 @@ if ($header && sizeof($studies) > 0): ?>
 		<div class="alert alert-danger"><?=lang('dataset_locked');?></div>
 <?php 
 endif; 
+$attrs = array(
+	"directory" => $current_dir,
+);
+echo form_open(null, null, $attrs);
 ?>
 
 <div class="btn-group">
@@ -77,29 +90,39 @@ endif;
 		?>
 	</ul>
 <?php
-	if($levelPermissions->canSnapshot && !$currentViewLocked): ?>
-			<button type="submit" class="btn btn-default" formaction="<?=$url->module;?>/actions/snapshot"<?php if(sizeof($directories) == 0) echo " disabled";?>>
+	if($levelPermissions->canSnapshot && !$currentViewLocked) { 
+		?>
+			<button type="submit" class="btn btn-default <?php if(sizeof($directories) == 0) echo " disabled";?>"
+				formaction="<?=site_url(array($this->modulelibrary->name(), "actions", "snapshot")); ?>"
+				>
 				<span class="glyphicon glyphicon-camera"></span>&nbsp;<?=lang('create_snapshot');?>
 			</button>
-	<?php elseif($levelPermissions->canSnapshot && !$currentViewFrozen): ?>
-			<button type="submit" class="btn btn-default"  name="unlock_study" value="<?=$studyFolder;?>"
-				formaction="<?=$url->module;?>/actions/unlock">
+	<?php } else if($levelPermissions->canSnapshot && !$currentViewFrozen) { ?>
+			<button type="button" class="btn btn-default"  name="unlock_study" value="<?=$current_dir;?>"
+				formaction="<?=site_url(array($this->modulelibrary->name(), "actions", "snapshot")); ?>"
 				<span class="glyphicon glyphicon-lock" title="<?=lang('file_locked');?>"></span>&nbsp;<?=lang('unlock_snapshot');?>
 			</button>
-
 	<?php 
-	endif; 
-	if($levelPermissions->canEditMeta || $levelPermissions->canViewMeta): ?>
+	} 
+	if($levelPermissions->canEditMeta || $levelPermissions->canViewMeta){ ?>
 		<!-- <a type="button" class="btn btn-default" href="<?=$url->module;?>/intake/metadata/<?=$studyID;?>/<?=$studyFolder;?>">
 			<span class="glyphicon glyphicon-tags"></span> Meta data
 		</a> -->
 		<a href="#" class="btn btn-default">
 			<span class="glyphicon glyphicon-tags"></span> NTL: Meta data (todo)
 		</a>
-	<?php endif; ?>
+<?php 
+	} 
+?>
 </div>
-<?php $this->load->view($content); ?>
+<?php 
+form_close();
+$this->load->view($content); 
+?>
 
 </div>
+<?php 
+}
+?>
 
 
