@@ -8,21 +8,43 @@ $config = array();
 $config["intake-prefix"] 	= "grp-intake-";
 $config["manager-prefix"]	= "grp-datamanager-";
 
+$config["role:administrator"] = "administrator";
+$config["role:contributor"] = "contributor";
+$config["role:reader"] = "reader";
+
+$config["default-level"] = array(
+	"title" => false,
+	"glyphicon" => false,
+	"canSnapshot" => false,
+	"canArchive" => false,
+	"metadata" => false
+);
+
 $config["level-hierarchy"] = array(
 		array(
-				"enabled" => true,
-				"title" => "project",
-				"glyphicon" => "briefcase"
-			),
-		array(
-			"enabled" => true,
-			"title" => "study",
-			"glyphicon" => "education"
+			"title" => "project",
+			"glyphicon" => "briefcase",
+			"canSnapshot" => false,
+			"canArchive" => false,
+			"metadata" => false
 		),
 		array(
-			"enabled" => true,
+			"title" => "study",
+			"glyphicon" => "education",
+			"canSnapshot" => false,
+			"canArchive" => false,
+			"metadata" => false
+		),
+		array(
 			"title" => "dataset",
-			"glyphicon" => "paperclip"
+			"glyphicon" => "paperclip",
+			"canSnapshot" => $config['role:contributor'],
+			"canArchive" => $config["role:administrator"],
+			"metadata" => array(
+				"form" => "intake_metadata.xml",
+				"canView" => $config["role:reader"],
+				"canEdit" => $config["role:administrator"]
+			)
 		)
 	);
 

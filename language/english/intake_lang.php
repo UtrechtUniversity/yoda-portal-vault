@@ -1,5 +1,6 @@
 <?php
 $lang["project"] = "project";
+$lang["intake:change-project"] = "change project";
 $lang['INTAKE_STUDY'] = "study";
 $lang["dataset"] = "datapackage";
 $lang['header:files_not_recognised'] = "Unrecognised files";

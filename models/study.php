@@ -5,8 +5,8 @@ class Study extends CI_Model {
     public $PERM_GroupAssistant ='grp-intake-'; // prefix of what is to be extended with a study-id
     public $PERM_GroupDataManager = 'grp-datamanager-';
 
-    public $ROLE_Assistant = 'assistant';
-    public $ROLE_Manager = 'manager';
+    public $ROLE_Assistant = ""; //$this->config->item('role:contributor'); // 'assistant';
+    public $ROLE_Manager = 'datamanager';
 
     // validateIntakeStudyPermissions constants
     // This is merely symbolic for now. Nothing is actually done with this.
@@ -16,6 +16,7 @@ class Study extends CI_Model {
     public function __construct()
     {
         parent::__construct();
+        $this->ROLE_Assistant = $this->config->item('role:contributor');
         $this->load->model('dataset');
         $this->load->model('rodsuser');
     }
@@ -44,18 +45,18 @@ class Study extends CI_Model {
      * @return object
      */
     public function getIntakeStudyPermissions($studyID){
-        return (object)array(
-            'assistant' => get_instance()->dataset->isGroupMember(
+        return array(
+            $this->config->item('role:contributor') => get_instance()->dataset->isGroupMember(
                 $this->rodsuser->getRodsAccount(), 
                 $this->PERM_GroupAssistant . $studyID ,  
                 get_instance()->rodsuser->getUsername()
             ),
-            'administrator' => get_instance()->dataset->isGroupManager(
+            $this->config->item('role:administrator') => get_instance()->dataset->isGroupManager(
                 $this->rodsuser->getRodsAccount(),
                 $this->PERM_GroupAssistant . $studyID,
                 get_instance()->rodsuser->getUsername()
             ),
-            'manager' => get_instance()->dataset->isGroupMember(
+            'datamanager' => get_instance()->dataset->isGroupMember(
                 $this->rodsuser->getRodsAccount(), 
                 $this->PERM_GroupDataManager . $studyID, 
                 get_instance()->rodsuser->getUsername()

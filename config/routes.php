@@ -42,5 +42,7 @@ $route[$module] 					= $module . "/intake";
 $route[$module . '/actions']		= $module . "/actions";
 $route[$module . '/metadata']		= $module . "/metadata";
 
+$route[$module . '/intake2'] 		= $module . "/intake2";
+
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */
