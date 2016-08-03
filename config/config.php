@@ -20,6 +20,8 @@ $config["default-level"] = array(
 	"metadata" => false
 );
 
+$config["metadata_prefix"] = "ilab_intake_metadata_";
+
 $config["level-hierarchy"] = array(
 		array(
 			"title" => "project",
@@ -28,6 +30,7 @@ $config["level-hierarchy"] = array(
 			"canArchive" => false,
 			"metadata" => array(
 				"form" => "project_schema.xml",
+				"prefix" => "project_",
 				"canView" => $config["role:administrator"], // TODO: rights should inherit
 				"canEdit" => $config["role:administrator"]
 			)
@@ -46,6 +49,7 @@ $config["level-hierarchy"] = array(
 			"canArchive" => $config["role:administrator"],
 			"metadata" => array(
 				"form" => "intake_metadata.xml",
+				"prefix" => "datapackage_",
 				// "canView" => $config["role:reader"],
 				"canView" => $config["role:administrator"], // TODO: rights should inherit
 				"canEdit" => $config["role:administrator"]

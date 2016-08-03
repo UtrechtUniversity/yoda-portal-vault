@@ -60,7 +60,7 @@ class metadataFields {
 		return $fields;
 	}
 
-	private function getMetaForLevel($object) {
+	public function getMetaForLevel($object) {
 		$rodsaccount = $this->CI->rodsuser->getRodsAccount();
 		$pathStart = $this->CI->pathlibrary->getPathStart($this->CI->config);
         $segments = $this->CI->pathlibrary->getPathSegments($rodsaccount, $pathStart, $object, $prodsdir);

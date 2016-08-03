@@ -12,36 +12,41 @@ class MetadataModel extends CI_Model {
         parent::__construct();
     }
 
-    public static function processResults($iRodsAccount, $object, $deleteArr, $addArr) {
+    public function processResults($iRodsAccount, $object, $deleteArr, $addArr) {
         $alphabet = "abcdefghijklmnopqrstuvwxyz";
-        $ruleBody = "myRule{\n\t*error1a = 0\n\t; *error2a = 0;\n\tmsiGetObjType(*objectPath, *t);\n\t";
-        $kvp = "*";
 
-        if(!empty($deleteArr[0])){
-            for($i = 0; $i < sizeof($deleteArr); $i++){
-                $kvp .= $alphabet[$i % 25];
+        $ruleBody = "myRule{\n\t*error1a = 0\n\t*error2a = 0; \n\tmsiGetObjType(*objectPath, *t);\n\t";
+
+        $addKVTemplate = '*kverr = errorcode(msiAddKeyVal(*%1$s, "%2$s", "%3$s"));';
+        $execTemplate = 'if(*kverr == 0) { *error%1$da = *error%1$da + errorcode(%2$s(*%3$s, %4$s, *t)); }';
+        $logTemplate = 'writeLine("serverLog", "%1$s key - %2$s - and value - %3$s - pair to/from object %4$s")';
+
+        $kvp = "";
+
+        if(!empty($deleteArr[0])) {
+            for($i = 0; $i < sizeof($deleteArr); $i++) {
                 foreach($deleteArr[$i] as $kv) {
-                    $ruleBody .= "msiAddKeyVal(" . $kvp . ", '" . $kv->key . "', '" . str_replace("$", "&#36;", $kv->value) . "');\n\t";
-                    $ruleBody .= "writeLine(\"serverLog\", \"Added call to remove key value pair ";
-                    $ruleBody .= $kv->key . ":" . str_replace("$", "&#36;", $kv->value) . ", resulting in " . $kvp . "\");\n\t";
+                    $kvp .= $alphabet[$i % 25];
+                    $key = $this->prefixKey($object, $kv->key);
+                    $ruleBody .= sprintf($addKVTemplate, $kvp, $key, str_replace("$", "&#36;", $kv->value)) . "\n\t";
+                    $ruleBody .= sprintf($logTemplate, "Removing", $key, str_replace("$", "&#36;", $kv->value), $object) . "\n\t";
+                    $ruleBody .= sprintf($execTemplate, 1, "msiRemoveKeyValuePairsFromObj", $kvp, $object) . "\n\t";
                 }
-                $ruleBody .= "*error1a = *error1a + errorcode(msiRemoveKeyValuePairsFromObj(" . $kvp . ", *objectPath, *t));\n\t";
             }
         }
-
 
         if(!empty($addArr[0])) {
-            for($i = 0; $i < sizeof($addArr); $i++){
-                $kvp .= $alphabet[$i % 25];
+            for($i = 0; $i < sizeof($addArr); $i++) {
                 foreach($addArr[$i] as $kv) {
-                    $ruleBody .= "msiAddKeyVal(" . $kvp . ", '" . $kv->key . "', '" . str_replace("$", "&#36;", $kv->value) . "');\n\t";
-                    $ruleBody .= "writeLine(\"serverLog\", \"Added call to add key value pair ";
-                    $ruleBody .= $kv->key . ":" . str_replace("$", "&#36;", $kv->value) . "\");\n\t";
+                    $kvp .= $alphabet[$i % 25];
+                    $key = $this->prefixKey($object, $kv->key);
+                    $ruleBody .= sprintf($addKVTemplate, $kvp, $key, str_replace("$", "&#36;", $kv->value)) . "\n\t";
+                    $ruleBody .= sprintf($logTemplate, "Adding", $key, str_replace("$", "&#36;", $kv->value), $object) . "\n\t";
+                    $ruleBody .= sprintf($execTemplate, 2, "msiAssociateKeyValuePairsToObj", $kvp, $object) . "\n\t";
                 }
-                $ruleBody .= "*error2a = *error2a + errorcode(msiAssociateKeyValuePairsToObj(" . $kvp . ", *objectPath, *t));\n\t";
             }
         }
-        
+
         $ruleBody .= "*error1 = str(*error1a);\n\t*error2 = str(*error2a);\n}";
 
         try {
@@ -69,13 +74,51 @@ class MetadataModel extends CI_Model {
         return UPDATE_FAILED;
     }
 
-    public static function getValuesForKeys2($iRodsAccount, $keyList, $object) {
-        try{
-            $prodsdir = new ProdsDir($iRodsAccount, $object);
+    private function prefixKey($object, $key) {
+        $prefixed_key = "";
+        if($this->config->item("metadata_prefix") && $this->config->item("metadata_prefix") !== false) {
+            $prefixed_key .= $this->config->item("metadata_prefix");
+        }
+        $meta = $this->metadatafields->getMetaForLevel($object);
+        if(array_key_exists("prefix", $meta) && $meta["prefix"] !== false) {
+            $prefixed_key .= $meta["prefix"];
+        }
+        $prefixed_key .= $key;
+
+        return $prefixed_key;
+    }
+
+    private function unPrefixKey($object, $prefixed_key) {
+        if($this->config->item("metadata_prefix") && $this->config->item("metadata_prefix") !== false) {
+            if(strpos($prefixed_key, $this->config->item("metadata_prefix")) === 0) {
+                $prefixed_key = substr($prefixed_key, strlen($this->config->item("metadata_prefix")));
+            } else {
+                return false;
+            }
+        }
+        $meta = $this->metadatafields->getMetaForLevel($object);
+        if(array_key_exists("prefix", $meta) && $meta["prefix"] !== false) {
+            if(strpos($prefixed_key, $meta["prefix"]) === 0) {
+                $prefixed_key = substr($prefixed_key, strlen($meta["prefix"]));
+            } else {
+                return false;
+            }
+        }
+
+        return $prefixed_key;
+    }
+
+    public function getValuesForKeys2($rodsaccount, $keyList, $object) {
+        $prefixedKeyList = array();
+        foreach($keyList as $key) {
+            $prefixedKeyList[$this->prefixKey($object, $key)] = $key;
+        }
+
+        try {
+            $prodsdir = new ProdsDir($rodsaccount, $object);
             $metadatas = $prodsdir->getMeta();
 
             $rodsKVPairs = array();
-
             foreach($metadatas as $key => $val) {
                 if(array_key_exists($val->name, $rodsKVPairs)) {
                     $rodsKVPairs[$val->name][] = htmlentities(str_replace("&#36;", "$", $val->value));
@@ -83,54 +126,18 @@ class MetadataModel extends CI_Model {
                     $rodsKVPairs[$val->name] = array(htmlentities(str_replace("&#36;", "$", $val->value)));
                 }
             }
-            
+
             $keyValuePairs = array();
-            foreach($keyList as $key) {
-                $keyValuePairs[$key] = array_key_exists($key, $rodsKVPairs) ? $rodsKVPairs[$key] : array();
-            }
+            foreach($prefixedKeyList as $prefixed_key => $key) {
+                $keyValuePairs[$key] = array_key_exists($prefixed_key, $rodsKVPairs) ? $rodsKVPairs[$prefixed_key] : array();
+            }   
+
             return $keyValuePairs;
 
         } catch(RODSException $e) {
             echo $e->showStacktrace();
             return false;
         }
-    }
-
-    public static function getValueForKey($iRodsAccount, $key, $object, $isCollection) {
-    	$ruleBody = '
-    		myRule {
-    			if(*isCollection == "1") {
-                    *isColl = true;
-                } else {
-                    *isColl = false;
-                }
-
-    			uuIiGetValueForKey(*key, *object, *isColl, *value);
-    			*value = str(*value);
-    		}';
-
-    	try {
-    		$rule = new ProdsRule(
-                $iRodsAccount,
-    			$ruleBody,
-    			array(
-    				"*key" => $key,
-    				"*object" => $object,
-    				"*isCollection" => $isCollection
-    			),
-    			array(
-    				'*value'
-    			)
-    		);
-
-    		$result = $rule->execute();
-
-    		return $result["*value"];
-    	} catch(RODSException $e) {
-    		echo $e->showStacktrace();
-            return false;
-        }
-        return false;
     }
 
     public static function getOwner($iRodsAccount, $collection) {
