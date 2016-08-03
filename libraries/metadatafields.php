@@ -17,22 +17,33 @@ define("ERROR_DATE_HIGHER_THAN_LINKED", -11);
 
 class metadataFields {
 
-
 	public function __construct() {
 		$this->CI =& get_instance();
 		$parser = xml_parser_create();
-		$fdir = "/var/www/html/yoda/yoda-portal/modules/intake/libraries/intake_metadata.xml";
-		$this->fields = json_decode(json_encode(simplexml_load_file($fdir)), true);
+		// $fdir = realpath(dirname(__FILE__)) . "/" . "intake_metadata.xml";
+		// $this->fields = json_decode(json_encode(simplexml_load_file($fdir)), true);
 	}
 
+	/**
+	 * Get the field definitions of the meta data schema
+	 * @param $schemaName 	Name of the .xml file (including extension)
+	 *						that is placed in the library directory
+	 *						of this module.
+	 * @param $object 		The iRods object the meta data is stored on
+	 * @param $isCollection Boolean, true iff $object is a collection
+	 */
 	public function getFields($object, $isCollection) {
+		$fields = $this->loadXML($object);
+
+		if(!$fields) return false;
+
 		$iRodsAccount = $this->CI->rodsuser->getRodsAccount();
-		$keys = array_keys($this->fields);
+		$keys = array_keys($fields);
 		$values = $this->CI->metadatamodel->getValuesForKeys2($iRodsAccount, $keys, $object);
 
 		if(!$values) return false;
 
-		foreach($this->fields as $key => $arr) {
+		foreach($fields as $key => $arr) {
 			$this->castToValues($arr);
 			if(array_key_exists("multiple", $arr) || $arr["type"] == "checkbox") {
 				$arr["value"] = $values[$key];
@@ -48,6 +59,38 @@ class metadataFields {
 
 		return $fields;
 	}
+
+	private function getMetaForLevel($object) {
+		$rodsaccount = $this->CI->rodsuser->getRodsAccount();
+		$pathStart = $this->CI->pathlibrary->getPathStart($this->CI->config);
+        $segments = $this->CI->pathlibrary->getPathSegments($rodsaccount, $pathStart, $object, $prodsdir);
+        $this->CI->pathlibrary->getCurrentLevelAndDepth($this->CI->config, $segments, $level, $depth);
+
+        if(array_key_exists("metadata", $level) && $level["metadata"] !== false) {
+        	return $level["metadata"];
+        }
+
+        return false;
+	}
+
+	private function loadXML($object) {
+		
+		$meta = $this->getMetaForLevel($object);
+
+        if(is_array($meta) && array_key_exists("form", $meta) && $meta["form"] !== false) {
+        	$form = $meta["form"];
+        	$fdir = realpath(dirname(__FILE__)) . "/" . $form;
+
+    		set_error_handler(function(){ /** ugly warnings are disabled this way. Error is shown in view **/ });
+    		$result = json_decode(json_encode(simplexml_load_file($fdir)), true);
+    		restore_error_handler();
+    		return $result;
+        } else {
+        	return false;
+        }
+	}
+
+
 
 	/**
 	 * Function that recursivily casts int and bool values hidden

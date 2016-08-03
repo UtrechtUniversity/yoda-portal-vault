@@ -26,7 +26,11 @@ $config["level-hierarchy"] = array(
 			"glyphicon" => "briefcase",
 			"canSnapshot" => false,
 			"canArchive" => false,
-			"metadata" => false
+			"metadata" => array(
+				"form" => "project_schema.xml",
+				"canView" => $config["role:administrator"], // TODO: rights should inherit
+				"canEdit" => $config["role:administrator"]
+			)
 		),
 		array(
 			"title" => "study",

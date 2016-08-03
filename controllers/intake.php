@@ -73,7 +73,7 @@ class Intake extends MY_Controller
                 'username' => $this->rodsuser->getUsername(),
             ),
         ));
-        
+
         $this->load->view('edit_meta', $this->data);
         $this->load->view('common-end');
     }
@@ -159,7 +159,7 @@ class Intake extends MY_Controller
             $segmentBuilder[] = $seg;
             $breadCrumbs[] = (object)array(
                 "segment" => $seg, 
-                "link" => ($i === sizeof($segments) -1) ? false : $link . (implode("/", $segmentBuilder)),
+                "link" => $link . (implode("/", $segmentBuilder)),
                 "prefix" => ($i == 0) ? $this->config->item('intake-prefix') : false,
                 "postfix" => false,
                 "is_current" => (bool)($i === sizeof($segments) - 1)

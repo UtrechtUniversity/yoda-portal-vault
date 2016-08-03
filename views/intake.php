@@ -34,9 +34,9 @@ if ($header && sizeof($studies) > 0): ?>
 					if($bc->is_current) $html .= " active";
 					$html .= "\">";
 					if($bc->prefix !== false) $html .= $bc->prefix ;
-					if($bc->link !== false) $html .= "<a href=\"" . $bc->link . "\">";
+					if($bc->link !== false && $bc->is_current === false) $html .= "<a href=\"" . $bc->link . "\">";
 					$html .= $bc->segment;
-					if($bc->link !== false) $html .= "</a>";
+					if($bc->link !== false && $bc->is_current === false) $html .= "</a>";
 					if($bc->postfix !== false) $html .= $bc->postfix;
 					$html .= "</li>\n";
 					echo $html;
@@ -106,11 +106,8 @@ echo form_open(null, null, $attrs);
 	<?php 
 	} 
 	if($levelPermissions->canEditMeta || $levelPermissions->canViewMeta){ ?>
-		<!-- <a type="button" class="btn btn-default" href="<?=$url->module;?>/intake/metadata/<?=$studyID;?>/<?=$studyFolder;?>">
-			<span class="glyphicon glyphicon-tags"></span> Meta data
-		</a> -->
-		<a href="#" class="btn btn-default">
-			<span class="glyphicon glyphicon-tags"></span> NTL: Meta data (todo)
+		<a href="<?=site_url(array($url->module, "intake", "metadata")) . "?dir=" . urlencode($current_dir); ?>" class="btn btn-default">
+			<span class="glyphicon glyphicon-tags"></span> NTL: Meta data
 		</a>
 <?php 
 	} 

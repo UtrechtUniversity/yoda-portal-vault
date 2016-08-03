@@ -57,7 +57,17 @@ if($folderValid === false) {
 		</div>
 	<?php 
 	}
-	
+
+	$fields = $this->metadatafields->getFields($current_dir, true);
+
+	if(!$fields || !is_array($fields) || sizeof($fields) === 0) {
+?>
+		<div class="alert alert-warning">
+			ntl: There is no meta data schema defined for this object, so no meta data can be shown
+		</div>
+<?php
+	}
+
 	$wrongFields = $this->session->flashdata("incorrect_fields") ? $this->session->flashdata("incorrect_fields") : array();
 
 	$formAttrs = array(
@@ -70,7 +80,7 @@ if($folderValid === false) {
 
 	echo form_open($url->module . "/metadata/update", $formAttrs, $hidden);
 
-	if($levelPermissions->canEditMeta) {
+	if($levelPermissions->canEditMeta && is_array($fields) && sizeof($fields) > 0) {
 		echo $this->metadatafields->getEditButtons();
 	}
 ?>
@@ -86,25 +96,27 @@ if($folderValid === false) {
 
 		<tbody>
 <?php 
-	$fields = $this->metadatafields->getFields($current_dir, true);
-	foreach($fields as $key => $config){
-		echo $this->metadatafields->getHtmlForRow(
-			$key,
-			$config,
-			$config["value"],
-			2,
-			$levelPermissions->canViewMeta && $levelPermissions->canEditMeta,
-			array_key_exists($key, $wrongFields) ? $wrongFields[$key] : array(), // in_array($key, $wrongFields),
-			$this->session->flashdata('form_data')
-		);
-		echo "\n";
+	
+	if(is_array($fields) && sizeof($fields) > 0) {
+		foreach($fields as $key => $config){
+			echo $this->metadatafields->getHtmlForRow(
+				$key,
+				$config,
+				$config["value"],
+				2,
+				$levelPermissions->canViewMeta && $levelPermissions->canEditMeta,
+				array_key_exists($key, $wrongFields) ? $wrongFields[$key] : array(), // in_array($key, $wrongFields),
+				$this->session->flashdata('form_data')
+			);
+			echo "\n";
+		}
 	}
 ?>
 		</tbody>
 	</table>
 
 <?php
-	if($levelPermissions->canEditMeta) {
+	if($levelPermissions->canEditMeta && is_array($fields) && sizeof($fields) > 0) {
 		echo $this->metadatafields->getEditButtons();
 	}	
 
