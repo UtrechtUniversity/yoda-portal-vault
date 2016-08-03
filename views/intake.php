@@ -92,14 +92,15 @@ echo form_open(null, null, $attrs);
 <?php
 	if($levelPermissions->canSnapshot && !$currentViewLocked) { 
 		?>
-			<button type="submit" class="btn btn-default <?php if(sizeof($directories) == 0) echo " disabled";?>"
+			<button type="<?=(sizeof($directories) === 0) ? "button" : "submit";?>" 
+				class="btn btn-default <?php if(sizeof($directories) === 0) echo " disabled";?>"
 				formaction="<?=site_url(array($this->modulelibrary->name(), "actions", "snapshot")); ?>"
 				>
 				<span class="glyphicon glyphicon-camera"></span>&nbsp;<?=lang('create_snapshot');?>
 			</button>
 	<?php } else if($levelPermissions->canSnapshot && !$currentViewFrozen) { ?>
-			<button type="button" class="btn btn-default"  name="unlock_study" value="<?=$current_dir;?>"
-				formaction="<?=site_url(array($this->modulelibrary->name(), "actions", "snapshot")); ?>"
+			<button type="submit" class="btn btn-default" 
+				formaction="<?=site_url(array($this->modulelibrary->name(), "actions", "unlock")); ?>"
 				<span class="glyphicon glyphicon-lock" title="<?=lang('file_locked');?>"></span>&nbsp;<?=lang('unlock_snapshot');?>
 			</button>
 	<?php 
