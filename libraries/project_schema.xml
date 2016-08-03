@@ -5,7 +5,7 @@
 		<type>text</type>
 		<type_configuration>
 			<length>false</length>
-			<pattern>false</pattern>
+			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
 		<required>true</required>
@@ -17,7 +17,7 @@
 		<type>text</type>
 		<type_configuration>
 			<length>false</length>
-			<pattern>false</pattern>
+			<pattern>*</pattern>
 			<longtext>false</longtext>
 		</type_configuration>
 		<required>true</required>
@@ -29,7 +29,7 @@
 		<type>text</type>
 		<type_configuration>
 			<length>false</length>
-			<pattern>false</pattern>
+			<pattern>*</pattern>
 			<longtext>true</longtext>
 		</type_configuration>
 		<required>true</required>

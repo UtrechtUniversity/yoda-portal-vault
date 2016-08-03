@@ -37,7 +37,7 @@ class Intake extends MY_Controller
     }
 
     public function index(){
-        $this->loadDirectory();
+        $this->loadDirectory(true);
 
         $this->load->view('common-start', array(
             'styleIncludes' => array('css/datatables.css', 'css/intake.css', 'lib/chosen-select/chosen.min.css'),
@@ -79,16 +79,25 @@ class Intake extends MY_Controller
     }
 
     
-    private function loadDirectory() {
+    private function loadDirectory($redirectIfInvalid = false) {
         $this->current_path = $this->input->get('dir');
-        
+
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $this->current_path, $this->dir);
 
         if(!is_array($segments)) {
-            var_dump("todo: error");
+            if($redirectIfInvalid) {
+                if(sizeof($this->studies) > 0) {
+                    $redirectTo = $pathStart . $this->studies[0];
+                    $referUrl = site_url($this->modulelibrary->name(), "intake", "intake", "index") . "?dir=" . $redirectTo;
+                    $message = sprintf("ntl: %s is not a valid directory", $this->current_path);
+                    if($this->current_path)
+                        displayMessage($this, $message, true);
+                    redirect($referUrl, 'refresh');
+                }
+            }
             $this->data["folderValid"] = false;
         } else {
             $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $this->head, $this->level_depth);
