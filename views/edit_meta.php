@@ -1,5 +1,19 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-if ($header && $hasStudies): ?>
+
+if($folderValid === false) {
+	if($information = $this->session->flashdata('information')){ ?>
+		<div class="alert alert-<?=$information->type;?>">
+			<?=$information->message;?>
+		</div>
+<?php
+	}
+} else if($levelPermissions->canViewMeta === false && $levelPermissions->canEditMeta === false) {
+?>
+	<div class="alert alert-danger">
+		ntl: You do not have permission to edit metadata for this directory
+	</div>
+<?php
+} else { ?>
 	<div class="container page-body">
 		<div class="row page-header">
 			<div class="col-sm-6">
@@ -7,34 +21,52 @@ if ($header && $hasStudies): ?>
 					<span class="glyphicon glyphicon-tags"></span>&nbsp;
 					<?=lang('header:metadata');?>
 				</h1>
-<?php 
-				if($userIsAllowed) {
-					echo '<h3><span class="glyphicon glyphicon-education"></span>&nbsp;' . htmlentities($title) . "</h3>";
-?>
-					<div class="input-group">
-						<div class="input-group-btn">
-							<a class="btn btn-default" href="<?=$url->module;?>/intake/index/<?=$studyID;?>/<?=$studyFolder;?>" >
-								<span class="glyphicon glyphicon-arrow-left"></span>
-							</a>
-						</div>
-						<span class="form-control"><?=htmlentities($intakePath . ($studyFolder?'/'.$studyFolder:''));?></span>
-					</div>
-<?php	
-				}
-?>
+					<?php 
+						$title = "<h3>";
+						if($head["glyphicon"] !== false)
+							$title .= sprintf('<span class="glyphicon glyphicon-%s"></span>&nbsp;', $head["glyphicon"]);
+						if($head["title"] != false)
+							$title .= $head["title"] . "&nbsp;";
+						$title .= $breadcrumbs[sizeof($breadcrumbs) - 1]->segment . "</h3>";
+						echo $title;
+					?>
 			</div>
+			
 		</div>
-<?php endif; ?>
-
-<?php if($information = $this->session->flashdata('information')): ?>
+		<div class="row">
+			<ol class="breadcrumb">
+				<?php foreach($breadcrumbs as $bc) {
+					$html = "\t<li class=\"breadcrumb-item";
+					if($bc->is_current) $html .= " active";
+					$html .= "\">";
+					if($bc->prefix !== false) $html .= $bc->prefix ;
+					if($bc->link !== false) $html .= "<a href=\"" . $bc->link . "\">";
+					$html .= $bc->segment;
+					if($bc->link !== false) $html .= "</a>";
+					if($bc->postfix !== false) $html .= $bc->postfix;
+					$html .= "</li>\n";
+					echo $html;
+				}
+				?>
+			</ol>
+		</div>
+<?php
+	if($information = $this->session->flashdata('information')){ ?>
 		<div class="alert alert-<?=$information->type;?>">
 			<?=$information->message;?>
 		</div>
-<?php 
-endif;
+	<?php 
+	}
 
+	$fields = $this->metadatafields->getFields($current_dir, true);
 
-if($userIsAllowed && $studyFolder != ''): 
+	if(!$fields || !is_array($fields) || sizeof($fields) === 0) {
+?>
+		<div class="alert alert-warning">
+			ntl: There is no meta data schema defined for this object, so no meta data can be shown
+		</div>
+<?php
+	}
 
 	$wrongFields = $this->session->flashdata("incorrect_fields") ? $this->session->flashdata("incorrect_fields") : array();
 
@@ -43,89 +75,55 @@ if($userIsAllowed && $studyFolder != ''):
 	);
 
 	$hidden = array(
-		"studyRoot" => $intakePath,
-		"studyID" => $studyID,
-		"dataset" => ($studyFolder ? $studyFolder : false),
-		"intake_url" => $url->module
+		"directory" => $current_dir
 	);
+
 	echo form_open($url->module . "/metadata/update", $formAttrs, $hidden);
-	
-	if($permissions->administrator): 
+
+	if($levelPermissions->canEditMeta && is_array($fields) && sizeof($fields) > 0) {
+		echo $this->metadatafields->getEditButtons();
+	}
 ?>
-		<div class="container-fluid metadata_form_buttons">
-			<div class="row">
-				<button class="btn btn-default showWhenEdit col-md-4 metadata-btn-editMetaSubmit"
-					disabled="disabled" type="submit">
-					<span class="glyphicon glyphicon-save"></span>
-					Submit
-				</button>
-				<button type="button" class="btn btn-default hideWhenEdit col-md-4 metadata-btn-editAll" 
-					action="" onclick="enableAllForEdit()">
-					<span class="glyphicon glyphicon-pencil"></span>
-					Edit all
-				</button>
-				<button type="button" 
-					class="btn btn-default showWhenEdit col-md-4 metadata-btn-cancelAll"
-					disabled="disabled" action="" onclick="disableAllForEdit()">
-					<span class="glyphicon glyphicon-remove"></span>
-					Cancel edit
-				</button>
-			</div>
-		</div>
-	
-	<?php endif; // if administrator ?>
+	<table id="metadata_edittable" 
+		class="display table table-datatable">
+		<thead>
+			<tr>
+				<th width="100"><?=lang('metadata_name');?></th>
+				<th><?=lang('metadata_value');?></th>
+				<th></th>
+			</tr>
+		</thead>
 
-		<table id="metadata_edittable" 
-			class="display table table-datatable">
-			<thead>
-				<tr>
-					<th width="100"><?=lang('metadata_name');?></th>
-					<th><?=lang('metadata_value');?></th>
-					<th></th>
-				</tr>
-			</thead>
-
-			<tbody>
+		<tbody>
 <?php 
-			$fields = $this->metadatafields->getFields($currentDir, true);
-			foreach($fields as $key => $config){
-				echo $this->metadatafields->getHtmlForRow(
-					$key,
-					$config,
-					$config["value"],
-					2,
-					$permissions,
-					array_key_exists($key, $wrongFields) ? $wrongFields[$key] : array(), // in_array($key, $wrongFields),
-					$this->session->flashdata('form_data')
-				);
-				echo "\n";
-			}
+	
+	if(is_array($fields) && sizeof($fields) > 0) {
+		foreach($fields as $key => $config){
+			echo $this->metadatafields->getHtmlForRow(
+				$key,
+				$config,
+				$config["value"],
+				2,
+				$levelPermissions->canViewMeta && $levelPermissions->canEditMeta,
+				array_key_exists($key, $wrongFields) ? $wrongFields[$key] : array(), // in_array($key, $wrongFields),
+				$this->session->flashdata('form_data')
+			);
+			echo "\n";
+		}
+	}
 ?>
-			</tbody>
-		</table>
-	<?php if($permissions->administrator): ?>
-		<div class="container-fluid metadata_form_buttons">
-			<div class="row">
-				<button class="btn btn-default showWhenEdit col-md-4 metadata-btn-editMetaSubmit"
-					disabled="disabled" type="submit">
-					<span class="glyphicon glyphicon-save"></span>
-					Submit
-				</button>
-				<button type="button" class="btn btn-default hideWhenEdit col-md-4 metadata-btn-editAll" 
-					action="" onclick="enableAllForEdit()">
-					<span class="glyphicon glyphicon-pencil"></span>
-					Edit all
-				</button>
-				<button type="button" 
-					class="btn btn-default showWhenEdit col-md-4 metadata-btn-cancelAll"
-					disabled="disabled" action="" onclick="disableAllForEdit()">
-					<span class="glyphicon glyphicon-remove"></span>
-					Cancel edit
-				</button>
-			</div>
-		</div>
-	<?php endif; // if administrator ?>
+		</tbody>
+	</table>
 
-	<?php 
+<?php
+	if($levelPermissions->canEditMeta && is_array($fields) && sizeof($fields) > 0) {
+		echo $this->metadatafields->getEditButtons();
+	}	
+
 	echo form_close();
-endif; ?>
+?>
+
+	</div>
+<?php
+}
+

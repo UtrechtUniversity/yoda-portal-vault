@@ -1,0 +1,38 @@
+<schema>
+	<project_name>
+		<label>Project name</label>
+		<help>Enter a project name</help>
+		<type>text</type>
+		<type_configuration>
+			<length>false</length>
+			<pattern>false</pattern>
+			<longtext>false</longtext>
+		</type_configuration>
+		<required>true</required>
+		<depends>false</depends>
+	</project_name>
+	<project_id>
+		<label>Project ID</label>
+		<help>Enter the project unique ID</help>
+		<type>text</type>
+		<type_configuration>
+			<length>false</length>
+			<pattern>false</pattern>
+			<longtext>false</longtext>
+		</type_configuration>
+		<required>true</required>
+		<depends>false</depends>
+	</project_id>
+	<project_description>
+		<label>Project description</label>
+		<help>Enter the project unique description</help>
+		<type>text</type>
+		<type_configuration>
+			<length>false</length>
+			<pattern>false</pattern>
+			<longtext>true</longtext>
+		</type_configuration>
+		<required>true</required>
+		<depends>false</depends>
+	</project_description>
+</schema>

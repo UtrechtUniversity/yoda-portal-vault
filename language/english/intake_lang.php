@@ -1,6 +1,8 @@
 <?php
-
+$lang["project"] = "project";
+$lang["intake:change-project"] = "change project";
 $lang['INTAKE_STUDY'] = "study";
+$lang["dataset"] = "datapackage";
 $lang['header:files_not_recognised'] = "Unrecognised files";
 $lang['file_locked'] = "This object is locked because it is being prepared for a snapshot. Click to unlock and cancel the snapshot";
 $lang['file_frozen'] = "This object is locked because a snapshot is currently being made. The object will be unlocked after the snapshot is completed";
