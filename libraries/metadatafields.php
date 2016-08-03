@@ -482,8 +482,7 @@ class metadataFields {
 		return OK;
 	}
 
-	public function getHtmlForRow($key, $config, $value, $indent = 0, $permissions, $errors = false, $formdata) {
-
+	public function getHtmlForRow($key, $config, $value, $indent = 0, $canEdit, $errors = false, $formdata) {
 		$idn = "";
 		for($i = 0; $i < $indent; $i++) {
 			$idn .= "\t";
@@ -529,7 +528,7 @@ EOT;
 %11$s 	<td width="50">
 
 EOT;
-		if($permissions->administrator):
+		if($canEdit):
 			$template .= <<<'EOT'
 %11$s 		<span type="button" class="btn btn-default glyphicon glyphicon-pencil hideWhenEdit button-%1$s" 
 %11$s			onclick="edit('%1$s')"></span>
@@ -555,7 +554,7 @@ EOT;
 			$currentValue = $value;
 		}
 
-		if($permissions->administrator){
+		if($canEdit){
 			if (!array_key_exists("multiple", $config) && is_string($currentValue) || $config["type"] == "checkbox") {
 				$input = $this->findProperInput($key, sprintf($inputName, $key), $config, $currentValue);
 				$rowInputTemplate = $this->findProperInput($key, sprintf($inputName, $key), $config, "");
@@ -626,7 +625,7 @@ EOT;
 			$help,
 			$input,
 			$this->getShadowInput($key, $config, $value),
-			htmlentities($rowInputTemplate),
+			$canEdit ? htmlentities($rowInputTemplate) : "",
 			is_array($currentValue) && sizeof($currentValue) > 0 ? max(array_keys($currentValue)) + 1 : 1,
 			$hasError ? " has-error" : "",
 			$rowDepends,
@@ -1055,6 +1054,32 @@ EOT;
 			$value,
 			$extra
 		);
+	}
+
+	public function getEditButtons() {
+		$template = <<<EOT
+	<div class="container-fluid metadata_form_buttons">
+		<div class="row">
+			<button class="btn btn-default showWhenEdit col-md-4 metadata-btn-editMetaSubmit"
+				disabled="disabled" type="submit">
+				<span class="glyphicon glyphicon-save"></span>
+				Submit
+			</button>
+			<button type="button" class="btn btn-default hideWhenEdit col-md-4 metadata-btn-editAll" 
+				action="" onclick="enableAllForEdit()">
+				<span class="glyphicon glyphicon-pencil"></span>
+				Edit all
+			</button>
+			<button type="button" 
+				class="btn btn-default showWhenEdit col-md-4 metadata-btn-cancelAll"
+				disabled="disabled" action="" onclick="disableAllForEdit()">
+				<span class="glyphicon glyphicon-remove"></span>
+				Cancel edit
+			</button>
+		</div>
+	</div>
+EOT;
+		return $template;
 	}
 
 }

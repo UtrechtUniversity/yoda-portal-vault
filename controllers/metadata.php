@@ -12,70 +12,78 @@ class MetaData extends MY_Controller
         $this->load->library('metadatafields');
         $this->load->model('study');
         $this->load->library('modulelibrary');
+        $this->load->library('pathlibrary');
     }
 
     public function update() {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $directory = $this->input->post('directory');
+        $folder = substr(strrchr($directory, "/"), 1);
+
         $message = "";
         $error = false;
         $type = "info";
 
-        $redirectTemplate = $this->modulelibrary->getModuleBase() . '/intake/%1$s/' . 
-            $this->input->post('studyID') . "/" . $this->input->post("dataset");
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $directory, $dir);
+        $studyID = $segments[0];
 
-
-        $permissions = $this->study->getIntakeStudyPermissions($this->input->post('studyID'));
-        if($permissions->administrator) {
-
-            $formdata = $this->input->post('metadata');
-            $shadowData = $this->input->post('metadata-shadow');
-            $collection = $this->input->post('studyRoot') . "/" . $this->input->post('dataset');
-            $fields = $this->metadatafields->getFields($collection, true);
-
-            $this->checkDependencyProperties($fields, $formdata);
-
-            $wrongFields = $this->veryInput($formdata, $fields);
-
-            if(sizeof($wrongFields) == 0) {
-
-                // Process results
-                $deletedValues = $this->findDeletedItems($formdata, $shadowData, $fields);
-                $addedValues = $this->findChangedItems($formdata, $shadowData, $fields);
-
-                // $this->dumpKeyVals($deletedValues, "These items will be deleted:");
-                // $this->dumpKeyVals($addedValues, "These items will be (re)added");
-
-                // Update results
-                $rodsaccount = $this->rodsuser->getRodsAccount();
-                $status = $this->metadatamodel->processResults($rodsaccount, $collection, $deletedValues, $addedValues); 
-                // $status = UPDATE_SUCCESS;
-
-                if($status == UPDATE_SUCCESS) {
-                    $referUrl = sprintf($redirectTemplate, "index");
-                    $message = "ntl:The metadata was updated successfully";
-                } else {
-                    $referUrl = sprintf($redirectTemplate, "metadata");
-                    $message = "ntl:Something went wrong updating the metadata. Please check all your metadata. The error code was " . 
-                        $status . " if it helps";
-                    $error = true;
-                    $type = "danger";
-                }
-            } else {
-                $referUrl = sprintf($redirectTemplate, "metadata");
-                $message = "ntl: Incorrect input";
-                $error = true;
-                $type = "warning";
-
-                $this->session->set_flashdata('incorrect_fields', $wrongFields);
-                $this->session->set_flashdata('form_data', $formdata);
-            }
-           
-        } else {
-            $referUrl = sprintf($redirectTemplate, "index");
-            $message = "ntl:You do not have admin rights on the " . $this->input->post("studyID") . " study and can therefor not update metadata";
+        if(!is_array($segments)) {
+            $message = sprintf("ntl: %s path does not seem to be a valid directory. No metadata updated", $directory);
             $error = true;
-            $type = "warning";
+            $type = "error";
+        } else {
+            $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $currentLevel, $currentDepth);
+            $levelPermissions = $this->study->getPermissionsForLevel($currentDepth, $studyID);
+            if($levelPermissions->canEditMeta === false) {
+                $message = sprintf("ntl: You do not have permission to edit meta data for the folder %s", $folder);
+                $error = true;
+                $type = "error";
+            } else {
+                $formdata = $this->input->post('metadata');
+                $shadowData = $this->input->post('metadata-shadow');
+                $fields = $this->metadatafields->getFields($directory, true);
+
+                $this->checkDependencyProperties($fields, $formdata);
+
+                $wrongFields = $this->veryInput($formdata, $fields);
+
+                if(sizeof($wrongFields) == 0) {
+
+                    // Process results
+                    $deletedValues = $this->findDeletedItems($formdata, $shadowData, $fields);
+                    $addedValues = $this->findChangedItems($formdata, $shadowData, $fields);
+
+                    $this->dumpKeyVals($deletedValues, "These items will be deleted:");
+                    $this->dumpKeyVals($addedValues, "These items will be (re)added");
+
+                    // Update results
+                    $rodsaccount = $this->rodsuser->getRodsAccount();
+                    $status = $this->metadatamodel->processResults($rodsaccount, $directory, $deletedValues, $addedValues); 
+                    // $status = UPDATE_SUCCESS;
+
+                    if($status == UPDATE_SUCCESS) {
+                        // $referUrl = sprintf($redirectTemplate, "index");
+                        $message = "ntl:The metadata was updated successfully";
+                    } else {
+                        // $referUrl = sprintf($redirectTemplate, "metadata");
+                        $message = "ntl:Something went wrong updating the metadata. Please check all your metadata. The error code was " . 
+                            $status . " if it helps";
+                        $error = true;
+                        $type = "danger";
+                    }
+                } else {
+                    $message = "ntl: Incorrect input";
+                    $error = true;
+                    $type = "warning";
+
+                    $this->session->set_flashdata('incorrect_fields', $wrongFields);
+                    $this->session->set_flashdata('form_data', $formdata);
+                }
+            }
         }
 
+        $referUrl = site_url(array($this->modulelibrary->name(), "intake", "metadata")) . "?dir=" . urlencode($directory);
         displayMessage($this, $message, $error, $type);
         redirect($referUrl, 'refresh');
     }

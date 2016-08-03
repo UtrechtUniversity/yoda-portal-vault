@@ -51,12 +51,34 @@ class Intake extends MY_Controller
         $this->load->view('common-end');
     }
 
-    /*
-        - check if path matches the zone and intake prefix
-        - check if path is valid iRods directory
-        - 
+    public function metadata() {
+        $this->loadDirectory();
 
-    */
+        $this->load->view('common-start', array(
+            'styleIncludes' => array(
+                'css/datatables.css', 
+                'css/intake.css', 
+                'lib/chosen-select/chosen.min.css',
+                'css/bootstrap-datetimepicker.css'
+            ),
+            'scriptIncludes' => array(
+                'js/datatables.js', 
+                'js/intake.js', 
+                'lib/chosen-select/chosen.jquery.min.js',
+                'js/moments.min.js',
+                'js/bootstrap-datetimepicker.js'
+            ),
+            'activeModule'   => $this->modulelibrary->name(),
+            'user' => array(
+                'username' => $this->rodsuser->getUsername(),
+            ),
+        ));
+        
+        $this->load->view('edit_meta', $this->data);
+        $this->load->view('common-end');
+    }
+
+    
     private function loadDirectory() {
         $this->current_path = $this->input->get('dir');
         
