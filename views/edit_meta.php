@@ -71,11 +71,14 @@ if($folderValid === false) {
 	$wrongFields = $this->session->flashdata("incorrect_fields") ? $this->session->flashdata("incorrect_fields") : array();
 
 	$formAttrs = array(
-		"id" => "metadata_form"
+		"id" => "metadata_form",
+
 	);
 
 	$hidden = array(
-		"directory" => $current_dir
+		"directory" => $current_dir,
+		"studyID" => $studyID,
+		"intake_url" => site_url($url->module, "intake")
 	);
 
 	echo form_open($url->module . "/metadata/update", $formAttrs, $hidden);

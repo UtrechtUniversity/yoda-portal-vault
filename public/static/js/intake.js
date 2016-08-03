@@ -143,6 +143,7 @@ function createUserFromGroupInput(elem) {
 				var url = $("input[name=intake_url]").val();
 				url += '/getGroupUsers/';
 				url += $("input[name=studyID]").val();
+				console.log(url);
 				return url;
 			},
 			type:     'get',
