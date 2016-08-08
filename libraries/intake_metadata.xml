@@ -169,11 +169,33 @@
 		<help>The select field can be used to provide multiple options</help>
 		<type>select</type>
 		<type_configuration>
-			<restricted>true</restricted>
-			<allow_create>true</allow_create>
+			<restricted>false</restricted>
+			<allow_create>false</allow_create>
 			<begin>0</begin>
 			<end>2016</end>
 			<step>1</step>
+			<options>
+				<optgroup>
+					<optlabel>Opt Group 1</optlabel>
+					<option>option 1</option>
+					<option>option 2</option>
+					<option>option 3</option>
+					<option>option 4</option>
+					<option>option 5</option>
+					<option>option 6</option>
+					<option>option 7</option>
+				</optgroup>
+				<optgroup>
+					<optlabel>Opt Group 2</optlabel>
+					<option>option 7</option>
+					<option>option 8</option>
+					<option>option 9</option>
+					<option>option 10</option>
+					<option>option 11</option>
+					<option>option 12</option>
+					<option>option 13</option>
+				</optgroup>
+			</options>
 		</type_configuration>
 		<required>true</required>
 		<allow_empty>true</allow_empty>
@@ -184,6 +206,43 @@
 		</multiple>
 		<depends>false</depends>
 	</example_select>
+	<another_select>
+		<label>Example select 2</label>
+		<help>The select field can be used to provide multiple options</help>
+		<type>select</type>
+		<type_configuration>
+			<restricted>false</restricted>
+			<allow_create>false</allow_create>
+			<begin>0</begin>
+			<end>2016</end>
+			<step>1</step>
+			<options>
+				<optgroup>
+					<optlabel>Opt Group 1</optlabel>
+					<option>option 1</option>
+					<option>option 2</option>
+					<option>option 3</option>
+					<option>option 4</option>
+					<option>option 5</option>
+					<option>option 6</option>
+					<option>option 7</option>
+				</optgroup>
+				<optgroup>
+					<optlabel>Opt Group 2</optlabel>
+					<option>option 7</option>
+					<option>option 8</option>
+					<option>option 9</option>
+					<option>option 10</option>
+					<option>option 11</option>
+					<option>option 12</option>
+					<option>option 13</option>
+				</optgroup>
+			</options>
+		</type_configuration>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
+		<depends>false</depends>
+	</another_select>
 	<project_id>
 		<label>Project ID</label>
 		<help>The unique identifier of this project</help>

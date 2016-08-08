@@ -13,11 +13,6 @@ $(function() {
 		"html" : true
 	});
 
-	$(".chosen").chosen({
-		inherit_select_classes : true,
-		width : "100%"
-	});
-
 	$el = $("input.select-user-from-group");
 	createUserFromGroupInput($el);
 
@@ -32,6 +27,9 @@ $(function() {
 		elem = $(e);
 		createDateTimePickerInput(elem);
 	});
+
+	$chosen = $(".chosen-select");
+	createChosenInput($chosen, false);
 
 	$('#metadata_form').submit(function(e){
 		$('.fixed-row-removed').remove();
@@ -143,7 +141,6 @@ function createUserFromGroupInput(elem) {
 				var url = $("input[name=intake_url]").val();
 				url += '/getGroupUsers/';
 				url += $("input[name=studyID]").val();
-				console.log(url);
 				return url;
 			},
 			type:     'get',
@@ -335,7 +332,6 @@ function createMetaSuggestionsInput(elem) {
 		ajax: {
 			quietMillis: 400,
 			url:      function(params) {
-				console.log(elem);
 				var url = $("input[name=intake_url]").val();
 				url += '/metadata/metasuggestions/';
 				url += elem.data('for');
@@ -352,7 +348,6 @@ function createMetaSuggestionsInput(elem) {
 				var query   = elem.data('select2').search.val();
 				var results = [];
 				var inputMatches = false;
-				console.log(options);
 				options.forEach(function(userName) {
 					// Exclude options already in the group.
 					results.push({
@@ -385,6 +380,20 @@ function createMetaSuggestionsInput(elem) {
 		initSelection: function($el, callback) {
 			callback({ id: $el.val(), text: $el.val() });
 		},
+	});
+}
+
+function createChosenInput(elem, show) {
+	if(!elem.hasClass("chosen-select")) return;
+	elem.chosen({
+		inherit_select_classes : true,
+		width: "100%",
+		inherit_select_classes : true
+	});
+	elem.each(function(i, e){
+		var row = $(e).parent(".col-xs-11");
+		var select = row.children(".chosen-container");
+		_show(select);
 	});
 }
 
@@ -468,13 +477,14 @@ function addValueRow($element) {
 	row = $('table#metadata_edittable .row-' + $element);
 	_show(input);
 	_show(row);
-	newElem = $('input[name="metadata[' + $element + '][' + addRowBtn[0].dataset['nextindex'] + ']"]');
+	newElem = $('[name="metadata[' + $element + '][' + addRowBtn[0].dataset['nextindex'] + ']"]');
 	newElem.each(function(i, e) {
 		e = $(e);
 		createMetaSuggestionsInput(e);
 		createUserFromGroupInput(e);
 		createDirectoryListSelectInput(e);
 		createDateTimePickerInput(e);
+		createChosenInput(e, true);
 	});
 	addRowBtn[0].dataset['nextindex']++;
 }
@@ -494,11 +504,16 @@ var _show = function(elem){
 		_show($("#s2id_" + elem.attr('id')));
 	}
 
-	if( _attrIsChosen(elem) ) {
-		_hide(elem);
-		_show($("#" + elem.attr('id').split("-").join("_") + "_chosen"));
-	}
-	$("#input_example_select_chosen").css('display', 'block');
+	elem.each(function(i, e) {
+		if( 
+			$(e).hasClass("chosen-select") && 
+			!$(e).hasClass("chosen-container") 
+		) {
+			_hide($(e));
+		}
+	});
+
+	
 };
 
 var _hide = function(elem){
@@ -528,11 +543,6 @@ function restoreValueFromShadow(elem) {
 
 	$(elem).val(shadowElem.val()).trigger("change");
 		
-}
-
-function _attrIsChosen(elem) {
-	var val = elem.hasClass("chosen") && !elem.attr('id').match("_chosen$");
-	return val;
 }
 
 function _attrIsSelect2(elem) {

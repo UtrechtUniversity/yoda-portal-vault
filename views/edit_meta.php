@@ -12,6 +12,8 @@ if($folderValid === false) {
 	<div class="alert alert-danger">
 		ntl: You do not have permission to edit metadata for this directory
 	</div>
+
+
 <?php
 } else { ?>
 	<div class="container page-body">
@@ -127,6 +129,8 @@ if($folderValid === false) {
 ?>
 
 	</div>
+
+	
 <?php
 }
 

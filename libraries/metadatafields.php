@@ -622,6 +622,7 @@ EOT;
 						0,
 						$this->findProperInput($key, sprintf($inputArrayName, $key, 0), $config, $currentValue)
 					);
+
 				} else {
 					foreach(array_keys($currentValue) as $i) {
 						$input .= sprintf(
@@ -941,7 +942,7 @@ EOT;
 
 	public function getSelectInput($key, $inputName, $config, $value) {
 		$tc = $config["type_configuration"]; // tc = TypeConfiguration;
-		if($tc["restricted"]) {
+		if(array_key_exists("restricted", $tc) && $tc["restricted"] === true) {
 			$template = '<input name="%2$s" type="hidden"';
 			$template .= ' value="%3$s"';
 			$template .= ' class="showWhenEdit meta-suggestions-field input-%1$s"';
@@ -966,7 +967,7 @@ EOT;
 		} else {
 			$options = "";
 			$optTemplate = '<option value="%1$s">%1$s</option>';
-			if(! array_key_exists("options", $tc) || sizeof($tc["options"]) == 0){
+			if(!array_key_exists("options", $tc) || sizeof($tc["options"]) == 0){
 				for(
 					$i = $tc["begin"]; 
 					( $tc["begin"] <= $tc["end"] && $i <= $tc["end"] ) ||
@@ -977,13 +978,28 @@ EOT;
 				}
 			} else {
 				foreach($tc["options"] as $option) {
-					$options .= sprintf($optTemplate, $option, $option == $value ? ' selected=""' : '');
+					if(is_string($option)) {
+						$options .= sprintf($optTemplate, $option, $option == $value ? ' selected=""' : '');
+					} else if(is_array($option)) {
+						foreach($option as $optgroup) {
+							if(array_key_exists("optlabel", $optgroup) && $optgroup["optlabel"] !== false)
+								$options .= sprintf('<optgroup label="%s">', $optgroup["optlabel"]);
+
+							if(array_key_exists("option", $optgroup) && is_array($optgroup["option"])) {
+								foreach($optgroup["option"] as $o) {
+									$options .= sprintf($optTemplate, $o, $o == $value ? ' selected=""' : '');
+								}
+							}
+							if(array_key_exists("optlabel", $optgroup) && $optgroup["optlabel"] !== false)
+								$options .= "</optgroup>";
+						}
+					}
 				}
 			}
 			
-			$select ='<select';
-			$select .= ' name="%2$s';
-			$select .= ' class="showWhenEdit chosen input-%1$s">%4$s</select>';
+			$select = '<select';
+			$select .= ' name="%2$s"';
+			$select .= ' class="showWhenEdit chosen-select input-%1$s">%4$s</select>';
 
 			return sprintf(
 					$select,
