@@ -109,7 +109,7 @@ if(array_key_exists($this->config->item('role:reader'), $permissions) && $permis
 <?php
 	}
 
-	if($levelPermissions->canArchive === false && sizeof($directories) > 0) {
+	if($levelPermissions->canArchive === false && sizeof($files) > 0) {
 ?>
 	</tbody>
 </table>
