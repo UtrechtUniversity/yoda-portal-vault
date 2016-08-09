@@ -383,10 +383,27 @@ class metadataFields {
 			}
 		}
 
-		if(array_key_exists("options", $conf) && !in_array($value, $conf["options"])) {
-			// echo $value . " fails because the value is not in the specified range";
-			// return false;
-			$errors[] = ERROR_NOT_IN_RANGE;
+		if(array_key_exists("options", $conf)) {
+			$options = array();
+			foreach($conf["options"] as $key => $option) {
+				if(is_string($option)) {
+					$options[] = $option;
+				} else if(is_array($option)) {
+					foreach($option as $optgroup) {
+						if(array_key_exists("option", $optgroup) && is_array($optgroup["option"])) {
+							$options = array_merge($options, $optgroup["option"]);
+						} else if(array_key_exists("option", $optgroup) && is_string($optgroup["option"])) {
+							$options[] = $optgroup["option"];
+						}
+					}
+				}
+			}
+
+			if(!in_array($value, $options)) {
+				// echo $value . " fails because the value is not in the specified range";
+				// return false;
+				$errors[] = ERROR_NOT_IN_RANGE;
+			}
 		}
 
 		return $errors;
@@ -966,7 +983,7 @@ EOT;
 			);
 		} else {
 			$options = "";
-			$optTemplate = '<option value="%1$s">%1$s</option>';
+			$optTemplate = '<option value="%1$s"%2$s>%1$s</option>';
 			if(!array_key_exists("options", $tc) || sizeof($tc["options"]) == 0){
 				for(
 					$i = $tc["begin"]; 
