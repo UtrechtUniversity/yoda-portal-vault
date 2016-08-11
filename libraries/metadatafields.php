@@ -399,7 +399,7 @@ class metadataFields {
 				}
 			}
 
-			if(!in_array($value, $options)) {
+			if(!in_array($value, $options) && $value != "") {
 				// echo $value . " fails because the value is not in the specified range";
 				// return false;
 				$errors[] = ERROR_NOT_IN_RANGE;
@@ -477,8 +477,10 @@ class metadataFields {
 				if(array_key_exists($conf["min_date_time"]["linked"], $formdata)) {
 					try{
 						$valDate = DateTime::createFromFormat($format, $value);
+
+						$refValArr = is_array($formdata[$conf["min_date_time"]["linked"]]) ? $formdata[$conf["min_date_time"]["linked"]] : array($formdata[$conf["min_date_time"]["linked"]]);
 						$refVal = array_filter(
-							$formdata[$conf["min_date_time"]["linked"]], 
+							$refValArr, 
 							array($this, "callback_isNotEmpty")
 						);
 						if(is_array($refVal)) {
@@ -517,8 +519,11 @@ class metadataFields {
 				if(array_key_exists($conf["max_date_time"]["linked"], $formdata)) {
 					try{
 						$valDate = DateTime::createFromFormat($format, $value);
+
+						$refValArr = is_array($formdata[$conf["max_date_time"]["linked"]]) ? $formdata[$conf["max_date_time"]["linked"]] : array($formdata[$conf["max_date_time"]["linked"]]);
+
 						$refVal = array_filter(
-							$formdata[$conf["min_date_time"]["linked"]], 
+							$refValArr, 
 							array($this, "callback_isNotEmpty")
 						);
 						if(is_array($refVal)) {
@@ -534,6 +539,7 @@ class metadataFields {
 						}
 					} catch(exception $e) {
 						// do nothing
+						var_dump($e);
 					}
 				}
 			}
@@ -1013,6 +1019,7 @@ EOT;
 					}
 				}
 			}
+			$options = "<option value=\"\">&nbsp;</option>" . $options;
 			
 			$select = '<select';
 			$select .= ' name="%2$s"';

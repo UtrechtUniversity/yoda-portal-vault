@@ -388,7 +388,8 @@ function createChosenInput(elem, show) {
 	elem.chosen({
 		inherit_select_classes : true,
 		width: "100%",
-		inherit_select_classes : true
+		allow_single_deselect : true,
+		include_group_label_in_selected : true,
 	});
 	elem.each(function(i, e){
 		var row = $(e).parent(".col-xs-11");

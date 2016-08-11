@@ -1,0 +1,184 @@
+<schema>
+	<datapackage_name>
+		<label>Datapackage name</label>
+		<help>Enter a datapackage name</help>
+		<type>text</type>
+		<type_configuration>
+			<length>false</length>
+			<pattern>*</pattern>
+			<longtext>false</longtext>
+		</type_configuration>
+		<required>true</required>
+		<depends>false</depends>
+	</datapackage_name>
+	<datapackage_description>
+		<label>datapackage description</label>
+		<help>Enter the datapackage description</help>
+		<type>text</type>
+		<type_configuration>
+			<length>false</length>
+			<pattern>*</pattern>
+			<longtext>true</longtext>
+		</type_configuration>
+		<required>true</required>
+		<depends>false</depends>
+	</datapackage_description>
+	<discipline>
+		<label>Discipline</label>
+		<help>Select the discipline from the list</help>
+		<type>select</type>
+		<type_configuration>
+			<restricted>false</restricted>
+			<options>
+				<optgroup>
+					<optlabel>Medical and health sciences</optlabel>
+					<option>Basic medicine</option>
+					<option>Clinical medicine</option>
+					<option>Health sciences</option>
+					<option>Health biotechnology</option>
+					<option>Other medical sciences</option>
+				</optgroup>
+				<optgroup>
+					<optlabel>Agricultural sciences</optlabel>
+					<option>Agriculture, forestry, and fisheries</option>
+					<option>Animal and dairy science</option>
+					<option>Veterinary science</option>
+					<option>Agricultural biotechnology</option>
+					<option>Other agricultural sciences</option>
+				</optgroup>
+				<optgroup>
+					<optlabel>Social sciences and Humanities</optlabel>
+				</optgroup>
+				<optgroup>
+					<optlabel>Not specified</optlabel>
+				</optgroup>
+				<optgroup>
+					<optlabel>Natural sciences, Engineering and technology, Medical and health sciences, Agricultural sciences</optlabel>
+					<option>Mathematics</option>
+					<option>Computer and information sciences</option>
+					<option>Physical sciences</option>
+					<option>Chemical sciences</option>
+					<option>Earth and related environmental sciences</option>
+					<option>Biological sciences</option>
+					<option>Other natural sciences</option>
+				</optgroup>
+				<optgroup>
+					<optlabel>Engineering and technology</optlabel>
+					<option>Civil engineering</option>
+					<option>Electrical engineering, electronic engineering, information engineering</option>
+					<option>Mechanical engineering</option>
+					<option>Chemical engineering</option>
+					<option>Materials engineering</option>
+					<option>Medical engineering</option>
+					<option>Environmental engineering</option>
+					<option>Environmental biotechnology</option>
+					<option>Industrial Biotechnology</option>
+					<option>Nano-technology</option>
+					<option>Other engineering and technologies</option>
+				</optgroup>
+				<optgroup>
+					<optlabel>Total</optlabel>
+				</optgroup>
+				<optgroup>
+					<optlabel>Social sciences</optlabel>
+					<option>Psychology</option>
+					<option>Economics and business</option>
+					<option>Educational sciences</option>
+					<option>Sociology</option>
+					<option>Law</option>
+					<option>Political Science</option>
+					<option>Social and economic geography</option>
+					<option>Media and communications</option>
+					<option>Other social sciences</option>
+				</optgroup>
+				<optgroup>
+					<optlabel>Humanities</optlabel>
+					<option>History and archaeology</option>
+					<option>Languages and literature</option>
+					<option>Philosophy</option>
+					<option>Art (arts, history of arts, performing arts, music)</option>
+					<option>Other humanities</option>
+				</optgroup>
+			</options>
+		</type_configuration>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
+		<depends>false</depends>
+	</discipline>
+	<ethical_approved>
+		<label>Ethically approved</label>
+		<help>Is this datapackage ethically approved?</help>
+		<type>bool</type>
+		<type_configuration>
+			<true_val>yes</true_val>
+			<false_val>no</false_val>
+		</type_configuration>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
+		<depends>false</depends>
+	</ethical_approved>
+	<approval_added>
+		<label>Approval added</label>
+		<help>Is approval added for this datapackage?</help>
+		<type>bool</type>
+		<type_configuration>
+			<true_val>yes</true_val>
+			<false_val>no</false_val>
+		</type_configuration>
+		<required>true</required>
+		<allow_empty>true</allow_empty>
+		<depends>false</depends>
+	</approval_added>
+
+	<unit_of_analysis>
+		<label>Unit of Analysis</label>
+		<help>What is the unit of analysis? Type the value in the input box. Suggested values are then shown. If your value of choice does not exist, you can add it</help>
+		<type>select</type>
+		<type_configuration>
+			<restricted>true</restricted>
+			<allow_create>true</allow_create>
+		</type_configuration>
+		<required>true</required>
+		<multiple>
+			<min>0</min>
+			<max>100</max>
+			<infinite>false</infinite>
+		</multiple>
+		<depends>false</depends>
+	</unit_of_analysis>
+
+	<start_collection>
+		<label>Start period</label>
+		<help>When did the collection process for this datapackage start?</help>
+		<type>datetime</type>
+		<type_configuration>
+			<show_years>true</show_years>
+			<show_months>true</show_months>
+			<show_days>false</show_days>
+			<show_time>false</show_time>
+			<min_date_time>false</min_date_time>
+			<max_date_time>
+				<linked>end_collection</linked>
+			</max_date_time>
+		</type_configuration>
+		<required>true</required>
+	</start_collection>
+
+	<end_collection>
+		<label>End period</label>
+		<help>When did the collection process for this datapackage end?</help>
+		<type>datetime</type>
+		<type_configuration>
+			<show_years>true</show_years>
+			<show_months>true</show_months>
+			<show_days>false</show_days>
+			<show_time>false</show_time>
+			<min_date_time>
+				<linked>start_collection</linked>
+			</min_date_time>
+			<max_date_time>false</max_date_time>
+		</type_configuration>
+		<required>true</required>
+	</end_collection>
+	
+</schema>

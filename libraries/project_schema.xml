@@ -25,7 +25,7 @@
 	</project_id>
 	<project_description>
 		<label>Project description</label>
-		<help>Enter the project unique description</help>
+		<help>Enter the project description</help>
 		<type>text</type>
 		<type_configuration>
 			<length>false</length>
@@ -35,4 +35,23 @@
 		<required>true</required>
 		<depends>false</depends>
 	</project_description>
+	<pi>
+		<label>Principal Investigator</label>
+		<help>Who is the principal investigatr for this project</help>
+		<type>custom</type>
+		<custom_type>userlist</custom_type>
+		<type_configuration>
+			<allow_create>false</allow_create>
+			<show_admins>true</show_admins>
+			<show_users>true</show_users>
+			<show_readonly>true</show_readonly>
+		</type_configuration>
+		<required>true</required>
+		<depends>false</depends>
+		<multiple>
+			<min>0</min>
+			<max>100</max>
+			<infinite>false</infinite>
+		</multiple>
+	</pi>
 </schema>
