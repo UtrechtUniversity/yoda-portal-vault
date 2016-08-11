@@ -93,7 +93,7 @@ echo form_open(null, null, $attrs);
 	if($levelPermissions->canSnapshot && !$currentViewLocked) { 
 		?>
 			<button type="<?=(sizeof($directories) === 0) ? "button" : "submit";?>" 
-				class="btn btn-default <?php if(sizeof($directories) === 0) echo " disabled";?>"
+				class="btn btn-default <?php if(sizeof($directories) === 0 && sizeof($files === 0)) echo " disabled";?>"
 				formaction="<?=site_url(array($this->modulelibrary->name(), "actions", "snapshot")); ?>"
 				>
 				<span class="glyphicon glyphicon-camera"></span>&nbsp;<?=lang('create_snapshot');?>
@@ -107,7 +107,7 @@ echo form_open(null, null, $attrs);
 	} 
 	if($levelPermissions->canEditMeta || $levelPermissions->canViewMeta){ ?>
 		<a href="<?=site_url(array($url->module, "intake", "metadata")) . "?dir=" . urlencode($current_dir); ?>" class="btn btn-default">
-			<span class="glyphicon glyphicon-tags"></span> NTL: Meta data
+			<span class="glyphicon glyphicon-tags"></span><?=lang('header:metadata');?>
 		</a>
 <?php 
 	} 
