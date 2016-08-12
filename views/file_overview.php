@@ -67,12 +67,14 @@ if(array_key_exists($this->config->item('role:reader'), $permissions) && $permis
 			<th data-toggle="tool-tip" title="<?=$glyphLabel;?>" > <!-- Name -->
 				<span class="glyphicon glyphicon-<?=$glyph;?>" style="margin-right: 10px"></span>
 				<?php
-					$lnk = '<a href="%1$s/intake/index?dir=%2$s/%3$s">%3$s</a>';
+					$lnk = isset($studyID) ? '<a href="%1$s/intake/index?dir=%2$s/%3$s">%3$s</a>' : '<span class="grey">%4$s</span><a href="%1$s/intake/index?dir=%2$s/%3$s">%5$s</a>';
 					echo sprintf(
 							$lnk,
 							htmlentities($url->module),
 							htmlentities($current_dir),
-							htmlentities($dir->getName())
+							htmlentities($dir->getName()),
+							$intake_prefix,
+							substr($dir->getName(), strlen($intake_prefix))
 						);
 				?>
 			</th>

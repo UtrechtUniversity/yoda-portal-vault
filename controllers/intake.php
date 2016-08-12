@@ -32,8 +32,8 @@ class Intake extends MY_Controller
         $this->load->library('modulelibrary');
         $this->load->library('metadatafields');
         $this->load->library('pathlibrary');
-
         $this->studies = $this->dataset->getStudies($this->rodsuser->getRodsAccount());
+        sort($this->studies);
     }
 
     public function index(){
@@ -88,59 +88,106 @@ class Intake extends MY_Controller
 
     
     private function loadDirectory($redirectIfInvalid = false) {
-        $this->current_path = $this->input->get('dir');
+        $this->current_path = rtrim($this->input->get('dir'), "/");
+        if(!$this->current_path){
+            if($tempDir = $this->session->userdata('tempDir') AND $tempDir){
+                $this->current_path = $tempDir;
+            } else if($this->studies[0]){
+                $this->current_path = sprintf(
+                    "/%s/home/%s%s",
+                    $this->config->item('rodsServerZone'), 
+                    $this->config->item('intake-prefix'), 
+                    $this->studies[0]
+                );
+            }
+        }
+
+        $urls = (object) array(
+            "site" => site_url(), 
+            "module" => $this->modulelibrary->getModuleBase()
+        );
 
         $rodsaccount = $this->rodsuser->getRodsAccount();
-
         $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $this->current_path, $this->dir);
+        
+        if($this->current_path === sprintf("/%s/home", $this->config->item('rodsServerZone'))) {
+            $this->session->set_userdata('tempDir', $this->current_path);
+            $this->breadcrumbs = $this->getBreadcrumbLinks($pathStart, array());
+            $this->head = $this->config->item('base-level');
+            $this->levelPermissions = $this->study->getPermissionsForLevel(-1, "");
+            $this->nextLevelPermissions = $this->study->getPermissionsForLevel(0, "");
 
-        if(!is_array($segments)) {
-            if($redirectIfInvalid) {
-                if(sizeof($this->studies) > 0) {
-                    $redirectTo = $pathStart . $this->studies[0];
-                    $referUrl = site_url($this->modulelibrary->name(), "intake", "intake", "index") . "?dir=" . $redirectTo;
-                    $message = sprintf("ntl: %s is not a valid directory", $this->current_path);
-                    if($this->current_path)
-                        displayMessage($this, $message, true);
-                    redirect($referUrl, 'refresh');
-                }
+            $dirs = array();
+            foreach($this->studies as $study) {
+                $d =  new ProdsDir($rodsaccount, sprintf("%s%s", $pathStart, $study), true);
+                $d->getStats();
+                $dirs[] = $d;
             }
-            $this->data["folderValid"] = false;
-        } else {
-            $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $this->head, $this->level_depth);
-
-            $studyID = $this->validateStudyPermission($segments[0]);
-            $this->getLockedStatus();
-            $this->breadcrumbs = $this->getBreadcrumbLinks($pathStart, $segments);
-
-            $urls = (object) array(
-                "site" => site_url(), 
-                "module" => $this->modulelibrary->getModuleBase()
-            );
 
             $dataArr = array(
-                "folderValid" => true,
-                "url" => $urls,
-                "head" => $this->head,
-                "studies" => $this->studies,
-                "studyID" => $studyID,
-                "breadcrumbs" => $this->breadcrumbs,
-                "current_dir" => $this->current_path,
-                "currentViewLocked" => $this->currentViewLocked,
-                "currentViewFrozen" => $this->currentViewFrozen,
-                "permissions" => (array) $this->permissions,
-                "directories" => $this->dir->getChildDirs(),
-                "files" => $this->dir->getChildFiles(),
-                "content" => "file_overview",
-                "levelPermissions" => $this->levelPermissions,
-                "nextLevelPermissions" => $this->nextLevelPermissions,
-                "level_depth" => $this->level_depth,
-                "level_depth_start" => $this->level_depth_start
+                "currentViewLocked" => false,
+                "currentViewFrozen" => false,
+                "level_depth" => -1,
+                "permissions" => array($this->config->item('role:contributor') => true),
+                "files" => array()
             );
-            $this->data = array_merge($this->data, $dataArr);
 
+
+        } else {
+            $segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $this->current_path, $this->dir);
+            if(!is_array($segments)) {
+                if($redirectIfInvalid) {
+                    if(sizeof($this->studies) > 0) {
+                        $redirectTo = $pathStart . $this->studies[0];
+                        $referUrl = site_url($this->modulelibrary->name(), "intake", "intake", "index") . "?dir=" . $redirectTo;
+                        $message = sprintf("ntl: %s is not a valid directory", $this->current_path);
+                        if($this->current_path)
+                            displayMessage($this, $message, true);
+                        redirect($referUrl, 'refresh');
+                    }
+                }
+                $this->data["folderValid"] = false;
+            } else {
+                $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $this->head, $this->level_depth);
+
+                $studyID = $this->validateStudyPermission($segments[0]);
+
+                $this->getLockedStatus();
+                $dirs = $this->dir->getChildDirs();
+                $files = $this->dir->getChildFiles();
+
+                $this->session->set_userdata('tempDir', $this->current_path);
+                $this->breadcrumbs = $this->getBreadcrumbLinks($pathStart, $segments);
+
+                $dataArr = array(
+                    "studyID" => $studyID,
+                    "currentViewLocked" => $this->currentViewLocked,
+                    "currentViewFrozen" => $this->currentViewFrozen,
+                    "files" => $files,
+                    "level_depth" => $this->level_depth,
+                    "level_depth_start" => $this->level_depth_start,
+                    "permissions" => $this->permissions
+                );
+                
+
+            }
         }
+
+        $dataArr = array_merge($dataArr, array(
+            "content" => "file_overview",
+            "folderValid" => true,
+            "url" => $urls,
+            "head" => $this->head,
+            "studies" => $this->studies,
+            "breadcrumbs" => $this->breadcrumbs,
+            "current_dir" => $this->current_path,
+            "levelPermissions" => $this->levelPermissions,
+            "nextLevelPermissions" => $this->nextLevelPermissions,
+            "directories" => $dirs,
+            "intake_prefix" => $this->config->item('intake-prefix')
+        ));
+
+        $this->data = array_merge($this->data, $dataArr);
 
     }
 
@@ -154,20 +201,32 @@ class Intake extends MY_Controller
     private function getBreadcrumbLinks($pathStart, $segments) {
         $breadCrumbs = array();
         $i = 0;
+        $link = site_url(array($this->modulelibrary->name(), "intake", "index")) . "?dir=";
         foreach(explode("/", $pathStart) as $seg) {
             if($seg === "" || $seg == $this->config->item('intake-prefix')) continue;
-            $breadCrumbs[] = (object)array(
+            else if($seg === "home") {
+                $homePath = sprintf("/%s/home", $this->config->item('rodsServerZone'));
+                $breadCrumbs[] = (object) array(
+                    "segment" => $seg,
+                    "link" => $link . $homePath,
+                    "prefix" => false,
+                    "postfix" => false,
+                    "is_current" => $this->current_path === $homePath
+                );
+            } else {
+               $breadCrumbs[] = (object)array(
                     "segment" => $seg, 
                     "link" => false, 
                     "prefix" => false, 
                     "postfix" => false, 
                     "is_current" => false
                 );
+            }
             $i++;
+            
         }
         $this->level_depth_start = $i;
 
-        $link = site_url(array($this->modulelibrary->name(), "intake", "index")) . "?dir=" . $pathStart;
 
         $segmentBuilder = array();
 
@@ -176,7 +235,7 @@ class Intake extends MY_Controller
             $segmentBuilder[] = $seg;
             $breadCrumbs[] = (object)array(
                 "segment" => $seg, 
-                "link" => $link . (implode("/", $segmentBuilder)),
+                "link" => $link . $pathStart . (implode("/", $segmentBuilder)),
                 "prefix" => ($i == 0) ? $this->config->item('intake-prefix') : false,
                 "postfix" => false,
                 "is_current" => (bool)($i === sizeof($segments) - 1)
@@ -197,14 +256,6 @@ class Intake extends MY_Controller
      *                      the study ID otherwise
      */
     private function validateStudyPermission($studyID) {
-        // studyID handling from session info
-        if(!$studyID){
-            if($tempID = $this->session->userdata('studyID') AND $tempID){
-                $studyID = $tempID;
-            } else if($this->studies[0]){
-                $studyID = $this->studies[0];
-            }
-        }
 
         // get study dependant rights for current user.
         $this->permissions = $this->study->getIntakeStudyPermissions($studyID);

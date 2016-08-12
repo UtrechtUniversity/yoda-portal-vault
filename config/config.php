@@ -20,6 +20,14 @@ $config["default-level"] = array(
 	"metadata" => false
 );
 
+$config["base-level"] = array(
+	"title" => "projects",
+	"glyphicon" => "home",
+	"canSnapshot" => false,
+	"canArchive" => false,
+	"metadata" => false
+);
+
 $config["metadata_prefix"] = "ilab_intake_metadata_";
 
 $config["level-hierarchy"] = array(

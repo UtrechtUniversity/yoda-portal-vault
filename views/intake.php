@@ -64,7 +64,7 @@ echo form_open(null, null, $attrs);
 ?>
 
 <div class="btn-group">
-	<button type="button" class="btn btn-default dropdown-toggle" 
+	<!--<button type="button" class="btn btn-default dropdown-toggle" 
 		<?php if(sizeof($studies) == 0) echo "disabled";?> 
 		data-toggle="dropdown" 
 		aria-haspopup="true" 
@@ -88,11 +88,11 @@ echo form_open(null, null, $attrs);
 				);
 			}
 		?>
-	</ul>
+	</ul>-->
 <?php
 	if($levelPermissions->canSnapshot && !$currentViewLocked) { 
 		?>
-			<button type="<?=(sizeof($directories) === 0) ? "button" : "submit";?>" 
+			<button type="<?=(sizeof($directories) === 0 && sizeof($files) === 0) ? "button" : "submit";?>" 
 				class="btn btn-default <?php if(sizeof($directories) === 0 && sizeof($files) === 0) echo " disabled";?>"
 				formaction="<?=site_url(array($this->modulelibrary->name(), "actions", "snapshot")); ?>"
 				>

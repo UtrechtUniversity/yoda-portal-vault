@@ -47,30 +47,34 @@ class Study extends CI_Model {
     public function getIntakeStudyPermissions($studyID){
         $rodsaccount = $this->rodsuser->getRodsAccount();
         return array(
-            $this->config->item('role:contributor') => get_instance()->dataset->isGroupMember(
+            $this->config->item('role:contributor') => $studyID ? get_instance()->dataset->isGroupMember(
                 $rodsaccount, 
                 $this->PERM_GroupAssistant . $studyID ,  
                 get_instance()->rodsuser->getUsername()
-            ),
-            $this->config->item('role:administrator') => get_instance()->dataset->isGroupManager(
+            ) : false,
+            $this->config->item('role:administrator') => $studyID ? get_instance()->dataset->isGroupManager(
                 $rodsaccount,
                 $this->PERM_GroupAssistant . $studyID,
                 get_instance()->rodsuser->getUsername()
-            ),
-            'datamanager' => get_instance()->dataset->isGroupMember(
+            ) : false,
+            'datamanager' => $studyID ? get_instance()->dataset->isGroupMember(
                 $rodsaccount, 
                 $this->PERM_GroupDataManager . $studyID, 
                 get_instance()->rodsuser->getUsername()
-            ),
+            ) : false
         );
     }
 
     public function getPermissionsForLevel($depth, $studyID) {
 
-        $level = 
-                sizeof($this->config->item('level-hierarchy')) > $depth ?
-                $this->config->item('level-hierarchy')[$depth] : 
-                $this->config->item('default-level');
+        if($studyID) {
+            $level = 
+                    sizeof($this->config->item('level-hierarchy')) > $depth ?
+                    $this->config->item('level-hierarchy')[$depth] : 
+                    $this->config->item('default-level');
+        } else {
+            $level = $this->config->item('base-level');
+        }
 
         $permissions = $this->getIntakeStudyPermissions($studyID);
 
