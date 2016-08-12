@@ -64,31 +64,6 @@ echo form_open(null, null, $attrs);
 ?>
 
 <div class="btn-group">
-	<!--<button type="button" class="btn btn-default dropdown-toggle" 
-		<?php if(sizeof($studies) == 0) echo "disabled";?> 
-		data-toggle="dropdown" 
-		aria-haspopup="true" 
-		aria-expanded="false"
-	>
-		<span class="glyphicon glyphicon-option-vertical"></span>
-		<?=lang('intake:change-project');?>&nbsp;<span class="caret"></span>
-	</button>
-	<ul class="dropdown-menu">
-		<?php 
-			foreach($studies as $study){
-				$class = $study == $studyID ? 'glyphicon-ok' : 'pad-left';
-				$str = '<li><a class="glyphicon %5$s" href="%1$s/intake?dir=/%2$s/home/%3$s%4$s">&nbsp;%4$s</a><li>';
-				echo sprintf(
-					$str, 
-					$url->module, 
-					$this->config->item('rodsServerZone'), 
-					$this->config->item('intake-prefix'),
-					$study, 
-					$class
-				);
-			}
-		?>
-	</ul>-->
 <?php
 	if($levelPermissions->canSnapshot && !$currentViewLocked) { 
 		?>
