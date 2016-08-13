@@ -929,17 +929,17 @@ EOT;
 
 		$length = $config["type_configuration"]["length"] ? 
 			sprintf(
-				"length=[%d]", 
+				"maxlength=\"%d\"", 
 				$config["type_configuration"]["length"]
 			)
-			: "";
+			: "maxlength=\"2700\"";
 
 		return sprintf($template, $key, $inputName, $value, $length);
 	}
 
 	public function getLongtextInput($key, $inputName, $config, $value) {
 		$template = '<textarea name="%2$s"';
-		$template .= ' class="showWhenEdit input-%1$s">%3$s</textarea>';
+		$template .= ' class="showWhenEdit input-%1$s" maxlength="2700">%3$s</textarea>';
 
 		return sprintf($template, $key, $inputName, $value);
 	}

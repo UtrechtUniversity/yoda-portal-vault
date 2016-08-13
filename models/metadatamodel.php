@@ -52,8 +52,7 @@ class MetadataModel extends CI_Model {
         }
         $ruleBody .= "*error1 = str(*error1a);\n\t*error2 = str(*error2a);\n}";
 
-        echo sprintf("<pre>%s</pre>", $ruleBody);
-        var_dump($params);
+        // echo sprintf("<pre>%s</pre>", $ruleBody);
 
         try {
             $rule = new ProdsRule(
@@ -66,8 +65,6 @@ class MetadataModel extends CI_Model {
             );
 
             $result = $rule->execute();
-
-            var_dump($result);
 
             $deleteStatus = $result["*error1"] == "0" ? 0 : -1;
             $addStatus = $result["*error2"] == "0" ? 0 : -2;
