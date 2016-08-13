@@ -184,7 +184,8 @@ class Intake extends MY_Controller
             "levelPermissions" => $this->levelPermissions,
             "nextLevelPermissions" => $this->nextLevelPermissions,
             "directories" => $dirs,
-            "intake_prefix" => $this->config->item('intake-prefix')
+            "intake_prefix" => $this->config->item('intake-prefix'),
+            "levelSize" => sizeof($this->config->item('level-hierarchy'))
         ));
 
         $this->data = array_merge($this->data, $dataArr);
