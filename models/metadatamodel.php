@@ -12,44 +12,6 @@ class MetadataModel extends CI_Model {
         parent::__construct();
     }
 
-    // public function processResultsOld() {
-        
-
-    //     $ruleBody = "myRule{\n\t*error1a = 0\n\t*error2a = 0; \n\tmsiGetObjType(*objectPath, *t);\n\t";
-
-    //     $addKVTemplate = '*kverr = errorcode(msiAddKeyVal(*%1$s, "%2$s", "%3$s"));';
-    //     $execTemplate = 'if(*kverr == 0) { *error%1$da = *error%1$da + errorcode(%2$s("*%3$s", "%4$s", *t)); }';
-    //     $logTemplate = 'writeLine("serverLog", "%1$s key - \'%2$s\' - and value - \'%3$s\' - pair to/from object \'%4$s\'")';
-
-    //     $kvp = "";
-
-    //     if(!empty($deleteArr[0])) {
-    //         for($i = 0; $i < sizeof($deleteArr); $i++) {
-    //             foreach($deleteArr[$i] as $kv) {
-    //                 $kvp .= $alphabet[$i % 25];
-    //                 $key = $this->prefixKey($object, $kv->key);
-    //                 $ruleBody .= sprintf($addKVTemplate, $kvp, $key, str_replace("$", "&#36;", $kv->value)) . "\n\t";
-    //                 $ruleBody .= sprintf($logTemplate, "Removing", $key, str_replace("$", "&#36;", $kv->value), $object) . "\n\t";
-    //                 $ruleBody .= sprintf($execTemplate, 1, "msiRemoveKeyValuePairsFromObj", $kvp, $object) . "\n\t";
-    //             }
-    //         }
-    //     }
-
-    //     if(!empty($addArr[0])) {
-    //         for($i = 0; $i < sizeof($addArr); $i++) {
-    //             foreach($addArr[$i] as $kv) {
-    //                 $kvp .= $alphabet[$i % 25];
-    //                 $key = $this->prefixKey($object, $kv->key);
-    //                 $ruleBody .= sprintf($addKVTemplate, $kvp, $key, str_replace("$", "&#36;", $kv->value)) . "\n\t";
-    //                 $ruleBody .= sprintf($logTemplate, "Adding", $key, str_replace("$", "&#36;", $kv->value), $object) . "\n\t";
-    //                 $ruleBody .= sprintf($execTemplate, 2, "msiAssociateKeyValuePairsToObj", $kvp, $object) . "\n\t";
-    //             }
-    //         }
-    //     }
-
-    //     $ruleBody .= "*error1 = str(*error1a);\n\t*error2 = str(*error2a);\n}";
-    // }
-
     public function processResults($iRodsAccount, $object, $deleteArr, $addArr) {
         $params = array("*objectPath" => $object);
 
@@ -166,9 +128,9 @@ class MetadataModel extends CI_Model {
             $rodsKVPairs = array();
             foreach($metadatas as $key => $val) {
                 if(array_key_exists($val->name, $rodsKVPairs)) {
-                    $rodsKVPairs[$val->name][] = htmlentities(str_replace("&#36;", "$", $val->value));
+                    $rodsKVPairs[$val->name][] = htmlentities($val->value);
                 } else {
-                    $rodsKVPairs[$val->name] = array(htmlentities(str_replace("&#36;", "$", $val->value)));
+                    $rodsKVPairs[$val->name] = array(htmlentities($val->value));
                 }
             }
 
