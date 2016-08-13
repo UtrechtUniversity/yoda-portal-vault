@@ -12,56 +12,101 @@ class MetadataModel extends CI_Model {
         parent::__construct();
     }
 
+    // public function processResultsOld() {
+        
+
+    //     $ruleBody = "myRule{\n\t*error1a = 0\n\t*error2a = 0; \n\tmsiGetObjType(*objectPath, *t);\n\t";
+
+    //     $addKVTemplate = '*kverr = errorcode(msiAddKeyVal(*%1$s, "%2$s", "%3$s"));';
+    //     $execTemplate = 'if(*kverr == 0) { *error%1$da = *error%1$da + errorcode(%2$s("*%3$s", "%4$s", *t)); }';
+    //     $logTemplate = 'writeLine("serverLog", "%1$s key - \'%2$s\' - and value - \'%3$s\' - pair to/from object \'%4$s\'")';
+
+    //     $kvp = "";
+
+    //     if(!empty($deleteArr[0])) {
+    //         for($i = 0; $i < sizeof($deleteArr); $i++) {
+    //             foreach($deleteArr[$i] as $kv) {
+    //                 $kvp .= $alphabet[$i % 25];
+    //                 $key = $this->prefixKey($object, $kv->key);
+    //                 $ruleBody .= sprintf($addKVTemplate, $kvp, $key, str_replace("$", "&#36;", $kv->value)) . "\n\t";
+    //                 $ruleBody .= sprintf($logTemplate, "Removing", $key, str_replace("$", "&#36;", $kv->value), $object) . "\n\t";
+    //                 $ruleBody .= sprintf($execTemplate, 1, "msiRemoveKeyValuePairsFromObj", $kvp, $object) . "\n\t";
+    //             }
+    //         }
+    //     }
+
+    //     if(!empty($addArr[0])) {
+    //         for($i = 0; $i < sizeof($addArr); $i++) {
+    //             foreach($addArr[$i] as $kv) {
+    //                 $kvp .= $alphabet[$i % 25];
+    //                 $key = $this->prefixKey($object, $kv->key);
+    //                 $ruleBody .= sprintf($addKVTemplate, $kvp, $key, str_replace("$", "&#36;", $kv->value)) . "\n\t";
+    //                 $ruleBody .= sprintf($logTemplate, "Adding", $key, str_replace("$", "&#36;", $kv->value), $object) . "\n\t";
+    //                 $ruleBody .= sprintf($execTemplate, 2, "msiAssociateKeyValuePairsToObj", $kvp, $object) . "\n\t";
+    //             }
+    //         }
+    //     }
+
+    //     $ruleBody .= "*error1 = str(*error1a);\n\t*error2 = str(*error2a);\n}";
+    // }
+
     public function processResults($iRodsAccount, $object, $deleteArr, $addArr) {
-        $alphabet = "abcdefghijklmnopqrstuvwxyz";
+        $params = array("*objectPath" => $object);
 
         $ruleBody = "myRule{\n\t*error1a = 0\n\t*error2a = 0; \n\tmsiGetObjType(*objectPath, *t);\n\t";
 
-        $addKVTemplate = '*kverr = errorcode(msiAddKeyVal(*%1$s, "%2$s", "%3$s"));';
-        $execTemplate = 'if(*kverr == 0) { *error%1$da = *error%1$da + errorcode(%2$s(*%3$s, %4$s, *t)); }';
-        $logTemplate = 'writeLine("serverLog", "%1$s key - %2$s - and value - %3$s - pair to/from object %4$s")';
-
-        $kvp = "";
+        $addKVTemplate = '*kverr = errorcode(msiAddKeyVal(%1$s, "%2$s", "%3$s"));';
+        $execTemplate = 'if(*kverr == 0) {*error%1$da = *error%1$da + errorcode(%2$s(%3$s, "*objectPath", *t)); }';
+        $logTemplate = 'writeLine("serverLog", "%1$s key - \'%2$s\' - and value - \'%3$s\' - pair to/from object \'*objectPath\'")';
 
         if(!empty($deleteArr[0])) {
             for($i = 0; $i < sizeof($deleteArr); $i++) {
+                $j = 0;
                 foreach($deleteArr[$i] as $kv) {
-                    $kvp .= $alphabet[$i % 25];
+                    $pfx = sprintf("%d_%d", $i, $j);
                     $key = $this->prefixKey($object, $kv->key);
-                    $ruleBody .= sprintf($addKVTemplate, $kvp, $key, str_replace("$", "&#36;", $kv->value)) . "\n\t";
-                    $ruleBody .= sprintf($logTemplate, "Removing", $key, str_replace("$", "&#36;", $kv->value), $object) . "\n\t";
-                    $ruleBody .= sprintf($execTemplate, 1, "msiRemoveKeyValuePairsFromObj", $kvp, $object) . "\n\t";
+                    $params = array_merge($params, array("*dkey" . $pfx => $key, "*dval" . $pfx => $kv->value));
+                    $ruleBody .= sprintf($addKVTemplate, "*kvd" . $pfx, "*dkey" . $pfx, "*dval" . $pfx) . "\n\t";
+                    $ruleBody .= sprintf($logTemplate, "Removing", "*dkey" . $pfx, "*dval" . $pfx) . "\n\t";
+                    $ruleBody .= sprintf($execTemplate, 1, "msiRemoveKeyValuePairsFromObj", "*kvd" . $pfx) . "\n\t";
+                    $j++;
                 }
             }
         }
 
         if(!empty($addArr[0])) {
             for($i = 0; $i < sizeof($addArr); $i++) {
+                $j = 0;
                 foreach($addArr[$i] as $kv) {
-                    $kvp .= $alphabet[$i % 25];
+                    $pfx = sprintf("%d_%d", $i, $j);
                     $key = $this->prefixKey($object, $kv->key);
-                    $ruleBody .= sprintf($addKVTemplate, $kvp, $key, str_replace("$", "&#36;", $kv->value)) . "\n\t";
-                    $ruleBody .= sprintf($logTemplate, "Adding", $key, str_replace("$", "&#36;", $kv->value), $object) . "\n\t";
-                    $ruleBody .= sprintf($execTemplate, 2, "msiAssociateKeyValuePairsToObj", $kvp, $object) . "\n\t";
-                }
+                    $params = array_merge($params, array("*akey" . $pfx => $key, "*aval" . $pfx => $kv->value));
+                    $ruleBody .= sprintf($addKVTemplate, "*kva" . $pfx, "*akey" . $pfx, "*aval" . $pfx) . "\n\t";
+                    $ruleBody .= sprintf($logTemplate, "Adding", "*akey" . $pfx, "*aval" . $pfx) . "\n\t";
+                    $ruleBody .= sprintf($execTemplate, 2, "msiAssociateKeyValuePairsToObj", "*kva" . $pfx) . "\n\t";
+                    $j++;
+                }  
             }
         }
-
         $ruleBody .= "*error1 = str(*error1a);\n\t*error2 = str(*error2a);\n}";
+
+        echo sprintf("<pre>%s</pre>", $ruleBody);
+        var_dump($params);
 
         try {
             $rule = new ProdsRule(
                 $iRodsAccount,
                 $ruleBody,
-                array(
-                    "*objectPath" => $object
-                ),
+                $params,
                 array(
                     "*error1", "*error2"
                 )
             );
 
             $result = $rule->execute();
+
+            var_dump($result);
+
             $deleteStatus = $result["*error1"] == "0" ? 0 : -1;
             $addStatus = $result["*error2"] == "0" ? 0 : -2;
 
