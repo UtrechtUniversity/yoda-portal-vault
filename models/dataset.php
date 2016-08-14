@@ -206,7 +206,50 @@ class Dataset extends CI_Model {
         }
 
         return false;
+    }
 
+    static public function getSnapshotHistory($iRodsAccount, $dataset) {
+        $ruleBody = '
+            myRule {
+                uuIiGetSnapshotHistory(*collection, *history);
+                uuJoin(",", *history, *str);
+            }';
+
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*collection" => $dataset
+                    ),
+                array(
+                    "*str"
+                )
+            );
+
+            $result = $rule->execute();
+
+            $history = array();
+
+            foreach( explode(",", $result["*str"]) as $hist ) {
+                if(strlen($hist) === 0) continue;
+                $timeAndUser = explode(":", $hist);
+                $userAndZone = explode("#", $timeAndUser[1]);
+                $history[] = (object) array(
+                    "user" => $userAndZone[0],
+                    "time" => $timeAndUser[0],
+                    "userZone" => $userAndZone[1]
+                );
+            }
+
+            return $history;
+            
+        } catch(RODSException $e) {
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
     }
 
     /**

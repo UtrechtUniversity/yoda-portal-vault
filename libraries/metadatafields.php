@@ -581,11 +581,11 @@ class metadataFields {
 %11$s 		%5$s
 %11$s 		%6$s
 EOT;
-		if(array_key_exists("multiple", $config)):
+		if(array_key_exists("multiple", $config) && $canEdit):
 			$template .= <<<'EOT'
 %11$s 		<span class="btn btn-default glyphicon glyphicon-plus showWhenEdit" 
 %11$s 			data-template="%7$s" data-nextindex="%8$d" onclick="addValueRow('%1$s')" id="addRow-%1$s">
-%11$s 			Add value
+%11$s 			ntl:Add value
 %11$s 		</span>
 EOT;
 		endif;

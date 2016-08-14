@@ -1,4 +1,8 @@
 $(function() {
+	$('.nav-tabs a').click(function(){
+	    $(this).tab('show');
+	});
+
 	$('.table.table-datatable').DataTable( {
 	    "paging": false,
 	    "columnDefs": [

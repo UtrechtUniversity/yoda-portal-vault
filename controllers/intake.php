@@ -128,7 +128,7 @@ class Intake extends MY_Controller
                 "currentViewLocked" => false,
                 "currentViewFrozen" => false,
                 "level_depth" => -1,
-                "permissions" => array($this->config->item('role:contributor') => true),
+                "permissions" => array($this->config->item('role:contributor') => true), // files can be viewed with at least contributor permission
                 "files" => array()
             );
 
@@ -159,6 +159,8 @@ class Intake extends MY_Controller
                 $this->session->set_userdata('tempDir', $this->current_path);
                 $this->breadcrumbs = $this->getBreadcrumbLinks($pathStart, $segments);
 
+                $snapHistory = $this->dataset->getSnapshotHistory($rodsaccount, $this->current_path);
+
                 $dataArr = array(
                     "studyID" => $studyID,
                     "currentViewLocked" => $this->currentViewLocked,
@@ -166,7 +168,9 @@ class Intake extends MY_Controller
                     "files" => $files,
                     "level_depth" => $this->level_depth,
                     "level_depth_start" => $this->level_depth_start,
-                    "permissions" => $this->permissions
+                    "permissions" => $this->permissions,
+                    "snapshotHistory" => $snapHistory,
+                    "previousLevelsMeta" => $this->getPreviouslevelsMeta($pathStart, $segments)
                 );
                 
 
@@ -247,6 +251,29 @@ class Intake extends MY_Controller
         return $breadCrumbs;
     }
 
+    private function getPreviouslevelsMeta($pathStart, $segments) {
+        $levels = array();
+
+        // Check all levels up to but not including the current one
+        for($i = 0; $i < sizeof($segments) - 1; $i++) {
+            $perm = $this->study->getPermissionsForLevel($i, $segments[0]);
+            if($perm->canEditMeta || $perm->canViewMeta) {
+                $meta = array(
+                    "name" => $segments[$i],
+                    "level" => ($i < sizeof($this->config->item('level-hierarchy'))) ? 
+                        $this->config->item('level-hierarchy')[$i] : $this->config->item('default-level'),
+                    "meta" => $this->metadatafields->getFields(
+                        sprintf("%s%s", $pathStart, implode("/", array_slice($segments, 0, $i+1))),
+                        true
+                    )
+                );
+                $levels[] = (object) $meta;
+            }
+        }
+
+        return $levels;
+    }
+
     
     /**
      * Private method that validates the study permissions for
@@ -262,6 +289,11 @@ class Intake extends MY_Controller
         $this->permissions = $this->study->getIntakeStudyPermissions($studyID);
         $this->levelPermissions = $this->study->getPermissionsForLevel($this->level_depth, $studyID);
         $this->nextLevelPermissions = $this->study->getPermissionsForLevel($this->level_depth + 1, $studyID);
+        $this->previousLevels = array();
+        for($l = 0; $l < $this->level_depth && $l < sizeof($this->config->item('level-hierarchy')); $l++) {
+            $this->previousLevels[] = $this->config->item('level-hierarchy')[$l];
+            $this->previousLevels[$l]["permissions"] = $this->study->getPermissionsForLevel($l, $studyID);
+        }
 
         if(!$this->studies[0]) {
             displayMessage($this, lang('ERROR_NO_INTAKE_ACCESS'), true);

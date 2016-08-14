@@ -84,14 +84,45 @@ echo form_open(null, null, $attrs);
 		<a href="<?=site_url(array($url->module, "intake", "metadata")) . "?dir=" . urlencode($current_dir); ?>" class="btn btn-default">
 			<span class="glyphicon glyphicon-tags"></span>&nbsp;<?=lang('header:metadata');?>
 		</a>
+
+
 <?php 
 	} 
+
 ?>
 </div>
+<?php
+	if($levelPermissions->canSnapshot && sizeof($snapshotHistory) > 0) {
+?>
+
+	<ul class="nav nav-tabs" id="fileOverviewTabMenu" data-tabs="tabs">
+	 	<li role="presentation" class="active"><a href="#files" aria-controls="files" role="tab" data-toggle="tab">ntl:Files</a></li> 
+	 	<li role="presentation"><a href="#details" aria-controls="details" role="tab" data-toggle="tab">ntl:Details</a></li> 
+	</ul>
+	<div class="tab-content">
+		<div role="tabpanel" class="tab-pane active" id="files">
+
 <?php 
+}
 form_close();
 $this->load->view($content); 
+if($levelPermissions->canSnapshot && sizeof($snapshotHistory) > 0) {
 ?>
+		</div>
+		<div role="tabpanel" class="tab-pane" id="details">
+<?php 
+	echo "<h3>NTL: Version history</h3>";
+	echo "<ul>";
+	foreach($snapshotHistory as $hist) {
+		echo sprintf('<li>ntl: <b>%2$s</b> by <b>%1$s</b></li>', $hist->user, absoluteTimeWithTooltip($hist->time));
+	}
+	echo "</ul>";
+}
+
+?>
+		</div> 
+	</div>
+
 
 </div>
 <?php 

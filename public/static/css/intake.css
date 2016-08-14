@@ -50,5 +50,8 @@ table#metadata_edittable > tbody > tr.form-group.has-error > td:first-child > sp
 	color: grey;
 }
 
+#fileOverviewTabMenu {
+	margin-top: 30px;
+}
 
 
