@@ -656,6 +656,7 @@ EOT;
 						);
 					}
 				}
+				$input .= $rowInputTemplate;
 			}
 		}
 
