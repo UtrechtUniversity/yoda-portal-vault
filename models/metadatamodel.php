@@ -69,15 +69,7 @@ RULE;
 
 
 RULE;
-        $prfx = "";
-        if($this->config->item("metadata_prefix") && $this->config->item("metadata_prefix") !== false) {
-            $prfx .= $this->config->item("metadata_prefix");
-        }
-        $meta = $this->metadatafields->getMetaForLevel($object);
-        if(array_key_exists("prefix", $meta) && $meta["prefix"] !== false) {
-            $prfx .= $meta["prefix"];
-        }
-        $params = array("*objectPath" => $object, "*prefix" => $prfx);
+        $params = array("*objectPath" => $object);
         $ruleBody = <<<RULE
 myRule {
     *removeFailed = list();
@@ -91,6 +83,7 @@ RULE;
         $d = 0;
         $k = 0;
         $kv = 0;
+        $prfx = $this->metadatafields->getPrefix($object);
         foreach($changes as $key => $valueList) {
             $kvar = "*key" . $k;
             $params[$kvar] = $prfx . $key;
@@ -137,6 +130,7 @@ RULE;
 }
 RULE;
         // echo sprintf('<pre>%s</pre>', $ruleBody);
+        // var_dump($params);
 
         try {
             $rule = new ProdsRule(
@@ -206,7 +200,7 @@ RULE;
                 $j = 0;
                 foreach($deleteArr[$i] as $kv) {
                     $pfx = sprintf("%d_%d", $i, $j);
-                    $key = $this->prefixKey($object, $kv->key);
+                    $key = $this->metadatafields->prefixKey($kv->key, $object);
                     $params = array_merge($params, array("*dkey" . $pfx => $key, "*dval" . $pfx => $kv->value));
                     $ruleBody .= sprintf($addKVTemplate, "*kvd" . $pfx, "*dkey" . $pfx, "*dval" . $pfx) . "\n\t";
                     $ruleBody .= sprintf($logTemplate, "Removing", "*dkey" . $pfx, "*dval" . $pfx) . "\n\t";
@@ -221,7 +215,7 @@ RULE;
                 $j = 0;
                 foreach($addArr[$i] as $kv) {
                     $pfx = sprintf("%d_%d", $i, $j);
-                    $key = $this->prefixKey($object, $kv->key);
+                    $key = $this->metadatafields->prefixKey($kv->key, $object);
                     $params = array_merge($params, array("*akey" . $pfx => $key, "*aval" . $pfx => $kv->value));
                     $ruleBody .= sprintf($addKVTemplate, "*kva" . $pfx, "*akey" . $pfx, "*aval" . $pfx) . "\n\t";
                     $ruleBody .= sprintf($logTemplate, "Adding", "*akey" . $pfx, "*aval" . $pfx) . "\n\t";
@@ -232,7 +226,7 @@ RULE;
         }
         $ruleBody .= "*error1 = str(*error1a);\n\t*error2 = str(*error2a);\n}";
 
-        // echo sprintf("<pre>%s</pre>", $ruleBody);
+        echo sprintf("<pre>%s</pre>", $ruleBody);
 
         try {
             $rule = new ProdsRule(
@@ -244,7 +238,7 @@ RULE;
                 )
             );
 
-            $result = $rule->execute();
+            // $result = $rule->execute();
 
             $deleteStatus = $result["*error1"] == "0" ? 0 : -1;
             $addStatus = $result["*error2"] == "0" ? 0 : -2;
@@ -258,44 +252,10 @@ RULE;
         return UPDATE_FAILED;
     }
 
-    private function prefixKey($object, $key) {
-        $prefixed_key = "";
-        if($this->config->item("metadata_prefix") && $this->config->item("metadata_prefix") !== false) {
-            $prefixed_key .= $this->config->item("metadata_prefix");
-        }
-        $meta = $this->metadatafields->getMetaForLevel($object);
-        if(array_key_exists("prefix", $meta) && $meta["prefix"] !== false) {
-            $prefixed_key .= $meta["prefix"];
-        }
-        $prefixed_key .= $key;
-
-        return $prefixed_key;
-    }
-
-    private function unPrefixKey($object, $prefixed_key) {
-        if($this->config->item("metadata_prefix") && $this->config->item("metadata_prefix") !== false) {
-            if(strpos($prefixed_key, $this->config->item("metadata_prefix")) === 0) {
-                $prefixed_key = substr($prefixed_key, strlen($this->config->item("metadata_prefix")));
-            } else {
-                return false;
-            }
-        }
-        $meta = $this->metadatafields->getMetaForLevel($object);
-        if(array_key_exists("prefix", $meta) && $meta["prefix"] !== false) {
-            if(strpos($prefixed_key, $meta["prefix"]) === 0) {
-                $prefixed_key = substr($prefixed_key, strlen($meta["prefix"]));
-            } else {
-                return false;
-            }
-        }
-
-        return $prefixed_key;
-    }
-
     public function getValuesForKeys2($rodsaccount, $keyList, $object) {
         $prefixedKeyList = array();
         foreach($keyList as $key) {
-            $prefixedKeyList[$this->prefixKey($object, $key)] = $key;
+            $prefixedKeyList[$this->metadatafields->prefixKey($key, $object)] = $key;
         }
 
         try {

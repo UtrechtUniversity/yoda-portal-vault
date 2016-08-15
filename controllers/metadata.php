@@ -106,18 +106,9 @@ class MetaData extends MY_Controller
 
     private function buildSingleError($errorFields, $fields, $action) {
         $object = $this->input->post('directory');
-        $prfx = "";
-        if($this->config->item("metadata_prefix") && $this->config->item("metadata_prefix") !== false) {
-            $prfx .= $this->config->item("metadata_prefix");
-        }
-        $meta = $this->metadatafields->getMetaForLevel($object);
-        if(array_key_exists("prefix", $meta) && $meta["prefix"] !== false) {
-            $prfx .= $meta["prefix"];
-        }
-
         $errors = array();
         foreach($errorFields as $f) {
-            if(strpos($f, $prfx) === 0) $f = substr($f, strlen($prfx));
+            $f = $this->metadatafields->unprefixKey($f, $object);
             if(array_key_exists($f, $fields) && array_key_exists("label", $fields[$f])) {
                 $errors[] = sprintf('"%1$s"', $fields[$f]["label"]);
             } else {
