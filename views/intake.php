@@ -107,14 +107,36 @@ echo form_open(null, null, $attrs);
 form_close();
 $this->load->view($content); 
 if($levelPermissions->canSnapshot && sizeof($snapshotHistory) > 0) {
+$row = '<div class="row"><div class="col-xs-12 col-sm-2"><b>%1$s</b></div><div class="col-xs-12 col-sm-10">%2$s</div></div>';
+$itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $row . '</div></li>';
 ?>
 		</div>
 		<div role="tabpanel" class="tab-pane" id="details">
+		<h3>ntl:Information</h3><ul class="list-group">
 <?php 
+	$rodsaccount = $this->rodsuser->getRodsAccount();
+	$count = $this->filesystem->countSubFiles($rodsaccount, $current_dir);
+	$version = $this->dataset->getCurrentVersion($rodsaccount, $current_dir);
+	echo sprintf($itemTemplate, "ntl:Dataset name", $breadcrumbs[sizeof($breadcrumbs) - 1]->segment);
+	echo sprintf($itemTemplate, "ntl:Path to dataset", $current_dir);
+	echo sprintf($itemTemplate, "ntl:Current version", $version->version ? $version->version : "ntl:N/A");
+	echo sprintf($itemTemplate, "ntl:Based on", $version->basedon? $version->basedon : "ntl:N/A");
+	echo sprintf($itemTemplate, "ntl:Total folders", $count["dircount"]);
+	echo sprintf($itemTemplate, "ntl:Total files", $count["filecount"]);
+	echo sprintf($itemTemplate, "ntl:Total size", sprintf('%1$s (%2$s ntl:bytes)', human_filesize($count["totalSize"]), $count["totalSize"]));
+	// echo sprintf($row, "ntl:Latest snapshot")
+
+	echo "</ul>";	
+
 	echo "<h3>NTL: Version history</h3>";
-	echo "<ul>";
+	echo "<ul class=\"list-group\">";
 	foreach($snapshotHistory as $hist) {
-		echo sprintf('<li>ntl: <b>%2$s</b> by <b>%1$s</b></li>', $hist->user, absoluteTimeWithTooltip($hist->time));
+		echo "<li class=\"list-group-item\">";
+		echo "<div class=\"container-fluid\">";
+		echo sprintf($row, "ntl:Information", sprintf('ntl:%1$s by %2$s', absoluteTimeWithTooltip($hist->time), $hist->user));
+		echo sprintf($row, "ntl:Version", $hist->version ? $hist->version : "ntl:N/A");
+		echo sprintf($row, "ntl:Vault path", $hist->datasetPath ? $hist->datasetPath : "ntl:N/A");
+		echo "</div></li>";
 	}
 	echo "</ul>";
 }

@@ -168,7 +168,7 @@ class Dataset extends CI_Model {
     static public function getLatestSnapshotInfo($iRodsAccount, $dataset) {
         $ruleBody = '
             myRule {
-                uuIiGetLatestSnapshotInfo(*collection, *time, *userName, *userZone);
+                uuIiGetLatestSnapshotInfo(*collection, *version, *datasetID, *datasetPath, *time, *userName, *userZone);
                 *time = str(*time);
             }';
 
@@ -180,6 +180,9 @@ class Dataset extends CI_Model {
                     '*collection' => $dataset
                 ),
                 array(
+                    '*version',
+                    '*datasetID',
+                    '*datasetPath',
                     '*time',
                     '*userName',
                     '*userZone'
@@ -230,15 +233,17 @@ class Dataset extends CI_Model {
             $result = $rule->execute();
 
             $history = array();
-
             foreach( explode(",", $result["*str"]) as $hist ) {
                 if(strlen($hist) === 0) continue;
-                $timeAndUser = explode(":", $hist);
-                $userAndZone = explode("#", $timeAndUser[1]);
+                $segments = explode("#", $hist);
+                $info = explode(":", $segments[1]);
                 $history[] = (object) array(
-                    "user" => $userAndZone[0],
-                    "time" => $timeAndUser[0],
-                    "userZone" => $userAndZone[1]
+                    "datasetPath" => $segments[0],
+                    "version" => $info[0],
+                    "datasetID" => $info[1],
+                    "time" => $info[2],
+                    "user" => $info[3],
+                    "userZone" => $segments[2]
                 );
             }
 
@@ -250,6 +255,35 @@ class Dataset extends CI_Model {
         }
 
         return array();
+    }
+
+    static public function getCurrentVersion($iRodsAccount, $dataset) {
+        $ruleBody = '
+            myRule {
+                uuIiGetVersionAndBasedOn(*collection, *version, *basedOn);
+            }';
+
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array("*collection" => $dataset),
+                array("*version", "*basedOn")
+            );
+
+            $result = $rule->execute();
+
+            return (object) array(
+                "version" => $result["*version"] && $result["*version"] != "" ? (int)$result["*version"] : false,
+                "basedon" => $result["*basedOn"] && $result["*basedOn"] != "" ? $result["*basedOn"] : false
+            );
+        } catch(RODSException $e) {
+            echo $e->showStacktrace();
+            return (object) array("version" => false, "basedon" => false);
+        }
+
+        return (object) array("version" => false, "basedon" => false);
+
     }
 
     /**
