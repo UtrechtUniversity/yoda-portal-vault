@@ -341,7 +341,8 @@ function createMetaSuggestionsInput(elem) {
 			dataType: 'json',
 			data: function (term, page) {
 				return {
-					query: term
+					query: term,
+					directory : $("input[name=directory]").val()
 				};
 			},
 			results: function (options) {
