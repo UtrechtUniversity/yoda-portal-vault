@@ -257,7 +257,7 @@ function createDateTimePickerInput(elem) {
 
 	var config = elem.data('typeconfiguration');
 
-	var pickerConfig = {format : ''}
+	var pickerConfig = {format : '', showClear : true}
 
 	var viewMode;
 	var format = '';
@@ -300,7 +300,6 @@ function createDateTimePickerInput(elem) {
 			link.on("dp.change", function(e){
 				elem.data("DateTimePicker").minDate(e.date);
 			});
-			link.trigger("dp.change");
 		}
 	}
 
@@ -314,12 +313,9 @@ function createDateTimePickerInput(elem) {
 			link.on("dp.change", function(e){
 				elem.data("DateTimePicker").maxDate(e.date);
 			});
-			link.trigger("dp.change");
 		}
 	}
-
 }
-
 
 /**
  * Creates a select2 input from the element given as argument
@@ -584,6 +580,8 @@ function _iterateAll(showWhenEdit) {
 		e.style.display = showWhenEdit ? "none" : "block";
 		e.style.visibility = showWhenEdit ? "hidden" : "visible";
 	});
+
+	_hide($("table#metadata_edittable select.showWhenEdit.chosen-select"));
 
 	cancelAll = $(".metadata-btn-cancelAll");
 	submit = $(".metadata-btn-editMetaSubmit");
