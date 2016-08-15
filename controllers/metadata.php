@@ -50,27 +50,29 @@ class MetaData extends MY_Controller
 
                 if(sizeof($wrongFields) == 0) {
 
-                    // Process results
-                    $deletedValues = $this->findDeletedItems($formdata, $shadowData, $fields);
-                    $addedValues = $this->findChangedItems($formdata, $shadowData, $fields);
+                    // Process results (depricated)
+                    // $deletedValues = $this->findDeletedItems($formdata, $shadowData, $fields);
+                    // $addedValues = $this->findChangedItems($formdata, $shadowData, $fields);
 
                     // $this->dumpKeyVals($deletedValues, "These items will be deleted:");
                     // $this->dumpKeyVals($addedValues, "These items will be (re)added");
 
+                    // $status = $this->metadatamodel->processResults($rodsaccount, $directory, $deletedValues, $addedValues); 
+
+                    // Process results
+                    $changes = $this->findChanges($formdata, $shadowData, $fields);
+                    // $this->dumpChanges($changes);
+
                     // Update results
                     $rodsaccount = $this->rodsuser->getRodsAccount();
-                    $status = $this->metadatamodel->processResults($rodsaccount, $directory, $deletedValues, $addedValues); 
-                    // $status = UPDATE_SUCCESS;
+                    $status = $this->metadatamodel->processResults($rodsaccount, $directory, $changes);
 
-                    if($status == UPDATE_SUCCESS) {
-                        // $referUrl = sprintf($redirectTemplate, "index");
+                    if($status["success"] === true) {
                         $message = "ntl:The metadata was updated successfully";
                     } else {
-                        // $referUrl = sprintf($redirectTemplate, "metadata");
-                        $message = "ntl:Something went wrong updating the metadata. Please check all your metadata. The error code was " . 
-                            $status . " if it helps";
+                        $message = $this->buildError($status, $fields);
                         $error = true;
-                        $type = "danger";
+                        $type = "warning";   
                     }
                 } else {
                     $message = "ntl: Incorrect input";
@@ -86,6 +88,43 @@ class MetaData extends MY_Controller
         $referUrl = site_url(array($this->modulelibrary->name(), "intake", "metadata")) . "?dir=" . urlencode($directory);
         displayMessage($this, $message, $error, $type);
         redirect($referUrl, 'refresh');
+    }
+
+    private function buildError($status, $fields) {
+        $message = "<p><b>ntl: Something went wrong updating the meta data:</b></p>";
+        if($status["delete"]) {
+            $message .= $this->buildSingleError($status["delete"], $fields, "delete");
+        }
+        if($status["add"]) {
+            $message .= $this->buildSingleError($status["add"], $fields, "add");
+        }
+        if($status["update"]) {
+            $message .= $this->buildSingleError($status["update"], $fields, "update");
+        }
+        return $message;
+    }
+
+    private function buildSingleError($errorFields, $fields, $action) {
+        $object = $this->input->post('directory');
+        $prfx = "";
+        if($this->config->item("metadata_prefix") && $this->config->item("metadata_prefix") !== false) {
+            $prfx .= $this->config->item("metadata_prefix");
+        }
+        $meta = $this->metadatafields->getMetaForLevel($object);
+        if(array_key_exists("prefix", $meta) && $meta["prefix"] !== false) {
+            $prfx .= $meta["prefix"];
+        }
+
+        $errors = array();
+        foreach($errorFields as $f) {
+            if(strpos($f, $prfx) === 0) $f = substr($f, strlen($prfx));
+            if(array_key_exists($f, $fields) && array_key_exists("label", $fields[$f])) {
+                $errors[] = sprintf('"%1$s"', $fields[$f]["label"]);
+            } else {
+                $errors[] = sprintf('"%1$s"', $f);
+            }
+        }
+        return sprintf('<p>nt:Could not %1$s the values for %2$s', $action, human_implode($errors, ", ", " ntl:and "));
     }
 
     /**
@@ -147,6 +186,29 @@ class MetaData extends MY_Controller
         }
         echo "</ul>";
     }
+
+    private function dumpChanges($changes) {
+        echo "<h1>Changes</h1>";
+        echo "<ul>";
+        foreach($changes as $changed_key => $changed_val) {
+            $lis = "";
+            foreach($changed_val as $val) {
+                if($val->delete && $val->add) {
+                    $lis .= sprintf('<li><b>%1$s</b> will be deleted and <b>%2$s</b> will be added</li>', $val->delete, $val->add);
+                } else if($val->delete) {
+                    $lis .= sprintf('<li><b>%1$s</b> will be deleted (nothing is added)</li>', $val->delete);
+                } else {
+                    $lis .= sprintf('<li>nothing is deleted but <b>%1$s</b> will be added</li>', $val->add);
+                }
+            }
+            echo sprintf(
+                '<li><b>%1$s</b><ul>%2$s</ul></li>',
+                $changed_key,
+                $lis
+            );
+        }
+        echo "</ul>";
+    }
    
     /**
      * Function that generates an object list of key-value pairs that should be
@@ -199,6 +261,97 @@ class MetaData extends MY_Controller
         }
 
         return $deletedValues;
+    }
+
+    private function findChanges($formdata, $shadowdata, $fields) {
+        $changes = array();
+        foreach($shadowdata as $shadow_key => $shadow_value) {
+            if($fields[$shadow_key]["dependencyMet"] === false) continue; 
+
+            if(
+                (
+                    array_key_exists("multiple", $fields[$shadow_key]) && 
+                    $fields[$shadow_key]["multiple"]
+                ) || $fields[$shadow_key]["type"] == "checkbox"
+            ) {
+                if(is_array($shadow_value)) {
+                    foreach($shadow_value as $index => $shadow_value_part) {
+                        if($shadow_value_part != "" && (
+                                !array_key_exists($shadow_key, $formdata) || 
+                                !in_array($shadow_value_part, $formdata[$shadow_key])
+                            )
+                        ) {
+                            if(!array_key_exists($shadow_key, $changes)) $changes[$shadow_key] = array();
+                            $deleteItem = (object) array("delete" => $shadow_value_part, "add" => null);
+                            // array("value" => $shadow_value_part, "action" => "delete");
+                            if(!in_array($deleteItem, $changes[$shadow_key])) $changes[$shadow_key][] = $deleteItem;
+                        }
+                    }
+                } else {
+                    // TODO, this shouldn't happen, but it's a nice check
+                    var_dump($shadow_value);
+                    echo "Value of multiple-value-key $shadow_key is not of type array, but of type " . 
+                        gettype($shadow_value) . "<br/>";
+                }
+            } else {
+                if( $shadow_value != "" &&
+                    (
+                        !array_key_exists($shadow_key, $formdata) ||
+                        $shadow_value != $formdata[$shadow_key]
+                    )
+                ) {
+                    if(!array_key_exists($shadow_key, $changes)) $changes[$shadow_key] = array();
+                    $deleteItem = array("delete" => $shadow_value, "add" => null);
+                    if(array_key_exists($shadow_key, $formdata) && $formdata[$shadow_key] != "") {
+                        $deleteItem["add"] = $formdata[$shadow_key];
+                    }
+                    $changes[$shadow_key][] = (object) $deleteItem;
+                }
+            }
+        }
+
+        foreach($formdata as $form_key => $form_value) {
+            if($fields[$form_key]["dependencyMet"] === false) continue;
+
+            if(
+                (
+                    array_key_exists("multiple", $fields[$form_key]) &&
+                    $fields[$form_key]["multiple"]
+                ) || $fields[$form_key]["type"] === "checkbox"
+            ) {
+                if(is_array($form_value)) {
+                    foreach($form_value as $index => $form_value_part) {
+                        if($form_value_part != "" && 
+                            (
+                                !array_key_exists($form_key, $shadowdata) ||
+                                !in_array($form_value_part, $shadowdata[$form_key])
+                            )
+                        ) {
+                            if(!array_key_exists($form_key, $changes)) $changes[$form_key] = array();
+                            $addItem = (object) array("add" => $form_value_part, "delete" => null);
+                            if(!in_array($addItem, $changes[$form_key])) $changes[$form_key][] = $addItem;
+                        }
+                    }
+                } else {
+                    // TODO, this shouldn't happen, but it's a nice check
+                    var_dump($form_value);
+                    echo "Value of multiple-value-key $form_key is not of type array, but of type " . 
+                        gettype($form_value) . "<br/>";
+                }
+            } else {
+                if( $form_value != "" && 
+                    (
+                        !array_key_exists($form_key, $shadowdata) || 
+                        $shadowdata[$form_key] == ""
+                    )
+                ) {
+                    if(!array_key_exists($form_key, $changes)) $changes[$form_key] = array();
+                    $changes[$form_key][] = (object) array("add" => $form_value, "delete" => null);
+                }
+            }
+        }
+
+        return $changes;
     }
 
     /**

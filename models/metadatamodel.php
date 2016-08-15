@@ -12,7 +12,187 @@ class MetadataModel extends CI_Model {
         parent::__construct();
     }
 
-    public function processResults($iRodsAccount, $object, $deleteArr, $addArr) {
+    public function processResults($iRodsAccount, $object, $changes) {
+        $removeTemplate = <<<'RULE'
+    *kverr = errorcode(msiAddKeyVal(%1$s, %2$s, %3$s));
+    *rerr = -1;
+    if(*kverr == 0) {
+        *rerr = errorcode(msiRemoveKeyValuePairsFromObj(%1$s, *objectPath, *t));
+    }
+    if(*kverr != 0 || *rerr != 0) {
+        writeLine("serverLog", "Could not remove '%3$s' from key '%2$s' for *objectPath");
+        writeLine("serverLog", "Got error for creating keyval pair *kverr and for removing *rerr");
+        *removeFailed = cons(%2$s, *removeFailed);
+    }
+
+
+RULE;
+
+        $addTemplate = <<<'RULE'
+    *kverr = errorcode(msiAddKeyVal(%1$s, %2$s, %3$s));
+    *aerr = -1;
+    if(*kverr == 0) {
+        *aerr = errorcode(msiAssociateKeyValuePairsToObj(%1$s, *objectPath, *t));
+    }
+    if(*kverr != 0 || *aerr != 0) {
+        writeLine("serverLog", "Could not add '%3$s' to key '%2$s' for *objectPath");
+        writeLine("serverLog", "Got error for creating keyval pair *kverr and for adding *aerr");
+        *addFailed = cons(%2$s, *addFailed);
+    }
+
+
+RULE;
+        
+        // 1) keyValPair to remove
+        // 2) key for key val pair to update
+        // 3) value to remove from key
+        // 4) keyValPair to add
+        // 5) value to add to key
+        $replaceTemplate = <<<'RULE'
+    *kverr = errorcode(msiAddKeyVal(%1$s, %2$s, %3$s));
+    *urerr = -1;
+    *uaerr = -1; 
+    if(*kverr == 0) {
+        *urerr = errorcode(msiRemoveKeyValuePairsFromObj(%1$s, *objectPath, *t));
+        if(*urerr == 0) {
+            *kverr = errorcode(msiAddKeyVal(%4$s, %2$s, %5$s));
+            if(*kverr == 0) {
+                *uaerr = errorcode(msiAssociateKeyValuePairsToObj(%4$s, *objectPath, *t));
+            }
+        }
+    }
+    if(*urerr != 0 || *uaerr != 0) {
+        writeLine("serverLog", "Could not update from '%3$s' to '%5$s' on '%2$s' for *objectPath");
+        writeLine("serverLog", "Got error removing *urerr and adding *uaerr");
+        *updateFailed = cons(%2$s, *updateFailed);
+    }
+
+
+RULE;
+        $prfx = "";
+        if($this->config->item("metadata_prefix") && $this->config->item("metadata_prefix") !== false) {
+            $prfx .= $this->config->item("metadata_prefix");
+        }
+        $meta = $this->metadatafields->getMetaForLevel($object);
+        if(array_key_exists("prefix", $meta) && $meta["prefix"] !== false) {
+            $prfx .= $meta["prefix"];
+        }
+        $params = array("*objectPath" => $object, "*prefix" => $prfx);
+        $ruleBody = <<<RULE
+myRule {
+    *removeFailed = list();
+    *addFailed = list();
+    *updateFailed = list();
+    msiGetObjType(*objectPath, *t);
+
+
+RULE;
+        $a = 0;
+        $d = 0;
+        $k = 0;
+        $kv = 0;
+        foreach($changes as $key => $valueList) {
+            $kvar = "*key" . $k;
+            $params[$kvar] = $prfx . $key;
+            $k++;
+            foreach($valueList as $values) {
+                if($values->delete && $values->add) {
+                    $dv = "*delVal" . $d;
+                    $params[$dv] = $values->delete;
+                    $d++;
+                    $av = "*addVal" . $a;
+                    $params[$av] = $values->add;
+                    $a++;
+                    $kv1 = "*kv" . $kv;
+                    $kv++;
+                    $kv2 = "*kv" . $kv;
+                    $kv++;
+
+                    $ruleBody .= sprintf($replaceTemplate, $kv1, $kvar, $dv, $kv2, $av);
+                } else if($values->delete) {
+                    $dv = "*delVal" . $d;
+                    $params[$dv] = $values->delete;
+                    $d++;
+                    $kv1 = "*kv" . $kv;
+                    $kv++;
+
+                    $ruleBody .= sprintf($removeTemplate, $kv1, $kvar, $dv);                    
+                } else {
+                    $av = "*addVal" . $a;
+                    $params[$av] = $values->add;
+                    $a++;
+                    $kv1 = "*kv" . $kv;
+                    $kv++;
+
+                    $ruleBody .= sprintf($addTemplate, $kv1, $kvar, $av);
+                }
+            }
+        }
+
+        $ruleBody .= <<<'RULE'
+
+    uuJoin(",", *addFailed, *addErrors);
+    uuJoin(",", *removeFailed, *removeErrors);
+    uuJoin(",", *updateFailed, *updateErrors);
+}
+RULE;
+        // echo sprintf('<pre>%s</pre>', $ruleBody);
+
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                $params,
+                array(
+                    "*addErrors", "*removeErrors", "*updateErrors"
+                )
+            );
+
+            $result = $rule->execute();
+
+            $deleteErrors = explode(",", $result["*removeErrors"]);
+            $addErrors = explode(",", $result["*addErrors"]);
+            $updateErrors = explode(",", $result["*updateErrors"]);
+
+            $status = array(
+                "success" => ($this->isEmpty($deleteErrors) && $this->isEmpty($addErrors) && $this->isEmpty($updateErrors)),
+                "delete" => $this->isEmpty($deleteErrors) ? false : $deleteErrors,
+                "add" => $this->isEmpty($addErrors) ? false : $deleteErrors,
+                "update" => $this->isEmpty($updateErrors) ? false : $updateErrors
+            );
+
+            return $status;
+
+        } catch(RODSException $e) {
+            echo $e->showStacktrace();
+            return UPDATE_FAILED;
+        }
+
+        return UPDATE_FAILED;
+    }
+
+    private function isEmpty($val) {
+        if(is_array($val)) return !$val || sizeof($val) === 0 || sizeof($val) === 1 && $val[0] === "";
+        else if (is_string($val)) return $val === "";
+        else return $val === null;
+    }
+
+    /**
+     * This update function is depricated, as it had a bug where two values could appear on a key
+     * that only allowed a single one:
+     * If a user x loaded the meta data screen and
+     * User y loaded the same meta data screen
+     * user y updated a value z
+     * user x then updated a value z,
+     * The action of user x tried to remove a no longer existing value, but still associated the new
+     *      value
+     * The result: two values on the same key, where only one would show up in the portal.
+     * Multi value keys still have this problem, but as both values show up in the portal, this is better
+     *
+     * Use the new processResults function above
+     * This function is kept in place in case a challenging bug is found after all in the new function
+     */
+    public function processResults_depricated($iRodsAccount, $object, $deleteArr, $addArr) {
         $params = array("*objectPath" => $object);
 
         $ruleBody = "myRule{\n\t*error1a = 0\n\t*error2a = 0; \n\tmsiGetObjType(*objectPath, *t);\n\t";

@@ -656,7 +656,13 @@ EOT;
 						);
 					}
 				}
-				$input .= $rowInputTemplate;
+				$index = is_array($currentValue) ? sizeof($currentValue) : 1;
+				$input .= sprintf(
+					$deleteRowButtonTemplate,
+					$key,
+					$index,
+					$this->findProperInput($key, sprintf($inputArrayName, $key, $index), $config, "")
+				);
 			}
 		}
 

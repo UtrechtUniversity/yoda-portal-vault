@@ -57,6 +57,7 @@ $config["level-hierarchy"] = array(
 			"canArchive" => $config["role:administrator"],
 			"metadata" => array(
 				"form" => "datapackage.xml",
+				// "form" => "intake_metadata.xml",
 				"prefix" => "datapackage_",
 				// "canView" => $config["role:reader"],
 				"canView" => $config["role:administrator"], // TODO: rights should inherit
