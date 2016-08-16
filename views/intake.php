@@ -84,80 +84,14 @@ echo form_open(null, null, $attrs);
 		<a href="<?=site_url(array($url->module, "intake", "metadata")) . "?dir=" . urlencode($current_dir); ?>" class="btn btn-default">
 			<span class="glyphicon glyphicon-tags"></span>&nbsp;<?=lang('header:metadata');?>
 		</a>
-
-
 <?php 
 	} 
-	form_close();
-
 ?>
 </div>
 <?php
-	if($levelPermissions->canSnapshot) {
-?>
+	echo form_close();
+	$this->load->view($content); 
 
-	<ul class="nav nav-tabs" id="fileOverviewTabMenu" data-tabs="tabs">
-	 	<li role="presentation" class="active"><a href="#files" aria-controls="files" role="tab" data-toggle="tab">ntl:Files</a></li> 
-	 	<li role="presentation"><a href="#details" aria-controls="details" role="tab" data-toggle="tab">ntl:Details</a></li> 
-	</ul>
-	<div class="tab-content">
-		<div role="tabpanel" class="tab-pane active" id="files">
-
-<?php 
-}
-$this->load->view($content); 
-if($levelPermissions->canSnapshot) {
-$row = '<div class="row"><div class="col-xs-12 col-sm-2"><b>%1$s</b></div><div class="col-xs-12 col-sm-10">%2$s</div></div>';
-$itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $row . '</div></li>';
-?>
-		</div>
-		<div role="tabpanel" class="tab-pane" id="details">
-		
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<h3 class="panel-title">ntl:Information</h3>
-			</div>
-			<ul class="list-group list-group-flush">
-<?php 
-	$rodsaccount = $this->rodsuser->getRodsAccount();
-	$count = $this->filesystem->countSubFiles($rodsaccount, $current_dir);
-	$version = $this->dataset->getCurrentVersion($rodsaccount, $current_dir);
-	echo sprintf($itemTemplate, "ntl:Dataset name", $breadcrumbs[sizeof($breadcrumbs) - 1]->segment);
-	echo sprintf($itemTemplate, "ntl:Path to dataset", $current_dir);
-	echo sprintf($itemTemplate, "ntl:Current version", $version->version ? $version->version : "ntl:N/A");
-	echo sprintf($itemTemplate, "ntl:Based on", $version->basedon? $version->basedon : "ntl:N/A");
-	echo sprintf($itemTemplate, "ntl:Total folders", $count["dircount"]);
-	echo sprintf($itemTemplate, "ntl:Total files", $count["filecount"]);
-	echo sprintf($itemTemplate, "ntl:Total size", sprintf('%1$s (%2$s ntl:bytes)', human_filesize($count["totalSize"]), $count["totalSize"]));
-	// echo sprintf($row, "ntl:Latest snapshot")
-
-	echo "</ul></div>";	
-
-	 if(sizeof($snapshotHistory) > 0) {
-	 	echo '<div class="panel panel-default">';
-	 	echo '<div class="panel-heading">';
-		echo sprintf('<h3 class="panel-title">%1$s</h3>', "NTL: Version history");
-		echo "</div>";
-		echo "<ul class=\"list-group\">";
-		foreach($snapshotHistory as $hist) {
-			echo "<li class=\"list-group-item\">";
-			echo "<div class=\"container-fluid\">";
-			echo sprintf($row, "ntl:Information", sprintf('ntl:%1$s by %2$s', absoluteTimeWithTooltip($hist->time), $hist->user));
-			echo sprintf($row, "ntl:Version", $hist->version ? $hist->version : "ntl:N/A");
-			echo sprintf($row, "ntl:Vault path", $hist->datasetPath ? $hist->datasetPath : "ntl:N/A");
-			echo "</div></li>";
-		}
-		echo "</ul></div>";
-	}
-}
-
-?>
-		</div> 
-	</div>
-
-
-</div>
-<?php 
 }
 ?>
 
