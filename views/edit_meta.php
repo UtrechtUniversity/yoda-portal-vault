@@ -150,14 +150,16 @@ if($folderValid === false) {
 	?>
 	</div>
 	<?php
-		foreach($previousLevelsMeta as $m) {
-			echo sprintf('<div role="tabpanel" class="tab-pane" id="metadata-level-%1$s">', $m->level["title"]);
-			$this->load->view("parent_level_meta_overview", array("metalevel" => $m)); 
-			echo "</div>";
+		foreach($previousLevelsMeta as $m) { 
+	?>
+		<div role="tabpanel" class="tab-pane" id="metadata-level-<?=$m->level["title"];?>">
+			<?=$this->load->view("parent_level_meta_overview", array("metalevel" => $m));?>
+		</div>
+	<?php
 		}
 	?>
-		</div>
-		</div>	
+	</div>
+</div>	
 <?php
 }
 

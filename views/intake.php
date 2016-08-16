@@ -88,11 +88,12 @@ echo form_open(null, null, $attrs);
 
 <?php 
 	} 
+	form_close();
 
 ?>
 </div>
 <?php
-	if($levelPermissions->canSnapshot && sizeof($snapshotHistory) > 0) {
+	if($levelPermissions->canSnapshot) {
 ?>
 
 	<ul class="nav nav-tabs" id="fileOverviewTabMenu" data-tabs="tabs">
@@ -104,15 +105,19 @@ echo form_open(null, null, $attrs);
 
 <?php 
 }
-form_close();
 $this->load->view($content); 
-if($levelPermissions->canSnapshot && sizeof($snapshotHistory) > 0) {
+if($levelPermissions->canSnapshot) {
 $row = '<div class="row"><div class="col-xs-12 col-sm-2"><b>%1$s</b></div><div class="col-xs-12 col-sm-10">%2$s</div></div>';
 $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $row . '</div></li>';
 ?>
 		</div>
 		<div role="tabpanel" class="tab-pane" id="details">
-		<h3>ntl:Information</h3><ul class="list-group">
+		
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">ntl:Information</h3>
+			</div>
+			<ul class="list-group list-group-flush">
 <?php 
 	$rodsaccount = $this->rodsuser->getRodsAccount();
 	$count = $this->filesystem->countSubFiles($rodsaccount, $current_dir);
@@ -126,19 +131,24 @@ $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $r
 	echo sprintf($itemTemplate, "ntl:Total size", sprintf('%1$s (%2$s ntl:bytes)', human_filesize($count["totalSize"]), $count["totalSize"]));
 	// echo sprintf($row, "ntl:Latest snapshot")
 
-	echo "</ul>";	
+	echo "</ul></div>";	
 
-	echo "<h3>NTL: Version history</h3>";
-	echo "<ul class=\"list-group\">";
-	foreach($snapshotHistory as $hist) {
-		echo "<li class=\"list-group-item\">";
-		echo "<div class=\"container-fluid\">";
-		echo sprintf($row, "ntl:Information", sprintf('ntl:%1$s by %2$s', absoluteTimeWithTooltip($hist->time), $hist->user));
-		echo sprintf($row, "ntl:Version", $hist->version ? $hist->version : "ntl:N/A");
-		echo sprintf($row, "ntl:Vault path", $hist->datasetPath ? $hist->datasetPath : "ntl:N/A");
-		echo "</div></li>";
+	 if(sizeof($snapshotHistory) > 0) {
+	 	echo '<div class="panel panel-default">';
+	 	echo '<div class="panel-heading">';
+		echo sprintf('<h3 class="panel-title">%1$s</h3>', "NTL: Version history");
+		echo "</div>";
+		echo "<ul class=\"list-group\">";
+		foreach($snapshotHistory as $hist) {
+			echo "<li class=\"list-group-item\">";
+			echo "<div class=\"container-fluid\">";
+			echo sprintf($row, "ntl:Information", sprintf('ntl:%1$s by %2$s', absoluteTimeWithTooltip($hist->time), $hist->user));
+			echo sprintf($row, "ntl:Version", $hist->version ? $hist->version : "ntl:N/A");
+			echo sprintf($row, "ntl:Vault path", $hist->datasetPath ? $hist->datasetPath : "ntl:N/A");
+			echo "</div></li>";
+		}
+		echo "</ul></div>";
 	}
-	echo "</ul>";
 }
 
 ?>

@@ -37,12 +37,9 @@
 | in the URL cannot be matched to a valid route.
 |
 */
-$route['default_controller'] 		= "intake";
+$route['default_controller'] 		= "projects";
 $route[$module] 					= $module . "/intake";
 $route[$module . '/actions']		= $module . "/actions";
 $route[$module . '/metadata']		= $module . "/metadata";
-
-$route[$module . '/intake2'] 		= $module . "/intake2";
-
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */
