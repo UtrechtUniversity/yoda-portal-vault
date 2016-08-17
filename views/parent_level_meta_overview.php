@@ -11,7 +11,7 @@
 	if(!$fields || !is_array($fields) || sizeof($fields) === 0) {
 ?>
 		<div class="alert alert-warning">
-			ntl: There is no meta data schema defined for this object, so no meta data can be shown
+			<?=lang('intake_metadata_error_no_schema');?>
 		</div>
 <?php
 	}

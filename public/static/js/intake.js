@@ -141,10 +141,11 @@ function createUserFromGroupInput(elem) {
 		minimumInputLength: 1,
 		ajax: {
 			quietMillis: 400,
-			url:      function(params) {
+			url: function(params) {
 				var url = $("input[name=intake_url]").val();
 				url += '/getGroupUsers/';
 				url += $("input[name=studyID]").val();
+				console.log(url);
 				return url;
 			},
 			type:     'get',

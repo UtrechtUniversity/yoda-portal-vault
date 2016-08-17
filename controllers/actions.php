@@ -12,6 +12,10 @@ class Actions extends MY_Controller
         $this->load->model("study");
         $this->load->helper("intake");
         $this->load->library('pathlibrary');
+        $this->load->helper('language');
+        $this->load->language('intake');
+        $this->load->language('errors');
+        $this->load->language('form_errors');
     }
 
     public function snapshot()
@@ -19,7 +23,7 @@ class Actions extends MY_Controller
     	$result = $this->performSnapshot();
 
 		displayMessage($this, $result->message, $result->error, $result->type);
-		$redir = (isset($_SERVER['HTTP_REFERER'])) ? $_SERVER['HTTP_REFERER'] : $this->intake->getRedirect($studyID);
+		$redir = (isset($_SERVER['HTTP_REFERER'])) ? $_SERVER['HTTP_REFERER'] : $this->intake->getRedirect();
 		redirect($redir, 'refresh');
     }
 
@@ -38,7 +42,7 @@ class Actions extends MY_Controller
     	$success = true;
 
     	if(!is_array($segments)) {
-    		$status->message = sprintf("ntl: %s path does not seem to be a valid directory. The collection could not be snapshotted", $directory);
+    		$status->message = sprintf(lang('intake_actions_snapshot_path_invalid'), $directory);
 			return $status;
     	}
 
@@ -47,7 +51,7 @@ class Actions extends MY_Controller
     	if($success && $this->input->post('checked_studies')) {
     		$nextLevelPermissions = $this->study->getPermissionsForLevel($currentDepth + 1, $studyID);
     		if($nextLevelPermissions->canSnapshot === false) {
-    			$status->message = "You do not have permission to create snapshots for these folders";
+    			$status->message = lang('intake_actions_no_permission');
     			return $status;
     		} else {
 	    		foreach($this->input->post('checked_studies') as $study) {
@@ -57,7 +61,7 @@ class Actions extends MY_Controller
     	} else if($success) {
     		$levelPermissions = $this->study->getPermissionsForLevel($currentDepth, $studyID);
     		if($levelPermissions->canSnapshot === false) {
-    			$status->message = "You do not have permission to create snapshots for these folders";
+    			$status->message = lang('intake_actions_no_permission');
     			return $status;
     		} else {
     			$snapOf[] = $directory;
@@ -76,23 +80,24 @@ class Actions extends MY_Controller
     			}
     		}
     	} else {
-    		$status->message = "ntl: No folders selected";
+    		$status->message = lang('intake_actions_no_selected_folder');
     		return $status;
     	}
 
     	if($success) {
 			if(sizeof($succes_directories) > 1) {
-    			$status->message = "Snapshots of the studies " . human_implode($datasets, ", ", " and ") . " are currently being created. This might take a while";
+    			$status->message = sprintf(
+                    lang('intake_actions_snapshots_in_progress'), human_implode($datasets, ", ", " and "));
 			} else if (sizeof($succes_directories) == 0) {
-				$status->message = "No dataset selected";
+				$status->message = lang('intake_actions_no_selected_folder');
 			} else {
-				$status->message = $succes_directories[0] . " is currently being snapshotted";
+				$status->message = sprintf(lang('intake_actions_snapshot_in_progress'), $succes_directories[0]);
 			}
 			$status->error = false;
 			$status->type = "info";
 			return $status;
 		} else {
-			$status->message = "Some datasets could not be prepared to be moved to the vault. Try again later.";
+			$status->message = lang('intake_actions_snapshot_general_error');
 			return $status;
 		}
     }
@@ -109,7 +114,7 @@ class Actions extends MY_Controller
 
 		if(!is_array($segments)) {
 			// TODO 
-			$message = sprintf("ntl: %s path does not seem to be a valid directory. The collection could not be unlocked", $directory);
+			$message = sprintf(lang('intake_actions_unlock_no_valid_directory'), $directory);
 			$error = true;
 			$type = "error";
 		} else {
@@ -122,11 +127,11 @@ class Actions extends MY_Controller
 				$type = "error";
 			} else {
 				if($this->dataset->removeSnapshotLockFromDataset($rodsaccount, $directory)) {
-					$message = sprintf("ntl: Snapshot cancelled for <i>%s</i>", $folder);
+					$message = sprintf(lang('intake_actions_snapshot_cancelled'), $folder);
 					$error = false;
 					$type = "info";
 				} else {
-					$message = sprintf("ntl: The snapshot for the folder <i>%s</s> could not be cancelled. Please wait until the snapshot is finished", $folder);
+					$message = sprintf(lang('intake_actions_snapshot_cancel_fail'), $folder);
 					$error = true;
 					$type = "error";
 				}
@@ -134,36 +139,10 @@ class Actions extends MY_Controller
 		}
 
 		displayMessage($this, $message, $error, $type);
-		if(isset($_SERVER['HTTP_REFERER'])) {
-			redirect($_SERVER['HTTP_REFERER'], 'refresh');
-		} else {
-			$redir = $this->intake->getRedirect($this->input->post('studyId'));
-			redirect($redir, 'refresh');
-		}
+        $referer = $_SERVER['HTTP_REFERER'] ? $_SERVER['HTTP_REFERER'] : 
+            $redir = $this->intake->getRedirect($this->input->post('studyId'));
+		redirect($referer, 'refresh');
 		
     }
 
-    public function unlockAll() {
-    	$rodsuser = $this->rodsuser->getRodsAccount();
-    	$result = $this->dataset->unlockAll($rodsuser);
-    	displayMessage($this, "Result: " . $result);
-    	if(isset($_SERVER['HTTP_REFERER'])) {
-			redirect($_SERVER['HTTP_REFERER'], 'refresh');
-		} else {
-			$redir = $this->intake->getRedirect($this->input->post('studyId'));
-			redirect($redir, 'refresh');
-		}
-    }
-
-    public function testFunction() {
-    	$rodsuser = $this->rodsuser->getRodsAccount();
-    	$result = $this->dataset->testFunction($rodsuser);
-  //   	displayMessage($this, "Result: " . $result);
-  //   	if(isset($_SERVER['HTTP_REFERER'])) {
-		// 	redirect($_SERVER['HTTP_REFERER'], 'refresh');
-		// } else {
-		// 	$redir = $this->intake->getRedirect($this->input->post('studyId'));
-		// 	redirect($redir, 'refresh');
-		// }
-    }
 }

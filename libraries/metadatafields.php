@@ -640,7 +640,10 @@ EOT;
 			$template .= <<<'EOT'
 %11$s 		<span class="btn btn-default glyphicon glyphicon-plus showWhenEdit" 
 %11$s 			data-template="%7$s" data-nextindex="%8$d" onclick="addValueRow('%1$s')" id="addRow-%1$s">
-%11$s 			ntl:Add value
+%11$s 			
+EOT;
+		$template .= lang('intake_metadata_button_add_value');
+		$template .= <<<'EOT'
 %11$s 		</span>
 EOT;
 		endif;

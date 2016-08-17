@@ -13,6 +13,10 @@ class MetaData extends MY_Controller
         $this->load->model('study');
         $this->load->library('modulelibrary');
         $this->load->library('pathlibrary');
+        $this->load->helper('language');
+        $this->load->language('intake');
+        $this->load->language('errors');
+        $this->load->language('form_errors');
     }
 
     public function update() {
@@ -29,14 +33,14 @@ class MetaData extends MY_Controller
         $studyID = $segments[0];
 
         if(!is_array($segments)) {
-            $message = sprintf("ntl: %s path does not seem to be a valid directory. No metadata updated", $directory);
+            $message = sprintf(lang('intake_metadata_dir_invalid'), $directory);
             $error = true;
             $type = "error";
         } else {
             $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $currentLevel, $currentDepth);
             $levelPermissions = $this->study->getPermissionsForLevel($currentDepth, $studyID);
             if($levelPermissions->canEditMeta === false) {
-                $message = sprintf("ntl: You do not have permission to edit meta data for the folder %s", $folder);
+                $message = sprintf(lang('intake_metadata_no_permission'), $folder);
                 $error = true;
                 $type = "error";
             } else {
@@ -68,14 +72,14 @@ class MetaData extends MY_Controller
                     $status = $this->metadatamodel->processResults($rodsaccount, $directory, $changes);
 
                     if($status["success"] === true) {
-                        $message = "ntl:The metadata was updated successfully";
+                        $message = lang('intake_metadata_update_success');
                     } else {
                         $message = $this->buildError($status, $fields);
                         $error = true;
                         $type = "warning";   
                     }
                 } else {
-                    $message = "ntl: Incorrect input";
+                    $message = lang('intake_metadata_input_invalid');
                     $error = true;
                     $type = "warning";
 
@@ -91,7 +95,7 @@ class MetaData extends MY_Controller
     }
 
     private function buildError($status, $fields) {
-        $message = "<p><b>ntl: Something went wrong updating the meta data:</b></p>";
+        $message = lang('intake_metadata_update_failed_general');
         if($status["delete"]) {
             $message .= $this->buildSingleError($status["delete"], $fields, "delete");
         }
@@ -115,7 +119,15 @@ class MetaData extends MY_Controller
                 $errors[] = sprintf('"%1$s"', $f);
             }
         }
-        return sprintf('<p>nt:Could not %1$s the values for %2$s', $action, human_implode($errors, ", ", " ntl:and "));
+        return sprintf(
+            lang('intake_metadata_update_failed_details'), 
+            $action, 
+            human_implode(
+                $errors, 
+                ", ", 
+                sprintf(' %s ', lang('intake_and'))
+            )
+        );
     }
 
     /**

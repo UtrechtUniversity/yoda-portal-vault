@@ -102,6 +102,8 @@ class Intake extends MY_Controller
             }
         }
 
+        $this->data["folderValid"] = true;
+
         $urls = (object) array(
             "site" => site_url(), 
             "module" => $this->modulelibrary->getModuleBase()
@@ -117,7 +119,7 @@ class Intake extends MY_Controller
             if(!is_array($segments)) {
                 if($redirectIfInvalid) {
                     if(sizeof($this->studies) > 0) {
-                        $redirectTo = $pathStart . $this->studies[0];
+                        $redirectTo = $this->getRedirect();
                         try {
                             new ProdsDir($rodsaccount, $redirectTo, true);
                             $referUrl = site_url($this->modulelibrary->name(), "intake", "intake", "index") . "?dir=" . $redirectTo;
@@ -131,7 +133,7 @@ class Intake extends MY_Controller
                     }
                 }
                 $this->data["folderValid"] = false;
-                $this->data["errorMessage"] = sprintf(lang('intake_error_project_no_exist'), $this->current_path, $this->getRedirect(), "home");
+                $this->data["errorMessage"] = sprintf(lang('intake_error_project_no_exist'), $this->current_path);
                 $this->prepareHomeLevel($rodsaccount, $pathStart, $dirs, $dataArr);
             } else {
                 $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $this->head, $this->level_depth);
@@ -330,9 +332,6 @@ class Intake extends MY_Controller
             return false;
         }
 
-        // study is validated. Put in session.
-        $this->session->set_userdata('studyID', $studyID);
-
         return $studyID;
     }
 
@@ -348,9 +347,9 @@ class Intake extends MY_Controller
      */
     private function getRedirect($studyID = '') {
         $segments = array($this->modulelibrary->name(), "intake", "index");
-        if(!empty($this->studies)) {
-            array_push($segments, $studyID ? $studyID : $this->studies[0]);
-        }
+        // if(!empty($this->studies)) {
+        //     array_push($segments, $studyID ? $studyID : $this->studies[0]);
+        // }
         return site_url($segments);
     }
 

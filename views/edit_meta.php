@@ -10,7 +10,7 @@ if($folderValid === false) {
 } else if($levelPermissions->canViewMeta === false && $levelPermissions->canEditMeta === false) {
 	?>
 		<div class="alert alert-danger">
-			ntl: You do not have permission to view or edit metadata for this directory
+			<?=lang('intake_metadata_no_access'); ?>
 		</div>
 	<?php
 	} else { ?>
@@ -83,7 +83,7 @@ if($folderValid === false) {
 		if(!$fields || !is_array($fields) || sizeof($fields) === 0) {
 	?>
 			<div class="alert alert-warning">
-				ntl: There is no meta data schema defined for this object, so no meta data can be shown
+				<?=lang('intake_metadata_error_no_schema');?>
 			</div>
 	<?php
 		}
@@ -98,7 +98,7 @@ if($folderValid === false) {
 		$hidden = array(
 			"directory" => $current_dir,
 			"studyID" => $studyID,
-			"intake_url" => site_url($url->module, "intake")
+			"intake_url" => sprintf('%1$s/%2$s', $url->module, "intake")
 		);
 
 		echo form_open($url->module . "/metadata/update", $formAttrs, $hidden);

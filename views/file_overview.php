@@ -246,13 +246,34 @@ $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $r
 <?php 
 	$count = $this->filesystem->countSubFiles($rodsaccount, $current_dir);
 	$version = $this->dataset->getCurrentVersion($rodsaccount, $current_dir);
-	echo sprintf($itemTemplate, "ntl:Dataset name", $breadcrumbs[sizeof($breadcrumbs) - 1]->segment);
-	echo sprintf($itemTemplate, "ntl:Path to dataset", $current_dir);
-	echo sprintf($itemTemplate, "ntl:Current version", $version->version ? $version->version : "ntl:N/A");
-	echo sprintf($itemTemplate, "ntl:Based on", $version->basedon? $version->basedon : "ntl:N/A");
-	echo sprintf($itemTemplate, "ntl:Total folders", $count["dircount"]);
-	echo sprintf($itemTemplate, "ntl:Total files", $count["filecount"]);
-	echo sprintf($itemTemplate, "ntl:Total size", sprintf('%1$s (%2$s ntl:bytes)', human_filesize($count["totalSize"]), $count["totalSize"]));
+	echo sprintf($itemTemplate, ucfirst(lang('intake_name')), $breadcrumbs[sizeof($breadcrumbs) - 1]->segment);
+	echo sprintf($itemTemplate, ucfirst(lang('intake_rodspath')), $current_dir);
+	echo sprintf($itemTemplate, ucfirst(lang('intake_version')), $version->version ? $version->version : ucfirst(lang('intake_info_not_available')));
+	echo sprintf(
+		$itemTemplate,
+		ucfirst(lang('intake_based_on')), 
+		$version->basedon? 
+			$version->basedon : 
+			ucfirst(lang('intake_info_not_available'))
+	);
+
+	echo sprintf(
+		$itemTemplate, 
+		ucfirst(sprintf("%s %s", lang('intake_total'), lang('intake_folders'))),
+		$count["dircount"]
+	);
+	echo sprintf(
+		$itemTemplate, 
+		ucfirst(sprintf("%s %s", lang('intake_total'), lang('intake_files'))), 
+		$count["filecount"]
+	);
+	echo sprintf($itemTemplate, 
+		ucfirst(sprintf("%s %s", lang('intake_total'), lang('intake_size'))), 
+		sprintf(
+			'%1$s (%2$s ntl:bytes)', 
+			human_filesize($count["totalSize"]), $count["totalSize"]
+		)
+	);
 ?>
 		</ul>
 	</div>	
