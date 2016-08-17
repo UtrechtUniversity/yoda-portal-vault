@@ -104,7 +104,7 @@ class Intake extends MY_Controller
 
         $this->data["folderValid"] = true;
 
-        $urls = (object) array(
+        $this->urls = (object) array(
             "site" => site_url(), 
             "module" => $this->modulelibrary->getModuleBase()
         );
@@ -158,7 +158,8 @@ class Intake extends MY_Controller
                     "level_depth_start" => $this->level_depth_start,
                     "permissions" => $this->permissions,
                     "snapshotHistory" => $snapHistory,
-                    "previousLevelsMeta" => $this->getPreviouslevelsMeta($pathStart, $segments)
+                    "previousLevelsMeta" => $this->getPreviouslevelsMeta($pathStart, $segments),
+                    "previousLevelLink" => $this->getPrevLevelLink($pathStart, $segments)
                 );
                 
 
@@ -168,7 +169,7 @@ class Intake extends MY_Controller
         $dataArr = array_merge($dataArr, array(
             "content" => "file_overview",
             "folderValid" => true,
-            "url" => $urls,
+            "url" => $this->urls,
             "head" => $this->head,
             "studies" => $this->studies,
             "breadcrumbs" => $this->breadcrumbs,
@@ -210,7 +211,9 @@ class Intake extends MY_Controller
             "currentViewFrozen" => false,
             "level_depth" => -1,
             "permissions" => array($this->config->item('role:contributor') => true), // files can be viewed with at least contributor permission
-            "files" => array()
+            "files" => array(),
+            "previousLevelLink" => $this->getPrevLevelLink($pathStart, array())
+
         );
     }
 
@@ -219,6 +222,21 @@ class Intake extends MY_Controller
         $currentViewLocked = $this->dataset->getLockedStatus($rodsaccount, $this->current_path);
         $this->currentViewLocked = $currentViewLocked['locked'];
         $this->currentViewFrozen = $currentViewLocked['frozen'];
+    }
+
+    private function getPrevLevelLink($pathstart, $segments) {
+        $link = sprintf("%s/intake?dir=/%s/home", $this->urls->module, $this->config->item('rodsServerZone'));
+        if(sizeof($segments) === 0) {
+            $link = false;
+        } else if(sizeof($segments) > 1) {
+            $link .= sprintf(
+                "/%s%s", 
+                $this->config->item('intake-prefix'), 
+                implode("/", array_slice($segments, 0, sizeof($segments) - 1))
+            );
+        }
+
+        return $link;
     }
 
     private function getBreadcrumbLinks($pathStart, $segments) {
@@ -256,9 +274,10 @@ class Intake extends MY_Controller
         $i = 0;
         foreach($segments as $seg) {
             $segmentBuilder[] = $seg;
+            $levelLink = $link . $pathStart . (implode("/", $segmentBuilder));
             $breadCrumbs[] = (object)array(
                 "segment" => $seg, 
-                "link" => $link . $pathStart . (implode("/", $segmentBuilder)),
+                "link" => $levelLink,
                 "prefix" => ($i == 0) ? $this->config->item('intake-prefix') : false,
                 "postfix" => false,
                 "is_current" => (bool)($i === sizeof($segments) - 1)

@@ -22,7 +22,14 @@ if ($folderValid) {
 				
 			</div>
 			<div class="row">
+		<?php if($previousLevelLink) { ?>
+					<a class="btn btn-default pull-left back-button" 
+						href="<?=$previousLevelLink?>">
+						<span class="glyphicon glyphicon-back"></span>&nbsp;<?=ucfirst(lang('intake_button_back'));?>
+					</a>
+		<?php } ?>
 				<ol class="breadcrumb">
+
 					<?php foreach($breadcrumbs as $bc) {
 						$html = "\t<li class=\"breadcrumb-item";
 						if($bc->is_current) $html .= " active";
