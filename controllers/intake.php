@@ -111,42 +111,28 @@ class Intake extends MY_Controller
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         
         if($this->current_path === sprintf("/%s/home", $this->config->item('rodsServerZone'))) {
-            $this->session->set_userdata('tempDir', $this->current_path);
-            $this->breadcrumbs = $this->getBreadcrumbLinks($pathStart, array());
-            $this->head = $this->config->item('base-level');
-            $this->levelPermissions = $this->study->getPermissionsForLevel(-1, "");
-            $this->nextLevelPermissions = $this->study->getPermissionsForLevel(0, "");
-
-            $dirs = array();
-            foreach($this->studies as $study) {
-                $d =  new ProdsDir($rodsaccount, sprintf("%s%s", $pathStart, $study), true);
-                $d->getStats();
-                $dirs[] = $d;
-            }
-
-            $dataArr = array(
-                "currentViewLocked" => false,
-                "currentViewFrozen" => false,
-                "level_depth" => -1,
-                "permissions" => array($this->config->item('role:contributor') => true), // files can be viewed with at least contributor permission
-                "files" => array()
-            );
-
-
+            $this->prepareHomeLevel($rodsaccount, $pathStart, $dirs, $dataArr);
         } else {
             $segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $this->current_path, $this->dir);
             if(!is_array($segments)) {
                 if($redirectIfInvalid) {
                     if(sizeof($this->studies) > 0) {
                         $redirectTo = $pathStart . $this->studies[0];
-                        $referUrl = site_url($this->modulelibrary->name(), "intake", "intake", "index") . "?dir=" . $redirectTo;
-                        $message = sprintf("ntl: %s is not a valid directory", $this->current_path);
-                        if($this->current_path)
+                        try {
+                            new ProdsDir($rodsaccount, $redirectTo, true);
+                            $referUrl = site_url($this->modulelibrary->name(), "intake", "intake", "index") . "?dir=" . $redirectTo;
+                            $message = sprintf("ntl: %s is not a valid directory", $this->current_path);
+                            if($this->current_path)
                             displayMessage($this, $message, true);
-                        redirect($referUrl, 'refresh');
+                            redirect($referUrl, 'refresh');
+                        } catch(RODSException $e) {
+                            // Do not redirect to an invalid folder
+                        }
                     }
                 }
                 $this->data["folderValid"] = false;
+                $this->data["errorMessage"] = sprintf(lang('intake_error_project_no_exist'), $this->current_path, $this->getRedirect(), "home");
+                $this->prepareHomeLevel($rodsaccount, $pathStart, $dirs, $dataArr);
             } else {
                 $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $this->head, $this->level_depth);
 
@@ -194,6 +180,36 @@ class Intake extends MY_Controller
 
         $this->data = array_merge($this->data, $dataArr);
 
+    }
+
+    private function prepareHomeLevel($rodsaccount, $pathStart, &$dirs, &$dataArr) {
+        $this->session->set_userdata('tempDir', $this->current_path);
+        $this->breadcrumbs = $this->getBreadcrumbLinks($pathStart, array());
+        $this->head = $this->config->item('base-level');
+        $this->levelPermissions = $this->study->getPermissionsForLevel(-1, "");
+        $this->nextLevelPermissions = $this->study->getPermissionsForLevel(0, "");
+
+        $dirs = array();
+        foreach($this->studies as $key => $study) {
+            try {
+                $d =  new ProdsDir($rodsaccount, sprintf("%s%s", $pathStart, $study), true);
+                $d->getStats();
+                $dirs[] = $d;
+            } catch(RODSException $e) {
+                unset($this->studies[$key]);
+                // Studie was loaded but doesn't exist. This should not happen, but might,
+                // if intake prefix defined in the ruleset differs from the intake prefix
+                // defined in the config
+            }
+        }
+
+        $dataArr = array(
+            "currentViewLocked" => false,
+            "currentViewFrozen" => false,
+            "level_depth" => -1,
+            "permissions" => array($this->config->item('role:contributor') => true), // files can be viewed with at least contributor permission
+            "files" => array()
+        );
     }
 
     private function getLockedStatus() {

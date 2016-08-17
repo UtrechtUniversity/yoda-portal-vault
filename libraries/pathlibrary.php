@@ -1,9 +1,9 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class PathLibrary {
+define('DIR_NOT_INTAKE', -10);
+define('NO_DIRECTORY', -11);
 
-	public $DIR_NOT_INTAKE = -10;
-	public $NO_DIRECTORY = -11;
+class PathLibrary {
 
 	public function getPathSegments($rodsaccount, $pathStart, $path, &$dir) {
         $studyIDBegin = strpos(
@@ -14,7 +14,7 @@ class PathLibrary {
         if($studyIDBegin !== 0) {
             // error
             // echo "Not a valid intake folder";
-            return $this->DIR_NOT_INTAKE;
+            return DIR_NOT_INTAKE;
         } else {
             try {
                 $dir = new ProdsDir($rodsaccount, $path, true);
@@ -23,7 +23,7 @@ class PathLibrary {
                
 
             } catch(RODSException $e) {
-                return $this->NO_DIRECTORY;
+                return NO_DIRECTORY;
             }
         }
 	}

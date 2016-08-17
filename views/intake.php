@@ -1,15 +1,14 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
-if($folderValid === false) {
-	if($information = $this->session->flashdata('information')){ ?>
-		<div class="alert alert-<?=$information->type;?>">
-			<?=$information->message;?>
-		</div>
+if($information = $this->session->flashdata('information')){ ?>
+	<div class="alert alert-<?=$information->type;?>">
+		<?=$information->message;?>
+	</div>
 <?php
-	}
 } else {
-
-if ($header && sizeof($studies) > 0): ?>
+if(isset($errorMessage)) {
+	echo sprintf('<div class="alert alert-danger">%1$s</div>',$errorMessage);
+}
+if ($header && (sizeof($studies) > 0 || $level_depth === -1)) { ?>
 	<div class="container page-body">
 		<div class="row page-header">
 			<div class="col-sm-6">
@@ -44,23 +43,23 @@ if ($header && sizeof($studies) > 0): ?>
 				?>
 			</ol>
 		</div>
-	<?php endif; ?>
+	<?php } ?>
 
-	<?php if($information = $this->session->flashdata('information')): ?>
+	<?php if($information = $this->session->flashdata('information')){ ?>
 		<div class="alert alert-<?=$information->type;?>">
 			<?=$information->message;?>
 		</div>
 	<?php 
-	endif;
+	}
 	
-	if($currentViewLocked): ?>
+	if($currentViewLocked) { ?>
 		<div class="alert alert-danger"><?=lang('intake_dataset_locked');?></div>
 <?php 
-endif; 
-$attrs = array(
-	"directory" => $current_dir,
-);
-echo form_open(null, null, $attrs);
+	} 
+	$attrs = array(
+		"directory" => $current_dir,
+	);
+	echo form_open(null, null, $attrs);
 ?>
 
 <div class="btn-group">
