@@ -623,6 +623,9 @@ class metadataFields {
 		 * 9) error class
 		 * 10) data-attributes for row (depends options)
 		 * 11) indent
+		 * 12) intake_metadata_button_add_value lang string
+		 * 13) intake_metadata_button_edit lang string
+		 * 14) intake_metadata_button_cancel lang string
 		 */
 		$template =  <<<'EOT'
 %11$s<tr class="form-group%9$s"%10$s id="metadata-row-%1$s">
@@ -640,10 +643,7 @@ EOT;
 			$template .= <<<'EOT'
 %11$s 		<span class="btn btn-default glyphicon glyphicon-plus showWhenEdit" 
 %11$s 			data-template="%7$s" data-nextindex="%8$d" onclick="addValueRow('%1$s')" id="addRow-%1$s">
-%11$s 			
-EOT;
-		$template .= lang('intake_metadata_button_add_value');
-		$template .= <<<'EOT'
+%11$s 			%12$s
 %11$s 		</span>
 EOT;
 		endif;
@@ -654,10 +654,12 @@ EOT;
 EOT;
 		if($canEdit):
 			$template .= <<<'EOT'
-%11$s 		<span type="button" class="btn btn-default glyphicon glyphicon-pencil hideWhenEdit button-%1$s" 
+%11$s 		<span type="button" class="btn btn-default glyphicon glyphicon-pencil hideWhenEdit button-%1$s"
+%11$s			title="%13$s" data-toggle="tooltip" data-placement="top" 
 %11$s			onclick="edit('%1$s')"></span>
 %11$s 		<span type="button"
-%11$s			class="btn btn-default glyphicon glyphicon-remove showWhenEdit button-%1$s"
+%11$s			title="%14$s" data-toggle="tooltip" data-placement="top" 
+%11$s			class="btn btn-default glyphicon glyphicon-pencil-cancel showWhenEdit button-%1$s"
 %11$s 			onclick="cancelEdit('%1$s')"></span>
 
 EOT;
@@ -761,7 +763,10 @@ EOT;
 			is_array($currentValue) && sizeof($currentValue) > 0 ? max(array_keys($currentValue)) + 1 : 1,
 			$hasError ? " has-error" : "",
 			$rowDepends,
-			$indent
+			$indent,
+			lang('intake_metadata_button_add_value'),
+			lang('intake_metadata_button_edit'),
+			lang('intake_metadata_button_cancel')
 		);
 	}
 

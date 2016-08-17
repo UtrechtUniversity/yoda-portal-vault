@@ -34,6 +34,10 @@ if($folderValid === false) {
 				
 			</div>
 			<div class="row">
+				<a class="btn btn-default pull-left back-button" 
+					href="<?=sprintf('%s/intake/?dir=%s', $url->module, $current_dir);?>">
+					<span class="glyphicon glyphicon-back"></span>&nbsp;<?=ucfirst(lang('intake_button_back'));?>
+				</a>
 				<ol class="breadcrumb">
 					<?php foreach($breadcrumbs as $bc) {
 						$html = "\t<li class=\"breadcrumb-item";
@@ -49,11 +53,6 @@ if($folderValid === false) {
 					}
 					?>
 				</ol>
-			</div>
-			<div class="row">
-				<a class="btn btn-default" href="<?=sprintf('%s/intake/?dir=%s', $url->module, $current_dir);?>">
-					<span class="glyphicon glyphicon-back"></span>&nbsp;<?=ucfirst(lang('intake_button_back'));?>
-				</a>
 			</div>
 	<?php
 		if($information = $this->session->flashdata('information')){ ?>

@@ -67,6 +67,9 @@ $lang['intake_metadata_update_failed_general'] = "Something went wrong updating 
 $lang['intake_metadata_update_failed_details'] = '<p>nt:Could not %1$s the values for %2$s';
 $lang['intake_metadata_button_add_value'] = 'Add value';
 $lang['intake_metadata_error_no_schema'] = 'There is no meta data schema defined for this object, so no meta data can be shown';
+$lang['intake_metadata_button_edit'] = 'Edit';
+$lang['intake_metadata_button_cancel'] = "Cancel editting and undo changes";
+
 
 
 /***********************************************

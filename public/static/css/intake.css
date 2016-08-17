@@ -67,8 +67,29 @@ table#metadata_edittable > tbody > tr.form-group.has-error > td:first-child > sp
 
 }
 
+.glyphicon-pencil-cancel:after {
+	content: "\270f";
+}
+
+.glyphicon-pencil-cancel:before {
+	content: "\e095";
+	position: absolute;
+	margin-left: -.3em;
+	margin-top: -.2ex;
+	-moz-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: FlipH;
+    -ms-filter: "FlipH";
+}
+
 .tab-pane {
 	padding-top: 20px;
+}
+
+.back-button {
+	margin: 1px 10px 1px 0px;
 }
 
 
