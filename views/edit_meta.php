@@ -50,6 +50,11 @@ if($folderValid === false) {
 					?>
 				</ol>
 			</div>
+			<div class="row">
+				<a class="btn btn-default" href="<?=sprintf('%s/intake/?dir=%s', $url->module, $current_dir);?>">
+					<span class="glyphicon glyphicon-back"></span>&nbsp;<?=ucfirst(lang('intake_button_back'));?>
+				</a>
+			</div>
 	<?php
 		if($information = $this->session->flashdata('information')){ ?>
 			<div class="alert alert-<?=$information->type;?>">

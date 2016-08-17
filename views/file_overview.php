@@ -296,18 +296,24 @@ $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $r
 <?php
 			echo sprintf(
 				$row, 
-				"ntl:Information", 
+				ucfirst(lang('intake_snapshot_head_summary')), 
 				sprintf(
-					'ntl:%1$s by %2$s', 
+					lang('intake_snapshot_created_at_by'), 
 					absoluteTimeWithTooltip($hist->time), 
 					$hist->user
 				)
 			);
-			echo sprintf($row, "ntl:Version", $hist->version ? $hist->version : "ntl:N/A");
 			echo sprintf(
 				$row, 
-				"ntl:Vault path", 
-				$hist->datasetPath ? $hist->datasetPath : "ntl:N/A"
+				ucfirst(lang('intake_version')),
+				$hist->version ? $hist->version : 
+					lang('intake_info_not_available')
+			);
+			echo sprintf(
+				$row, 
+				ucfirst(lang('intake_snapshot_vault_path')), 
+				$hist->datasetPath ? $hist->datasetPath : 
+					lang('intake_info_not_available')
 			);
 ?>
 				</div>

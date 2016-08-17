@@ -9,6 +9,7 @@ $lang['intake_and'] 	= 'and';
 $lang['intake_bytes'] = 'bytes';
 $lang['intake_total'] = 'total';
 $lang['intake_info_not_available'] = 'N/A';
+$lang['intake_button_back'] = "back";
 
 
 /***********************************************
@@ -42,6 +43,9 @@ $lang['intake_rodspath'] = 'path to dataset';
 $lang['intake_version_current'] = 'current version';
 $lang['intake_version'] = 'version';
 $lang['intake_based_on'] = 'based on';
+$lang['intake_snapshot_head_summary'] = "information";
+$lang['intake_snapshot_vault_path'] = "vault path";
+$lang['intake_snapshot_created_at_by'] = 'Version created by user <b>%2$s</b> at <b>%1$s</b>';
 
 
 $lang['intake_head_dataset_information'] = '%1$s information';
