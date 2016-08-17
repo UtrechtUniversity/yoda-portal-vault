@@ -296,11 +296,11 @@ class Intake extends MY_Controller
         }
 
         if(!$this->studies[0]) {
-            displayMessage($this, lang('ERROR_NO_INTAKE_ACCESS'), true);
+            displayMessage($this, lang('intake_error_no_projects'), true);
             return false;
         }
         else if(!$this->study->validateStudy($this->studies, $studyID)){
-            $message = sprintf(lang('ERR_STUDY_NO_EXIST'), $studyID, $this->getRedirect(), $this->studies[0]);
+            $message = sprintf(lang('intake_error_project_no_exist'), $studyID, $this->getRedirect(), $this->studies[0]);
             displayMessage($this, $message, true);
             return false;
         } else if(
@@ -309,7 +309,7 @@ class Intake extends MY_Controller
         ){
             // If the user doesn't have acces, this study doesn't appear in $this->studies,
             // so the user won't get through the previous test, right?
-            $message = sprintf(lang('ERR_STUDY_NO_ACCESS'), $studyID, $this->getRedirect(), $this->studies[0]);
+            $message = sprintf(lang('intake_error_no_access'), $studyID, $this->getRedirect(), $this->studies[0]);
             displayMessage($this, $message, true);
             return false;
         }

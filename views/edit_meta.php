@@ -19,7 +19,7 @@ if($folderValid === false) {
 				<div class="col-sm-6">
 					<h1>
 						<span class="glyphicon glyphicon-tags"></span>&nbsp;
-						<?=lang('header:metadata');?>
+						<?=lang('intake_header_metadata');?>
 					</h1>
 						<?php 
 							$title = "<h3>";

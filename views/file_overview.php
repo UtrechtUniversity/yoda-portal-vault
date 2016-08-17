@@ -4,12 +4,12 @@ if($levelPermissions->canSnapshot) { ?>
 <ul class="nav nav-tabs" id="fileOverviewTabMenu" data-tabs="tabs">
 	 	<li role="presentation" class="active">
 	 		<a href="#files" aria-controls="files" role="tab" data-toggle="tab">
-	 			ntl:Files
+	 			<?=ucfirst(lang('intake_tab_file_overview'));?>
 	 		</a>
 	 	</li> 
 	 	<li role="presentation">
 		 	<a href="#details" aria-controls="details" role="tab" data-toggle="tab">
-		 		ntl:Details
+		 		<?=ucfirst(lang('intake_tab_details'));?>
 		 	</a>
 	 	</li> 
 </ul>
@@ -46,15 +46,15 @@ if(
 		?>">
 		<thead>
 			<tr>
-				<th><?=lang('snapshot_name');?></th>
-				<th><?=lang('size');?></th>
-				<th><?=lang('files');?></th>
-				<th><?=lang('created');?></th>
-				<th><?=lang('modified');?></th>
+				<th><?=ucfirst(lang('intake_name'));?></th>
+				<th><?=ucfirst(lang('intake_size'));?></th>
+				<th><?=ucfirst(lang('intake_files'));?></th>
+				<th><?=ucfirst(lang('intake_created'));?></th>
+				<th><?=ucfirst(lang('intake_modified'));?></th>
 	<?php if($nextLevelPermissions->canSnapshot){ ?> 
-				<th><?=lang('snapshot_latest');?></th>
+				<th><?=ucfirst(lang('intake_snapshot_latest'));?></th>
 	<?php } ?>
-				<th><?=lang('comment');?></th>
+				<th><?=ucfirst(lang('intake_comment'));?></th>
 			</tr>
 		</thead>
 		
@@ -103,7 +103,7 @@ if(
 
 				<td><!-- File / Dir information -->
 					<?=sprintf(
-						lang('files_in_dirs'), 
+						lang('intake_n_files_in_n_dirs'), 
 						$count['filecount'], 
 						$count['dircount']
 					);?>
@@ -122,14 +122,14 @@ if(
 							if($latestSnapshot !== false) { 
 								// remove isset once $latestSnapshot is defined
 								echo sprintf(
-									lang('latest_snapshot_by'), 
+									lang('intake_latest_snapshot_by'), 
 									relativeTimeWithTooltip(
 										$latestSnapshot["datetime"]->getTimestamp(), true
 									),
 									htmlentities($latestSnapshot["username"])
 								);
 							} else {
-								echo lang('no_snapshots');
+								echo lang('intake_no_snapshots');
 							}
 						?>
 					</td>
@@ -154,23 +154,23 @@ if(
 	    <div class="col-sm-6">
 	      <h3>
 	        <span class="glyphicon glyphicon-alert"></span>
-	        <?=lang('header:files_not_recognised');?>
+	        <?=lang('intake_head_files_not_recognised');?>
 	      </h3>
 	    </div>
 	</div>
 
 	<div class="alert alert-warning">
-		<?=lang('header:files_not_in_dataset');?>
+		<?=lang('intake_files_not_recognized');?>
 	</div>
 
 	<table id="unknown_files_overview" class="display table table-datatable">
 		<thead>
 			<tr>
-				<th><?=lang('dataset_name');?></th>
-				<th><?=lang('size');?></th>
-				<th><?=lang('created');?></th>
-				<th><?=lang('modified');?></th>
-				<th><?=lang('comment');?></th>
+				<th><?=ucfirst(lang('intake_name'));?></th>
+				<th><?=ucfirst(lang('intake_size'));?></th>
+				<th><?=ucfirst(lang('intake_created'));?></th>
+				<th><?=ucfirst(lang('intake_modified'));?></th>
+				<th><?=ucfirst(lang('intake_comment'));?></th>
 			</tr>
 		</thead>
 		
@@ -233,7 +233,14 @@ $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $r
 	
 	<div class="panel panel-default">
 		<div class="panel-heading">
-			<h3 class="panel-title">ntl:Information</h3>
+			<h3 class="panel-title">
+				<?=ucfirst(
+					sprintf(
+						lang('intake_head_dataset_information'), 
+						$head["title"])
+					);
+				?>
+			</h3>
 		</div>
 		<ul class="list-group">
 <?php 
@@ -255,7 +262,9 @@ $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $r
 ?>
 	<div class="panel panel-default">
 		<div class="panel-heading">
-			<h3 class="panel-title"><?="NTL:Version history";?></h3>
+			<h3 class="panel-title">
+				<?=ucfirst(lang('intake_head_snapshot_history'));?>
+			</h3>
 		</div>
 		<ul class="list-group">
 <?php
