@@ -65,7 +65,6 @@ if(
     		$rodsaccount, 
     		$current_dir . "/" . $dir->getName()
     	);
-    	var_dump($count);
     	$lock = $this->dataset->getLockedStatus(
     		$rodsaccount, 
     		$current_dir . "/" . $dir->getName(), 
@@ -115,7 +114,10 @@ if(
 				</td>
 
 				<td> <!-- Modified -->
-					<?=absoluteTimeWithTooltip($dir->stats->mtime);?>
+					<?=$count["modified"] === 0 ? 
+						absoluteTimeWithTooltip($dir->stats->mtime) : 
+						absoluteTimeWithTooltip($count["modified"]);
+					?>
 				</td>
 				<?php if($nextLevelPermissions->canSnapshot){ ?>
 					<td>

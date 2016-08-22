@@ -80,6 +80,7 @@ class Filesystem extends CI_Model {
             return $result;
 
         } catch(RODSException $e) {
+            echo $e->showStacktrace();
             return false;
         }
 
