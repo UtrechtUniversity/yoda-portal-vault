@@ -11,7 +11,7 @@ class MetaData extends MY_Controller
         $this->load->helper('intake');
         $this->load->library('metadatafields');
         $this->load->model('study');
-        $this->load->library('modulelibrary');
+        $this->load->library('module', array(__DIR__));
         $this->load->library('pathlibrary');
         $this->load->helper('language');
         $this->load->language('intake');
@@ -89,7 +89,7 @@ class MetaData extends MY_Controller
             }
         }
 
-        $referUrl = site_url(array($this->modulelibrary->name(), "intake", "metadata")) . "?dir=" . urlencode($directory);
+        $referUrl = site_url(array($this->module->name(), "intake", "metadata")) . "?dir=" . urlencode($directory);
         displayMessage($this, $message, $error, $type);
         redirect($referUrl, 'refresh');
     }

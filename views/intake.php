@@ -70,13 +70,13 @@ if ($folderValid) {
 			?>
 				<button type="<?=(sizeof($directories) === 0 && sizeof($files) === 0) ? "button" : "submit";?>" 
 					class="btn btn-default <?php if(sizeof($directories) === 0 && sizeof($files) === 0) echo " disabled";?>"
-					formaction="<?=site_url(array($this->modulelibrary->name(), "actions", "snapshot")); ?>"
+					formaction="<?=site_url(array($this->module->name(), "actions", "snapshot")); ?>"
 					>
 					<span class="glyphicon glyphicon-camera"></span>&nbsp;<?=ucfirst(lang('intake_button_create_snapshot'));?>
 				</button>
 		<?php } else if($levelPermissions->canSnapshot && !$currentViewFrozen) { ?>
 				<button type="submit" class="btn btn-default" 
-					formaction="<?=site_url(array($this->modulelibrary->name(), "actions", "unlock")); ?>"
+					formaction="<?=site_url(array($this->module->name(), "actions", "unlock")); ?>"
 					<span class="glyphicon glyphicon-lock" title="<?=lang('intake_file_locked');?>"></span>&nbsp;<?=ucfirst(lang('intake_button_unlock_snapshot'));?>
 				</button>
 		<?php 

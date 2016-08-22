@@ -19,7 +19,7 @@ class Filesystem extends CI_Model {
     static public function countSubFiles($iRodsAccount, $path) {
         $ruleBody = '
             myRule {
-                iiFileCount(*path, *totalSize, *dircount, *filecount);
+                iiFileCount(*path, *totalSize, *dircount, *filecount, *modified);
                 
             }
         ';
@@ -29,7 +29,7 @@ class Filesystem extends CI_Model {
                 $iRodsAccount,
                 $ruleBody,
                 array("*path" => $path),
-                array("*totalSize", "*dircount", "*filecount")
+                array("*totalSize", "*dircount", "*filecount", "*modified")
             );
 
             $result = $rule->execute();
@@ -38,9 +38,11 @@ class Filesystem extends CI_Model {
                     "dircount" => intval($result["*dircount"]),
                     "filecount" => intval($result["*filecount"]),
                     "totalSize" => intval($result["*totalSize"]),
+                    "modified" => intval($result["*modified"])
                 );
 
         } catch(RODSException $e) {
+            echo $e->showStacktrace();
             return false;
         }
 

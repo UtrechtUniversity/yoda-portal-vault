@@ -65,6 +65,7 @@ if(
     		$rodsaccount, 
     		$current_dir . "/" . $dir->getName()
     	);
+    	var_dump($count);
     	$lock = $this->dataset->getLockedStatus(
     		$rodsaccount, 
     		$current_dir . "/" . $dir->getName(), 
@@ -210,7 +211,6 @@ if(
 				</td>
 
 				<td> <!-- Modified -->
-					&plusmn;
 					<?=absoluteTimeWithTooltip($file->stats->mtime);?>
 				</td>
 				<td>
@@ -230,7 +230,7 @@ $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $r
 ?>
 </div>
 	<div role="tabpanel" class="tab-pane" id="details">
-	
+<!--	
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<h3 class="panel-title">
@@ -277,6 +277,8 @@ $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $r
 ?>
 		</ul>
 	</div>	
+
+	-->
 
 <?php
 	 if(sizeof($snapshotHistory) > 0) {

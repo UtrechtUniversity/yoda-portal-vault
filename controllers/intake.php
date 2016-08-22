@@ -29,7 +29,7 @@ class Intake extends MY_Controller
         $this->load->language('intake');
         $this->load->language('errors');
         $this->load->language('form_errors');
-        $this->load->library('modulelibrary');
+        $this->load->library('module', array(__DIR__));
         $this->load->library('metadatafields');
         $this->load->library('pathlibrary');
         $this->studies = $this->dataset->getStudies($this->rodsuser->getRodsAccount());
@@ -50,7 +50,7 @@ class Intake extends MY_Controller
                 'lib/datatables/datatables.js', 
                 'lib/chosen-select/chosen.jquery.min.js'
             ),
-            'activeModule'   => $this->modulelibrary->name(),
+            'activeModule'   => $this->module->name(),
             'user' => array(
                 'username' => $this->rodsuser->getUsername(),
             ),
@@ -76,7 +76,7 @@ class Intake extends MY_Controller
                 'lib/datetimepicker/moments.min.js',
                 'lib/datetimepicker/bootstrap-datetimepicker.js'
             ),
-            'activeModule'   => $this->modulelibrary->name(),
+            'activeModule'   => $this->module->name(),
             'user' => array(
                 'username' => $this->rodsuser->getUsername(),
             ),
@@ -106,7 +106,7 @@ class Intake extends MY_Controller
 
         $this->urls = (object) array(
             "site" => site_url(), 
-            "module" => $this->modulelibrary->getModuleBase()
+            "module" => $this->module->getModuleBase()
         );
 
         $rodsaccount = $this->rodsuser->getRodsAccount();
@@ -122,7 +122,7 @@ class Intake extends MY_Controller
                         $redirectTo = $this->getRedirect();
                         try {
                             new ProdsDir($rodsaccount, $redirectTo, true);
-                            $referUrl = site_url($this->modulelibrary->name(), "intake", "intake", "index") . "?dir=" . $redirectTo;
+                            $referUrl = site_url($this->module->name(), "intake", "intake", "index") . "?dir=" . $redirectTo;
                             $message = sprintf("ntl: %s is not a valid directory", $this->current_path);
                             if($this->current_path)
                             displayMessage($this, $message, true);
@@ -242,7 +242,7 @@ class Intake extends MY_Controller
     private function getBreadcrumbLinks($pathStart, $segments) {
         $breadCrumbs = array();
         $i = 0;
-        $link = site_url(array($this->modulelibrary->name(), "intake", "index")) . "?dir=";
+        $link = site_url(array($this->module->name(), "intake", "index")) . "?dir=";
         foreach(explode("/", $pathStart) as $seg) {
             if($seg === "" || $seg == $this->config->item('intake-prefix')) continue;
             else if($seg === "home") {
@@ -365,7 +365,7 @@ class Intake extends MY_Controller
      *          module and to a valid study, if one is available
      */
     private function getRedirect($studyID = '') {
-        $segments = array($this->modulelibrary->name(), "intake", "index");
+        $segments = array($this->module->name(), "intake", "index");
         // if(!empty($this->studies)) {
         //     array_push($segments, $studyID ? $studyID : $this->studies[0]);
         // }

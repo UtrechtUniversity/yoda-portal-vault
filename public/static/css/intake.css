@@ -92,4 +92,8 @@ table#metadata_edittable > tbody > tr.form-group.has-error > td:first-child > sp
 	margin: 1px 10px 1px 0px;
 }
 
+.page-header {
+	margin-top: 0px;
+}
+
 
