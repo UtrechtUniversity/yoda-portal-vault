@@ -5,7 +5,7 @@
 // No module-specific config yet.
 $config = array();
 
-$config["intake-prefix"] 	= "grp-intake-";
+$config["intake-prefix"] 	= "grp-project-";
 $config["manager-prefix"]	= "grp-datamanager-";
 
 $config["role:administrator"] = "administrator";
@@ -28,7 +28,7 @@ $config["base-level"] = array(
 	"metadata" => false
 );
 
-$config["metadata_prefix"] = "ilab_intake_metadata_";
+$config["metadata_prefix"] = "ilab_";
 
 $config["level-hierarchy"] = array(
 		array(

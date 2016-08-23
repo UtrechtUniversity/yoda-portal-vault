@@ -321,7 +321,6 @@ class Intake extends MY_Controller
      *                      the study ID otherwise
      */
     private function validateStudyPermission($studyID) {
-
         // get study dependant rights for current user.
         $this->permissions = $this->study->getIntakeStudyPermissions($studyID);
         $this->levelPermissions = $this->study->getPermissionsForLevel($this->level_depth, $studyID);

@@ -235,13 +235,15 @@ class Dataset extends CI_Model {
             $keys = array("vaultPath", "version", "createdDatetime", "createdUser", "createdUserzone", "dependsID", "dependsPath", "dependsVersion");
             $history = array();
             foreach(explode(",", $result["*str"]) as $snapshot) {
-                $history[] = (object) array_combine($keys, explode("#", $snapshot));
+                $snapshotElems = explode("#", $snapshot);
+                if(sizeof($snapshotElems) === sizeof($keys)) {
+                    $history[] = (object) array_combine($keys, $snapshotElems);
+                }
             }
 
             return $history;
             
         } catch(RODSException $e) {
-            echo $e->showStacktrace();
             return array();
         }
 
@@ -287,7 +289,7 @@ class Dataset extends CI_Model {
     {
         $ruleBody = "
             myRule {
-                uuYcIntakerStudies(*studies);
+                uuIiIntakerStudies(*studies);
                 *studies = str(*studies);
         }";
 

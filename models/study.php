@@ -2,7 +2,6 @@
 
 class Study extends CI_Model {
     // Permissions - study dependant
-    public $PERM_GroupAssistant ='grp-intake-'; // prefix of what is to be extended with a study-id
     public $PERM_GroupDataManager = 'grp-datamanager-';
 
     public $ROLE_Assistant = ""; //$this->config->item('role:contributor'); // 'assistant';
@@ -49,12 +48,12 @@ class Study extends CI_Model {
         return array(
             $this->config->item('role:contributor') => $studyID ? get_instance()->dataset->isGroupMember(
                 $rodsaccount, 
-                $this->PERM_GroupAssistant . $studyID ,  
+                $this->config->item('intake-prefix') . $studyID ,  
                 get_instance()->rodsuser->getUsername()
             ) : false,
             $this->config->item('role:administrator') => $studyID ? get_instance()->dataset->isGroupManager(
                 $rodsaccount,
-                $this->PERM_GroupAssistant . $studyID,
+                $this->config->item('intake-prefix') . $studyID,
                 get_instance()->rodsuser->getUsername()
             ) : false,
             'datamanager' => $studyID ? get_instance()->dataset->isGroupMember(
