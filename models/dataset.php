@@ -232,19 +232,10 @@ class Dataset extends CI_Model {
 
             $result = $rule->execute();
 
+            $keys = array("vaultPath", "version", "createdDatetime", "createdUser", "createdUserzone", "dependsID", "dependsPath", "dependsVersion");
             $history = array();
-            foreach( explode(",", $result["*str"]) as $hist ) {
-                if(strlen($hist) === 0) continue;
-                $segments = explode("#", $hist);
-                $info = explode(":", $segments[1]);
-                $history[] = (object) array(
-                    "datasetPath" => $segments[0],
-                    "version" => $info[0],
-                    "datasetID" => $info[1],
-                    "time" => $info[2],
-                    "user" => $info[3],
-                    "userZone" => $segments[2]
-                );
+            foreach(explode(",", $result["*str"]) as $snapshot) {
+                $history[] = (object) array_combine($keys, explode("#", $snapshot));
             }
 
             return $history;

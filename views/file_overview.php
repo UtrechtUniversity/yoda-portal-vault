@@ -303,8 +303,9 @@ $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $r
 				ucfirst(lang('intake_snapshot_head_summary')), 
 				sprintf(
 					lang('intake_snapshot_created_at_by'), 
-					absoluteTimeWithTooltip($hist->time), 
-					$hist->user
+					// absoluteTimeWithTooltip($hist->time), 
+					absoluteTimeWithTooltip($hist->createdDatetime),
+					$hist->createdUser
 				)
 			);
 			echo sprintf(
@@ -316,7 +317,7 @@ $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $r
 			echo sprintf(
 				$row, 
 				ucfirst(lang('intake_snapshot_vault_path')), 
-				$hist->datasetPath ? $hist->datasetPath : 
+				$hist->vaultPath ? $hist->vaultPath : 
 					lang('intake_info_not_available')
 			);
 ?>
