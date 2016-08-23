@@ -331,7 +331,7 @@ class Intake extends MY_Controller
             $this->previousLevels[$l]["permissions"] = $this->study->getPermissionsForLevel($l, $studyID);
         }
 
-        if(!$this->studies[0]) {
+        if(sizeof($this->studies) === 0 || $this->studies[0] === false) {
             displayMessage($this, lang('intake_error_no_projects'), true);
             return false;
         }

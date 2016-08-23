@@ -320,6 +320,13 @@ $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $r
 				$hist->vaultPath ? $hist->vaultPath : 
 					lang('intake_info_not_available')
 			);
+			echo sprintf(
+				$row,
+				ucfirst(lang('intake_snapshot_depends')),
+				($hist->dependsPath && $hist->dependsVersion !== "0") ?
+					sprintf(ucfirst(lang('intake_snapshot_depends_version_path')), $hist->dependsVersion, $hist->dependsPath) :
+					ucfirst(lang('intake_snapshot_first_version'))
+			);
 ?>
 				</div>
 			</li>

@@ -80,7 +80,7 @@ if ($folderValid) {
 					<span class="glyphicon glyphicon-lock" title="<?=lang('intake_file_locked');?>"></span>&nbsp;<?=ucfirst(lang('intake_button_unlock_snapshot'));?>
 				</button>
 		<?php 
-		} 
+		}
 		if($levelPermissions->canEditMeta || $levelPermissions->canViewMeta){ ?>
 			<a href="<?=site_url(array($url->module, "intake", "metadata")) . "?dir=" . urlencode($current_dir); ?>" class="btn btn-default">
 				<span class="glyphicon glyphicon-tags"></span>&nbsp;&nbsp;<?=ucfirst(lang('intake_header_metadata'));?>

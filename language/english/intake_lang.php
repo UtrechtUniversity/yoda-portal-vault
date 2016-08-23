@@ -46,6 +46,9 @@ $lang['intake_based_on'] = 'based on';
 $lang['intake_snapshot_head_summary'] = "information";
 $lang['intake_snapshot_vault_path'] = "vault path";
 $lang['intake_snapshot_created_at_by'] = 'Version created by user <b>%2$s</b> at <b>%1$s</b>';
+$lang['intake_snapshot_depends'] = 'derived from';
+$lang['intake_snapshot_depends_version_path'] = 'version <b>%1$s</b> (Vault path: %2$s)';
+$lang['intake_snapshot_first_version'] = 'this version was created from scratch';
 
 
 $lang['intake_head_dataset_information'] = '%1$s information';

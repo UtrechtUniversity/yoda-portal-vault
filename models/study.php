@@ -30,7 +30,7 @@ class Study extends CI_Model {
         }
         else{
             foreach($studies as $study){
-                if($studyID == $study){ // passed study has to match an existing one
+                if($studyID === $study){ // passed study has to match an existing one
                     return TRUE;
                 }
             }
@@ -46,17 +46,17 @@ class Study extends CI_Model {
     public function getIntakeStudyPermissions($studyID){
         $rodsaccount = $this->rodsuser->getRodsAccount();
         return array(
-            $this->config->item('role:contributor') => $studyID ? get_instance()->dataset->isGroupMember(
+            $this->config->item('role:contributor') => ($studyID !== "") ? get_instance()->dataset->isGroupMember(
                 $rodsaccount, 
                 $this->config->item('intake-prefix') . $studyID ,  
                 get_instance()->rodsuser->getUsername()
             ) : false,
-            $this->config->item('role:administrator') => $studyID ? get_instance()->dataset->isGroupManager(
+            $this->config->item('role:administrator') => ($studyID !== "") ? get_instance()->dataset->isGroupManager(
                 $rodsaccount,
                 $this->config->item('intake-prefix') . $studyID,
                 get_instance()->rodsuser->getUsername()
             ) : false,
-            'datamanager' => $studyID ? get_instance()->dataset->isGroupMember(
+            'datamanager' => ($studyID !== "") ? get_instance()->dataset->isGroupMember(
                 $rodsaccount, 
                 $this->PERM_GroupDataManager . $studyID, 
                 get_instance()->rodsuser->getUsername()
@@ -66,7 +66,7 @@ class Study extends CI_Model {
 
     public function getPermissionsForLevel($depth, $studyID) {
 
-        if($studyID) {
+        if($studyID !== "") {
             $level = 
                     sizeof($this->config->item('level-hierarchy')) > $depth ?
                     $this->config->item('level-hierarchy')[$depth] : 
