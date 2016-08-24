@@ -87,13 +87,13 @@ class Filesystem extends CI_Model {
         return false;
     }
 
-    static public function getFilesInformation($iRodsAccount, $collection, $limit = 0, $offset = 0, $search = false) {
-        $ruleBody = <<<'RULE'
+    static public function getDirsInformation($iRodsAccount, $collection, $limit = 0, $offset = 0, $search = false) {
+         $ruleBody = <<<'RULE'
 myRule {
     *l = int(*limit);
     *o = int(*offset);
 
-    uuIiGetFilesInformation(*l, *o, *searchval, *buffer, *f, *i);
+    uuIiGetDirInformation(*collection, *l, *o, *searchval, *buffer, *f, *i, false);
 
     *total = str(*i);
     *filtered = str(*f);
@@ -119,7 +119,70 @@ RULE;
                 $iRodsAccount,
                 $ruleBody,
                 array(
-                        "*collectionName" => $collection,
+                        "*collection" => $collection,
+                        "*limit" => sprintf("%d",$limit),
+                        "*offset" => sprintf("%d", $offset),
+                        "*searchval" => $searchval
+                    ),
+                array("*buffer", "*total", "*filtered")
+            );
+
+            $result = $rule->execute();
+
+            $files = array();
+            if(strlen($result["*buffer"]) > 0) {
+                foreach(explode("++++====++++", $result["*buffer"]) as $file) {
+                    $fexp = explode("+=+", $file);
+                    if(sizeof($fexp) > 7)
+                        $files[] = array("name" => $fexp[0], "size" => $fexp[1], "ndirectories" => $fexp[2],
+                        "nfiles" => $fexp[3], "created" => $fexp[4], "modified" => $fexp[5],
+                        "version" => $fexp[6], "versionUser" => $fexp[7], "versionTime" => $fexp[8]);
+                }
+            }
+
+            return array("total" => $result["*total"], "filtered" => $result["*filtered"], "data" => $files);
+
+        } catch(RODSException $e) {
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
+    }
+
+    static public function getFilesInformation($iRodsAccount, $collection, $limit = 0, $offset = 0, $search = false) {
+        $ruleBody = <<<'RULE'
+myRule {
+    *l = int(*limit);
+    *o = int(*offset);
+
+    uuIiGetFilesInformation(*collection, *l, *o, *searchval, *buffer, *f, *i);
+
+    *total = str(*i);
+    *filtered = str(*f);
+}
+
+
+RULE;
+        
+        $searchval = "";
+        $searchregex = "";
+
+        if($search !== false && is_array($search)) {
+            if(array_key_exists("value", $search) && $search["value"]) {
+                $searchval = $search["value"];
+            }
+            if(array_key_exists("regex", $search) && $search["regex"]) {
+                $searchregex = $search["regex"];
+            }
+        }
+
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                        "*collection" => $collection,
                         "*limit" => sprintf("%d",$limit),
                         "*offset" => sprintf("%d", $offset),
                         "*searchval" => $searchval
@@ -147,48 +210,5 @@ RULE;
 
         return array();
     }
-
-    // static public function getFilesInformation($iRodsAccount, $collection, $files) {
-    //     $ruleBody = "myRule {";
-
-    //     $fnames = array("*collection" => $collection);
-    //     $outparams = array();
-
-    //     foreach($files as $key => $filename) {
-    //         $ruleBody .= "\n\t" . sprintf(
-    //                 'iiGetFileAttrs("*collection", "%1$s", %2$s, %3$s)',
-    //                 "*key" . $key . "_fname",
-    //                 "*key" . $key . "_size",
-    //                 "*key" . $key . "_comment"
-    //             );
-    //         $fnames["*key" . $key . "_fname"] = $filename->getName();
-    //         $outparams[] = "*key" . $key . "_size";
-    //         $outparams[] = "*key" . $key . "_comment";
-    //     }
-
-    //     $ruleBody .= "\n}";
-
-    //     echo "<pre>" . $ruleBody . "</pre>";
-        
-    //     try {
-    //         $rule = new ProdsRule(
-    //             $iRodsAccount,
-    //             $ruleBody,
-    //             $fnames,
-    //             $outparams
-    //         );
-
-    //         $result = $rule->execute();
-
-    //         var_dump($result);
-
-    //     } catch(RODSException $e) {
-    //         echo $e->showStacktrace();
-    //         return false;
-    //     }
-
-    //     return false;
-
-    // }
 }
 

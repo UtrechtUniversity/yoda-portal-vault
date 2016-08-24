@@ -471,6 +471,86 @@ class Intake extends MY_Controller
         $this->load->view('common-end');
     }
 
+    public function getDirsInformation() {
+        $directory = $this->input->get('dir');
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $directory, $dir);
+        $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $head, $level_depth);
+        $perms = $this->study->getPermissionsForLevel($level_depth, $segments[0]);
+
+        $offset = $this->input->get('start') ? $this->input->get('start') : 0;
+        $limit = $this->input->get('length') ? $this->input->get('length') : 0;
+        $search = $this->input->get('search');
+
+        $data = $this->filesystem->getDirsInformation($rodsaccount, $directory, $limit, $offset, $search);
+
+        $columns = array(
+            array(
+                'db' => 'name', 
+                'dt' => 'filename',
+                'formatter' => function($d, $row) {
+                    $lnktmpl = '<span class="glyphicon glyphicon-%4$s" style="margin-right: 10px;"></span>';
+                    $lnktmpl .= '<a href="%1$s/intake/index?dir=%2$s/%3$s">%3$s</a>';
+                    $lnk = sprintf(
+                        $lnktmpl,
+                        htmlentities($this->module->getModuleBase()),
+                        htmlentities($this->input->get('dir')),
+                        htmlentities($d),
+                        htmlentities($this->input->get('glyph'))
+                    );
+                    return sprintf(
+                        '<span class="glyphicon glyphicon-folder"></span>%1$s',
+                        $lnk
+                    );
+                }
+            ),
+            array(
+                'db' => 'size', 
+                'dt' => 'size',
+                'formatter' => function($d, $row) {
+                    return human_filesize(intval(htmlentities($d)));
+                }
+            ),
+            array(
+                'db' => 'nfiles',
+                'dt' => 'count',
+                'formatter' => function($d, $row) {
+                    return sprintf(
+                        lang('intake_n_files_in_n_dirs'), 
+                        $d, 
+                        $row['ndirectories']
+                    );
+                }
+            ),
+            array(
+                'db' => 'created', 
+                'dt' => 'created', 
+                'formatter' => function($d, $row) {
+                    return absoluteTimeWithTooltip($d);
+                }
+            ),
+            array('db' => 'modified', 
+                'dt' => 'modified', 
+                'formatter' => function($d, $row) {
+                    $d = $d === "0" ? $row["created"] : $d;
+                    return absoluteTimeWithTooltip($d);
+                }
+            ),
+        );
+
+        echo json_encode(
+            array(
+                "draw"            => $this->input->get('draw') ?
+                    intval( $this->input->get('draw') ) :
+                    0,
+                "recordsTotal"    => intval( $data["total"] ),
+                "recordsFiltered" => intval( $data["filtered"] ? $data["filtered"] : $data["total"]),
+                "data"            => $this->ssp->data_output( $columns, $data["data"] )
+            )
+        );
+    }
+
     public function getFilesInformation() {
         $directory = $this->input->get('dir');
         $rodsaccount = $this->rodsuser->getRodsAccount();
@@ -491,7 +571,7 @@ class Intake extends MY_Controller
                 'dt' => 'filename',
                 'formatter' => function($d, $row) {
                     return sprintf(
-                        '<span class="glyphicon glyphicon-file"></span>%1$s',
+                        '<span class="glyphicon glyphicon-file" style="margin-right: 10px;"></span>%1$s',
                         htmlentities($d)
                     );
                 }
