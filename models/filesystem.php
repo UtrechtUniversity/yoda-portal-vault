@@ -72,7 +72,7 @@ class Filesystem extends CI_Model {
                     "*collectionName" => $collection,
                     "*fileName" => $file,
                 ),
-                array("*size", "*comment")
+                array("*size", "*comment", "*locked", "*frozen")
             );
 
             $result = $rule->execute();
@@ -86,4 +86,154 @@ class Filesystem extends CI_Model {
 
         return false;
     }
+
+    static public function getFilesInformation($iRodsAccount, $collection, $limit = 0, $offset = 0, $search = false) {
+        $ruleBody = <<<'RULE'
+myRule {
+    *buffer = "";
+
+    *l = int(*limit);
+    *o = int(*offset);
+
+    writeLine("serverLog", "Found limit *limit becomes *l and offset *offset becomes *o and searching for '*searchval'");
+
+    *i = 0;
+    *s = 0; #selected
+    *p = 0; #passed
+    *f = 0; #found if filter
+    foreach(*row in SELECT order_asc(DATA_NAME), DATA_SIZE, DATA_COMMENTS, 
+        DATA_CREATE_TIME, DATA_MODIFY_TIME
+            WHERE COLL_NAME = '*collectionName'
+    ) {
+        *name = *row.DATA_NAME;
+        *size = *row.DATA_SIZE;
+        *comments = *row.DATA_COMMENTS;
+        *created = *row.DATA_CREATE_TIME;
+        *modified = *row.DATA_MODIFY_TIME;
+        *searchstring = "*name*size*comments*created*modified";
+
+        *add = false;
+        if(*searchval == "") {
+            writeLine("serverLog", "*i >= *o and *s < *l ?");
+            if(*i >= *o && *s < *l) {
+                *add = true;
+            }
+        } else {
+            if(*searchstring like "**searchval*") {
+                *f = *f + 1;
+                if(*p >= *o && *s < *l) {
+                    *add = true;
+                } else {
+                    *p = *p + 1;
+                }
+            }
+        }
+
+        if(*add) {
+            *buffer = "*buffer++++====++++*size+=+*name+=+*comments+=+*created+=+*modified";
+            *s = *s + 1;
+        }
+
+        *i = *i + 1;
+            
+    }
+    
+    writeLine("serverLog", "At the end of the run, i=*i, o=*o, l=*l, s=*s, f=*f and p=*p");
+
+    *total = str(*i);
+    *filtered = str(*f);
 }
+
+
+RULE;
+        
+        $searchval = "";
+        $searchregex = "";
+
+        if($search !== false && is_array($search)) {
+            if(array_key_exists("value", $search) && $search["value"]) {
+                $searchval = $search["value"];
+            }
+            if(array_key_exists("regex", $search) && $search["regex"]) {
+                $searchregex = $search["regex"];
+            }
+        }
+
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                        "*collectionName" => $collection,
+                        "*limit" => sprintf("%d",$limit),
+                        "*offset" => sprintf("%d", $offset),
+                        "*searchval" => $searchval
+                    ),
+                array("*buffer", "*total", "*filtered")
+            );
+
+            $result = $rule->execute();
+
+            $files = array();
+            if(strlen($result["*buffer"]) > 0) {
+                foreach(explode("++++====++++", $result["*buffer"]) as $file) {
+                    $fexp = explode("+=+", $file);
+                    if(sizeof($fexp) > 1)
+                        $files[] = array("file" => $fexp[1], "size" => $fexp[0], "comments" => $fexp[2], "created" => $fexp[3], "modified" => $fexp[4]);
+                }
+            }
+
+            return array("total" => $result["*total"], "filtered" => $result["*filtered"], "data" => $files);
+
+        } catch(RODSException $e) {
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
+    }
+
+    // static public function getFilesInformation($iRodsAccount, $collection, $files) {
+    //     $ruleBody = "myRule {";
+
+    //     $fnames = array("*collection" => $collection);
+    //     $outparams = array();
+
+    //     foreach($files as $key => $filename) {
+    //         $ruleBody .= "\n\t" . sprintf(
+    //                 'iiGetFileAttrs("*collection", "%1$s", %2$s, %3$s)',
+    //                 "*key" . $key . "_fname",
+    //                 "*key" . $key . "_size",
+    //                 "*key" . $key . "_comment"
+    //             );
+    //         $fnames["*key" . $key . "_fname"] = $filename->getName();
+    //         $outparams[] = "*key" . $key . "_size";
+    //         $outparams[] = "*key" . $key . "_comment";
+    //     }
+
+    //     $ruleBody .= "\n}";
+
+    //     echo "<pre>" . $ruleBody . "</pre>";
+        
+    //     try {
+    //         $rule = new ProdsRule(
+    //             $iRodsAccount,
+    //             $ruleBody,
+    //             $fnames,
+    //             $outparams
+    //         );
+
+    //         $result = $rule->execute();
+
+    //         var_dump($result);
+
+    //     } catch(RODSException $e) {
+    //         echo $e->showStacktrace();
+    //         return false;
+    //     }
+
+    //     return false;
+
+    // }
+}
+

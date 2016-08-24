@@ -32,6 +32,7 @@ class Intake extends MY_Controller
         $this->load->library('module', array(__DIR__));
         $this->load->library('metadatafields');
         $this->load->library('pathlibrary');
+        $this->load->library('SSP');
         $this->studies = $this->dataset->getStudies($this->rodsuser->getRodsAccount());
         sort($this->studies);
     }
@@ -111,6 +112,10 @@ class Intake extends MY_Controller
 
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
+
+        if($this->current_path === "") {
+            $this->current_path = sprintf("/%s/home", $this->config->item('rodsServerZone'));
+        }
         
         if($this->current_path === sprintf("/%s/home", $this->config->item('rodsServerZone'))) {
             $this->prepareHomeLevel($rodsaccount, $pathStart, $dirs, $dataArr);
@@ -142,7 +147,7 @@ class Intake extends MY_Controller
 
                 $this->getLockedStatus();
                 $dirs = $this->dir->getChildDirs();
-                $files = $this->dir->getChildFiles();
+                // $files = $this->dir->getChildFiles();
 
                 $this->session->set_userdata('tempDir', $this->current_path);
                 $this->breadcrumbs = $this->getBreadcrumbLinks($pathStart, $segments);
@@ -153,7 +158,8 @@ class Intake extends MY_Controller
                     "studyID" => $studyID,
                     "currentViewLocked" => $this->currentViewLocked,
                     "currentViewFrozen" => $this->currentViewFrozen,
-                    "files" => $files,
+                    // "files" => $files,
+                    "files" => array(),
                     "level_depth" => $this->level_depth,
                     "level_depth_start" => $this->level_depth_start,
                     "permissions" => $this->permissions,
@@ -440,5 +446,69 @@ class Intake extends MY_Controller
                     $results
                 )
             );
+    }
+
+    public function test() {
+        $this->data["current_dir"] = $this->input->get('dir');
+
+        $this->load->view('common-start', array(
+            'styleIncludes' => array(
+                'css/intake.css', 
+                'lib/datatables/datatables.css', 
+                'lib/chosen-select/chosen.min.css'
+            ),
+            'scriptIncludes' => array(
+                'js/intake.js', 
+                'lib/datatables/datatables.js', 
+                'lib/chosen-select/chosen.jquery.min.js'
+            ),
+            'activeModule'   => $this->module->name(),
+            'user' => array(
+                'username' => $this->rodsuser->getUsername(),
+            ),
+        ));
+        $this->load->view('testview', $this->data);
+        $this->load->view('common-end');
+    }
+
+    public function getFilesInformation() {
+        $directory = $this->input->get('dir');
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $directory, $dir);
+        $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $head, $level_depth);
+        $perms = $this->study->getPermissionsForLevel($level_depth, $segments[0]);
+
+        $offset = $this->input->get('start') ? $this->input->get('start') : 0;
+        $limit = $this->input->get('length') ? $this->input->get('length') : 0;
+        $search = $this->input->get('search');
+
+        $data = $this->filesystem->getFilesInformation($rodsaccount, $directory, $limit, $offset, $search);
+
+        $columns = array(
+            array('db' => 'file', 'dt' => 'filename'),
+            array('db' => 'size', 'dt' => 'size'),
+            array(
+                'db' => 'created', 'dt' => 'created', 'formatter' => function($d, $row) {
+                    return absoluteTimeWithTooltip($d);
+                }
+            ),
+            array('db' => 'modified', 'dt' => 'modified', 'formatter' => function($d, $row) {
+                    return absoluteTimeWithTooltip($d);
+                }
+            ),
+            array('db' => 'comments', 'dt' => 'comments')
+        );
+
+        echo json_encode(
+            array(
+                "draw"            => $this->input->get('draw') ?
+                    intval( $this->input->get('draw') ) :
+                    0,
+                "recordsTotal"    => intval( $data["total"] ),
+                "recordsFiltered" => intval( $data["filtered"] ? $data["filtered"] : $data["total"]),
+                "data"            => $this->ssp->data_output( $columns, $data["data"] )
+            )
+        );
     }
 }

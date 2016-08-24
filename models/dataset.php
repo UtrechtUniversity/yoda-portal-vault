@@ -205,6 +205,7 @@ class Dataset extends CI_Model {
             }
 
         } catch(RODSException $e) {
+            echo $e->showStacktrace();
             return false;
         }
 

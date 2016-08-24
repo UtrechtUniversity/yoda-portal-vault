@@ -182,45 +182,9 @@ if(
 <?php
 	}
 
-	foreach($files as $file) { 
-		$inf = $this->filesystem->getFileInformation(
-			$rodsaccount, 
-			$current_dir, 
-			$file->getName()
-		);
-		$lock = $this->dataset->getLockedStatus(
-			$rodsaccount, 
-			$current_dir . "/" . $file->getName(), 
-			false
-		);
-?>
-			<tr>
-				<th> <!-- Name -->
-					<span class="glyphicon glyphicon-file"></span>
-					<?=htmlentities($file->getName()); ?>
-				</th>
+	$finfos = $this->filesystem->getFilesInformation($rodsaccount, $current_dir);
 
-				<td>
-					<?=human_filesize(intval(htmlentities($inf["*size"])));?>				
-				</td> <!-- Size -->
-
-				<?php if($levelPermissions->canArchive !== false) {
-					echo "<td></td>";
-				}?>
-
-				<td> <!-- Created -->
-					<?=absoluteTimeWithTooltip($file->stats->ctime);?>
-				</td>
-
-				<td> <!-- Modified -->
-					<?=absoluteTimeWithTooltip($file->stats->mtime);?>
-				</td>
-				<td>
-					<?=htmlentities($file->stats->comments); ?>
-				</td>
-			</tr>
-<?php
-	}
+	
 ?>
 		</tbody>
 	</table>
