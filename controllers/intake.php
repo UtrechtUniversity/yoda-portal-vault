@@ -486,18 +486,36 @@ class Intake extends MY_Controller
         $data = $this->filesystem->getFilesInformation($rodsaccount, $directory, $limit, $offset, $search);
 
         $columns = array(
-            array('db' => 'file', 'dt' => 'filename'),
-            array('db' => 'size', 'dt' => 'size'),
             array(
-                'db' => 'created', 'dt' => 'created', 'formatter' => function($d, $row) {
+                'db' => 'file', 
+                'dt' => 'filename',
+                'formatter' => function($d, $row) {
+                    return sprintf(
+                        '<span class="glyphicon glyphicon-file"></span>%1$s',
+                        htmlentities($d)
+                    );
+                }
+            ),
+            array(
+                'db' => 'size', 
+                'dt' => 'size',
+                'formatter' => function($d, $row) {
+                    return human_filesize(intval(htmlentities($d)));
+                }
+            ),
+            array(
+                'db' => 'created', 
+                'dt' => 'created', 
+                'formatter' => function($d, $row) {
                     return absoluteTimeWithTooltip($d);
                 }
             ),
-            array('db' => 'modified', 'dt' => 'modified', 'formatter' => function($d, $row) {
+            array('db' => 'modified', 
+                'dt' => 'modified', 
+                'formatter' => function($d, $row) {
                     return absoluteTimeWithTooltip($d);
                 }
             ),
-            array('db' => 'comments', 'dt' => 'comments')
         );
 
         echo json_encode(
