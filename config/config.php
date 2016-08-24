@@ -14,6 +14,7 @@ $config["role:reader"] = "reader";
 
 $config["default-level"] = array(
 	"title" => false,
+	"tab" => "directories",
 	"glyphicon" => false,
 	"canSnapshot" => false,
 	"canArchive" => false,
@@ -33,6 +34,7 @@ $config["metadata_prefix"] = "ilab_";
 $config["level-hierarchy"] = array(
 		array(
 			"title" => "project",
+			"tab" => "projects",
 			"glyphicon" => "briefcase",
 			"canSnapshot" => false,
 			"canArchive" => false,
@@ -45,6 +47,7 @@ $config["level-hierarchy"] = array(
 		),
 		array(
 			"title" => "study",
+			"tab" => "studies",
 			"glyphicon" => "education",
 			"canSnapshot" => false,
 			"canArchive" => false,
@@ -52,6 +55,7 @@ $config["level-hierarchy"] = array(
 		),
 		array(
 			"title" => "dataset",
+			"tab" => "datasets",
 			"glyphicon" => "paperclip",
 			"canSnapshot" => $config['role:contributor'],
 			"canArchive" => $config["role:administrator"],

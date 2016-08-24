@@ -482,8 +482,8 @@ class Intake extends MY_Controller
         $offset = $this->input->get('start') ? $this->input->get('start') : 0;
         $limit = $this->input->get('length') ? $this->input->get('length') : 0;
         $search = $this->input->get('search');
-
-        $data = $this->filesystem->getDirsInformation($rodsaccount, $directory, $limit, $offset, $search);
+        $nextLevelCanSnap = $this->input->get('canSnap') === "1";
+        $data = $this->filesystem->getDirsInformation($rodsaccount, $directory, $limit, $offset, $search, $nextLevelCanSnap);
 
         $columns = array(
             array(
@@ -530,13 +530,32 @@ class Intake extends MY_Controller
                     return absoluteTimeWithTooltip($d);
                 }
             ),
-            array('db' => 'modified', 
+            array(
+                'db' => 'modified', 
                 'dt' => 'modified', 
                 'formatter' => function($d, $row) {
                     $d = $d === "0" ? $row["created"] : $d;
                     return absoluteTimeWithTooltip($d);
                 }
             ),
+            array(
+                'db' => 'version',
+                'dt' => 'version',
+                'formatter' => function($d, $row) {
+                    if($d) {
+                        return sprintf(
+                            lang('intake_latest_snapshot_by'),
+                            htmlentities($d),
+                            relativeTimeWithTooltip(
+                                $row["versionTime"], true
+                            ),
+                            htmlentities($row["versionUser"])
+                        );
+                    } else {
+                        return lang('intake_no_snapshots_text');
+                    }
+                }
+            )
         );
 
         echo json_encode(

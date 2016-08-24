@@ -87,13 +87,19 @@ class Filesystem extends CI_Model {
         return false;
     }
 
-    static public function getDirsInformation($iRodsAccount, $collection, $limit = 0, $offset = 0, $search = false) {
+    static public function getDirsInformation($iRodsAccount, $collection, $limit = 0, $offset = 0, $search = false, $canSnap = false) {
          $ruleBody = <<<'RULE'
 myRule {
     *l = int(*limit);
     *o = int(*offset);
+    writeLine("serverLog", "*canSnap");
+    if(*canSnap == "1") {
+        *canSnapb = true;
+    } else {
+        *canSnapb = false;
+    }
 
-    uuIiGetDirInformation(*collection, *l, *o, *searchval, *buffer, *f, *i, false);
+    uuIiGetDirInformation(*collection, *l, *o, *searchval, *buffer, *f, *i, *canSnapb);
 
     *total = str(*i);
     *filtered = str(*f);
@@ -122,7 +128,8 @@ RULE;
                         "*collection" => $collection,
                         "*limit" => sprintf("%d",$limit),
                         "*offset" => sprintf("%d", $offset),
-                        "*searchval" => $searchval
+                        "*searchval" => $searchval,
+                        "*canSnap" => $canSnap ? "1" : "0"
                     ),
                 array("*buffer", "*total", "*filtered")
             );

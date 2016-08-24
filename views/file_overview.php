@@ -1,22 +1,5 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); 
-if($levelPermissions->canSnapshot) { ?>
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-<ul class="nav nav-tabs" id="fileOverviewTabMenu" data-tabs="tabs">
-	 	<li role="presentation" class="active">
-	 		<a href="#files" aria-controls="files" role="tab" data-toggle="tab">
-	 			<?=ucfirst(lang('intake_tab_file_overview'));?>
-	 		</a>
-	 	</li> 
-	 	<li role="presentation">
-		 	<a href="#details" aria-controls="details" role="tab" data-toggle="tab">
-		 		<?=ucfirst(lang('intake_tab_details'));?>
-		 	</a>
-	 	</li> 
-</ul>
-<div class="tab-content">
-	<div role="tabpanel" class="tab-pane active" id="files">
-<?php
-}
 $rodsaccount = $this->rodsuser->getRodsAccount();
 if(
 	array_key_exists($this->config->item('role:reader'), $permissions) && 
@@ -26,167 +9,105 @@ if(
 ){ 
 	if(sizeof($this->config->item("level-hierarchy")) > $level_depth + 1) {
 		$lh = $this->config->item('level-hierarchy')[$level_depth+1];
-		if(array_key_exists("title", $lh)) {
-			$glyphLabel = $lh["title"];
-		}
-		if(array_key_exists("glyphicon", $lh)) {
-			$glyph = $lh["glyphicon"];
-		}
 	} else {
 		$lh = $this->config->item('default-level');
-		$glyphLabel = "";
-		$glyph = "folder-open";
-	}
-?>
-
-	<table id="files_overview" 
-		class="display table table-datatable<?php 
-		if($currentViewLocked) 
-			echo " table-disabled";
-		?>">
-		<thead>
-			<tr>
-				<th><?=ucfirst(lang('intake_name'));?></th>
-				<th><?=ucfirst(lang('intake_size'));?></th>
-				<th><?=ucfirst(lang('intake_files'));?></th>
-				<th><?=ucfirst(lang('intake_created'));?></th>
-				<th><?=ucfirst(lang('intake_modified'));?></th>
-	<?php if($nextLevelPermissions->canSnapshot){ ?> 
-				<th><?=ucfirst(lang('intake_snapshot_latest'));?></th>
-	<?php } ?>
-				<th><?=ucfirst(lang('intake_comment'));?></th>
-			</tr>
-		</thead>
-		
-		<tbody>
-<?php 
-	foreach($directories as $dir){ 
-    	$count = $this->filesystem->countSubFiles(
-    		$rodsaccount, 
-    		$current_dir . "/" . $dir->getName()
-    	);
-    	$lock = $this->dataset->getLockedStatus(
-    		$rodsaccount, 
-    		$current_dir . "/" . $dir->getName(), 
-    		true
-    	);
-
-    	if($nextLevelPermissions->canSnapshot !== false) {
-    		$latestSnapshot = 
-    			$this->dataset->getLatestSnapshotInfo(
-    				$rodsaccount, 
-    				$current_dir . "/" . $dir->getName()
-    			);
-    	} else {
-    		$latestSnapshot = false;
-    	}
-?>
-			<tr <?php if($lock["locked"]) echo "class=\"table-row-disabled\"";?>>
-				<th data-toggle="tool-tip" title="<?=$glyphLabel;?>" > <!-- Name -->
-					<span class="glyphicon glyphicon-<?=$glyph;?>" style="margin-right: 10px"></span>
-<?php
-		$lnk = isset($studyID) ? 
-			'<a href="%1$s/intake/index?dir=%2$s/%3$s">%3$s</a>' : 
-			'<span class="grey">%4$s</span><a href="%1$s/intake/index?dir=%2$s/%3$s">%5$s</a>';
-			echo sprintf(
-					$lnk,
-					htmlentities($url->module),
-					htmlentities($current_dir),
-					htmlentities($dir->getName()),
-					$intake_prefix,
-					substr($dir->getName(), strlen($intake_prefix))
-				);
-				?>
-				</th>
-
-				<td><?=human_filesize($count['totalSize']);?></td> <!-- Size -->
-
-				<td><!-- File / Dir information -->
-					<?=sprintf(
-						lang('intake_n_files_in_n_dirs'), 
-						$count['filecount'], 
-						$count['dircount']
-					);?>
-				</td>
-
-				<td> <!-- Created -->
-					<?=absoluteTimeWithTooltip($dir->stats->ctime); ?>
-				</td>
-
-				<td> <!-- Modified -->
-					<?=$count["modified"] === 0 ? 
-						absoluteTimeWithTooltip($dir->stats->mtime) : 
-						absoluteTimeWithTooltip($count["modified"]);
-					?>
-				</td>
-				<?php if($nextLevelPermissions->canSnapshot){ ?>
-					<td>
-						<?php 
-							if($latestSnapshot !== false) { 
-								// remove isset once $latestSnapshot is defined
-								echo sprintf(
-									lang('intake_latest_snapshot_by'), 
-									relativeTimeWithTooltip(
-										$latestSnapshot["datetime"]->getTimestamp(), true
-									),
-									htmlentities($latestSnapshot["username"])
-								);
-							} else {
-								echo lang('intake_no_snapshots');
-							}
-						?>
-					</td>
-				<?php } ?>
-				<td>
-					<?=htmlentities($dir->stats->comments); ?>
-				</td>
-			</tr>
-<?php
 	}
 	
-	if(
-		$levelPermissions->canArchive === false && 
-		sizeof($files) > 0 && 
-		$level_depth < $levelSize
-	) {
+	$glyphLabel = "";
+	$glyph = "folder-open";
+	$tab = "";
+
+	if(array_key_exists("title", $lh)) {
+		$glyphLabel = $lh["title"];
+	}
+	if(array_key_exists("glyphicon", $lh) && $lh["glyphicon"]) {
+		$glyph = $lh["glyphicon"];
+	}
+	if(array_key_exists("tab", $lh)) {
+		$tab = $lh["tab"];
+	} else {
+		$tab = $glyphLabel;
+	}
+	
+		
+	if(lang('intake_config_' . $glyphLabel)) {
+		$glyphLabel = lang('intake_config_' . $glyphLabel);
+	}
+
+	if(lang('intake_config_' . $tab)) {
+		$tab = lang('intake_config_' . $tab);
+	}
 ?>
-		</tbody>
-	</table>
 
-	<div class="row page-header">
-	    <div class="col-sm-6">
-	      <h3>
-	        <span class="glyphicon glyphicon-alert"></span>
-	        <?=lang('intake_head_files_not_recognised');?>
-	      </h3>
-	    </div>
+<input type="hidden" name="levelglyph" value="<?=$glyph;?>"/>
+<input type="hidden" name="nextLevelCanSnapshot" value="<?=($nextLevelPermissions->canSnapshot !== false) ? "1" : "0";?>"/>
+
+<ul class="nav nav-tabs" id="fileOverviewTabMenu" data-tabs="tabs">
+		<li role="presentation" class="active">
+	 		<a href="#directories" aria-controls="directories" role="tab" data-toggle="tab">
+	 			<?=ucfirst(htmlentities($tab));?>
+	 		</a>
+	 	</li> 
+	 	<li role="presentation">
+	 		<a href="#files" aria-controls="files" role="tab" data-toggle="tab">
+	 			<?=ucfirst(lang('intake_tab_file_overview'));?>
+	 		</a>
+	 	</li> 
+
+<?php if($levelPermissions->canSnapshot) { ?>
+	 	<li role="presentation">
+		 	<a href="#details" aria-controls="details" role="tab" data-toggle="tab">
+		 		<?=ucfirst(lang('intake_tab_details'));?>
+		 	</a>
+	 	</li> 
+<?php
+}
+?>
+</ul>
+<div class="tab-content">
+	<div role="tabpanel" class="tab-pane active" id="directories">
+
+		<table id="directories_overview" width="100%"
+			class="display table table-datatable<?php 
+			if($currentViewLocked) 
+				echo " table-disabled";
+			?>">
+			<thead>
+				<tr>
+					<th><?=ucfirst(lang('intake_name'));?></th>
+					<th><?=ucfirst(lang('intake_size'));?></th>
+					<th><?=ucfirst(lang('intake_files'));?></th>
+					<th><?=ucfirst(lang('intake_created'));?></th>
+					<th><?=ucfirst(lang('intake_modified'));?></th>
+					<th<?=($nextLevelPermissions->canSnapshot === false) ? ' style="display: none"' : '';?>><?=ucfirst(lang('intake_snapshot_latest'));?></th>
+				</tr>
+			</thead>
+			
+			<tbody>
+
+			</tbody>
+		</table>
 	</div>
-
+<div role="tabpanel" class="tab-pane" id="files">
+	<?php if(!$levelPermissions->canSnapshot) { ?>
 	<div class="alert alert-warning">
 		<?=lang('intake_files_not_recognized');?>
 	</div>
+	<?php } ?>
 
-	<table id="unknown_files_overview" class="display table table-datatable">
+	<table id="files_overview" class="display table table-datatable<?php 
+			if($currentViewLocked) 
+				echo " table-disabled";
+			?>"" width="100%">
 		<thead>
 			<tr>
 				<th><?=ucfirst(lang('intake_name'));?></th>
 				<th><?=ucfirst(lang('intake_size'));?></th>
 				<th><?=ucfirst(lang('intake_created'));?></th>
 				<th><?=ucfirst(lang('intake_modified'));?></th>
-				<th><?=ucfirst(lang('intake_comment'));?></th>
 			</tr>
 		</thead>
-		
-		<tbody>
-
-<?php
-	}
-
-	$finfos = $this->filesystem->getFilesInformation($rodsaccount, $current_dir);
-
-	
-?>
-		</tbody>
+		<tbody></tbody>
 	</table>
 
 <?php }
@@ -194,7 +115,7 @@ if($levelPermissions->canSnapshot) {
 $row = '<div class="row"><div class="col-xs-12 col-sm-2"><b>%1$s</b></div><div class="col-xs-12 col-sm-10">%2$s</div></div>';
 $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $row . '</div></li>';
 ?>
-</div>
+	</div>
 	<div role="tabpanel" class="tab-pane" id="details">
 <!--	
 	<div class="panel panel-default">

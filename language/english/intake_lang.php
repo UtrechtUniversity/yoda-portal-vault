@@ -22,12 +22,22 @@ $lang['intake_dataset_locked'] = "<p>This collection and all its contents are cu
 $lang['intake_button_create_snapshot'] = "Save as Version";
 $lang['intake_button_unlock_snapshot'] = "Unlock";
 
+/***********************************************
+			INTAKE CONFIG DEFINED STRINGS
+***********************************************/
+$lang['intake_config_project'] = 'project';
+$lang['intake_config_projects'] = 'projects';
+$lang['intake_config_study'] = 'study';
+$lang['intake_config_studies'] = 'studies';
+$lang['intake_config_dataset'] = 'datapackage';
+$lang['intake_config_datasets'] = 'datapackages';
+$lang['intake_config_directories'] = 'directories';
 
 /***********************************************
 			INTAKE FILE OVERVIEW
 ***********************************************/
-$lang['intake_tab_file_overview'] = "contents";
-$lang['intake_tab_details'] = "version history";
+$lang['intake_tab_file_overview'] = "files";
+$lang['intake_tab_details'] = "previous versions";
 $lang['intake_name'] = "name";
 $lang['intake_size'] = "size";
 $lang['intake_files'] 		= "files";
@@ -38,7 +48,7 @@ $lang['intake_snapshot_latest'] = "latest version";
 $lang['intake_comment'] = "comment";
 $lang['intake_n_files_in_n_dirs'] = '%1$d (in %2$d directories)';
 $lang['intake_no_snapshots_text'] = "never";
-$lang['intake_latest_snapshot_by'] = "%s by %s";
+$lang['intake_latest_snapshot_by'] = "<b>v%s</b> created %s by %s";
 $lang['intake_rodspath'] = 'path to dataset';
 $lang['intake_version_current'] = 'current version';
 $lang['intake_version'] = 'version';
