@@ -15,6 +15,20 @@ $(function() {
 		canSnapBool = true;
 	}
 
+	$('#studies_overview').DataTable( {
+		"dom" : '<"top"lpf>rt<"bottom"lfp>i<"clear">',
+		"processing" : true,
+		"serverSide" : true,
+		"ajax" : "http://irods.foo.com/projects/intake/getStudiesInformation/?dir=" + current_dir + "&glyph=" + glyph,
+		"columns" : [
+			{"data" : "filename"},
+			{"data" : "size"},
+			{"data" : "count" },
+			{"data" : "created"},
+			{"data" : "modified"}
+		]
+	});
+
 	$('#directories_overview').DataTable( {
 		"dom" : '<"top"lpf>rt<"bottom"lfp>i<"clear">',
 		"processing" : true,

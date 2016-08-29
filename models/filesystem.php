@@ -87,8 +87,68 @@ class Filesystem extends CI_Model {
         return false;
     }
 
+    static public function getStudiesInformation($iRodsAccount, $limit = 0, $offset = 0, $search = false) {
+        $ruleBody = <<<'RULE'
+myRule {
+    *l = int(*limit);
+    *o = int(*offset);
+
+    uuIiGetStudiesInformation(*l, *o, *searchval, *buffer, *f, *i);
+
+    *total = str(*i);
+    *filtered = str(*f);
+}
+
+
+RULE;
+        $searchval = "";
+        $searchregex = "";
+
+        if($search !== false && is_array($search)) {
+            if(array_key_exists("value", $search) && $search["value"]) {
+                $searchval = $search["value"];
+            }
+            if(array_key_exists("regex", $search) && $search["regex"]) {
+                $searchregex = $search["regex"];
+            }
+        }
+
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                        "*limit" => sprintf("%d",$limit),
+                        "*offset" => sprintf("%d", $offset),
+                        "*searchval" => $searchval,
+                    ),
+                array("*buffer", "*total", "*filtered")
+            );
+
+            $result = $rule->execute();
+
+            $files = array();
+            if(strlen($result["*buffer"]) > 0) {
+                foreach(explode("++++====++++", $result["*buffer"]) as $file) {
+                    $fexp = explode("+=+", $file);
+                    if(sizeof($fexp) === 6)
+                        $files[] = array("name" => $fexp[0], "size" => $fexp[1], "ndirectories" => $fexp[2],
+                        "nfiles" => $fexp[3], "created" => $fexp[4], "modified" => $fexp[5]);
+                }
+            }
+
+            return array("total" => $result["*total"], "filtered" => $result["*filtered"], "data" => $files);
+
+        } catch(RODSException $e) {
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
+    }
+
     static public function getDirsInformation($iRodsAccount, $collection, $limit = 0, $offset = 0, $search = false, $canSnap = false) {
-         $ruleBody = <<<'RULE'
+        $ruleBody = <<<'RULE'
 myRule {
     *l = int(*limit);
     *o = int(*offset);

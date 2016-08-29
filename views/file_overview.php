@@ -117,55 +117,6 @@ $itemTemplate = '<li class="list-group-item"><div class="container-fluid">' . $r
 ?>
 	</div>
 	<div role="tabpanel" class="tab-pane" id="details">
-<!--	
-	<div class="panel panel-default">
-		<div class="panel-heading">
-			<h3 class="panel-title">
-				<?=ucfirst(
-					sprintf(
-						lang('intake_head_dataset_information'), 
-						$head["title"])
-					);
-				?>
-			</h3>
-		</div>
-		<ul class="list-group">
-<?php 
-	$count = $this->filesystem->countSubFiles($rodsaccount, $current_dir);
-	$version = $this->dataset->getCurrentVersion($rodsaccount, $current_dir);
-	echo sprintf($itemTemplate, ucfirst(lang('intake_name')), $breadcrumbs[sizeof($breadcrumbs) - 1]->segment);
-	echo sprintf($itemTemplate, ucfirst(lang('intake_rodspath')), $current_dir);
-	echo sprintf($itemTemplate, ucfirst(lang('intake_version')), $version->version ? $version->version : ucfirst(lang('intake_info_not_available')));
-	echo sprintf(
-		$itemTemplate,
-		ucfirst(lang('intake_based_on')), 
-		$version->basedon? 
-			$version->basedon : 
-			ucfirst(lang('intake_info_not_available'))
-	);
-
-	echo sprintf(
-		$itemTemplate, 
-		ucfirst(sprintf("%s %s", lang('intake_total'), lang('intake_folders'))),
-		$count["dircount"]
-	);
-	echo sprintf(
-		$itemTemplate, 
-		ucfirst(sprintf("%s %s", lang('intake_total'), lang('intake_files'))), 
-		$count["filecount"]
-	);
-	echo sprintf($itemTemplate, 
-		ucfirst(sprintf("%s %s", lang('intake_total'), lang('intake_size'))), 
-		sprintf(
-			'%1$s (%2$s ntl:bytes)', 
-			human_filesize($count["totalSize"]), $count["totalSize"]
-		)
-	);
-?>
-		</ul>
-	</div>	
-
-	-->
 
 <?php
 	 if(sizeof($snapshotHistory) > 0) {

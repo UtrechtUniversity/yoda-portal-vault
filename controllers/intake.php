@@ -165,7 +165,8 @@ class Intake extends MY_Controller
                     "permissions" => $this->permissions,
                     "snapshotHistory" => $snapHistory,
                     "previousLevelsMeta" => $this->getPreviouslevelsMeta($pathStart, $segments),
-                    "previousLevelLink" => $this->getPrevLevelLink($pathStart, $segments)
+                    "previousLevelLink" => $this->getPrevLevelLink($pathStart, $segments),
+                    "content" => "file_overview",
                 );
                 
 
@@ -173,7 +174,6 @@ class Intake extends MY_Controller
         }
 
         $dataArr = array_merge($dataArr, array(
-            "content" => "file_overview",
             "folderValid" => true,
             "url" => $this->urls,
             "head" => $this->head,
@@ -184,6 +184,7 @@ class Intake extends MY_Controller
             "nextLevelPermissions" => $this->nextLevelPermissions,
             "directories" => $dirs,
             "intake_prefix" => $this->config->item('intake-prefix'),
+            "rodsZone" => $this->config->item('rodsServerZone'),
             "levelSize" => sizeof($this->config->item('level-hierarchy'))
         ));
 
@@ -212,14 +213,23 @@ class Intake extends MY_Controller
             }
         }
 
+        if(sizeof($this->config->item('level-hierarchy')) > 0) {
+            $level = $this->config->item('level-hierarchy')[0];
+        } else {
+            $level = $this->config->item('default-level');
+        }
+
+        $glyph = array_key_exists("glyphicon", $level) ? $level["glyphicon"] : '';
+
         $dataArr = array(
             "currentViewLocked" => false,
             "currentViewFrozen" => false,
             "level_depth" => -1,
             "permissions" => array($this->config->item('role:contributor') => true), // files can be viewed with at least contributor permission
             "files" => array(),
-            "previousLevelLink" => $this->getPrevLevelLink($pathStart, array())
-
+            "previousLevelLink" => $this->getPrevLevelLink($pathStart, array()),
+            "content" => "study_overview.php",
+            "glyph" => $glyph
         );
     }
 
@@ -469,6 +479,81 @@ class Intake extends MY_Controller
         ));
         $this->load->view('testview', $this->data);
         $this->load->view('common-end');
+    }
+
+    public function getStudiesInformation() {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $offset = $this->input->get('start') ? $this->input->get('start') : 0;
+        $limit = $this->input->get('length') ? $this->input->get('length') : 0;
+        $search = $this->input->get('search');
+        $data = $this->filesystem->getStudiesInformation($rodsaccount, $limit, $offset, $search);
+
+        $columns = array(
+            array(
+                'db' => 'name', 
+                'dt' => 'filename',
+                'formatter' => function($d, $row) {
+                    $lnktmpl = '<span class="glyphicon glyphicon-%4$s" style="margin-right: 10px;"></span>';
+                    $lnktmpl .= '<span class="grey">%5$s</span><a href="%1$s/intake/index?dir=/%2$s/home/%5$s%3$s">%3$s</a>';
+                    $lnk = sprintf(
+                        $lnktmpl,
+                        htmlentities($this->module->getModuleBase()),
+                        $this->config->item('rodsServerZone'),
+                        htmlentities($d),
+                        htmlentities($this->input->get('glyph')),
+                        htmlentities($this->config->item('intake-prefix'))
+                    );
+                    return sprintf(
+                        '<span class="glyphicon glyphicon-folder"></span>%1$s',
+                        $lnk
+                    );
+                }
+            ),
+            array(
+                'db' => 'size', 
+                'dt' => 'size',
+                'formatter' => function($d, $row) {
+                    return human_filesize(intval(htmlentities($d)));
+                }
+            ),
+            array(
+                'db' => 'nfiles',
+                'dt' => 'count',
+                'formatter' => function($d, $row) {
+                    return sprintf(
+                        lang('intake_n_files_in_n_dirs'), 
+                        $d, 
+                        $row['ndirectories']
+                    );
+                }
+            ),
+            array(
+                'db' => 'created', 
+                'dt' => 'created', 
+                'formatter' => function($d, $row) {
+                    return absoluteTimeWithTooltip($d);
+                }
+            ),
+            array(
+                'db' => 'modified', 
+                'dt' => 'modified', 
+                'formatter' => function($d, $row) {
+                    $d = $d === "0" ? $row["created"] : $d;
+                    return absoluteTimeWithTooltip($d);
+                }
+            )
+        );
+
+        echo json_encode(
+            array(
+                "draw"            => $this->input->get('draw') ?
+                    intval( $this->input->get('draw') ) :
+                    0,
+                "recordsTotal"    => intval( $data["total"] ),
+                "recordsFiltered" => intval( $data["filtered"] ? $data["filtered"] : $data["total"]),
+                "data"            => $this->ssp->data_output( $columns, $data["data"] )
+            )
+        );
     }
 
     public function getDirsInformation() {
