@@ -3,10 +3,6 @@ $(function() {
 	    $(this).tab('show');
 	});
 
-	// $('.table.table-datatable').DataTable( {
-	//     "paging": false,
-	// } );
-
 	var current_dir = $('input[name="directory"]').val();
 	var glyph = $('input[name="levelglyph"]').val();
 	var canSnap = $('input[name="nextLevelCanSnapshot"]').val();
@@ -26,7 +22,8 @@ $(function() {
 			{"data" : "count" },
 			{"data" : "created"},
 			{"data" : "modified"}
-		]
+		],
+		"language" : $('#studies_overview').data('tablelanguage')
 	});
 
 	$('#directories_overview').DataTable( {
@@ -41,7 +38,8 @@ $(function() {
 			{"data" : "created"},
 			{"data" : "modified"},
 			{"data" : "version", "visible" : canSnapBool}
-		]
+		],
+		"language" : $('#directories_overview').data('tablelanguage')
 	});
 
 	$('#files_overview').DataTable( {
@@ -55,7 +53,16 @@ $(function() {
 			{"data" : "size"},
 			{"data" : "created"},
 			{"data" : "modified"},
-		]
+		],
+		"language" : $('#files_overview').data('tablelanguage')
+	});
+
+	$('#metadata_edittable').DataTable( {
+		"dom" : '<"top"f>rt<"clear">',
+		"aoColumnDefs": [
+			{ "bSortable": false, "aTargets": [ "_all" ] }
+		],
+		"language" : $('#metadata_edittable').data('tablelanguage')
 	});
 
 	$('[data-toggle="tooltip"]').tooltip({
@@ -464,6 +471,7 @@ function edit($element) {
 
 	inputEnable(cancelAll);
 	inputEnable(submit);
+	input.focus();
 
 	currentlyEditing += 1;
 }

@@ -98,5 +98,32 @@ $lang['intake_actions_snapshot_cancelled'] = 'Directory <i>%1$s</i> unlocked. No
 $lang['intake_actions_snapshot_cancel_fail'] = 'The directory <i>%1$s</s> could not be unlocked, because the system has already initiated the process of creating a version. After this process is complete, this directory will automatically be unlocked.';
 
 
+
+/***********************************************
+				DATATABLES
+***********************************************/
+$lang["intake_datatable_decimal"] = "";
+$lang["intake_datatable_emptyStudies"] = "You are not a member of any projects";
+$lang["intake_datatable_emptyFiles"] = "This directory does not contain any files";
+$lang["intake_datatable_emptyFolders"] = "This directory does not contain any folders";
+$lang["intake_datatable_emptyMetadata"] = "No metadata available";
+$lang["intake_datatable_info"] = "Showing _START_ to _END_ of _TOTAL_ entries";
+$lang["intake_datatable_infoEmpty"] = "Showing 0 to 0 of 0 entries";
+$lang["intake_datatable_infoFiltered"] = "(filtered from _MAX_ total entries)";
+$lang["intake_datatable_infoPostFix"] = "";
+$lang["intake_datatable_thousands"] = ",";
+$lang["intake_datatable_lengthMenu"] = "Show _MENU_ entries";
+$lang["intake_datatable_loadingRecords"] = "Loading...";
+$lang["intake_datatable_processing"] = "Processing...";
+$lang["intake_datatable_search"] = "Search:";
+$lang["intake_datatable_zeroRecords"] = "No matching records found";
+$lang["intake_datatable_paginate_first"] = "First";
+$lang["intake_datatable_paginate_last"] = "Last";
+$lang["intake_datatable_paginate_next"] = "Next";
+$lang["intake_datatable_paginate_previous"] = "Previous";
+$lang["intake_datatable_sortAscending"] = "activate to sort column ascending";
+$lang["intake_datatable_sortDescending"] = "activate to sort column descending";
+
+
 if (file_exists(dirname(__FILE__) . '/intake_local_lang.php'))
 	include(    dirname(__FILE__) . '/intake_local_lang.php');

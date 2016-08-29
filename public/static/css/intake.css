@@ -96,4 +96,8 @@ table#metadata_edittable > tbody > tr.form-group.has-error > td:first-child > sp
 	margin-top: 0px;
 }
 
+table#metadata_edittable > thead > tr > th {
+	background-image: none;
+}
+
 

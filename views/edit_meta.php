@@ -113,7 +113,9 @@ if($folderValid === false) {
 	?>
 		
 			<table id="metadata_edittable" width="100%"
-				class="display table table-datatable">
+				class="display table table-datatable" 
+				data-tablelanguage="<?=htmlentities($metadataTableLanguage);?>"
+				>
 				<thead>
 					<tr>
 						<th width="100"><?=lang('metadata_name');?></th>

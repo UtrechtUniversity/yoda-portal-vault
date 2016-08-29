@@ -185,7 +185,11 @@ class Intake extends MY_Controller
             "directories" => $dirs,
             "intake_prefix" => $this->config->item('intake-prefix'),
             "rodsZone" => $this->config->item('rodsServerZone'),
-            "levelSize" => sizeof($this->config->item('level-hierarchy'))
+            "levelSize" => sizeof($this->config->item('level-hierarchy')),
+            "fileTableLanguage" => $this->getDatatablesLanguage(lang('intake_datatable_emptyFiles')),
+            "folderTableLanguage" => $this->getDatatablesLanguage(lang('intake_datatable_emptyFolders')),
+            "studiesTableLanguage" => $this->getDatatablesLanguage(lang('intake_datatable_emptyStudies')),
+            "metadataTableLanguage" => $this->getDatatablesLanguage(lang('intake_datatable_emptyMetadata'))
         ));
 
         $this->data = array_merge($this->data, $dataArr);
@@ -326,7 +330,6 @@ class Intake extends MY_Controller
 
         return $levels;
     }
-
     
     /**
      * Private method that validates the study permissions for
@@ -385,6 +388,35 @@ class Intake extends MY_Controller
         //     array_push($segments, $studyID ? $studyID : $this->studies[0]);
         // }
         return site_url($segments);
+    }
+
+    public static function getDatatablesLanguage($emptyText) {
+        return json_encode(
+            array(
+                "decimal" => lang('intake_datatable_decimal'),
+                "emptyTable" => $emptyText,
+                "info" => lang('intake_datatable_info'),
+                "infoEmpty" => $emptyText,
+                "infoFiltered" => lang('intake_datatable_infoFiltered'),
+                "infoPostFix" => lang('intake_datatable_infoPostFix'),
+                "thousands" => lang('intake_datatable_thousands'),
+                "lengthMenu" => lang('intake_datatable_lengthMenu'),
+                "loadingRecords" => lang('intake_datatable_loadingRecords'),
+                "processing" => lang('intake_datatable_processing'),
+                "search" => lang('intake_datatable_search'),
+                "zeroRecords" => lang('intake_datatable_zeroRecords'),
+                "paginate" => array(
+                    "first" => lang('intake_datatable_paginate_first'),
+                    "last" => lang('intake_datatable_paginate_last'),
+                    "next" => lang('intake_datatable_paginate_next'),
+                    "previous" => lang('intake_datatable_paginate_previous')
+                ),
+                "aria" => array(
+                    "sortAscending" => lang('intake_datatable_sortAscending'),
+                    "sortDescending" => lang('intake_datatable_sortDescending')
+                )
+            )
+        );
     }
 
     public function getGroupUsers($study) {

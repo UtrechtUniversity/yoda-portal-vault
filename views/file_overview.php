@@ -71,7 +71,9 @@ if(
 			class="display table table-datatable<?php 
 			if($currentViewLocked) 
 				echo " table-disabled";
-			?>">
+			?>"
+			data-tablelanguage="<?=htmlentities($folderTableLanguage);?>"
+			>
 			<thead>
 				<tr>
 					<th><?=ucfirst(lang('intake_name'));?></th>
@@ -95,10 +97,13 @@ if(
 	</div>
 	<?php } ?>
 
-	<table id="files_overview" class="display table table-datatable<?php 
-			if($currentViewLocked) 
-				echo " table-disabled";
-			?>"" width="100%">
+	<table id="files_overview" width="100%"
+		class="display table table-datatable<?php 
+		if($currentViewLocked) 
+			echo " table-disabled";
+		?>" 
+		data-tablelanguage="<?=htmlentities($fileTableLanguage);?>"
+		>
 		<thead>
 			<tr>
 				<th><?=ucfirst(lang('intake_name'));?></th>
