@@ -32,6 +32,7 @@ class Intake extends MY_Controller
         $this->load->library('module', array(__DIR__));
         $this->load->library('metadatafields');
         $this->load->library('pathlibrary');
+        $this->load->library('SSP');
         $this->studies = $this->dataset->getStudies($this->rodsuser->getRodsAccount());
         sort($this->studies);
     }
@@ -111,6 +112,10 @@ class Intake extends MY_Controller
 
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
+
+        if($this->current_path === "") {
+            $this->current_path = sprintf("/%s/home", $this->config->item('rodsServerZone'));
+        }
         
         if($this->current_path === sprintf("/%s/home", $this->config->item('rodsServerZone'))) {
             $this->prepareHomeLevel($rodsaccount, $pathStart, $dirs, $dataArr);
@@ -142,7 +147,7 @@ class Intake extends MY_Controller
 
                 $this->getLockedStatus();
                 $dirs = $this->dir->getChildDirs();
-                $files = $this->dir->getChildFiles();
+                // $files = $this->dir->getChildFiles();
 
                 $this->session->set_userdata('tempDir', $this->current_path);
                 $this->breadcrumbs = $this->getBreadcrumbLinks($pathStart, $segments);
@@ -153,13 +158,15 @@ class Intake extends MY_Controller
                     "studyID" => $studyID,
                     "currentViewLocked" => $this->currentViewLocked,
                     "currentViewFrozen" => $this->currentViewFrozen,
-                    "files" => $files,
+                    // "files" => $files,
+                    "files" => array(),
                     "level_depth" => $this->level_depth,
                     "level_depth_start" => $this->level_depth_start,
                     "permissions" => $this->permissions,
                     "snapshotHistory" => $snapHistory,
                     "previousLevelsMeta" => $this->getPreviouslevelsMeta($pathStart, $segments),
-                    "previousLevelLink" => $this->getPrevLevelLink($pathStart, $segments)
+                    "previousLevelLink" => $this->getPrevLevelLink($pathStart, $segments),
+                    "content" => "file_overview",
                 );
                 
 
@@ -167,7 +174,6 @@ class Intake extends MY_Controller
         }
 
         $dataArr = array_merge($dataArr, array(
-            "content" => "file_overview",
             "folderValid" => true,
             "url" => $this->urls,
             "head" => $this->head,
@@ -178,6 +184,7 @@ class Intake extends MY_Controller
             "nextLevelPermissions" => $this->nextLevelPermissions,
             "directories" => $dirs,
             "intake_prefix" => $this->config->item('intake-prefix'),
+            "rodsZone" => $this->config->item('rodsServerZone'),
             "levelSize" => sizeof($this->config->item('level-hierarchy'))
         ));
 
@@ -206,14 +213,23 @@ class Intake extends MY_Controller
             }
         }
 
+        if(sizeof($this->config->item('level-hierarchy')) > 0) {
+            $level = $this->config->item('level-hierarchy')[0];
+        } else {
+            $level = $this->config->item('default-level');
+        }
+
+        $glyph = array_key_exists("glyphicon", $level) ? $level["glyphicon"] : '';
+
         $dataArr = array(
             "currentViewLocked" => false,
             "currentViewFrozen" => false,
             "level_depth" => -1,
             "permissions" => array($this->config->item('role:contributor') => true), // files can be viewed with at least contributor permission
             "files" => array(),
-            "previousLevelLink" => $this->getPrevLevelLink($pathStart, array())
-
+            "previousLevelLink" => $this->getPrevLevelLink($pathStart, array()),
+            "content" => "study_overview.php",
+            "glyph" => $glyph
         );
     }
 
@@ -440,5 +456,261 @@ class Intake extends MY_Controller
                     $results
                 )
             );
+    }
+
+    public function test() {
+        $this->data["current_dir"] = $this->input->get('dir');
+
+        $this->load->view('common-start', array(
+            'styleIncludes' => array(
+                'css/intake.css', 
+                'lib/datatables/datatables.css', 
+                'lib/chosen-select/chosen.min.css'
+            ),
+            'scriptIncludes' => array(
+                'js/intake.js', 
+                'lib/datatables/datatables.js', 
+                'lib/chosen-select/chosen.jquery.min.js'
+            ),
+            'activeModule'   => $this->module->name(),
+            'user' => array(
+                'username' => $this->rodsuser->getUsername(),
+            ),
+        ));
+        $this->load->view('testview', $this->data);
+        $this->load->view('common-end');
+    }
+
+    public function getStudiesInformation() {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $offset = $this->input->get('start') ? $this->input->get('start') : 0;
+        $limit = $this->input->get('length') ? $this->input->get('length') : 0;
+        $search = $this->input->get('search');
+        $data = $this->filesystem->getStudiesInformation($rodsaccount, $limit, $offset, $search);
+
+        $columns = array(
+            array(
+                'db' => 'name', 
+                'dt' => 'filename',
+                'formatter' => function($d, $row) {
+                    $lnktmpl = '<span class="glyphicon glyphicon-%4$s" style="margin-right: 10px;"></span>';
+                    $lnktmpl .= '<span class="grey">%5$s</span><a href="%1$s/intake/index?dir=/%2$s/home/%5$s%3$s">%3$s</a>';
+                    $lnk = sprintf(
+                        $lnktmpl,
+                        htmlentities($this->module->getModuleBase()),
+                        $this->config->item('rodsServerZone'),
+                        htmlentities($d),
+                        htmlentities($this->input->get('glyph')),
+                        htmlentities($this->config->item('intake-prefix'))
+                    );
+                    return sprintf(
+                        '<span class="glyphicon glyphicon-folder"></span>%1$s',
+                        $lnk
+                    );
+                }
+            ),
+            array(
+                'db' => 'size', 
+                'dt' => 'size',
+                'formatter' => function($d, $row) {
+                    return human_filesize(intval(htmlentities($d)));
+                }
+            ),
+            array(
+                'db' => 'nfiles',
+                'dt' => 'count',
+                'formatter' => function($d, $row) {
+                    return sprintf(
+                        lang('intake_n_files_in_n_dirs'), 
+                        $d, 
+                        $row['ndirectories']
+                    );
+                }
+            ),
+            array(
+                'db' => 'created', 
+                'dt' => 'created', 
+                'formatter' => function($d, $row) {
+                    return absoluteTimeWithTooltip($d);
+                }
+            ),
+            array(
+                'db' => 'modified', 
+                'dt' => 'modified', 
+                'formatter' => function($d, $row) {
+                    $d = $d === "0" ? $row["created"] : $d;
+                    return absoluteTimeWithTooltip($d);
+                }
+            )
+        );
+
+        echo json_encode(
+            array(
+                "draw"            => $this->input->get('draw') ?
+                    intval( $this->input->get('draw') ) :
+                    0,
+                "recordsTotal"    => intval( $data["total"] ),
+                "recordsFiltered" => intval( $data["filtered"] ? $data["filtered"] : $data["total"]),
+                "data"            => $this->ssp->data_output( $columns, $data["data"] )
+            )
+        );
+    }
+
+    public function getDirsInformation() {
+        $directory = $this->input->get('dir');
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $directory, $dir);
+        $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $head, $level_depth);
+        $perms = $this->study->getPermissionsForLevel($level_depth, $segments[0]);
+
+        $offset = $this->input->get('start') ? $this->input->get('start') : 0;
+        $limit = $this->input->get('length') ? $this->input->get('length') : 0;
+        $search = $this->input->get('search');
+        $nextLevelCanSnap = $this->input->get('canSnap') === "1";
+        $data = $this->filesystem->getDirsInformation($rodsaccount, $directory, $limit, $offset, $search, $nextLevelCanSnap);
+
+        $columns = array(
+            array(
+                'db' => 'name', 
+                'dt' => 'filename',
+                'formatter' => function($d, $row) {
+                    $lnktmpl = '<span class="glyphicon glyphicon-%4$s" style="margin-right: 10px;"></span>';
+                    $lnktmpl .= '<a href="%1$s/intake/index?dir=%2$s/%3$s">%3$s</a>';
+                    $lnk = sprintf(
+                        $lnktmpl,
+                        htmlentities($this->module->getModuleBase()),
+                        htmlentities($this->input->get('dir')),
+                        htmlentities($d),
+                        htmlentities($this->input->get('glyph'))
+                    );
+                    return sprintf(
+                        '<span class="glyphicon glyphicon-folder"></span>%1$s',
+                        $lnk
+                    );
+                }
+            ),
+            array(
+                'db' => 'size', 
+                'dt' => 'size',
+                'formatter' => function($d, $row) {
+                    return human_filesize(intval(htmlentities($d)));
+                }
+            ),
+            array(
+                'db' => 'nfiles',
+                'dt' => 'count',
+                'formatter' => function($d, $row) {
+                    return sprintf(
+                        lang('intake_n_files_in_n_dirs'), 
+                        $d, 
+                        $row['ndirectories']
+                    );
+                }
+            ),
+            array(
+                'db' => 'created', 
+                'dt' => 'created', 
+                'formatter' => function($d, $row) {
+                    return absoluteTimeWithTooltip($d);
+                }
+            ),
+            array(
+                'db' => 'modified', 
+                'dt' => 'modified', 
+                'formatter' => function($d, $row) {
+                    $d = $d === "0" ? $row["created"] : $d;
+                    return absoluteTimeWithTooltip($d);
+                }
+            ),
+            array(
+                'db' => 'version',
+                'dt' => 'version',
+                'formatter' => function($d, $row) {
+                    if($d) {
+                        return sprintf(
+                            lang('intake_latest_snapshot_by'),
+                            htmlentities($d),
+                            relativeTimeWithTooltip(
+                                $row["versionTime"], true
+                            ),
+                            htmlentities($row["versionUser"])
+                        );
+                    } else {
+                        return lang('intake_no_snapshots_text');
+                    }
+                }
+            )
+        );
+
+        echo json_encode(
+            array(
+                "draw"            => $this->input->get('draw') ?
+                    intval( $this->input->get('draw') ) :
+                    0,
+                "recordsTotal"    => intval( $data["total"] ),
+                "recordsFiltered" => intval( $data["filtered"] ? $data["filtered"] : $data["total"]),
+                "data"            => $this->ssp->data_output( $columns, $data["data"] )
+            )
+        );
+    }
+
+    public function getFilesInformation() {
+        $directory = $this->input->get('dir');
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $directory, $dir);
+        $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $head, $level_depth);
+        $perms = $this->study->getPermissionsForLevel($level_depth, $segments[0]);
+
+        $offset = $this->input->get('start') ? $this->input->get('start') : 0;
+        $limit = $this->input->get('length') ? $this->input->get('length') : 0;
+        $search = $this->input->get('search');
+
+        $data = $this->filesystem->getFilesInformation($rodsaccount, $directory, $limit, $offset, $search);
+
+        $columns = array(
+            array(
+                'db' => 'file', 
+                'dt' => 'filename',
+                'formatter' => function($d, $row) {
+                    return sprintf(
+                        '<span class="glyphicon glyphicon-file" style="margin-right: 10px;"></span>%1$s',
+                        htmlentities($d)
+                    );
+                }
+            ),
+            array(
+                'db' => 'size', 
+                'dt' => 'size',
+                'formatter' => function($d, $row) {
+                    return human_filesize(intval(htmlentities($d)));
+                }
+            ),
+            array(
+                'db' => 'created', 
+                'dt' => 'created', 
+                'formatter' => function($d, $row) {
+                    return absoluteTimeWithTooltip($d);
+                }
+            ),
+            array('db' => 'modified', 
+                'dt' => 'modified', 
+                'formatter' => function($d, $row) {
+                    return absoluteTimeWithTooltip($d);
+                }
+            ),
+        );
+
+        echo json_encode(
+            array(
+                "draw"            => $this->input->get('draw') ?
+                    intval( $this->input->get('draw') ) :
+                    0,
+                "recordsTotal"    => intval( $data["total"] ),
+                "recordsFiltered" => intval( $data["filtered"] ? $data["filtered"] : $data["total"]),
+                "data"            => $this->ssp->data_output( $columns, $data["data"] )
+            )
+        );
     }
 }

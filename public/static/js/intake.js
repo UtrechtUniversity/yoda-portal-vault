@@ -3,9 +3,60 @@ $(function() {
 	    $(this).tab('show');
 	});
 
-	$('.table.table-datatable').DataTable( {
-	    "paging": false,
-	} );
+	// $('.table.table-datatable').DataTable( {
+	//     "paging": false,
+	// } );
+
+	var current_dir = $('input[name="directory"]').val();
+	var glyph = $('input[name="levelglyph"]').val();
+	var canSnap = $('input[name="nextLevelCanSnapshot"]').val();
+	var canSnapBool = false;
+	if(canSnap === "1") {
+		canSnapBool = true;
+	}
+
+	$('#studies_overview').DataTable( {
+		"dom" : '<"top"lpf>rt<"bottom"lfp>i<"clear">',
+		"processing" : true,
+		"serverSide" : true,
+		"ajax" : "http://irods.foo.com/projects/intake/getStudiesInformation/?dir=" + current_dir + "&glyph=" + glyph,
+		"columns" : [
+			{"data" : "filename"},
+			{"data" : "size"},
+			{"data" : "count" },
+			{"data" : "created"},
+			{"data" : "modified"}
+		]
+	});
+
+	$('#directories_overview').DataTable( {
+		"dom" : '<"top"lpf>rt<"bottom"lfp>i<"clear">',
+		"processing" : true,
+		"serverSide" : true,
+		"ajax" : "http://irods.foo.com/projects/intake/getDirsInformation/?dir=" + current_dir + "&glyph=" + glyph + "&canSnap=" + canSnap,
+		"columns" : [
+			{"data" : "filename"},
+			{"data" : "size"},
+			{"data" : "count" },
+			{"data" : "created"},
+			{"data" : "modified"},
+			{"data" : "version", "visible" : canSnapBool}
+		]
+	});
+
+	$('#files_overview').DataTable( {
+		"dom" : '<"top"lpf>rt<"bottom"lfp>i<"clear">',
+		"width" : "100%",
+		"processing" : true,
+		"serverSide" : true,
+		"ajax" : "http://irods.foo.com/projects/intake/getFilesInformation/?dir=" + current_dir,
+		"columns" : [
+			{"data" : "filename"},
+			{"data" : "size"},
+			{"data" : "created"},
+			{"data" : "modified"},
+		]
+	});
 
 	$('[data-toggle="tooltip"]').tooltip({
 		"html" : true
