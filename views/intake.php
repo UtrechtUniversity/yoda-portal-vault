@@ -60,6 +60,7 @@ if ($folderValid) {
 		} 
 		$attrs = array(
 			"directory" => $current_dir,
+			"base_url" => $url->module
 		);
 		echo form_open(null, null, $attrs);
 	?>

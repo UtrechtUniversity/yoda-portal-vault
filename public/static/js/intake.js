@@ -3,6 +3,7 @@ $(function() {
 	    $(this).tab('show');
 	});
 
+	var moduleUrl = $('input[name="base_url"]').val();
 	var current_dir = $('input[name="directory"]').val();
 	var glyph = $('input[name="levelglyph"]').val();
 	var canSnap = $('input[name="nextLevelCanSnapshot"]').val();
@@ -15,7 +16,7 @@ $(function() {
 		"dom" : '<"top"lpf>rt<"bottom"lfp>i<"clear">',
 		"processing" : true,
 		"serverSide" : true,
-		"ajax" : "http://irods.foo.com/projects/intake/getStudiesInformation/?dir=" + current_dir + "&glyph=" + glyph,
+		"ajax" : moduleUrl + "/intake/getStudiesInformation/?dir=" + current_dir + "&glyph=" + glyph,
 		"columns" : [
 			{"data" : "filename"},
 			{"data" : "size"},
@@ -30,7 +31,7 @@ $(function() {
 		"dom" : '<"top"lpf>rt<"bottom"lfp>i<"clear">',
 		"processing" : true,
 		"serverSide" : true,
-		"ajax" : "http://irods.foo.com/projects/intake/getDirsInformation/?dir=" + current_dir + "&glyph=" + glyph + "&canSnap=" + canSnap,
+		"ajax" : moduleUrl + "/intake/getDirsInformation/?dir=" + current_dir + "&glyph=" + glyph + "&canSnap=" + canSnap,
 		"columns" : [
 			{"data" : "filename"},
 			{"data" : "size"},
@@ -47,7 +48,7 @@ $(function() {
 		"width" : "100%",
 		"processing" : true,
 		"serverSide" : true,
-		"ajax" : "http://irods.foo.com/projects/intake/getFilesInformation/?dir=" + current_dir,
+		"ajax" : moduleUrl + "/intake/getFilesInformation/?dir=" + current_dir,
 		"columns" : [
 			{"data" : "filename"},
 			{"data" : "size"},
