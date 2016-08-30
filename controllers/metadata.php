@@ -343,7 +343,7 @@ class MetaData extends MY_Controller
     public function metasuggestions($key = null) {
         $query = $this->input->get('query');
         $rodsAccount = $this->rodsuser->getRodsAccount();
-        $key = $this->metadatafields->prefixKey($key, $this->input->get('directory'));
+        $key = sprintf('%s%%%s', $this->config->item('metadata_prefix'), $key);
         $options = $this->metadatamodel->getMetadataForKeyLike($rodsAccount, $key, $query);
         $this->output
             ->set_content_type('application/json')

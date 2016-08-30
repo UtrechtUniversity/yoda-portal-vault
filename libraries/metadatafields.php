@@ -193,8 +193,12 @@ class metadataFields {
 			return true;
 
 		$truthVals = array();
+		$fields = $fieldDependencies["fields"];
+		if(count($fields) > 0 && !array_key_exists(0, $fields) || is_array($fields[0])) {
+			$fields = array($fields);
+		}
 
-		foreach($fieldDependencies["fields"] as $field) {
+		foreach($fields as $field) {
 			array_push($truthVals, $this->evaluateSingleFieldDependency($field, $formData));
 		}
 

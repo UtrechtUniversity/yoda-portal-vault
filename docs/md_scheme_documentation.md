@@ -77,6 +77,12 @@ The custom configuration for the selectbox requires 5 keys, and has an optional 
 - **step**: Step in range (see below)
 - **options** *(optional)*: List of all options a user can pick from (see below)
 
+### Suggestions from previous metadata
+If you set `restricted` to `true`, the select box will appear as a free text field, where suggestions are shown of values that have previously been used for the same key. You can set `allow_create` to true, to allow users to add new values, if their value is not in the suggestions list.
+
+**IMPORTANT NOTE**
+Because of a bug in iRODS, no suggestions can be loaded if the word `select` appears in any form in the key of a field that uses restricted values. Avoid using anything resembling `select` in the key, to counter this problem.
+
 ### Range
 If no options are provided and *restricted* is *false*, a range of numbers can be used. This is done by filling in the *begin*, *end* and *step* parameters. The *begin* paramter describes the first option in the selectbox, the *end* parameter describes the last option in the selectbox and the *step* parameter describes how many numbers are skipped between each option. So to show a list of years since 1980 to 2016 with step 4, [1980, 1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012, 2016], the following parameters should be used:
 ```xml
