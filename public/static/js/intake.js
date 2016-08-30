@@ -108,6 +108,11 @@ var operators = {
 	'>=' : function(a, b) {return a >= b}
 };
 
+operators['gt'] = operators['>'];
+operators['geq'] = operators['>='];
+operators['lt'] = operators['<'];
+operators['leq'] = operators['<='];
+
 var likeOperators = {
 	'==' : function(a, b) {return a.toLowerCase().indexOf(b.toLowerCase()) >= 0; },
 	'!=' : function(a, b) {return a.toLowerCase().indexOf(b.toLowerCase()) < 0; }
