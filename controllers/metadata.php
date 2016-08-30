@@ -11,9 +11,11 @@ class MetaData extends MY_Controller
         $this->load->helper('intake');
         $this->load->library('metadatafields');
         $this->load->model('study');
+        $this->load->model('metadataschemareader');
         $this->load->library('module', array(__DIR__));
         $this->load->library('pathlibrary');
         $this->load->helper('language');
+        $this->load->helper('metadata_prefix_helper');
         $this->load->language('intake');
         $this->load->language('errors');
         $this->load->language('form_errors');
@@ -49,7 +51,7 @@ class MetaData extends MY_Controller
             } else {
                 $formdata = $this->input->post('metadata');
                 $shadowData = $this->input->post('metadata-shadow');
-                $fields = $this->metadatafields->getFields($directory, true);
+                $fields = $this->metadataschemareader->getFields($directory, true);
 
                 $this->checkDependencyProperties($fields, $formdata);
 
@@ -122,7 +124,7 @@ class MetaData extends MY_Controller
         $object = $this->input->post('directory');
         $errors = array();
         foreach($errorFields as $f) {
-            $f = $this->metadatafields->unprefixKey($f, $object);
+            $f = unprefixKey($f, $object);
             if(array_key_exists($f, $fields) && array_key_exists("label", $fields[$f])) {
                 $errors[] = sprintf('"%1$s"', $fields[$f]["label"]);
             } else {

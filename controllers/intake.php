@@ -21,6 +21,7 @@ class Intake extends MY_Controller
         $this->load->model('study');
         $this->load->model('rodsuser');
         $this->load->model('metadatamodel');
+        $this->load->model('metadataschemareader');
         $this->load->helper('date');
         $this->load->helper('language');
         $this->load->helper('intake');
@@ -373,7 +374,7 @@ class Intake extends MY_Controller
                     "name" => $segments[$i],
                     "level" => ($i < sizeof($this->config->item('level-hierarchy'))) ? 
                         $this->config->item('level-hierarchy')[$i] : $this->config->item('default-level'),
-                    "meta" => $this->metadatafields->getFields(
+                    "meta" => $this->metadataschemareader->getFields(
                         sprintf("%s%s", $pathStart, implode("/", array_slice($segments, 0, $i+1))),
                         true
                     )
