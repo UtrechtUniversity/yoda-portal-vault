@@ -287,7 +287,11 @@ class metadataFields {
 		">" => "is_larger_than",
 		">=" => "is_larger_than_or_equal",
 		"<" => "is_less_than",
-		"<=" => "is_less_than_or_equal"
+		"<=" => "is_less_than_or_equal",
+		"gt" => "is_larger_than",
+		"geq" => "is_larger_than_or_equal",
+		"lt" => "is_less_than",
+		"leq" => "is_less_than_or_equal"
 	);
 
 	/**
