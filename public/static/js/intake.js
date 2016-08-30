@@ -58,11 +58,13 @@ $(function() {
 		"language" : $('#files_overview').data('tablelanguage')
 	});
 
-	$('#metadata_edittable').DataTable( {
+	$('.metadata_table').DataTable( {
 		"dom" : '<"top"f>rt<"clear">',
 		"aoColumnDefs": [
 			{ "bSortable": false, "aTargets": [ "_all" ] }
 		],
+		"aaSorting" : [],
+		"bPaginate" : false,
 		"language" : $('#metadata_edittable').data('tablelanguage')
 	});
 
@@ -119,8 +121,8 @@ var likeOperators = {
 };
 
 var regexOperators = {
-	'==' : function(a, b) {return RegExp(b).exec(a); },
-	'!=' : function(a, b) {return !RegExp(b).exec(a); }
+	'==' : function(a, b) { return RegExp(b.replace(/^\/+|\/+$/gm,'')).test(a); },
+	'!=' : function(a, b) {return !RegExp(b.replace(/^\/+|\/+$/gm,'')).test(a); }
 }
 
 var comparors = {
@@ -201,7 +203,7 @@ function createUserFromGroupInput(elem) {
 			quietMillis: 400,
 			url: function(params) {
 				var url = $("input[name=intake_url]").val();
-				url += '/getGroupUsers/';
+				url += '/metadata/getGroupUsers/';
 				url += $("input[name=studyID]").val();
 				console.log(url);
 				return url;
@@ -266,7 +268,7 @@ function createDirectoryListSelectInput(elem) {
 			quietMillis: 400,
 			url:      function(params) {
 				var url = $("input[name=intake_url]").val();
-				url += '/getDirectories/';
+				url += '/metadata/getDirectories/';
 				url += $("input[name=studyID]").val();
 				return url;
 			},

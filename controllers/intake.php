@@ -17,7 +17,6 @@ class Intake extends MY_Controller
 
         // TODO: Auto load doesn't work in module?
         $this->load->model('dataset');
-        $this->load->model('debug');
         $this->load->model('filesystem');
         $this->load->model('study');
         $this->load->model('rodsuser');
@@ -37,6 +36,9 @@ class Intake extends MY_Controller
         sort($this->studies);
     }
 
+    /**
+     * Index shows the default file overview
+     */
     public function index(){
         $this->loadDirectory(true);
 
@@ -60,6 +62,9 @@ class Intake extends MY_Controller
         $this->load->view('common-end');
     }
 
+    /**
+     * Display method for the metadata edit view
+     */
     public function metadata() {
         $this->loadDirectory();
 
@@ -87,7 +92,15 @@ class Intake extends MY_Controller
         $this->load->view('common-end');
     }
 
-    
+    /**
+     * Internal helper method that checks if a directory exists, is valid
+     * and if the user has access to it.
+     * Also calculates and sets basic data elements required by the view
+     *
+     * @param $redirectIfInvalid    If set to true, the user will be redirected
+     *                              to the home view of the file overview if
+     *                              they cannot view the directory
+     */
     private function loadDirectory($redirectIfInvalid = false) {
         $this->current_path = rtrim($this->input->get('dir'), "/");
         if(!$this->current_path){
@@ -196,6 +209,19 @@ class Intake extends MY_Controller
 
     }
 
+    /**
+     * Function that prepares certain view elements if the collection that
+     * is currently shown is 'home'
+     *
+     * @param rodsaccount          A reference to the users rods account
+     * @param pathStart            The first part of any valid intake path,
+     *                             i.e. the serverzone/home/intake-prefix
+     * @param[out] dirs            A list of child collections of home that
+     *                             start with the correct prefix and the user has
+     *                             access to
+     * @param[out] dataArr         The array containing all non-general elements
+     *                             required specifically by the home view
+     */
     private function prepareHomeLevel($rodsaccount, $pathStart, &$dirs, &$dataArr) {
         $this->session->set_userdata('tempDir', $this->current_path);
         $this->breadcrumbs = $this->getBreadcrumbLinks($pathStart, array());
@@ -237,6 +263,9 @@ class Intake extends MY_Controller
         );
     }
 
+    /**
+     * Method that verifies the current frozen and locked status of the current collection
+     */
     private function getLockedStatus() {
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $currentViewLocked = $this->dataset->getLockedStatus($rodsaccount, $this->current_path);
@@ -259,6 +288,18 @@ class Intake extends MY_Controller
         return $link;
     }
 
+    /**
+     * Function that generates the data object required to create proper
+     * breadcrumbs, based on the current directory
+     * 
+     * @param pathStart            The first part of any valid intake path,
+     *                             i.e. the serverzone/home/intake-prefix
+     * @param segments             An array of all the segments of the current
+     *                             directory, starting from the first collection
+     *                             under home
+     * @return array               List of segment objects, containing all keys
+     *                             required to display proper breadcrumbs 
+     */
     private function getBreadcrumbLinks($pathStart, $segments) {
         $breadCrumbs = array();
         $i = 0;
@@ -308,6 +349,19 @@ class Intake extends MY_Controller
         return $breadCrumbs;
     }
 
+    /**
+     * Method that finds the metadata of previous levels, if the previous
+     * levels are configured to allow metadata
+     *
+     * @param pathStart            The first part of any valid intake path,
+     *                             i.e. the serverzone/home/intake-prefix
+     * @param segments             An array of all the segments of the current
+     *                             directory, starting from the first collection
+     *                             under home
+     * @return array               Array of arrays, where the inner arrays
+     *                             correspond to key/value pairs for the
+     *                             meta data on the given level
+     */
     private function getPreviouslevelsMeta($pathStart, $segments) {
         $levels = array();
 
@@ -390,6 +444,16 @@ class Intake extends MY_Controller
         return site_url($segments);
     }
 
+    /**
+     * Method that generates a json object that can be used in JavaScript
+     * to override the default language of the DataTables table. The
+     * texts are extracted from the language files, to make sure datatables
+     * translates along with the rest of the portal
+     * 
+     * @param $emptyText    The text to display for the table if it contains
+     *                      no data
+     * @return string       Json encoded object with language strings
+     */
     public static function getDatatablesLanguage($emptyText) {
         return json_encode(
             array(
@@ -419,100 +483,10 @@ class Intake extends MY_Controller
         );
     }
 
-    public function getGroupUsers($study) {
-        $query = $this->input->get('query');
-        $showAdmin = $this->input->get("showAdmins");
-        $showUsers = $this->input->get("showUsers");
-        $showReadonly = $this->input->get("showReadonly");
-
-        $showAdmin = (is_null($showAdmin) || $showAdmin == "0") ? false : true;
-        $showUsers = (is_null($showUsers) || $showUsers == "0") ? false : true;
-        $showReadonly = (is_null($showReadonly) || $showReadonly == "0") ? false : true;
-
-
-        $group = sprintf(
-                "%s%s", 
-                $this->config->item('intake-prefix'),
-                $study
-            );
-
-        $rodsaccount = $this->rodsuser->getRodsAccount();
-
-        $results = 
-            array_values(array_filter(
-                $this->study->getGroupMembers($rodsaccount, $group, $showAdmin, $showUsers, $showReadonly),
-                function($val) use($query) {
-                    return !(!empty($query) && strstr($val, $query) === FALSE);
-                }
-            ));
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(
-                json_encode(
-                    $results
-                )
-            );
-    }
-
-    public function getDirectories() {
-        $query = $this->input->get('query');
-        $showProjects = $this->input->get('showProjects');
-        $showStudies = $this->input->get('showStudies');
-        $showDatasets = $this->input->get('showDatasets');
-        $requireContribute = $this->input->get('requireContribute');
-        $requireManager = $this->input->get('requireManager');
-
-        $showProjects = (is_null($showProjects) || $showProjects == "0" || strtolower($showProjects) !== "true") ? false : true;
-        $showStudies = (is_null($showStudies) || $showStudies == "0" || strtolower($showStudies) !== "true") ? false : true;
-        $showDatasets = (is_null($showDatasets) || $showDatasets == "0" || strtolower($showDatasets) !== "true") ? false : true;
-        $requireContribute = (is_null($requireContribute) || $requireContribute == "0" || strtolower($requireContribute) !== "true") ? false : true;
-        $requireManager = (is_null($requireManager) || $requireManager == "0" || strtolower($requireManager) !== "true") ? false : true;
-
-        $rodsaccount = $this->rodsuser->getRodsAccount();
-
-        $results = array_values(array_filter(
-            $this->study->getDirectories($rodsaccount, $showProjects, $showStudies, $showDatasets, $requireContribute, $requireManager),
-            function($val) use ($query) {
-                $dirArr = explode("/", $val);
-                $dirName = $dirArr[sizeof($dirArr) - 1];
-
-                return !(!empty($query) && strstr($dirName, $query) === FALSE);
-            }
-        ));
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(
-                json_encode(
-                    $results
-                )
-            );
-    }
-
-    public function test() {
-        $this->data["current_dir"] = $this->input->get('dir');
-
-        $this->load->view('common-start', array(
-            'styleIncludes' => array(
-                'css/intake.css', 
-                'lib/datatables/datatables.css', 
-                'lib/chosen-select/chosen.min.css'
-            ),
-            'scriptIncludes' => array(
-                'js/intake.js', 
-                'lib/datatables/datatables.js', 
-                'lib/chosen-select/chosen.jquery.min.js'
-            ),
-            'activeModule'   => $this->module->name(),
-            'user' => array(
-                'username' => $this->rodsuser->getUsername(),
-            ),
-        ));
-        $this->load->view('testview', $this->data);
-        $this->load->view('common-end');
-    }
-
+    /**
+     * Server side processing function for the DataTables table in the
+     * file overview view on the home level
+     */
     public function getStudiesInformation() {
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $offset = $this->input->get('start') ? $this->input->get('start') : 0;
@@ -588,6 +562,10 @@ class Intake extends MY_Controller
         );
     }
 
+    /**
+     * Server side processing function that returns a list of directories 
+     * inside a given collection incrementally
+     */
     public function getDirsInformation() {
         $directory = $this->input->get('dir');
         $rodsaccount = $this->rodsuser->getRodsAccount();
@@ -687,6 +665,10 @@ class Intake extends MY_Controller
         );
     }
 
+    /**
+     * Server side processing function that returns a list of files inside
+     * a certain collection incrementally
+     */
     public function getFilesInformation() {
         $directory = $this->input->get('dir');
         $rodsaccount = $this->rodsuser->getRodsAccount();
