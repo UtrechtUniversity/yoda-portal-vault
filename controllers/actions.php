@@ -1,5 +1,11 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
+/*
+| -------------------------------------------------------------------------
+| USER ACTIONS CONTROLLER
+| -------------------------------------------------------------------------
+| This file contains REST functions that are called for certain user actions
+|
+*/
 class Actions extends MY_Controller
 {
    
@@ -18,6 +24,10 @@ class Actions extends MY_Controller
         $this->load->language('form_errors');
     }
 
+    /**
+     * Performs a snapshot (create version) if a user clicks the create version
+     * button
+     */
     public function snapshot()
     {
     	$result = $this->performSnapshot();
@@ -27,6 +37,10 @@ class Actions extends MY_Controller
 		redirect($redir, 'refresh');
     }
 
+    /**
+     * Sub function of snapshot() that handles creating the actual version and prepares
+     * the redirect method and message
+     */
     private function performSnapshot() {
     	$status = (object)array("message" => "", "error" => false, "type" => "info");
 
@@ -102,6 +116,9 @@ class Actions extends MY_Controller
 		}
     }
 
+    /**
+     * Method that tries to unlock a collection, if it is not yet picked up by the filesystem
+     */
     public function unlock() {
     	$rodsaccount = $this->rodsuser->getRodsAccount();
 		$directory = $this->input->post('directory');

@@ -227,9 +227,6 @@ class Study extends CI_Model {
             #*directoryList = "lol;jolo";
             
         }';
-
-        
-
         
 
         try {

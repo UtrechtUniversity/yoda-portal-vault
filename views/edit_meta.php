@@ -102,7 +102,7 @@ if($folderValid === false) {
 		$hidden = array(
 			"directory" => $current_dir,
 			"studyID" => $studyID,
-			"intake_url" => sprintf('%1$s/%2$s', $url->module, "intake")
+			"intake_url" => $url->module
 		);
 
 		echo form_open($url->module . "/metadata/update", $formAttrs, $hidden);
@@ -113,7 +113,7 @@ if($folderValid === false) {
 	?>
 		
 			<table id="metadata_edittable" width="100%"
-				class="display table table-datatable" 
+				class="display table table-datatable metadata_table" 
 				data-tablelanguage="<?=htmlentities($metadataTableLanguage);?>"
 				>
 				<thead>

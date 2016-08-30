@@ -77,48 +77,18 @@ class Dataset extends CI_Model {
     }
 
     /**
-     * Method to make a call to iRods to create a snapshot of the current state of a dataset.
-     * @param $iRodsAccount     A rodsAccount object of the current user
-     * @param $vaultRoot        The root of the vault area of the study
-     * @param $intakeRoot       The root of the intake area of the study
-     * @param $datasetName      The name of the dataset, i.e. a directory directly under $intakeRoot
-     * @return Boolean          True iff lock could be aquired (check in later to see if it worked)
+     * Method that queries irods for the current locked status of a collection or 
+     * dataobject
+     * 
+     * @param iRodsAccount      Reference to the rods account object of the user
+     * @param path              The path to the collection or dataobject
+     * @param isCollection      Boolean, true iff the path point to a collection,
+     *                          false if it points to a data object
+     * @return array            Key "locked" indicates the path is locked, 
+     *                          "frozen" indicates it is also frozen and cannot be
+     *                          unlocked anymore by the user
      */
-    static public function copySnapshotToVault2($iRodsAccount, $vaultRoot, $intakeRoot, $datasetName)
-    {
-        $ruleBody = '
-        myRule {
-            uuIiCreateSnapshot(*intakeRoot, *vaultRoot, *datasetName, *status);
-            *status = str(*status);
-        }';
-
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*intakeRoot" => $intakeRoot,
-                    "*vaultRoot" => $vaultRoot,
-                    "*datasetName" => $datasetName,
-                ),
-                array("*status")
-            );
-
-            $result = $rule->execute();
-            return $result["*status"];
-            return $result["*status"] == "0";
-        } catch(RODSException $e) {
-            return false;
-        }
-
-        return false;
-    }
-
-    
-    
-
     static public function getLockedStatus($iRodsAccount, $path, $isCollection=True) {
-       
         $ruleBody = '
             myRule {
                 if(*isCollection == "1") {
@@ -157,61 +127,19 @@ class Dataset extends CI_Model {
         return false;
     }
 
-    
     /**
-     * Get the Date and Time, username and userzone for the latest 
-     * snapshot, if any exist
-     * @param $iRodsAccount     Rods account object
-     * @param $dataset          Collection name of the dataset
-     * @return array
+     * Method that queries irods for the snapshot/version history of a certain collection
+     * @param iRodsAccount      Reference to the rods account object of the user
+     * @param dataset           The path to the collection to get the history from
+     * @return array            Array of versions, sorted from old to new, where each
+     *                          version is an object with the keys vaultPath, version,
+     *                          createdDateTime (unix timestamp), createdUser (the username
+     *                          of the user who requested the version creation),
+     *                          createdUserZone (the zone of the user who created the version),
+     *                          dependsID (the collection ID the version was created from),
+     *                          dependsPath (the path to the collection corresponding to the id) and
+     *                          dependsVersion (the version this version was created from)
      */
-    static public function getLatestSnapshotInfo($iRodsAccount, $dataset) {
-        $ruleBody = '
-            myRule {
-                uuIiGetLatestSnapshotInfo(*collection, *version, *datasetID, *datasetPath, *time, *userName, *userZone);
-                *time = str(*time);
-            }';
-
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    '*collection' => $dataset
-                ),
-                array(
-                    '*version',
-                    '*datasetID',
-                    '*datasetPath',
-                    '*time',
-                    '*userName',
-                    '*userZone'
-                )
-            );
-
-            $result = $rule->execute();
-
-            if($result["*time"] == 0) return false;
-            else {
-                $dt = new DateTime();
-                $dt->setTimestamp((int)$result["*time"]);
-                $values = array(
-                        "datetime" => $dt,
-                        "username" => $result["*userName"],
-                        "userzone" => $result["*userZone"]
-                    );
-
-                return $values;
-            }
-
-        } catch(RODSException $e) {
-            echo $e->showStacktrace();
-            return false;
-        }
-
-        return false;
-    }
-
     static public function getSnapshotHistory($iRodsAccount, $dataset) {
         $ruleBody = '
             myRule {
@@ -249,35 +177,6 @@ class Dataset extends CI_Model {
         }
 
         return array();
-    }
-
-    static public function getCurrentVersion($iRodsAccount, $dataset) {
-        $ruleBody = '
-            myRule {
-                uuIiGetVersionAndBasedOn(*collection, *version, *basedOn);
-            }';
-
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array("*collection" => $dataset),
-                array("*version", "*basedOn")
-            );
-
-            $result = $rule->execute();
-
-            return (object) array(
-                "version" => $result["*version"] && $result["*version"] != "" ? (int)$result["*version"] : false,
-                "basedon" => $result["*basedOn"] && $result["*basedOn"] != "" ? $result["*basedOn"] : false
-            );
-        } catch(RODSException $e) {
-            echo $e->showStacktrace();
-            return (object) array("version" => false, "basedon" => false);
-        }
-
-        return (object) array("version" => false, "basedon" => false);
-
     }
 
     /**
@@ -383,30 +282,4 @@ class Dataset extends CI_Model {
         }
         return FALSE;
     }
-
-    static public function testFunction($iRodsAccount) {
-        $ruleBody = <<<'RULE'
-myRule {
-    *test = "hello world";
-    *result = list("This","is","a","list");
-    *item = hd(*result);
-    *int = 1;
-}
-RULE;
-
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(),
-                array("*test", "*item", "*int")
-            );
-
-            $result = $rule->execute();
-            var_dump($result);
-        } catch(RODSException $e) {
-            echo $e->showStacktrace();
-        }
-    }
-
 }

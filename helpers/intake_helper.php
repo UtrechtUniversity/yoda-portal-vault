@@ -5,7 +5,6 @@
  *
  * @return string
  */
-
 function human_filesize($bytes, $decimals = 2) {
 	$size = array('B','kB','MB','GB','TB','PB','EB','ZB','YB');
 	$factor = floor((strlen($bytes) - 1) / 3);
@@ -26,9 +25,10 @@ function displayMessage($controller, $message, $error=false, $type="info") {
  * Implode method that allows the last seperation character to be
  * different from the rest. This can be useful for a list that sums
  * some items.
- * @param $array 						The array to implode
- * @param $seperator 					The default seperator character
- * @param $last_seperator (optional) 	If set, this is the seperator 
+ *
+ * @param array 						The array to implode
+ * @param seperator 					The default seperator character
+ * @param last_seperator (optional) 	If set, this is the seperator 
  *										character used between the last
  *										two items of the array, instead
  *										of the default seperation character
@@ -46,6 +46,14 @@ function human_implode($array, $seperator, $last_seperator = null) {
 	return $str;
 }
 
+/**
+ * Generates html code to display a relative time stamp,
+ * that shows the absolute timestamp if it is hovered
+ *
+ * @param time 		Unix timestamp
+ * @param short 	Boolean, if true, short format will be used
+ * @return string 	HTML code
+ */
 function relativeTimeWithTooltip($time, $short=false) {
 	$reltime = getRelativeTime($time, $short);
 	$dt = new DateTime();
@@ -58,11 +66,19 @@ function relativeTimeWithTooltip($time, $short=false) {
 	return $result;
 }
 
-function absoluteTimeWithTooltip($time) {
+/**
+ * Generates html code to display an absolute time stamp,
+ * that shows the relative timestamp if it is hovered
+ *
+ * @param time 		Unix timestamp
+ * @param short 	Boolean, if true, short format will be used
+ * @return string 	HTML code
+ */
+function absoluteTimeWithTooltip($time, $short=false) {
 	$relative = timespan(htmlentities($time));
 	$dt = new DateTime();
 	$dt->setTimestamp((int)htmlentities($time));
-	$reltime = getRelativeTime($time);
+	$reltime = getRelativeTime($time, $short);
 	$result = "<span data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . $reltime . "\" >";
 	$result .= "\t" . $dt->format('Y-m-d H:i:s');
 	$result .= "</span>";
@@ -70,6 +86,13 @@ function absoluteTimeWithTooltip($time) {
 	return $result;
 }
 
+/**
+ * Converts a unix time stamp to a relative datetime stamp
+ *
+ * @param time 		Unix timestamp
+ * @param short 	Boolean, if true, short format will be used
+ * @return string 	Relative timestamp
+ */
 function getRelativeTime($time, $short=false) {
 	$relTime = timespan(htmlentities($time));
 	$dt = new DateTime();

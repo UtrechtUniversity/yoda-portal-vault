@@ -20,8 +20,6 @@ class metadataFields {
 	public function __construct() {
 		$this->CI =& get_instance();
 		$parser = xml_parser_create();
-		// $fdir = realpath(dirname(__FILE__)) . "/" . "intake_metadata.xml";
-		// $this->fields = json_decode(json_encode(simplexml_load_file($fdir)), true);
 	}
 
 	/**
@@ -94,7 +92,7 @@ class metadataFields {
 
 		$iRodsAccount = $this->CI->rodsuser->getRodsAccount();
 		$keys = array_keys($fields);
-		$values = $this->CI->metadatamodel->getValuesForKeys2($iRodsAccount, $keys, $object);
+		$values = $this->CI->metadatamodel->getValuesForKeys($iRodsAccount, $keys, $object);
 
 		if(!$values) return false;
 
@@ -134,7 +132,8 @@ class metadataFields {
 
         if(is_array($meta) && array_key_exists("form", $meta) && $meta["form"] !== false) {
         	$form = $meta["form"];
-        	$fdir = realpath(dirname(__FILE__)) . "/" . $form;
+
+        	$fdir = realpath(dirname(__FILE__) . '/../' . $this->CI->config->item('metadataform_location')) . "/" . $form;
 
     		set_error_handler(function(){ /** ugly warnings are disabled this way. Error is shown in view **/ });
     		$result = json_decode(json_encode(simplexml_load_file($fdir)), true);
@@ -403,33 +402,33 @@ class metadataFields {
 
 		if(array_key_exists("begin", $conf)) {
 			if(
+				$value !== "" &&
 				array_key_exists("step", $conf) && 
-				$conf["step"] < 0 &&
-				$conf["begin"] < $value
+				intval($conf["step"]) < 0 &&
+				intval($conf["begin"]) < intval($value)
+				
 			) {
-				// echo $value . " fails because the value is not in the specified range";
-				// return false;
 				$errors[] = ERROR_NOT_IN_RANGE;
 			}
-			else if($conf["begin"] > $value) {
-				// echo $value . " fails because the value is not in the specified range";
+			else if((!array_key_exists("step", $conf) || intval($conf["step"]) > 0) 
+				&& $value !== "" && $conf["begin"] > $value
+			) {
 				$errors[] = ERROR_NOT_IN_RANGE;
 			}
 		}
 
 		if(array_key_exists("end", $conf)) {
 			if(
+				$value !== "" &&
 				array_key_exists("step", $conf) && 
-				$conf["step"] < 0 &&
-				$conf["end"] > $value
+				intval($conf["step"]) < 0 &&
+				intval($conf["end"]) > intval($value) 
 			) {
-				// echo $value . " fails because the value is not in the specified range";
-				// return false;
 				$errors[] = ERROR_NOT_IN_RANGE;
 			}
-			else if($conf["end"] < $value) {
-				// echo $value . " fails because the value is not in the specified range";
-				// return false;
+			else if((!array_key_exists("step", $conf) || intval($conf["step"]) > 0) && 
+				$value !== "" && intval($conf["end"]) < intval($value)
+			) {
 				$errors[] = ERROR_NOT_IN_RANGE;
 			}
 		}
@@ -784,7 +783,7 @@ EOT;
 			} else {
 				$min = 0;
 			}
-			$errArr[] = sprintf(lang('formError_min_entries'), $min);
+			$errArr[] = sprintf(lang('intake_formerror_min_entries'), $min);
 		}
 
 		if(in_array(ERROR_MAX_ENTRIES, $errors)) {
@@ -794,15 +793,15 @@ EOT;
 				$max = 0;
 			}
 
-			$errArr[] = sprintf(lang('formError_max_entries'), $max);
+			$errArr[] = sprintf(lang('intake_formerror_max_entries'), $max);
 		}
 
 		if(in_array(ERROR_SINGLE_ENTRY, $errors)) {
-			$errArr[] = lang('formError_single_entry');
+			$errArr[] = lang('intake_formerror_single_entry');
 		}
 
 		if(in_array(ERROR_REQUIRED, $errors)) {
-			$errArr[] = lang('formError_required');
+			$errArr[] = lang('intake_formerror_required');
 		}
 
 		if(in_array(ERROR_MAX_LENGTH, $errors)) {
@@ -816,19 +815,19 @@ EOT;
 				$length = 0;
 			}
 
-			$errArr[] = sprintf(lang('formError_max_length'), $length);
+			$errArr[] = sprintf(lang('intake_formerror_max_length'), $length);
 		}
 
 		if(in_array(ERROR_REGEX, $errors)) {
-			$errArr[] = lang('formError_regex');
+			$errArr[] = lang('intake_formerror_regex');
 		}
 
 		if(in_array(ERROR_NOT_IN_RANGE, $errors)) {
-			$errArr[] = lang('formError_not_in_range');
+			$errArr[] = lang('intake_formerror_not_in_range');
 		}
 
 		if(in_array(ERROR_INVALID_DATETIME_FORMAT, $errors)) {
-			$errArr[] = lang('formError_datetime_format');
+			$errArr[] = lang('intake_formerror_datetime_format');
 		}
 
 		if(in_array(ERROR_DATE_LESS_THAN_FIXED, $errors)) {
@@ -844,7 +843,7 @@ EOT;
 				$mindatetime = "<INVALID>";
 			}
 
-			$errArr[] = sprintf(lang('formError_datetime_less_fixed'), $mindatetime);
+			$errArr[] = sprintf(lang('intake_formerror_datetime_less_fixed'), $mindatetime);
 		}
 
 		if(in_array(ERROR_DATE_LESS_THAN_LINKED, $errors)) {
@@ -860,7 +859,7 @@ EOT;
 				$mindatetime = "<INVALID>";
 			}
 
-			$errArr[] = sprintf(lang('formError_datetime_less_linked'), $mindatetime);
+			$errArr[] = sprintf(lang('intake_formerror_datetime_less_linked'), $mindatetime);
 		}
 
 
@@ -877,7 +876,7 @@ EOT;
 				$maxdatetime = "<INVALID>";
 			}
 
-			$errArr[] = sprintf(lang('formError_datetime_higher_fixed'), $maxdatetime);
+			$errArr[] = sprintf(lang('intake_formerror_datetime_higher_fixed'), $maxdatetime);
 		}
 
 		if(in_array(ERROR_DATE_HIGHER_THAN_LINKED, $errors)) {
@@ -893,10 +892,10 @@ EOT;
 				$maxdatetime = "<INVALID>";
 			}
 
-			$errArr[] = sprintf(lang('formError_datetime_higher_linked'), $maxdatetime);
+			$errArr[] = sprintf(lang('intake_formerror_datetime_higher_linked'), $maxdatetime);
 		}
 
-		$html = sprintf("<b>%s</b><ul>", lang('formError_heading'));
+		$html = sprintf("<b>%s</b><ul>", lang('intake_formerror_heading'));
 		foreach($errArr as $ea) {
 			$html .= sprintf("<li>%s</li>", $ea);
 		}
