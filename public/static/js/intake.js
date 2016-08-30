@@ -403,7 +403,6 @@ function createMetaSuggestionsInput(elem) {
 			data: function (term, page) {
 				return {
 					query: term,
-					directory : $("input[name=directory]").val()
 				};
 			},
 			results: function (options) {
@@ -479,7 +478,6 @@ function edit($element) {
 
 	inputEnable(cancelAll);
 	inputEnable(submit);
-	input.focus();
 
 	currentlyEditing += 1;
 }
@@ -549,6 +547,7 @@ function addValueRow($element) {
 		createDirectoryListSelectInput(e);
 		createDateTimePickerInput(e);
 		createChosenInput(e, true);
+		e.focus();
 	});
 	addRowBtn[0].dataset['nextindex']++;
 }
@@ -564,6 +563,8 @@ function removeFixedRow(row) {
 var _show = function(elem){
 	elem.css("display", "block");
 	elem.css("visibility", "visible");
+	elem.focus();
+
 	if( _attrIsSelect2(elem) ) {
 		_show($("#s2id_" + elem.attr('id')));
 	}
@@ -574,6 +575,11 @@ var _show = function(elem){
 			!$(e).hasClass("chosen-container") 
 		) {
 			_hide($(e));
+		} else if (
+			$(e).hasClass("chosen-select") && 
+			$(e).hasClass("chosen-container")
+		) {
+			$(e).focus();
 		}
 	});
 

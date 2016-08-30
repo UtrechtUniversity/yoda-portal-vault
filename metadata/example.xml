@@ -38,7 +38,7 @@
 		<depends>false</depends>
 	</text_pattern_example>
 
-	<select_from_range>
+	<get_from_range>
 		<label>Range select 1</label>
 		<help>This input shows how to provide a select field, where users can pick a year between 1980 and 2016 when olympic games were held</help>
 		<type>select</type>
@@ -49,9 +49,9 @@
 		</type_configuration>
 		<required>false</required>
 		<depends>false</depends>
-	</select_from_range>
+	</get_from_range>
 
-	<select_from_range2>
+	<get_from_range2>
 		<label>Range select 2</label>
 		<help>Same as Range Select 1, but with reversed order</help>
 		<type>select</type>
@@ -62,9 +62,9 @@
 		</type_configuration>
 		<required>false</required>
 		<depends>false</depends>
-	</select_from_range2>
+	</get_from_range2>
 
-	<select_from_options1>
+	<get_from_options1>
 		<label>Options select 1</label>
 		<help>This shows how to use a select input with predefined options</help>
 		<type>select</type>
@@ -81,9 +81,9 @@
 		</type_configuration>
 		<required>false</required>
 		<depends>false</depends>
-	</select_from_options1>
+	</get_from_options1>
 
-	<select_from_options2>
+	<get_from_options2>
 		<label>Options select 2</label>
 		<help>This shows how to use a select input with predefined grouped options</help>
 		<type>select</type>
@@ -106,9 +106,9 @@
 		</type_configuration>
 		<required>false</required>
 		<depends>false</depends>
-	</select_from_options2>
+	</get_from_options2>
 
-	<select_from_fixed1>
+	<get_from_fixed1>
 		<label>Suggestion select</label>
 		<help>This shows how to use a select input, that suggests previously used values for the same iRODS metadata key. If a value does not yet exist in iRODS, a new key can be created</help>
 		<type>select</type>
@@ -118,7 +118,7 @@
 		</type_configuration>
 		<required>false</required>
 		<depends>false</depends>
-	</select_from_fixed1>
+	</get_from_fixed1>
 
 	<datetime_example_1>
 		<label>Datetime example 1</label>
