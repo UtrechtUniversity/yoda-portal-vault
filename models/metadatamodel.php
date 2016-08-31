@@ -10,11 +10,26 @@ class MetadataModel extends CI_Model {
     public function __construct()
     {
         parent::__construct();
+        $this->load->helper('metadata_prefix_helper');
     }
 
     /**
      * This function writes the changes a user made in the metadata edit
      * form to the iRODS object the meta data is associated with
+     *
+     * This function takes an array where for each key and each possible
+     * value, an object is added which contains one item that should be
+     * removed and one that should be added.
+     * 
+     * This function then builds a rule around that array. If an item is
+     * removed, only the remove rule is used, likewise for adding.
+     * If an item is updated, firstly the item is deleted and only if that
+     * action succeeds is the item added again.
+     *
+     * The rule is built in such a way that if a single action fails, it will
+     * only have consequences for that single key/value pair, meaning that
+     * even if an error occurs, most metadata will still be updated correctly
+     *
      * @param iRodsAccount      Reference to the rods account object of the
      *                          user
      * @param object            The path to the object the meta data should
@@ -95,7 +110,7 @@ RULE;
         $d = 0;
         $k = 0;
         $kv = 0;
-        $prfx = $this->metadatafields->getPrefix($object);
+        $prfx = getPrefix($object);
         foreach($changes as $key => $valueList) {
             $kvar = "*key" . $k;
             $params[$kvar] = $prfx . $key;
@@ -201,7 +216,7 @@ RULE;
     public function getValuesForKeys($rodsaccount, $keyList, $object) {
         $prefixedKeyList = array();
         foreach($keyList as $key) {
-            $prefixedKeyList[$this->metadatafields->prefixKey($key, $object)] = $key;
+            $prefixedKeyList[prefixKey($key, $object)] = $key;
         }
 
         try {
@@ -263,7 +278,7 @@ RULE;
 
             if($result && array_key_exists("*str", $result)) {
                 $like = explode("#;#", $result["*str"]);
-                return array_slice($like, 1);
+                return count($like) === 1 && $like[0] === "" ? array() : $like;
             }
 
         } catch(RODSException $e) {

@@ -15,7 +15,7 @@
 *************************************************************************/
 
 /*
- *  The prefix used for iRODS collections that show up
+ * The prefix used for iRODS collections that show up
  * in the portal. Must be set the same in the constants.r
  * file in the irods-ruleset-ilab
  */
@@ -148,3 +148,19 @@ $config["base-level"] = array(
 
 if (file_exists(dirname(__FILE__) . '/config_local.php'))
 	include(    dirname(__FILE__) . '/config_local.php');
+
+
+define("WARNING_NO_CONF", -1);
+define("OK", 0);
+define("ERROR_MIN_ENTRIES", -2);
+define("ERROR_MAX_ENTRIES", -3);
+define("ERROR_SINGLE_ENTRY", -4);
+define("ERROR_REQUIRED", -5);
+define("ERROR_MAX_LENGTH", -6);
+define("ERROR_REGEX", -7);
+define("ERROR_NOT_IN_RANGE", -8);
+define("ERROR_INVALID_DATETIME_FORMAT", -9);
+define("ERROR_DATE_LESS_THAN_FIXED", -10);
+define("ERROR_DATE_LESS_THAN_LINKED", -11);
+define("ERROR_DATE_HIGHER_THAN_FIXED", -10);
+define("ERROR_DATE_HIGHER_THAN_LINKED", -11);

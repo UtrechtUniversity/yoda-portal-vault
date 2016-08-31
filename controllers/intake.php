@@ -21,6 +21,7 @@ class Intake extends MY_Controller
         $this->load->model('study');
         $this->load->model('rodsuser');
         $this->load->model('metadatamodel');
+        $this->load->model('metadataschemareader');
         $this->load->helper('date');
         $this->load->helper('language');
         $this->load->helper('intake');
@@ -160,7 +161,7 @@ class Intake extends MY_Controller
 
                 $this->getLockedStatus();
                 $dirs = $this->dir->getChildDirs();
-                // $files = $this->dir->getChildFiles();
+                $files = $this->dir->getChildFiles();
 
                 $this->session->set_userdata('tempDir', $this->current_path);
                 $this->breadcrumbs = $this->getBreadcrumbLinks($pathStart, $segments);
@@ -171,8 +172,7 @@ class Intake extends MY_Controller
                     "studyID" => $studyID,
                     "currentViewLocked" => $this->currentViewLocked,
                     "currentViewFrozen" => $this->currentViewFrozen,
-                    // "files" => $files,
-                    "files" => array(),
+                    "files" => $files,
                     "level_depth" => $this->level_depth,
                     "level_depth_start" => $this->level_depth_start,
                     "permissions" => $this->permissions,
@@ -305,7 +305,7 @@ class Intake extends MY_Controller
         $i = 0;
         $link = site_url(array($this->module->name(), "intake", "index")) . "?dir=";
         foreach(explode("/", $pathStart) as $seg) {
-            if($seg === "" || $seg == $this->config->item('intake-prefix')) continue;
+            if($seg === "" || $seg === $this->config->item('rodsServerZone') || $seg == $this->config->item('intake-prefix')) continue;
             else if($seg === "home") {
                 $homePath = sprintf("/%s/home", $this->config->item('rodsServerZone'));
                 $breadCrumbs[] = (object) array(
@@ -373,7 +373,7 @@ class Intake extends MY_Controller
                     "name" => $segments[$i],
                     "level" => ($i < sizeof($this->config->item('level-hierarchy'))) ? 
                         $this->config->item('level-hierarchy')[$i] : $this->config->item('default-level'),
-                    "meta" => $this->metadatafields->getFields(
+                    "meta" => $this->metadataschemareader->getFields(
                         sprintf("%s%s", $pathStart, implode("/", array_slice($segments, 0, $i+1))),
                         true
                     )

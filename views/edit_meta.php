@@ -82,7 +82,7 @@ if($folderValid === false) {
 		<div role="tabpanel" class="tab-pane active" id="metadata-level-<?=$head["title"];?>">
 
 <?php
-		$fields = $this->metadatafields->getFields($current_dir, true);
+		$fields = $this->metadataschemareader->getFields($current_dir, true);
 
 		if(!$fields || !is_array($fields) || sizeof($fields) === 0) {
 	?>

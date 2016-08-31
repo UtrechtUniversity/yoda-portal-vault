@@ -11,9 +11,12 @@ class MetaData extends MY_Controller
         $this->load->helper('intake');
         $this->load->library('metadatafields');
         $this->load->model('study');
+        $this->load->model('metadataschemareader');
         $this->load->library('module', array(__DIR__));
         $this->load->library('pathlibrary');
+        $this->load->library('metadataverification');
         $this->load->helper('language');
+        $this->load->helper('metadata_prefix_helper');
         $this->load->language('intake');
         $this->load->language('errors');
         $this->load->language('form_errors');
@@ -49,7 +52,7 @@ class MetaData extends MY_Controller
             } else {
                 $formdata = $this->input->post('metadata');
                 $shadowData = $this->input->post('metadata-shadow');
-                $fields = $this->metadatafields->getFields($directory, true);
+                $fields = $this->metadataschemareader->getFields($directory, true);
 
                 $this->checkDependencyProperties($fields, $formdata);
 
@@ -122,7 +125,7 @@ class MetaData extends MY_Controller
         $object = $this->input->post('directory');
         $errors = array();
         foreach($errorFields as $f) {
-            $f = $this->metadatafields->unprefixKey($f, $object);
+            $f = unprefixKey($f, $object);
             if(array_key_exists($f, $fields) && array_key_exists("label", $fields[$f])) {
                 $errors[] = sprintf('"%1$s"', $fields[$f]["label"]);
             } else {
@@ -153,7 +156,7 @@ class MetaData extends MY_Controller
         foreach($fields as $key => $field) {
             if(array_key_exists("depends", $field) && $field["depends"] !== false) {
                 $field["dependencyMet"] = 
-                    $this->metadatafields->evaluateRowDependencies($field["depends"], $formdata);
+                    $this->metadataverification->evaluateRowDependencies($field["depends"], $formdata);
             } else {
                 $field["dependencyMet"] = true;
             }
@@ -172,7 +175,7 @@ class MetaData extends MY_Controller
         $wrongFields = array();
         foreach($formdata as $inputKey => $inputValues) {
             if($fields[$inputKey]["dependencyMet"]) {
-                $errors = $this->metadatafields->verifyKey($inputValues, $fields[$inputKey], $formdata, false);
+                $errors = $this->metadataverification->verifyKey($inputValues, $fields[$inputKey], $formdata, false);
                 if(sizeof($errors) > 0) {
                     // array_push($wrongFields, var)
                     $wrongFields[$inputKey] = $errors;
