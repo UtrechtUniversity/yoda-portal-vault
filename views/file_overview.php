@@ -91,7 +91,7 @@ if(
 		</table>
 	</div>
 <div role="tabpanel" class="tab-pane" id="files">
-	<?php if(!$levelPermissions->canSnapshot) { ?>
+	<?php if(!$levelPermissions->canSnapshot && sizeof($files) > 0) { ?>
 	<div class="alert alert-warning">
 		<?=lang('intake_files_not_recognized');?>
 	</div>
