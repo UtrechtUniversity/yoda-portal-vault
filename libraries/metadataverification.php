@@ -49,33 +49,35 @@ class MetadataVerification {
 	 */
 	public function verifyKey($values, $definition, $final = false) {
 
-		if(array_key_exists("multiple", $definition) || $definition["type"] == "checkbox") {
+		if(keyIsTrue($definition, "multiple") || $definition["type"] == "checkbox") {
 			$errors = array();
 
-			$mult = array_key_exists("multiple", $definition) ? $definition["multiple"] : $definition["type_configuration"];
-			if($final && array_key_exists("min", $mult) && $mult["min"] > 0 && $mult["min"] > sizeof($values)){
+			$mult = 
+				keyIsTrue($definition, "multiple") ? 
+				$definition["multiple"] : 
+				(
+					keyIsTrue($definition, "type_configuration") ?
+					$definition["type_configuration"] : array()
+				);
+
+			if($final && keyIsTrue($mult, "min") && $mult["min"] > 0 && $mult["min"] > sizeof($values)){
 				$errors[] = ERROR_MIN_ENTRIES;
 			}
 
 			if(
-				(!array_key_exists("infinite", $mult) || $mult["infinite"] === false) && 
-				array_key_exists("max", $mult) && $mult["max"] !== false && $mult["max"] < sizeof($values)) {
+				!keyIsTrue($mult, "infinite") && 
+				keyIsTrue($mult, "max") && $mult["max"] < sizeof($values)) {
 				$errors[] = ERROR_MAX_ENTRIES;
 			}
 
 			foreach($values as $value) {
 				$errors = array_merge($errors, $this->verifyField($value, $definition, $final));
-				// $err = $this->verifyField($value, $definition, $final);
-				// if($err < OK) {
-				// 	return $errC;
-				// }
 			}
 
 			return $errors;
 
 		} else {
 			if(gettype($values) == gettype(array()) && sizeof($values) > 1) {
-				// var_dump($values); echo " fail because it should be a single value but doesn't seem to be single";
 				return array(ERROR_SINGLE_ENTRY);
 			}
 			return $this->verifyField($values, $definition, $final);
@@ -95,24 +97,26 @@ class MetadataVerification {
 		$value = (array_key_exists($fieldRequirements["field_name"], $formData)) ?
 			$formData[$fieldRequirements["field_name"]] : "";
 
-		if(array_key_exists("fixed", $fieldRequirements["value"])) {
-			return $this->checkOperator(
-				$fieldRequirements["operator"], 
-				$value, 
-				$fieldRequirements["value"]["fixed"]
-			);
-		} else if(array_key_exists("like", $fieldRequirements["value"])) {
-			return $this->checkLikeOperator(
-				$fieldRequirements["operator"],
-				$value,
-				$fieldRequirements["value"]["like"]
-			);
-		} else if(array_key_exists("regex", $fieldRequirements["value"])) {
-			return $this->checkRegexOperator(
-				$fieldRequirements["operator"],
-				$value,
-				$fieldRequirements["value"]["regex"]
-			);
+		if(keyIsTrue($fieldRequirements, "operator")) {
+			if(keyIsTrue($fieldRequirements, array("value", "fixed")))  {
+				return $this->checkOperator(
+					$fieldRequirements["operator"], 
+					$value, 
+					$fieldRequirements["value"]["fixed"]
+				);
+			} else if(keyIsTrue($fieldRequirements, array("value", "like"))) {
+				return $this->checkLikeOperator(
+					$fieldRequirements["operator"],
+					$value,
+					$fieldRequirements["value"]["like"]
+				);
+			} else if(keyIsTrue($fieldRequirements, array("value", "regex"))) {
+				return $this->checkRegexOperator(
+					$fieldRequirements["operator"],
+					$value,
+					$fieldRequirements["value"]["regex"]
+				);
+			}
 		}
 
 		return true;
@@ -189,27 +193,30 @@ class MetadataVerification {
 	private function verifyField($value, $definition, $formdata, $final = false) {
 		$errors = array();
 
-		if($final && $definition["required"] === True && !isset($value)) {
+		if($final && keyIsTrue($definition, "required") && $definition["required"] === True && !isset($value)) {
 			$errors[] = ERROR_REQUIRED;
 			// return false;
 		}
 
-		$conf = $definition["type_configuration"];
-		if(!isset($conf)) {
-			// echo $value . " fails because $conf is not set<br/>";
-			$errors[] = WARNING_NO_CONF;
-		}
+		// $conf = $definition["type_configuration"];
+		// if(!isset($conf)) {
+		// 	// echo $value . " fails because $conf is not set<br/>";
+		// 	$errors[] = WARNING_NO_CONF;
+		// }
 
 		// Check maximum length
-		if(array_key_exists("length", $conf) && $conf["length"] !== false && sizeof($value) > $conf["length"]){
-			// echo $value . " fails because the max length (" . $conf["length"] . ") is less than the input length (" . sizeof($value) . ")<br/>";
-			// return false;
+		//array_key_exists("length", $conf) && $conf["length"] !== false &&
+		if(
+			keyIsTrue($definition, array("type_configuration", "length")) && 
+			sizeof($value) > $definition["type_configuration"]["length"]
+		) {
 			$errors[] = ERROR_MAX_LENGTH;
 		}
 
 		// Todo: verify this
-		if(array_key_exists("pattern", $conf) && $conf["pattern"] != "*") {
-			$patt = $conf["pattern"];
+		// if(array_key_exists("pattern", $conf) && $conf["pattern"] != "*") {
+		if(keyIsTrue($definition, array("type_configuration", "pattern")) && $definition["type_configuration"]["pattern"] !== "*") {
+			$patt = $definition["type_configuration"]["pattern"];
 
 			if($patt[0] != "/") $patt = "/" . $patt;
 			if(substr($patt, -1) != "/") $patt .= "/";
@@ -218,49 +225,65 @@ class MetadataVerification {
 					(is_array($value) && sizeof($value) === 0) ||
 					(is_string($value) && strlen($value) === 0)
 				))) {
-				// echo "\"" . $value . "\" fails because the pattern " . $conf["pattern"] . " does not match the value";
 
 				$errors[] = ERROR_REGEX;
-				// return false;	
 			}
 		}
 
-		if(array_key_exists("restricted", $conf) && $conf["restricted"] === true) {
-			if(!array_key_exists("allow_create", $conf) || $conf["allow_create"] === false) {
+		// if(array_key_exists("restricted", $conf) && $conf["restricted"] === true) {
+		if(keyIsTrue($definition, array("type_configuration", "restricted"))) {
+			// if(!array_key_exists("allow_create", $conf) || $conf["allow_create"] === false) {
+			if(!keyIsTrue($definition, array("type_configuration", "allow_create"))) {
 				// TODO: check if the value exists for the key
 				// Q: This requires another connection to iRODS for each field that uses restricted
 				// values. Is this worth it?
 			}
 		}
 
-		if(array_key_exists("begin", $conf)) {
+		// if(array_key_exists("begin", $conf)) {
+		if(keyIsTrue($definition, array("type_configuration", "begin"))) {
 			if(
 				$value !== "" &&
-				array_key_exists("step", $conf) && 
-				intval($conf["step"]) < 0 &&
-				intval($conf["begin"]) < intval($value)
+				keyIsTrue($definition, array("type_configuration", "step")) && 
+				intval($definition["type_configuration"]["step"]) < 0 &&
+				intval($definition["type_configuration"]["begin"]) < intval($value)
 				
 			) {
 				$errors[] = ERROR_NOT_IN_RANGE;
 			}
-			else if((!array_key_exists("step", $conf) || intval($conf["step"]) > 0) 
-				&& $value !== "" && $conf["begin"] > $value
+			// else if((!array_key_exists("step", $conf) || intval($conf["step"]) > 0) 
+			else if(
+				(
+					!keyIsTrue($definition, array("type_configuration", "step")) || 
+					intval($definition["type_configuration"]["step"]) > 0
+				) && $value !== "" && $definition["type_configuration"]["begin"] > $value
 			) {
 				$errors[] = ERROR_NOT_IN_RANGE;
 			}
 		}
 
-		if(array_key_exists("end", $conf)) {
+		if(keyIsTrue($definition, array("type_configuration", "end"))) { // array_key_exists("end", $conf)) {
 			if(
 				$value !== "" &&
-				array_key_exists("step", $conf) && 
-				intval($conf["step"]) < 0 &&
-				intval($conf["end"]) > intval($value) 
+				// array_key_exists("step", $conf) && 
+				keyIsTrue($definition, array("type_configuration", "step")) &&
+				intval($definition["type_configuration"]["step"]) < 0 &&
+				intval($definition["type_configuration"]["end"]) > intval($value) 
 			) {
 				$errors[] = ERROR_NOT_IN_RANGE;
 			}
-			else if((!array_key_exists("step", $conf) || intval($conf["step"]) > 0) && 
-				$value !== "" && intval($conf["end"]) < intval($value)
+			// else if((!array_key_exists("step", $conf) || intval($conf["step"]) > 0) && 
+			// 	$value !== "" && intval($conf["end"]) < intval($value)
+			// ) {
+			// 	$errors[] = ERROR_NOT_IN_RANGE;
+			// }
+			else if(
+				(
+					!keyIsTrue($definition, array("type_configuration","step")) ||
+					intval($definition["type_configuration"]["step"]) > 0
+				) &&
+				$value != "" && 
+				intval($definition["type_configuration"]["end"]) < intval($value)
 			) {
 				$errors[] = ERROR_NOT_IN_RANGE;
 			}
@@ -274,9 +297,9 @@ class MetadataVerification {
 			}
 		}
 
-		if(array_key_exists("options", $conf)) {
+		if(keyIsTrue($definition, array("type_configuration","options"))) {
 			$options = array();
-			foreach($conf["options"] as $key => $option) {
+			foreach($definition["type_configuration"]["options"] as $key => $option) {
 				if(is_string($option)) {
 					$options[] = $option;
 				} else if(is_array($option)) {
