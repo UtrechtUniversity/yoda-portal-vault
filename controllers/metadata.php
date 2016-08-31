@@ -14,6 +14,7 @@ class MetaData extends MY_Controller
         $this->load->model('metadataschemareader');
         $this->load->library('module', array(__DIR__));
         $this->load->library('pathlibrary');
+        $this->load->library('metadataverification');
         $this->load->helper('language');
         $this->load->helper('metadata_prefix_helper');
         $this->load->language('intake');
@@ -155,7 +156,7 @@ class MetaData extends MY_Controller
         foreach($fields as $key => $field) {
             if(array_key_exists("depends", $field) && $field["depends"] !== false) {
                 $field["dependencyMet"] = 
-                    $this->metadatafields->evaluateRowDependencies($field["depends"], $formdata);
+                    $this->metadataverification->evaluateRowDependencies($field["depends"], $formdata);
             } else {
                 $field["dependencyMet"] = true;
             }
@@ -174,7 +175,7 @@ class MetaData extends MY_Controller
         $wrongFields = array();
         foreach($formdata as $inputKey => $inputValues) {
             if($fields[$inputKey]["dependencyMet"]) {
-                $errors = $this->metadatafields->verifyKey($inputValues, $fields[$inputKey], $formdata, false);
+                $errors = $this->metadataverification->verifyKey($inputValues, $fields[$inputKey], $formdata, false);
                 if(sizeof($errors) > 0) {
                     // array_push($wrongFields, var)
                     $wrongFields[$inputKey] = $errors;

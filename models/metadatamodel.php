@@ -278,7 +278,7 @@ RULE;
 
             if($result && array_key_exists("*str", $result)) {
                 $like = explode("#;#", $result["*str"]);
-                return array_slice($like, 1);
+                return count($like) === 1 && $like[0] === "" ? array() : $like;
             }
 
         } catch(RODSException $e) {

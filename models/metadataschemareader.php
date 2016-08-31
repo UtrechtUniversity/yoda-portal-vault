@@ -15,17 +15,17 @@ class MetadataSchemaReader extends CI_Model {
 	 * @param $schemaName 	Name of the .xml file (including extension)
 	 *						that is placed in the library directory
 	 *						of this module.
-	 * @param $object 		The iRods object the meta data is stored on
-	 * @param $isCollection Boolean, true iff $object is a collection
+	 * @param $path 		The iRods object the meta data is stored on
+	 * @param $isCollection Boolean, true iff $path is a collection
 	 */
-	public function getFields($object, $isCollection) {
-		$fields = $this->loadXML($object);
+	public function getFields($path, $isCollection) {
+		$fields = $this->loadXML($path);
 
 		if(!$fields) return false;
 
 		$iRodsAccount = $this->rodsuser->getRodsAccount();
 		$keys = array_keys($fields);
-		$values = $this->metadatamodel->getValuesForKeys($iRodsAccount, $keys, $object);
+		$values = $this->metadatamodel->getValuesForKeys($iRodsAccount, $keys, $path);
 
 		if(!$values) return false;
 
@@ -46,8 +46,40 @@ class MetadataSchemaReader extends CI_Model {
 		return $fields;
 	}
 
-	private function loadXML($object) {
-		$meta = $this->getMetaForLevel($object);
+	/**
+	 * Function that calculates what level a certain
+	 * object resides from and retreives the metadata 
+	 * configuration for that level from the module
+	 * configuration. THe default level is used if no
+	 * level-specific configuration is defined
+	 * 
+	 * @param path 		The path to the object
+	 * @return level 	The meta data configuration
+	 * 					for this level as defined
+	 * 					in the config
+	 */
+	public function getMetaForLevel($path) {
+		$rodsaccount = $this->rodsuser->getRodsAccount();
+		$pathStart = $this->pathlibrary->getPathStart($this->config);
+        $segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $path, $prodsdir);
+        $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $level, $depth);
+
+        if(array_key_exists("metadata", $level) && $level["metadata"] !== false) {
+        	return $level["metadata"];
+        }
+
+        return false;
+	}
+
+	/**
+	 * Function that loads the XML form defined for the level
+	 * the object $path resides in
+	 * @param object 		Path to object for which meta data schema
+	 * 						should be loaded
+	 * @return string 		PHP array containing meta data schema
+	 */
+	private function loadXML($path) {
+		$meta = $this->getMetaForLevel($path);
 
         if(is_array($meta) && array_key_exists("form", $meta) && $meta["form"] !== false) {
         	$form = $meta["form"];
@@ -63,18 +95,7 @@ class MetadataSchemaReader extends CI_Model {
         }
 	}
 
-	public function getMetaForLevel($object) {
-		$rodsaccount = $this->rodsuser->getRodsAccount();
-		$pathStart = $this->pathlibrary->getPathStart($this->config);
-        $segments = $this->pathlibrary->getPathSegments($rodsaccount, $pathStart, $object, $prodsdir);
-        $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $level, $depth);
-
-        if(array_key_exists("metadata", $level) && $level["metadata"] !== false) {
-        	return $level["metadata"];
-        }
-
-        return false;
-	}
+	
 
 	/**
 	 * Function that recursivily casts int and bool values hidden

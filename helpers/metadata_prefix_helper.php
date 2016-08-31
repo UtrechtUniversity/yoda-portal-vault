@@ -56,4 +56,31 @@ function unprefixKey($key, $object) {
 	}
 }
 
+/**
+ * The meta data schema field configuration contains a lot of 
+ * keys that may or may not be set and which may or may not
+ * be set to false
+ * This function checks if a key exists in a certain array and
+ * if the key is not set to false.
+ * 
+ * @param keys 		A single key to check in the array, or an
+ * 					array of keys that can be followed through
+ * 					the array to test the last key in this array
+ * @param array 	The array to test the key for
+ * @return bool 	True if the key exists and is not set to false
+ */
+function keyIsTrue($array, $keys) {
+	if(is_string($keys)) {
+		return array_key_exists($keys, $array) && $array[$keys] !== false;
+	} else if(is_array($keys)) {
+		if(count($keys) === 0) {
+			return false;
+		} else if(count($keys === 1)) {
+			return array_key_exists($keys[0], $array) && $array[$keys[0]] !== false;
+		} else {
+			return array_key_exists($keys[0], $array) && $array[$keys[0]] !== false && keyIsTrue($array[$keys[0]], array_slice($keys, 1));
+		}
+	}
+}
+
 ?>
