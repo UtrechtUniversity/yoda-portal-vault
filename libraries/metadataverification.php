@@ -195,17 +195,9 @@ class MetadataVerification {
 
 		if($final && keyIsTrue($definition, "required") && $definition["required"] === True && !isset($value)) {
 			$errors[] = ERROR_REQUIRED;
-			// return false;
 		}
 
-		// $conf = $definition["type_configuration"];
-		// if(!isset($conf)) {
-		// 	// echo $value . " fails because $conf is not set<br/>";
-		// 	$errors[] = WARNING_NO_CONF;
-		// }
-
 		// Check maximum length
-		//array_key_exists("length", $conf) && $conf["length"] !== false &&
 		if(
 			keyIsTrue($definition, array("type_configuration", "length")) && 
 			sizeof($value) > $definition["type_configuration"]["length"]
@@ -213,8 +205,6 @@ class MetadataVerification {
 			$errors[] = ERROR_MAX_LENGTH;
 		}
 
-		// Todo: verify this
-		// if(array_key_exists("pattern", $conf) && $conf["pattern"] != "*") {
 		if(keyIsTrue($definition, array("type_configuration", "pattern")) && $definition["type_configuration"]["pattern"] !== "*") {
 			$patt = $definition["type_configuration"]["pattern"];
 
@@ -230,9 +220,7 @@ class MetadataVerification {
 			}
 		}
 
-		// if(array_key_exists("restricted", $conf) && $conf["restricted"] === true) {
 		if(keyIsTrue($definition, array("type_configuration", "restricted"))) {
-			// if(!array_key_exists("allow_create", $conf) || $conf["allow_create"] === false) {
 			if(!keyIsTrue($definition, array("type_configuration", "allow_create"))) {
 				// TODO: check if the value exists for the key
 				// Q: This requires another connection to iRODS for each field that uses restricted
@@ -240,7 +228,6 @@ class MetadataVerification {
 			}
 		}
 
-		// if(array_key_exists("begin", $conf)) {
 		if(keyIsTrue($definition, array("type_configuration", "begin"))) {
 			if(
 				$value !== "" &&
@@ -251,7 +238,6 @@ class MetadataVerification {
 			) {
 				$errors[] = ERROR_NOT_IN_RANGE;
 			}
-			// else if((!array_key_exists("step", $conf) || intval($conf["step"]) > 0) 
 			else if(
 				(
 					!keyIsTrue($definition, array("type_configuration", "step")) || 
@@ -265,18 +251,12 @@ class MetadataVerification {
 		if(keyIsTrue($definition, array("type_configuration", "end"))) { // array_key_exists("end", $conf)) {
 			if(
 				$value !== "" &&
-				// array_key_exists("step", $conf) && 
 				keyIsTrue($definition, array("type_configuration", "step")) &&
 				intval($definition["type_configuration"]["step"]) < 0 &&
 				intval($definition["type_configuration"]["end"]) > intval($value) 
 			) {
 				$errors[] = ERROR_NOT_IN_RANGE;
 			}
-			// else if((!array_key_exists("step", $conf) || intval($conf["step"]) > 0) && 
-			// 	$value !== "" && intval($conf["end"]) < intval($value)
-			// ) {
-			// 	$errors[] = ERROR_NOT_IN_RANGE;
-			// }
 			else if(
 				(
 					!keyIsTrue($definition, array("type_configuration","step")) ||
@@ -292,7 +272,6 @@ class MetadataVerification {
 		if($definition["type"] == "datetime") {
 			$err = $this->verifyDateTime($value, $definition, $formdata, $final);
 			if($err != OK) {
-				// echo $value . " fails because the value does not meet datetime standards?";
 				$errors[] = $err;
 			}
 		}
@@ -314,8 +293,6 @@ class MetadataVerification {
 			}
 
 			if(!in_array($value, $options) && $value != "") {
-				// echo $value . " fails because the value is not in the specified range";
-				// return false;
 				$errors[] = ERROR_NOT_IN_RANGE;
 			}
 		}
@@ -344,12 +321,11 @@ class MetadataVerification {
 		$needsDashReg = "/.+[^:\/ -]$/";
 		$regex = "/^";
 		$format = "";
-		$conf = $definition["type_configuration"];
-		if(array_key_exists("show_years", $conf) && $conf["show_years"] !== false){
+		if(keyIsTrue($definition, array("type_configuration", "show_years"))) {
 			$regex .= "\d{4}";
 			$format .= "YYYY";
 		}
-		if(array_key_exists("show_months", $conf) && $conf["show_months"] !== false) {
+		if(keyIsTrue($definition, array("type_configuration", "show_months"))) {
 			if(preg_match($needsDashReg, $regex)){
 				$regex .= "-";
 				$format .= "-";
@@ -357,7 +333,7 @@ class MetadataVerification {
 			$regex .= "(?:(?:0[1-9])|(?:1(?:0|1|2)))";
 			$format .= "MM";
 		}
-		if(array_key_exists("show_days", $conf) && $conf["show_days"] !== false) {
+		if(keyIsTrue($definition, array("type_configuration", "show_days"))) {
 			if(preg_match($needsDashReg, $regex)){
 				$regex .= "-";
 				$format .= "-";
@@ -365,7 +341,7 @@ class MetadataVerification {
 			$regex .= "(?:(?:0[1-9])|(?:[1-2][0-9])|(?:3[0-1]))";
 			$format .= "DD";
 		}
-		if(array_key_exists("show_time", $conf) && $conf["show_time"] !== false) {
+		if(keyIsTrue($definition, array("type_configuration", "show_time"))) {
 			if(preg_match($needsDashReg, $regex)){
 				$regex .= " ";
 				$format .= "  ";
@@ -376,31 +352,26 @@ class MetadataVerification {
 		$regex .= "$/";
 
 		if(!preg_match($regex, $value)){
-			// echo "<p>$regex doesn't match $value</p>";
-			// return false;
 			return ERROR_INVALID_DATETIME_FORMAT;
 		}
 
-		if(array_key_exists("min_date_time", $conf) && $conf["min_date_time"] !== false) {
-			if(array_key_exists("fixed", $conf["min_date_time"]) && $conf["min_date_time"]["fixed"] !== false) {
+		if(keyIsTrue($definition, array("type_configuration", "min_date_time"))) {
+			if(keyIsTrue($definition, array("type_configuration", "min_date_time", "fixed"))) {
 				try{
 					$valDate = DateTime::createFromFormat($format, $value);
-					$referenceDate = DateTime::createFromFormat($format, $conf["min_date_time"]["fixed"]);
+					$referenceDate = DateTime::createFromFormat($format, $definition["type_configuration"]["min_date_time"]["fixed"]);
 					if($valDate < $referenceDate) {
-						// echo "<p>$valDate is less than fixed $referenceDate</p>";
-						// return false;
 						return ERROR_DATE_LESS_THAN_FIXED;
 					}
 				} catch(exception $e) {
 					// do nothing
-					// var_dump($e);
 				}
-			} else if(array_key_exists("linked", $conf["min_date_time"]) && $conf["min_date_time"]["linked"] !== false) {
-				if(array_key_exists($conf["min_date_time"]["linked"], $formdata)) {
+			} else if(keyIsTrue($definition, array("type_configuration", "min_date_time", "linked"))) {
+				if(array_key_exists($definition["type_configuration"]["min_date_time"]["linked"], $formdata)) {
 					try{
 						$valDate = DateTime::createFromFormat($format, $value);
 
-						$refValArr = is_array($formdata[$conf["min_date_time"]["linked"]]) ? $formdata[$conf["min_date_time"]["linked"]] : array($formdata[$conf["min_date_time"]["linked"]]);
+						$refValArr = is_array($formdata[$definition["type_configuration"]["min_date_time"]["linked"]]) ? $formdata[$definition["type_configuration"]["min_date_time"]["linked"]] : array($formdata[$definition["type_configuration"]["min_date_time"]["linked"]]);
 						$refVal = array_filter(
 							$refValArr, 
 							array($this, "callback_isNotEmpty")
@@ -411,38 +382,34 @@ class MetadataVerification {
 						}
 						$referenceDate = DateTime::createFromFormat($format, $refVal);
 						if($refVal == "" && $final) {
-							// return false;
 							return ERROR_REQUIRED;
 						} else if($refVal != "" && $valDate < $referenceDate) {
-							// return false;
 							return ERROR_DATE_LESS_THAN_LINKED;
 						}
 					} catch(Exception $e) {
 						// do nothing
-						var_dump($e);
 					}
 				}
 			}
 		}
 
-		if(array_key_exists("max_date_time", $conf) && $conf["max_date_time"] !== false) {
-			if(array_key_exists("fixed", $conf["max_date_time"]) && $conf["max_date_time"]["fixed"] !== false) {
+		if(keyIsTrue($definition, array("type_configuration", "max_date_time"))) {
+			if(keyIsTrue($definition, array("type_configuration", "max_date_time", "fixed"))) {
 				try{
 					$valDate = DateTime::createFromFormat($format, $value);
-					$referenceDate = DateTime::createFromFormat($format, $conf["max_date_time"]["fixed"]);
+					$referenceDate = DateTime::createFromFormat($format, $defintion["type_configuration"]["max_date_time"]["fixed"]);
 					if($valDate > $referenceDate) {
-						// return false;
 						return ERROR_DATE_HIGHER_THAN_FIXED;
 					}
 				} catch(exception $e) {
 					// do nothing
 				}
-			} else if(array_key_exists("linked", $conf["max_date_time"]) && $conf["max_date_time"]["linked"] !== false) {
-				if(array_key_exists($conf["max_date_time"]["linked"], $formdata)) {
+			} else if(keyIsTrue($definition, array("type_configuration", "max_date_time", "linked"))) {
+				if(array_key_exists($definition["type_configuration"]["max_date_time"]["linked"], $formdata)) {
 					try{
 						$valDate = DateTime::createFromFormat($format, $value);
 
-						$refValArr = is_array($formdata[$conf["max_date_time"]["linked"]]) ? $formdata[$conf["max_date_time"]["linked"]] : array($formdata[$conf["max_date_time"]["linked"]]);
+						$refValArr = is_array($formdata[$definition["type_configuration"]["max_date_time"]["linked"]]) ? $formdata[$definition["type_configuration"]["max_date_time"]["linked"]] : array($formdata[$definition["type_configuration"]["max_date_time"]["linked"]]);
 
 						$refVal = array_filter(
 							$refValArr, 
@@ -456,7 +423,6 @@ class MetadataVerification {
 						if($refVal == "" && $final) {
 							return ERROR_REQUIRED;
 						} else if($refVal != "" && $valDate > $referenceDate) {
-							// return false;
 							return ERROR_DATE_HIGHER_THAN_LINKED;
 						}
 					} catch(exception $e) {
