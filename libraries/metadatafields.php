@@ -154,7 +154,7 @@ EOT;
 
 		$rowDepends = "";
 
-		if(array_key_exists("depends", $config)) {
+		if(keyIsTrue($config, "depends")) {
 			$rowDepends .= htmlentities(" data-depends=\"" . json_encode($config["depends"]) . "\"");
 		}
 
@@ -167,7 +167,7 @@ EOT;
 		return sprintf(
 			$template,
 			$key,
-			array_key_exists("multiple", $config) || $config["type"] == "checkbox" ? $multiValueList : $currentValue,
+			keyIsTrue($config, "multiple") || $config["type"] == "checkbox" ? $multiValueList : $currentValue,
 			$config["label"],
 			$help,
 			$input,
@@ -197,7 +197,7 @@ EOT;
 
 		$errArr = array();
 		if(in_array(ERROR_MIN_ENTRIES, $errors)) {
-			if(array_key_exists("multiple", $definitions) && array_key_exists("min", $definitions["multiple"])) {
+			if(keyIsTrue($definitions, array("multiple", "min"))) {
 				$min = $definitions["multiple"]["min"];
 			} else {
 				$min = 0;
@@ -206,7 +206,7 @@ EOT;
 		}
 
 		if(in_array(ERROR_MAX_ENTRIES, $errors)) {
-			if(array_key_exists("multiple", $definitions) && array_key_exists("max", $definitions["multiple"])) {
+			if(keyIsTrue($definitions, array("multiple", "max"))) {
 				$max = $definitions["multiple"]["max"];
 			} else {
 				$max = 0;
@@ -224,11 +224,7 @@ EOT;
 		}
 
 		if(in_array(ERROR_MAX_LENGTH, $errors)) {
-			if(
-				in_array("type_configuration", $definitions) 
-				&& in_array("length", $definitions["type_configuration"])
-				AND $definitions["type_configuration"]["length"] !== false
-			) {
+				if(keyIsTrue($definitions, array("type_configuration", "length"))) {
 				$length = $definitions["type_configuration"]["length"];
 			} else {
 				$length = 0;
@@ -250,13 +246,8 @@ EOT;
 		}
 
 		if(in_array(ERROR_DATE_LESS_THAN_FIXED, $errors)) {
-			if(
-				array_key_exists("type_configuration", $definitions) &&
-				array_key_exists("min_date_time", $definitions["type_configuration"]) &&
-				$definitions["type_configuration"]["min_date_time"] !== false &&
-				array_key_exists("fixed", $definitions["type_configuration"]["min_date_time"])
+			if(keyIsTrue($definitions, array("type_configuration", "min_date_time", "fixed"))) {
 
-			) {
 				$mindatetime = $definitions["type_configuration"]["min_date_time"]["fixed"];
 			} else {
 				$mindatetime = "<INVALID>";
@@ -266,13 +257,8 @@ EOT;
 		}
 
 		if(in_array(ERROR_DATE_LESS_THAN_LINKED, $errors)) {
-			if(
-				array_key_exists("type_configuration", $definitions) &&
-				array_key_exists("min_date_time", $definitions["type_configuration"]) &&
-				$definitions["type_configuration"]["min_date_time"] !== false &&
-				array_key_exists("linked", $definitions["type_configuration"]["min_date_time"])
+			if(keyIsTrue($definitions, array("type_configuration", "min_date_time", "linked"))) {
 
-			) {
 				$mindatetime = $definitions["type_configuration"]["min_date_time"]["linked"];
 			} else {
 				$mindatetime = "<INVALID>";
@@ -283,14 +269,8 @@ EOT;
 
 
 		if(in_array(ERROR_DATE_HIGHER_THAN_FIXED, $errors)) {
-			if(
-				array_key_exists("type_configuration", $definitions) &&
-				array_key_exists("max_date_time", $definitions["type_configuration"]) &&
-				$definitions["type_configuration"]["max_date_time"] !== false &&
-				array_key_exists("fixed", $definitions["type_configuration"]["max_date_time"])
-
-			) {
-				$maxdatetime = $definitions["type_configuration"]["maxn_date_time"]["fixed"];
+			if(keyIsTrue($definitions, array("type_configuration", "max_date_time", "fixed"))) {
+				$maxdatetime = $definitions["type_configuration"]["max_date_time"]["fixed"];
 			} else {
 				$maxdatetime = "<INVALID>";
 			}
@@ -299,14 +279,8 @@ EOT;
 		}
 
 		if(in_array(ERROR_DATE_HIGHER_THAN_LINKED, $errors)) {
-			if(
-				array_key_exists("type_configuration", $definitions) &&
-				array_key_exists("max_date_time", $definitions["type_configuration"]) &&
-				$definitions["type_configuration"]["max_date_time"] !== false &&
-				array_key_exists("linked", $definitions["type_configuration"]["max_date_time"])
-
-			) {
-				$maxdatetime = $definitions["type_configuration"]["maxn_date_time"]["linked"];
+			if(keyIsTrue($definitions, array("type_configuration", "max_date_time", "linked"))) {
+				$maxdatetime = $definitions["type_configuration"]["max_date_time"]["linked"];
 			} else {
 				$maxdatetime = "<INVALID>";
 			}
@@ -359,7 +333,7 @@ EOT;
 				$input = $this->getCustomInput($key, $inputName, $config, $value);
 				break;
 			default:
-				$input = "<p>default value (no type found)</p>";
+				$input = "<p>Invalid type</p>";
 				break;
 		}
 		return $input;
@@ -391,7 +365,7 @@ EOT;
 				$input = $this->getStudielistInput($key, $inputName, $config, $value);
 				break;
 			default :
-				$input = "custom (default)";
+				$input = "<p>Invalid custom type</p>";
 				break;
 		}
 
@@ -421,7 +395,7 @@ EOT;
 					$value[$i]
 				);
 			}
-		} else if(array_key_exists("multiple", $config) || $config["type"] == "checkbox") {
+		} else if(keyIsTrue($config, "multiple") || $config["type"] == "checkbox") {
 			if(is_array($value)) $value = "";
 			$input = sprintf(
 					'<input type="hidden" name="metadata-shadow[%1$s][0]" value="%2$s"/>',
@@ -458,14 +432,14 @@ EOT;
 		 * 3) Current value
 		 * 4) length="<length>" if not false, "" otherwise
 		 */
-		if($config["type_configuration"]["longtext"])
+		if(keyIsTrue($config, array("type_configuration", "longtext")))
 			return $this->getLongtextInput($key, $inputName, $config, $value);
 
 		$template ='<input type="text"';
 		$template .= ' name="%2$s"';
 		$template .= ' %4$s class="showWhenEdit input-%1$s" value="%3$s"/>';
 
-		$length = $config["type_configuration"]["length"] ? 
+		$length = keyIsTrue($config, array("type_configuration", "length")) ?
 			sprintf(
 				"maxlength=\"%d\"", 
 				$config["type_configuration"]["length"]
@@ -505,13 +479,20 @@ EOT;
 	 * @return string 		Html for a single input field
 	 */
 	private function getTimeInput($key, $inputName, $config, $value) {
-		$tc = $config["type_configuration"];
 		$template = '<div class="input-group date showWhenEdit input-%1$s" id="metadata-datepicker-%1$s">';
 		$template .= '<input type="text" class="form-control metadata-datepicker input-%1$s" ';
 		$template .= 'value="%3$s" name="%2$s" %4$s/>';
 		$template .= '</div>';
 
-		$extra = "data-typeconfiguration=\"" . htmlentities(json_encode($config["type_configuration"])) . "\"";
+		$extra = "data-typeconfiguration=\"" . 
+			htmlentities(
+				json_encode(
+					keyIsTrue($config, "type_configuration") ? 
+					$config["type_configuration"] : 
+					array()
+				)
+			) . 
+			"\"";
 
 		return sprintf(
 			$template, 
@@ -536,7 +517,7 @@ EOT;
 	 */
 	private function getSelectInput($key, $inputName, $config, $value) {
 		$tc = $config["type_configuration"]; // tc = TypeConfiguration;
-		if(array_key_exists("restricted", $tc) && $tc["restricted"] === true) {
+		if(keyIsTrue($config, array("type_configuration", "restricted")) && $config["type_configuration"]["restricted"] === true) {
 			$template = '<input name="%2$s" type="hidden"';
 			$template .= ' value="%3$s"';
 			$template .= ' class="showWhenEdit meta-suggestions-field input-%1$s"';
@@ -548,7 +529,7 @@ EOT;
 
 			$extra = sprintf(
 				'data-allowcreate="%1$b"',
-				$tc["allow_create"]
+				keyIsTrue($config, array("type_configuration", "allow_create")) ? true : false
 			);
 
 			return sprintf(
@@ -561,30 +542,46 @@ EOT;
 		} else {
 			$options = "";
 			$optTemplate = '<option value="%1$s"%2$s>%1$s</option>';
-			if(!array_key_exists("options", $tc) || sizeof($tc["options"]) == 0){
+			if(
+				(!keyIsTrue($config, array("type_configuration", "options")) || sizeof($tc["options"]) === 0) &&
+				(
+					keyIsTrue($config, array("type_configuration", "begin")) && 
+					keyIsTrue($config, array("type_configuration", "end"))
+				)
+			) {
+				$begin = $config["type_configuration"]["begin"];
+				$end = $config["type_configuration"]["end"];
+				$step = keyIsTrue($config, "type_configuration", "step") ? 
+					$config["type_configuration"]["step"] : (
+						$begin > $end ? -1 : 1
+					);
 				for(
-					$i = $tc["begin"]; 
-					( $tc["begin"] <= $tc["end"] && $i <= $tc["end"] ) ||
-					( $tc["begin"] > $tc["end"] && $i >= $tc["end"] );
-					$i += $tc["step"]
+					$i = $begin; 
+					( $begin <= $end && $i <= $end ) ||
+					( $begin > $end && $i >= $end );
+					$i += $step
 				) {
 					$options .= sprintf($optTemplate, $i, $i == $value ? ' selected=""' : '');
 				}
 			} else {
-				foreach($tc["options"] as $option) {
+				$avOptions = keyIsTrue($config, "type_configuration", "options") ? 
+					$config["type_configuration"]["options"] :
+					array();
+
+				foreach($avOptions as $option) {
 					if(is_string($option)) {
 						$options .= sprintf($optTemplate, $option, $option == $value ? ' selected=""' : '');
 					} else if(is_array($option)) {
 						foreach($option as $optgroup) {
-							if(array_key_exists("optlabel", $optgroup) && $optgroup["optlabel"] !== false)
+							if(keyIsTrue($optgroup, "optlabel"))
 								$options .= sprintf('<optgroup label="%s">', $optgroup["optlabel"]);
 
-							if(array_key_exists("option", $optgroup) && is_array($optgroup["option"])) {
+							if(keyIsTrue($optgroup, "option") && is_array($optgroup["option"])) {
 								foreach($optgroup["option"] as $o) {
 									$options .= sprintf($optTemplate, $o, $o == $value ? ' selected=""' : '');
 								}
 							}
-							if(array_key_exists("optlabel", $optgroup) && $optgroup["optlabel"] !== false)
+							if(keyIsTrue($optgroup, "optlabel"))
 								$options .= "</optgroup>";
 						}
 					}
@@ -618,11 +615,9 @@ EOT;
 	 * @return string 		Html for a single input field
 	 */
 	private function getBoolInput($key, $inputName, $config, $value) {
-		if(!array_key_exists("type_configuration", $config)) $config["type_configuration"] = array();
-
-		$yesVal = array_key_exists("true_val", $config["type_configuration"]) ? 
+		$yesVal = keyIsTrue($config, array("type_configuration", "true_val")) ?
 			$config["type_configuration"]["true_val"] : "Yes";
-		$noVal = array_key_exists("false_val", $config["type_configuration"]) ? 
+		$noVal = keyIsTrue($config, array("type_configuration", "false_val")) ?
 			$config["type_configuration"]["false_val"] : "No";
 
 		$config["type_configuration"]["options"] = array($yesVal, $noVal);
@@ -690,20 +685,22 @@ EOT;
 
 		$input = '';
 
-		foreach($config["type_configuration"]["options"] as $option) {
-			$input .= sprintf(
-				$template,
-				$key,
-				$type == "checkbox" ? $inputName . '[]' : $inputName,
-				$option,
-				((is_string($value) && $value == $option)
-					|| ((is_array($value) && 
-						in_array($option, $value)))) 
-					? ' checked="checked"' : 
-					'',
-				$type
-			);
-		};
+		if(keyIsTrue($config, array("type_configuration","options"))) {
+			foreach($config["type_configuration"]["options"] as $option) {
+				$input .= sprintf(
+					$template,
+					$key,
+					$type == "checkbox" ? $inputName . '[]' : $inputName,
+					$option,
+					((is_string($value) && $value == $option)
+						|| ((is_array($value) && 
+							in_array($option, $value)))) 
+						? ' checked="checked"' : 
+						'',
+					$type
+				);
+			};
+		}
 
 		return $input;
 	}
@@ -735,10 +732,10 @@ EOT;
 
 		$extra = sprintf(
 			$displayroles,
-			$config["type_configuration"]["show_admins"],
-			$config["type_configuration"]["show_users"],
-			$config["type_configuration"]["show_readonly"],
-			$config["type_configuration"]["allow_create"]
+			keyIsTrue($config, array("type_configuration", "show_admins")) ? true : false,
+			keyIsTrue($config, array("type_configuration", "show_users")) ? true : false,
+			keyIsTrue($config, array("type_configuration", "show_readonly")) ? true : false,
+			keyIsTrue($config, array("type_configuration", "allow_create")) ? true : false
 		);
 
 		return sprintf(
@@ -767,7 +764,14 @@ EOT;
 		$template .= ' class="showWhenEdit select-dir-from-group input-%1$s"';
 		$template .= ' %4$s/>';
 
-		$extra = 'data-typeconfiguration="' . htmlentities(json_encode($config["type_configuration"])) . '"';
+		$extra = 'data-typeconfiguration="' . 
+			htmlentities(
+				json_encode(
+					keyIsTrue($config, "type_configuration") ?
+					$config["type_configuration"] : ''
+				)
+			) . 
+			'"';
 
 		return sprintf(
 			$template,

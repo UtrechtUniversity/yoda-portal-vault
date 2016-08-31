@@ -75,7 +75,7 @@ function keyIsTrue($array, $keys) {
 	} else if(is_array($keys)) {
 		if(count($keys) === 0) {
 			return false;
-		} else if(count($keys === 1)) {
+		} else if(count($keys) === 1) {
 			return array_key_exists($keys[0], $array) && $array[$keys[0]] !== false;
 		} else {
 			return array_key_exists($keys[0], $array) && $array[$keys[0]] !== false && keyIsTrue($array[$keys[0]], array_slice($keys, 1));
