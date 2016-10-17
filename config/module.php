@@ -56,8 +56,8 @@
 */
 
 $module['name'] 		= "projects";
-$module['label'] 		= "Projects";
-$module['glyph'] 		= "briefcase";
+$module['label'] 		= "Studies";
+$module['glyph'] 		= "education";
 $module['menu_order'] 	= 10;
 $module['hide_menu']	= false;
 

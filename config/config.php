@@ -19,7 +19,7 @@
  * in the portal. Must be set the same in the constants.r
  * file in the irods-ruleset-ilab
  */
-$config["intake-prefix"] 	= "grp-project-";
+$config["intake-prefix"] 	= "grp-";
 
 /*
  * The prefix used for groups that contain the group
@@ -82,19 +82,6 @@ $config["metadata_prefix"] = "ilab_";
  */
 $config["level-hierarchy"] = array(
 		array(
-			"title" => "project",
-			"tab" => "projects",
-			"glyphicon" => "briefcase",
-			"canSnapshot" => false,
-			"canArchive" => false,
-			"metadata" => array(
-				"form" => "example.xml",
-				"prefix" => "project_",
-				"canView" => $config["role:administrator"], // TODO: rights should inherit
-				"canEdit" => $config["role:administrator"]
-			)
-		),
-		array(
 			"title" => "study",
 			"tab" => "studies",
 			"glyphicon" => "education",
@@ -139,7 +126,7 @@ $config["default-level"] = array(
  * Contains the configuration for the Home level
  */
 $config["base-level"] = array(
-	"title" => "projects",
+	"title" => "Studies",
 	"glyphicon" => "home",
 	"canSnapshot" => false,
 	"canArchive" => false,
