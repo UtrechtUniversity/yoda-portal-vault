@@ -152,7 +152,7 @@ class Intake extends MY_Controller
                     }
                 }
                 $this->data["folderValid"] = false;
-                $this->data["errorMessage"] = sprintf(lang('intake_error_project_no_exist'), $this->current_path);
+                $this->data["errorMessage"] = sprintf(lang('intake_error_study_no_exist'), $this->current_path);
                 $this->prepareHomeLevel($rodsaccount, $pathStart, $dirs, $dataArr);
             } else {
                 $this->pathlibrary->getCurrentLevelAndDepth($this->config, $segments, $this->head, $this->level_depth);
@@ -405,11 +405,11 @@ class Intake extends MY_Controller
         }
 
         if(sizeof($this->studies) === 0 || $this->studies[0] === false) {
-            displayMessage($this, lang('intake_error_no_projects'), true);
+            displayMessage($this, lang('intake_error_no_studies'), true);
             return false;
         }
         else if(!$this->study->validateStudy($this->studies, $studyID)){
-            $message = sprintf(lang('intake_error_project_no_exist'), $studyID, $this->getRedirect(), $this->studies[0]);
+            $message = sprintf(lang('intake_error_study_no_exist'), $studyID, $this->getRedirect(), $this->studies[0]);
             displayMessage($this, $message, true);
             return false;
         } else if(

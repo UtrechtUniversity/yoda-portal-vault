@@ -15,5 +15,5 @@ data-tablelanguage="<?=htmlentities($studiesTableLanguage);?>"
 
 </table>
 <?php } else {
-	echo sprintf('<div class="alert alert-danger">%1$s</div>', lang('intake_error_no_projects'));
+	echo sprintf('<div class="alert alert-danger">%1$s</div>', lang('intake_error_no_studies'));
 }
