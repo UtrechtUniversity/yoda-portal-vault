@@ -38,7 +38,7 @@
 |
 */
 $route['default_controller'] 		= "projects";
-$route[$module] 					= $module . "/tree";
+$route[$module] 					= $module . "/browse";
 //$route[$module . '/actions']		= $module . "/actions";
 //$route[$module . '/metadata']		= $module . "/metadata";
 

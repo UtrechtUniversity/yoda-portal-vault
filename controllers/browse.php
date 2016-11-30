@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Tree extends MY_Controller
+class Browse extends MY_Controller
 {
     public function __construct()
     {
@@ -20,28 +20,6 @@ class Tree extends MY_Controller
 
         $this->load->library('module', array(__DIR__));
         $this->load->library('pathlibrary');
-
-        /*
-        //$this->load->model('dataset');
-        $this->load->model('filesystem');
-        //$this->load->model('study');
-        $this->load->model('rodsuser');
-        //$this->load->model('metadatamodel');
-        //$this->load->model('metadataschemareader');
-        $this->load->helper('date');
-        $this->load->helper('language');
-        //$this->load->helper('intake');
-        $this->load->helper('form');
-        $this->load->language('intake');
-        $this->load->language('errors');
-        $this->load->language('form_errors');
-        $this->load->library('module', array(__DIR__));
-        $this->load->library('metadatafields');
-        $this->load->library('pathlibrary');
-        $this->load->library('SSP');
-        $this->studies = $this->dataset->getStudies($this->rodsuser->getRodsAccount());
-        sort($this->studies);
-        */
     }
 
     public function index()
@@ -63,7 +41,7 @@ class Tree extends MY_Controller
                 'username' => $this->rodsuser->getUsername(),
             ),
         ));
-        $this->load->view('tree', $this->data);
+        $this->load->view('browse', $this->data);
         $this->load->view('common-end');
     }
 
@@ -91,6 +69,18 @@ class Tree extends MY_Controller
 
     public function test()
     {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
 
+        $path = $pathStart;
+
+        //print_r($rodsaccount);
+        //print_r($pathStart);
+
+
+
+        $result = $this->filesystem->browse($rodsaccount, $path, "Collection", "COLL_NAME", "desc", 25, 0);
+
+        print_r($result);
     }
 }

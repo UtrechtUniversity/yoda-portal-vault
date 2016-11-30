@@ -19,7 +19,7 @@
  * in the portal. Must be set the same in the constants.r
  * file in the irods-ruleset-ilab
  */
-$config["intake-prefix"] 	= "grp-project-";
+$config["intake-prefix"] 	= "grp-";
 
 /*
  * The prefix used for groups that contain the group
