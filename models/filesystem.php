@@ -8,6 +8,37 @@ class Filesystem extends CI_Model {
         parent::__construct();
     }
 
+    static public function browseCollections($iRodsAccount, $path) {
+        $ruleBody = <<<'RULE'
+myRule {
+    iiBrowseSubCollections(*path, *result);
+}
+
+
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array("*result")
+            );
+
+            $result = $rule->execute();
+
+            print_r(json_decode($result, true));
+            exit;
+
+        } catch(RODSException $e) {
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
+    }
+
     static public function getStudiesInformation($iRodsAccount, $limit = 0, $offset = 0, $search = false) {
         $ruleBody = <<<'RULE'
 myRule {

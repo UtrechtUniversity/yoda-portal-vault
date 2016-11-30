@@ -126,7 +126,7 @@ $config["default-level"] = array(
  * Contains the configuration for the Home level
  */
 $config["base-level"] = array(
-	"title" => "Studies",
+	"title" => "Research",
 	"glyphicon" => "home",
 	"canSnapshot" => false,
 	"canArchive" => false,

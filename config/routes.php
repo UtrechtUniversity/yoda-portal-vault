@@ -38,9 +38,9 @@
 |
 */
 $route['default_controller'] 		= "projects";
-$route[$module] 					= $module . "/intake";
-$route[$module . '/actions']		= $module . "/actions";
-$route[$module . '/metadata']		= $module . "/metadata";
+$route[$module] 					= $module . "/tree";
+//$route[$module . '/actions']		= $module . "/actions";
+//$route[$module . '/metadata']		= $module . "/metadata";
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */
