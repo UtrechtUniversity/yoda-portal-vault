@@ -1,11 +1,9 @@
 <div class="row">
 
     <ol class="breadcrumb">
-        <li>Home</li>
-        <li>GPR-Test</li>
-        <li><strong>Project Test</strong></li>
+        <li class="active">Home</li>
     </ol>
-    <h1><i class="fa fa-folder-o" aria-hidden="true"></i>Project test</h1>
+    <!--<h1><i class="fa fa-folder-o" aria-hidden="true"></i>Project test</h1>-->
 
     <!--
     <div class="btn-group" role="group" aria-label="...">

@@ -32,9 +32,9 @@ class Browse extends MY_Controller
                 'lib/font-awesome/css/font-awesome.css'
             ),
             'scriptIncludes' => array(
-                'js/research.js',
                 'lib/datatables/js/jquery.dataTables.min.js',
                 'lib/datatables/js/dataTables.bootstrap.min.js',
+                'js/research.js',
             ),
             'activeModule'   => $this->module->name(),
             'user' => array(
@@ -47,20 +47,39 @@ class Browse extends MY_Controller
 
     public function data()
     {
-        $output = array('draw' => $this->input->get('draw'), 'recordsTotal' => 1, 'recordsFiltered' => 0, 'data' => array());
-        $output['data'][] = array(
-            '<i class="fa fa-folder" aria-hidden="true"></i> Raw social data <span class="label label-success pull-right">In vault</span>',
-            '2016-11-28 16:43:21'
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+
+        $dirPath = $this->input->get('dir');
+        $start = $this->input->get('start');
+        $length = $this->input->get('length');
+        $order = $this->input->get('order');
+        $orderDir = $order[0]['dir'];
+        $orderColumn = $order[0]['column'];
+        $orderColumns = array(
+            0 => 'COLL_NAME',
+            1 => 'COLL_MODIFY_TIME'
         );
-        $output['data'][] = array(
-            '<i class="fa fa-folder" aria-hidden="true"></i> Analysed social data',
-            '2016-11-28 11:23:22'
-        );
-        $output['data'][] = array(
-            //'<i class="fa fa-lock" aria-hidden="true"></i> Datapackage 1',
-            '<i class="fa fa-folder-o" aria-hidden="true"></i> Study economy',
-            '2016-11-28 14:03:22'
-        );
+        $draw = $this->input->get('draw');
+
+        $path = $pathStart;
+        if (!empty($dirPath)) {
+            $path .= $dirPath;
+        }
+
+        $result = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+
+        $output = array('draw' => $draw, 'recordsTotal' => $result['summary']['total'], 'recordsFiltered' => 0, 'data' => array());
+
+        if ($result['summary']['returned'] > 0) {
+            foreach ($result['rows'] as $row) {
+                $path = str_replace($pathStart, '', $row['path']);
+                $output['data'][] = array(
+                    '<span class="browse" data-path="'. $path .'">' . trim($row['basename'], '/') . '</span>',
+                    date('Y-m-d H:i:s', $row['modify_time'])
+                );
+            }
+        }
 
         echo json_encode($output);
 
@@ -69,6 +88,7 @@ class Browse extends MY_Controller
 
     public function test()
     {
+
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
 

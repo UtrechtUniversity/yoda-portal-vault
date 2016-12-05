@@ -6,3 +6,11 @@
 .btn-group {
     margin-bottom: 20px;
 }
+
+.browse {
+    cursor: pointer;
+}
+
+ol.breadcrumb li.active {
+    font-weight: bold;
+}
