@@ -18,7 +18,6 @@ $( document ).ready(function() {
 
 
     $('#file-browser tbody').on('click', 'tr', function () {
-        // alert('hier');
         datasetRowClickForDetails($(this), mainTable);
     });
 
@@ -30,7 +29,10 @@ function datasetRowClickForDetails(obj, dtTable) {
 
     var tr = obj.closest('tr'),
         row = dtTable.row(tr),
-        cohortId = tr.find('.row-id').data('row-id');
+        studyId = tr.find("td:first").html(),
+        objectId = $('td:eq(1)', tr).text(),
+        revisionObjectId = '',
+        revisionStudyID = '';
 
     if ( row.child.isShown() ) {
         // This row is already open - close it
@@ -39,11 +41,9 @@ function datasetRowClickForDetails(obj, dtTable) {
     }
     else {
         // Open row for panel information
-        //var url = base_url + ['cohortqueries','getCohortRowDetailView',cohortId].join('/'),
-        //    ;
 
         $.ajax({
-            url: 'revision/detail',
+            url: 'revision/detail/' + studyId + '/' + objectId,
             type: 'GET',
             dataType: 'json',
             success: function(data) {
@@ -53,9 +53,100 @@ function datasetRowClickForDetails(obj, dtTable) {
                     row.child( htmlDetailView ).show();
 
                     tr.addClass('shown');
+
+                    $('.btn-rev-download').on('click', function () {
+                        handleButtonDownload($(this));
+
+                        event.stopPropagation();
+
+//                        alert('download: ' + revisionObjectId + ' - ' + revisionStudyID );
+                    });
+
+                    $('.btn-rev-actualise').on('click', function () {
+                        // element = $(this).parent().parent().parent();
+                        // revisionStudyID = element.data('study-id');
+                        // revisionObjectId = element.data('object-id');
+                        handleButtonActualise($(this));
+                        event.stopPropagation();
+                        // alert('actualise: ' + revisionObjectId);
+                    });
+
+                    $('.btn-rev-delete').on('click', function () {
+                        // element = $(this).parent().parent().parent();
+                        // revisionStudyID = element.data('study-id');
+                        // revisionObjectId = element.data('object-id');
+                        handleButtonDelete($(this));
+                        event.stopPropagation();
+                        //alert('delete: ' + revisionObjectId);
+                    });
                 }
             },
         });
     }
+}
+
+
+function handleButtonDownload(button)
+{
+    var element = button.parent().parent().parent();
+    revisionStudyID = element.data('study-id');
+    revisionObjectId = element.data('object-id');
+
+    $.ajax({
+        url: 'revision/download/' + revisionStudyID + '/' + revisionObjectId,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            if(data.hasError){
+                alert('HAS ERROR');
+            }
+            else {
+                alert('ALL OK');
+            }
+        },
+    });
+}
+
+function handleButtonActualise(button){
+    var element = button.parent().parent().parent();
+    revisionStudyID = element.data('study-id');
+    revisionObjectId = element.data('object-id');
+
+    $.ajax({
+        url: 'revision/actualise/'  + revisionStudyID + '/' + revisionObjectId,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            if(data.hasError){
+                alert('HAS ERROR');
+            }
+            else {
+                alert('ALL OK');
+            }
+        },
+    });
+
+}
+
+function handleButtonDelete(button)
+{
+    var element = button.parent().parent().parent();
+    revisionStudyID = element.data('study-id');
+    revisionObjectId = element.data('object-id');
+
+    $.ajax({
+        url: 'revision/delete/' + revisionStudyID + '/' + revisionObjectId,
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            if(data.hasError){
+                alert('HAS ERROR');
+            }
+            else {
+                alert('ALL OK');
+            }
+        },
+    });
+
 }
 

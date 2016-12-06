@@ -1,3 +1,11 @@
+<?php
+
+    if(!($permissions[$this->config->item('role:contributor')] OR $permissions[$this->config->item('role:reader')])){
+        // insufficient rights
+        return false;
+    }
+
+?>
 <div class="col-md-12">
     <div class="row">
 <!--        <div class="panel panel-default">-->
@@ -5,15 +13,15 @@
                 <table id="" class="table" >
                     <thead>
                     <tr>
-                        <th>File revisions</th>
-                        <th>Modification date</th>
+                        <th>Revisions</th>
+                        <th>Revision date</th>
                         <th>File size</th>
                         <th>Path</th>
                     </tr>
                     </thead>
                     <tbody>
                         <?php foreach($revisionFiles as $file): ?>
-                            <tr>
+                            <tr data-object-id="<?php echo $file->revisionObjectId; ?>" data-study-id="<?php echo $file->revisionStudyId; ?>">
                                 <td>
                                     <?php echo $file->revisionName ?>
                                 </td>
@@ -28,13 +36,20 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group" aria-label="...">
-                                        <button type="button" class="btn btn-default"><i class="fa fa-download" aria-hidden="true"></i> Download</button>
-                                        <button type="button" class="btn btn-default"><i class="fa fa-magic" aria-hidden="true"></i> Actualise</button>
-                                        <button class="btn btn-default disabled" href="#">
-                                            <i class="fa fa-remove"></i> Delete
-                                        </button>
-                                    </div>
+                                        <?php // all that can get here are allowed .. no specific ?>
+                                        <button type="button" class="btn btn-default btn-rev-download"><i class="fa fa-download" aria-hidden="true"></i> Download</button>
 
+
+                                        <?php if($permissions[$this->config->item('role:contributor')]): ?>
+                                            <button type="button" class="btn btn-default btn-rev-actualise"><i class="fa fa-magic" aria-hidden="true"></i> Actualise</button>
+                                        <?php endif; ?>
+
+                                        <?php if($permissions[$this->config->item('role:contributor')]): ?>
+                                            <button class="btn btn-default disabled btn-rev-delete" disabled>
+                                                <i class="fa fa-remove"></i> Delete
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
