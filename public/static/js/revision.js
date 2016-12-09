@@ -1,12 +1,15 @@
 $( document ).ready(function() {
     var mainTable = $('#file-browser').DataTable( {
         "bFilter": false,
-        "bInfo": false,
-        "bLengthChange": false,
+        "bInfo": true,
+        "bLengthChange": true,
         "ajax": "revision/data",
         "processing": true,
         "serverSide": true,
-        "pageLength": 20,
+        "iDisplayLength": 10,
+        "drawCallback": function(settings) {
+            mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
+        }
         /*
         "aoColumnDefs": [{
             "bSortable": false,
@@ -19,6 +22,11 @@ $( document ).ready(function() {
 
     $('#file-browser tbody').on('click', 'tr', function () {
         datasetRowClickForDetails($(this), mainTable);
+    });
+
+    $('.btn-search').on('click', function(){
+        mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
+        mainTable.ajax.reload();
     });
 
 });
