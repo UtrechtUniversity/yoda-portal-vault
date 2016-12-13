@@ -41,6 +41,9 @@ class Browse extends MY_Controller
                 'username' => $this->rodsuser->getUsername(),
             ),
         ));
+
+        $this->data['items'] = $this->config->item('browser-items-per-page');
+
         $this->load->view('browse', $this->data);
         $this->load->view('common-end');
     }
@@ -61,25 +64,42 @@ class Browse extends MY_Controller
             1 => 'COLL_MODIFY_TIME'
         );
         $draw = $this->input->get('draw');
+        $itemsPerPage = $this->config->item('browser-items-per-page');
 
         $path = $pathStart;
         if (!empty($dirPath)) {
             $path .= $dirPath;
         }
+        $rows = array();
 
-        $result = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
-
-        $output = array('draw' => $draw, 'recordsTotal' => $result['summary']['total'], 'recordsFiltered' => 0, 'data' => array());
-
-        if ($result['summary']['returned'] > 0) {
-            foreach ($result['rows'] as $row) {
-                $path = str_replace($pathStart, '', $row['path']);
-                $output['data'][] = array(
-                    '<span class="browse" data-path="'. $path .'">' . trim($row['basename'], '/') . '</span>',
+        // Collections
+        $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+        if ($collections['summary']['returned'] > 0) {
+            foreach ($collections['rows'] as $row) {
+                $filePath = str_replace($pathStart, '', $row['path']);
+                $rows[] = array(
+                    '<span class="browse" data-path="'. $filePath .'">' . trim($row['basename'], '/') . '</span>',
                     date('Y-m-d H:i:s', $row['modify_time'])
                 );
             }
         }
+
+        // Objects
+        $objects = $this->filesystem->browse($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
+        if ($objects['summary']['returned'] > 0) {
+            foreach ($objects['rows'] as $row) {
+                $filePath = str_replace($pathStart, '', $row['path']);
+                $rows[] = array(
+                    '<span data-path="'. $filePath .'">' . trim($row['basename'], '/') . '</span>',
+                    date('Y-m-d H:i:s', $row['modify_time'])
+                );
+            }
+        }
+
+
+        $output = array('draw' => $draw, 'recordsTotal' => $collections['summary']['total'], 'recordsFiltered' => 0, 'data' => $rows);
+
+
 
         echo json_encode($output);
 
@@ -99,7 +119,8 @@ class Browse extends MY_Controller
 
 
 
-        $result = $this->filesystem->browse($rodsaccount, $path, "Collection", "COLL_NAME", "desc", 25, 0);
+        //$result = $this->filesystem->browse($rodsaccount, $path, "Collection", "COLL_NAME", "desc", 25, 0);
+        $result = $this->filesystem->browse($rodsaccount, $path, "DataObject", "COLL_NAME", "desc", 25, 0);
 
         print_r($result);
     }

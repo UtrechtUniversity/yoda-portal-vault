@@ -1,25 +1,3 @@
-$( document ).ready(function() {
-    $('#file-browser').DataTable( {
-        "bFilter": false,
-        "bInfo": false,
-        "bLengthChange": false,
-        "ajax": "browse/data",
-        "processing": true,
-        "serverSide": true,
-        "pageLength": 20,
-        "drawCallback": function(settings) {
-            $( ".browse" ).on( "click", function() {
-                browse($(this).attr('data-path'));
-            });
-        }
-    });
-
-    $( "ol.breadcrumb li.browse" ).on( "click", function() {
-        console.log(123);
-        //browse($(this).attr('data-path'));
-    });
-});
-
 function browse(dir)
 {
     var path = makeBreadcrumb(dir);
