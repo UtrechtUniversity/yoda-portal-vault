@@ -1,8 +1,23 @@
+$( document ).ready(function() {
+    $(".dropdown-menu li a").click(function(){
+
+        $("#search_concept").html($(this).text());
+        //$(".btn:first-child").html($(this).html());
+        //$(".btn:first-child").val($(this).html());
+
+    });
+});
+
 function browse(dir)
 {
     var path = makeBreadcrumb(dir);
     changeBrowserUrl(path);
     buildFileBrowser(dir);
+}
+
+function searchSelectChanged(sel)
+{
+    console.log(sel);
 }
 
 function makeBreadcrumb(dir)
