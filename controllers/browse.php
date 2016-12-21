@@ -106,6 +106,75 @@ class Browse extends MY_Controller
 
     }
 
+    public function search()
+    {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+
+        $dirPath = $this->input->get('dir');
+        $filter = $this->input->get('filter');
+        $type = $this->input->get('type');
+        $start = $this->input->get('start');
+        $length = $this->input->get('length');
+        $order = $this->input->get('order');
+        $orderDir = $order[0]['dir'];
+        $orderColumn = $order[0]['column'];
+        $orderColumns = array(
+            0 => 'COLL_NAME',
+            1 => 'COLL_MODIFY_TIME'
+        );
+        $draw = $this->input->get('draw');
+        $itemsPerPage = $this->config->item('browser-items-per-page');
+
+        $path = $pathStart;
+        if (!empty($dirPath)) {
+            $path .= $dirPath;
+        }
+        $rows = array();
+
+        // Collections
+
+        if ($type == 'metadata') {
+            $collections = $this->filesystem->searchByUserMetadata($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+        } else {
+            $collections = $this->filesystem->searchByName($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+        }
+
+        if ($collections['summary']['returned'] > 0) {
+            foreach ($collections['rows'] as $row) {
+                $filePath = str_replace($pathStart, '', $row['path']);
+                $rows[] = array(
+                    '<i class="fa fa-folder-o" aria-hidden="true"></i> ' . $row['basename'],
+                    '<span class="browse" data-path="'. $filePath .'">' . trim($filePath, '/') . '</span>'
+                );
+            }
+        }
+
+        // Objects
+        if ($type == 'metadata') {
+            $collections = $this->filesystem->searchByUserMetadata($rodsaccount, $path, $filter, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
+        } else {
+            $objects = $this->filesystem->searchByName($rodsaccount, $path, $filter, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
+        }
+        if ($objects['summary']['returned'] > 0) {
+            foreach ($objects['rows'] as $row) {
+                $filePath = str_replace($pathStart, '', $row['path']);
+                $rows[] = array(
+                    '<i class="fa fa-file-o" aria-hidden="true"></i> ' . $row['basename'],
+                    '<span class="browse" data-path="'. $filePath .'">' . trim($filePath, '/') . '</span>'
+                );
+            }
+        }
+
+
+        $output = array('draw' => $draw, 'recordsTotal' => $collections['summary']['total'], 'recordsFiltered' => 0, 'data' => $rows);
+
+
+
+        echo json_encode($output);
+
+    }
+
     public function test()
     {
 
