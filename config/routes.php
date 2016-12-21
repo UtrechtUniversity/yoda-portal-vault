@@ -37,7 +37,7 @@
 | in the URL cannot be matched to a valid route.
 |
 */
-$route['default_controller'] 		= "projects";
+$route['default_controller'] 		= $module;
 
 $route[$module] 					= $module . "/browse";
 $route[$module . '/revision']       = $module . "/revision";

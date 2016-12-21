@@ -55,7 +55,7 @@
 | although this won't be harmful.
 */
 
-$module['name'] 		= "projects";
+$module['name'] 		= "research";
 $module['label'] 		= "Research";
 $module['glyph'] 		= "book";
 $module['menu_order'] 	= 10;
