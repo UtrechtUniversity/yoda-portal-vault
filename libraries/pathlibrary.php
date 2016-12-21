@@ -52,11 +52,18 @@ class PathLibrary {
      *                      including the intake prefix
      */
 	public function getPathStart($config) {
-		return sprintf(
+		/*
+	    return sprintf(
                 "/%s/home/%s", 
                 $config->item('rodsServerZone'), 
                 $config->item('intake-prefix')
             );
+		*/
+
+        return sprintf(
+            "/%s/home",
+            $config->item('rodsServerZone')
+        );
 	}
 
     /**

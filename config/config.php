@@ -133,6 +133,11 @@ $config["base-level"] = array(
 	"metadata" => false
 );
 
+/**
+ * Browser config
+ */
+$config['browser-items-per-page'] = 10;
+
 if (file_exists(dirname(__FILE__) . '/config_local.php'))
 	include(    dirname(__FILE__) . '/config_local.php');
 
