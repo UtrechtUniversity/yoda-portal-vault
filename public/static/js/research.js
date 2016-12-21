@@ -1,11 +1,22 @@
 $( document ).ready(function() {
     $(".dropdown-menu li a").click(function(){
-
-        $("#search_concept").html($(this).text());
-        //$(".btn:first-child").html($(this).html());
-        //$(".btn:first-child").val($(this).html());
-
+        searchSelectChanged($(this));
     });
+
+    $(".search-btn").click(function(){
+        search($("#search-filter").val(), $("#search_concept").attr('data-type'));
+    });
+
+    $("#search-filter").bind('keypress', function(e) {
+        if(e.keyCode==13) {
+            search($("#search-filter").val(), $("#search_concept").attr('data-type'));
+        }
+    });
+
+    $(".close-search-results").click(function() {
+        closeSearchResults();
+    });
+
 });
 
 function browse(dir)
@@ -15,9 +26,35 @@ function browse(dir)
     buildFileBrowser(dir);
 }
 
+function search(value, type)
+{
+    if (typeof value != 'undefined' && value.length > 0 ) {
+        var url = "browse/search?filter=" + value + "&type=" + type;
+
+        var search = $('#search').DataTable();
+        search.ajax.url(url).load();
+
+        $('.search-string').text(value);
+        showSearchResults();
+    }
+
+    return true;
+}
+
+function closeSearchResults()
+{
+    $('.search-results').hide();
+}
+
+function showSearchResults()
+{
+    $('.search-results').show();
+}
+
 function searchSelectChanged(sel)
 {
-    console.log(sel);
+    $("#search_concept").html(sel.text());
+    $("#search_concept").attr('data-type', sel.attr('data-type'));
 }
 
 function makeBreadcrumb(dir)

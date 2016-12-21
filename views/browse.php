@@ -14,6 +14,21 @@
                 });
             }
         });
+
+        $('#search').DataTable( {
+            "bFilter": false,
+            "bInfo": false,
+            "bLengthChange": false,
+            "ajax": "browse/search",
+            "processing": true,
+            "serverSide": true,
+            "pageLength": <?php echo $items; ?>,
+            "drawCallback": function(settings) {
+                $( ".browse" ).on( "click", function() {
+                    browse($(this).attr('data-path'));
+                });
+            }
+        });
     });
 </script>
 
@@ -21,20 +36,39 @@
     <div class="input-group" style="margin-bottom:20px;">
         <div class="input-group-btn search-panel">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                <span id="search_concept">Filter by name</span> <span class="caret"></span>
+                <span id="search_concept" data-type="name">Filter by name</span> <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
-                <li><a href="#">Filter by name</a></li>
-                <li><a href="#">Filter by metadata</a></li>
-                <li><a href="#">Filter by status</a></li>
-                <li><a href="#">Find revision for name</a></li>
+                <li><a href="#" data-type="name">Filter by name</a></li>
+                <li><a href="#" data-type="metadata">Filter by metadata</a></li>
+                <li><a href="#" data-type="status">Filter by status</a></li>
+                <li><a href="#" data-type="revision">Find revision for name</a></li>
             </ul>
         </div>
         <input type="hidden" name="search_param" value="all" id="search_param">
-        <input type="text" class="form-control" name="x" placeholder="Search term...">
+        <input type="text" class="form-control" id="search-filter" placeholder="Search term...">
         <span class="input-group-btn">
-            <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
+            <button class="btn btn-default search-btn" type="button"><span class="glyphicon glyphicon-search"></span></button>
         </span>
+    </div>
+
+    <div class="panel panel-default search-results">
+        <div class="panel-heading">
+            <h3 class="panel-title">Search results for '<span class="search-string"></span>'</h3>
+
+            <button class="btn btn-default pull-right close-search-results">Close</button>
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body">
+            <table class="table table-bordered" id="search" width="100%">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
     </div>
 </div>
 

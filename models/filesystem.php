@@ -8,7 +8,8 @@ class Filesystem extends CI_Model {
         parent::__construct();
     }
 
-    static public function browse($iRodsAccount, $path, $type, $orderBy, $orderSort, $limit, $offset = 0) {
+    static public function browse($iRodsAccount, $path, $type, $orderBy, $orderSort, $limit, $offset = 0)
+    {
         $output = array();
 
         $ruleBody = <<<'RULE'
@@ -25,6 +26,112 @@ RULE;
                 $ruleBody,
                 array(
                     "*path" => $path,
+                    "*collectionOrDataObject" => $type,
+                    "*orderby" => $orderBy,
+                    "*ascdesc" => $orderSort,
+                    "*limit" => $limit,
+                    "*offset" => $offset
+                ),
+                array("*result")
+            );
+
+            $ruleResult = $rule->execute();
+            $results = json_decode($ruleResult['*result'], true);
+
+            $summary = $results[0];
+            unset($results[0]);
+
+            $rows = $results;
+            $output = array(
+                'summary' => $summary,
+                'rows' => $rows
+            );
+
+            return $output;
+
+        } catch(RODSException $e) {
+            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
+            exit;
+
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
+    }
+
+    static public function searchByName($iRodsAccount, $path, $string, $type, $orderBy, $orderSort, $limit, $offset = 0)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    *l = int(*limit);
+    *o = int(*offset);
+
+    iiSearchByName(*path, *searchstring, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path,
+                    "*searchstring" => $string,
+                    "*collectionOrDataObject" => $type,
+                    "*orderby" => $orderBy,
+                    "*ascdesc" => $orderSort,
+                    "*limit" => $limit,
+                    "*offset" => $offset
+                ),
+                array("*result")
+            );
+
+            $ruleResult = $rule->execute();
+            $results = json_decode($ruleResult['*result'], true);
+
+            $summary = $results[0];
+            unset($results[0]);
+
+            $rows = $results;
+            $output = array(
+                'summary' => $summary,
+                'rows' => $rows
+            );
+
+            return $output;
+
+        } catch(RODSException $e) {
+            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
+            exit;
+
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
+    }
+
+    static public function searchByUserMetadata($iRodsAccount, $path, $string, $type, $orderBy, $orderSort, $limit, $offset = 0)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    *l = int(*limit);
+    *o = int(*offset);
+
+    iiSearchByMetadata(*path, *searchstring, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path,
+                    "*searchstring" => $string,
                     "*collectionOrDataObject" => $type,
                     "*orderby" => $orderBy,
                     "*ascdesc" => $orderSort,
