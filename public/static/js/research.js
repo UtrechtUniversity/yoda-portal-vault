@@ -29,10 +29,42 @@ function browse(dir)
 function search(value, type)
 {
     if (typeof value != 'undefined' && value.length > 0 ) {
-        var url = "browse/search?filter=" + value + "&type=" + type;
+        // Table columns definition
+        var columns = [];
+        if (type == 'filename') {
+            columns = ['Name', 'Location'];
+        } else {
+            columns = ['Location'];
+        }
 
-        var search = $('#search').DataTable();
-        search.ajax.url(url).load();
+        var tableHeaders;
+        $.each(columns, function(i, val){
+            tableHeaders += "<th>" + val + "</th>";
+        });
+
+        // Destroy current Datatable
+        var datatable = $('#search').DataTable();
+        datatable.destroy();
+
+        // Create the columns
+        $('#search thead tr').html(tableHeaders);
+
+        // Initialize new Datatable
+        var url = "browse/search?filter=" + value + "&type=" + type;
+        $('#search').DataTable( {
+            "bFilter": false,
+            "bInfo": false,
+            "bLengthChange": false,
+            "ajax": url,
+            "processing": true,
+            "serverSide": true,
+            "pageLength": 10,
+            "drawCallback": function(settings) {
+                $( ".browse" ).on( "click", function() {
+                    browse($(this).attr('data-path'));
+                });
+            }
+        });
 
         $('.search-string').text(value);
         showSearchResults();

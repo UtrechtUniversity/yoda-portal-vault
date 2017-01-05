@@ -14,21 +14,6 @@
                 });
             }
         });
-
-        $('#search').DataTable( {
-            "bFilter": false,
-            "bInfo": false,
-            "bLengthChange": false,
-            "ajax": "browse/search",
-            "processing": true,
-            "serverSide": true,
-            "pageLength": <?php echo $items; ?>,
-            "drawCallback": function(settings) {
-                $( ".browse" ).on( "click", function() {
-                    browse($(this).attr('data-path'));
-                });
-            }
-        });
     });
 </script>
 
@@ -36,10 +21,11 @@
     <div class="input-group" style="margin-bottom:20px;">
         <div class="input-group-btn search-panel">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                <span id="search_concept" data-type="name">Filter by name</span> <span class="caret"></span>
+                <span id="search_concept" data-type="filename">Filter by filename</span> <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
-                <li><a href="#" data-type="name">Filter by name</a></li>
+                <li><a href="#" data-type="filename">Filter by filename</a></li>
+                <li><a href="#" data-type="location">Filter by location</a></li>
                 <li><a href="#" data-type="metadata">Filter by metadata</a></li>
                 <li><a href="#" data-type="status">Filter by status</a></li>
                 <li><a href="#" data-type="revision">Find revision for name</a></li>
