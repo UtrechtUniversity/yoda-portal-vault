@@ -51,6 +51,42 @@ RULE;
         return array();
     }
 
+    static public function collectionDetails($iRodsAccount, $path)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    iiCollectionDetails(*path, *result);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array("*result")
+            );
+
+            $ruleResult = $rule->execute();
+            $output = json_decode($ruleResult['*result'], true);
+
+            return $output;
+
+        } catch(RODSException $e) {
+            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
+            exit;
+
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
+    }
+
+
 
     static public function browseCollections($iRodsAccount, $path) {
         $ruleBody = <<<'RULE'

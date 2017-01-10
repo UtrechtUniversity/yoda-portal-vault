@@ -3,6 +3,12 @@ $( document ).ready(function() {
         searchSelectChanged($(this));
     });
 
+    $('.btn-group button.information-type').click(function(){
+        toggleButtonType($(this).attr('data-type'), $(this).attr('data-path'));
+    });
+
+    $('.btn-group button.information-type')
+
     $(".search-btn").click(function(){
         search($("#search-filter").val(), $("#search_concept").attr('data-type'));
     });
@@ -23,6 +29,7 @@ function browse(dir)
 {
     var path = makeBreadcrumb(dir);
     changeBrowserUrl(path);
+    topInformation(dir);
     buildFileBrowser(dir);
 }
 
@@ -148,4 +155,42 @@ function changeBrowserUrl(path)
     }
 
     history.replaceState({} , {}, url);
+}
+
+function topInformation(dir)
+{
+    $('.top-information').hide();
+    if (typeof dir != 'undefined') {
+        $.getJSON("browse/top_data?dir=" + dir, function(data){
+            var type = data.org_type;
+            var icon = "fa-folder-o";
+
+            if (type == 'Folder' || typeof type == 'undefined') {
+                icon = "fa-folder-o";
+
+                // Folder toggle btn
+                $('.btn-group button.information-type').html('<i class="fa fa-folder-o" aria-hidden="true"></i> Is folder');
+                $('.btn-group button.information-type').attr('data-type', 'folder');
+                $('.btn-group button.information-type').attr('data-path', dir);
+
+            } else if (type == 'Datapackage') {
+                icon = "fa-folder";
+
+                // Datapackage toggle btn
+                $('.btn-group button.information-type').html('<i class="fa fa-folder" aria-hidden="true"></i> Is datapackage');
+                $('.btn-group button.information-type').attr('data-type', 'datapackage');
+                $('.btn-group button.information-type').attr('data-path', dir);
+            } else if (type == "Research Team") {
+                icon = "fa-users";
+            }
+
+            $('.top-information h1').html('<i class="fa '+ icon +'" aria-hidden="true"></i> ' + data.basename);
+            $('.top-information').show();
+        });
+    }
+}
+
+function toggleButton(currentType, path)
+{
+    
 }

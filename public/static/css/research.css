@@ -28,3 +28,7 @@ ol.breadcrumb li.active {
 .search-results {
     display: none;
 }
+
+.top-information {
+    display: none;
+}

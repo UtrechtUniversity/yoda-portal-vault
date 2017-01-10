@@ -63,21 +63,25 @@
     <ol class="breadcrumb">
         <li class="active">Home</li>
     </ol>
-    <!--<h1><i class="fa fa-folder-o" aria-hidden="true"></i>Project test</h1>-->
+    <div class="top-information">
+        <h1></h1>
 
 
-    <div class="btn-group" role="group" aria-label="...">
-        <!--
-        <button type="button" class="btn btn-default"><i class="fa fa-folder-o" aria-hidden="true"></i> Is folder</button>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default information-type" data-type="" data-path=""></button>
 
-        <button class="btn btn-default disabled" href="#">
-            <i class="fa fa-unlock"></i> Unlocked
-        </button>
-        <button type="button" class="btn btn-default disabled">
-            <i class="fa fa-university" aria-hidden="true"></i>
-            Save to vault</button>
-        <button type="button" class="btn btn-default">Edit metadata</button>
-        -->
+
+            <!--
+            <button type="button" class="btn btn-default" data-type=""><i class="fa fa-folder-o" aria-hidden="true"></i> Is folder</button>
+            <button class="btn btn-default disabled" href="#">
+                <i class="fa fa-unlock"></i> Unlocked
+            </button>
+            <button type="button" class="btn btn-default disabled">
+                <i class="fa fa-university" aria-hidden="true"></i>
+                Save to vault</button>
+            <button type="button" class="btn btn-default">Edit metadata</button>
+            -->
+        </div>
     </div>
 
 

@@ -48,6 +48,17 @@ class Browse extends MY_Controller
         $this->load->view('common-end');
     }
 
+    public function top_data()
+    {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $dirPath = $this->input->get('dir');
+
+        $output = $this->filesystem->collectionDetails($rodsaccount, $pathStart . $dirPath);
+
+        echo json_encode($output);
+    }
+
     public function data()
     {
         $rodsaccount = $this->rodsuser->getRodsAccount();
@@ -77,7 +88,7 @@ class Browse extends MY_Controller
         $icon = 'fa-folder-o';
         // Home path
         if ($path == $pathStart) {
-            //$path = $path . '/gpr-*';
+            //$path = $path . '/grp-';
             $icon = 'fa-users';
         }
 
