@@ -7,8 +7,6 @@ $( document ).ready(function() {
         toggleButtonType($(this).attr('data-type'), $(this).attr('data-path'));
     });
 
-    $('.btn-group button.information-type')
-
     $(".search-btn").click(function(){
         search($("#search-filter").val(), $("#search_concept").attr('data-type'));
     });
@@ -192,5 +190,5 @@ function topInformation(dir)
 
 function toggleButton(currentType, path)
 {
-    
+
 }

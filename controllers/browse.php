@@ -91,7 +91,7 @@ class Browse extends MY_Controller
             //$path = $path . '/grp-';
             $icon = 'fa-users';
         }
-
+        
         $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
         if ($collections['summary']['returned'] > 0) {
             foreach ($collections['rows'] as $row) {
