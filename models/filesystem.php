@@ -51,6 +51,42 @@ RULE;
         return array();
     }
 
+    static public function collectionDetails($iRodsAccount, $path)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    iiCollectionDetails(*path, *result);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array("*result")
+            );
+
+            $ruleResult = $rule->execute();
+            $output = json_decode($ruleResult['*result'], true);
+
+            return $output;
+
+        } catch(RODSException $e) {
+            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
+            exit;
+
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
+    }
+
+
 
     static public function browseCollections($iRodsAccount, $path) {
         $ruleBody = <<<'RULE'
@@ -239,6 +275,66 @@ RULE;
         }
 
         return array();
+    }
+
+    static public function createDatapackage($iRodsAccount, $path)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    iiCreateDatapackage(*path);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array()
+            );
+
+            $rule->execute();
+
+            return true;
+
+        } catch(RODSException $e) {
+            //return false;
+            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
+            print_r($path);
+            //print_r($e->showStacktrace());
+            exit;
+        }
+    }
+
+    static public function demoteDatapackage($iRodsAccount, $path)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    iiDemoteDatapackage(*path);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array()
+            );
+
+            $rule->execute();
+
+            return true;
+
+        } catch(RODSException $e) {
+            return false;
+        }
     }
 
     static public function getStudiesInformation($iRodsAccount, $limit = 0, $offset = 0, $search = false) {

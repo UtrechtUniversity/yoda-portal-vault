@@ -48,6 +48,17 @@ class Browse extends MY_Controller
         $this->load->view('common-end');
     }
 
+    public function top_data()
+    {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $dirPath = $this->input->get('dir');
+
+        $output = $this->filesystem->collectionDetails($rodsaccount, $pathStart . $dirPath);
+
+        echo json_encode($output);
+    }
+
     public function data()
     {
         $rodsaccount = $this->rodsuser->getRodsAccount();
@@ -72,13 +83,21 @@ class Browse extends MY_Controller
         }
         $rows = array();
 
+
         // Collections
+        $icon = 'fa-folder-o';
+        // Home path
+        if ($path == $pathStart) {
+            //$path = $path . '/grp-';
+            $icon = 'fa-users';
+        }
+        
         $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
         if ($collections['summary']['returned'] > 0) {
             foreach ($collections['rows'] as $row) {
                 $filePath = str_replace($pathStart, '', $row['path']);
                 $rows[] = array(
-                    '<span class="browse" data-path="'. $filePath .'">' . trim($row['basename'], '/') . '</span>',
+                    '<span class="browse" data-path="'. $filePath .'"><i class="fa ' . $icon .'" aria-hidden="true"></i> ' . trim($row['basename'], '/') . '</span>',
                     date('Y-m-d H:i:s', $row['modify_time'])
                 );
             }
@@ -90,12 +109,11 @@ class Browse extends MY_Controller
             foreach ($objects['rows'] as $row) {
                 $filePath = str_replace($pathStart, '', $row['path']);
                 $rows[] = array(
-                    '<span data-path="'. $filePath .'">' . trim($row['basename'], '/') . '</span>',
+                    '<span data-path="'. $filePath .'"><i class="fa fa-file-o" aria-hidden="true"></i> ' . trim($row['basename'], '/') . '</span>',
                     date('Y-m-d H:i:s', $row['modify_time'])
                 );
             }
         }
-
 
         $output = array('draw' => $draw, 'recordsTotal' => $collections['summary']['total'], 'recordsFiltered' => 0, 'data' => $rows);
 
@@ -180,51 +198,38 @@ class Browse extends MY_Controller
             }
         }
 
-        //die(var_dump($columns));
-
         $output = array('draw' => $draw, 'recordsTotal' => $result['summary']['total'], 'recordsFiltered' => 0, 'data' => $rows, 'columns' => $columns);
-
-        /*
-        // Collections
-        if ($type == 'metadata') {
-            $collections = $this->filesystem->searchByUserMetadata($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
-        } else if ($type == 'location') {
-            $collections = $this->filesystem->searchByName($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
-        }
-
-        if (isset($collections['summary']) && $collections['summary']['returned'] > 0) {
-            foreach ($collections['rows'] as $row) {
-                $filePath = str_replace($pathStart, '', $row['path']);
-                $rows[] = array(
-                    '<i class="fa fa-folder-o" aria-hidden="true"></i> ' . $row['basename'],
-                    '<span class="browse" data-path="' . $filePath . '">' . trim($filePath, '/') . '</span>'
-                );
-            }
-        }
-
-        // Objects
-        if ($type == 'metadata') {
-            $objects = $this->filesystem->searchByUserMetadata($rodsaccount, $path, $filter, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
-        } else if ($type == 'name') {
-            $objects = $this->filesystem->searchByName($rodsaccount, $path, $filter, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
-        }
-
-        if (isset($objects['summary']) && $objects['summary']['returned'] > 0) {
-            foreach ($objects['rows'] as $row) {
-                $filePath = str_replace($pathStart, '', $row['path']);
-                $rows[] = array(
-                    '<i class="fa fa-file-o" aria-hidden="true"></i> ' . $row['basename'],
-                    '<span class="browse" data-path="' . $filePath . '">' . trim($filePath, '/') . '</span>'
-                );
-            }
-        }
-
-        $output = array('draw' => $draw, 'recordsTotal' => $collections['summary']['total'], 'recordsFiltered' => 0, 'data' => $rows);
-        */
 
 
         echo json_encode($output);
 
+    }
+
+    public function change_directory_type()
+    {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $type = $this->input->get('type');
+        $path = $this->input->get('path');
+        $output = array();
+
+        if ($type == 'datapackage') {
+            // create datapackage Datapackage
+            $result = $this->filesystem->createDatapackage($rodsaccount, $pathStart . $path);
+            $beforeAction = 'folder';
+        } else {
+            // Demote Datapackage
+            $result = $this->filesystem->demoteDatapackage($rodsaccount, $pathStart . $path);
+            $beforeAction = 'datapackage';
+        }
+
+        if ($result) {
+            $output = array('success' => true, 'type' => $type);
+        } else {
+            $output = array('success' => false, 'type' => $beforeAction);
+        }
+
+        echo json_encode($output);
     }
 
     public function test()
