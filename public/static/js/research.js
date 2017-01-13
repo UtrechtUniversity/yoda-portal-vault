@@ -208,7 +208,7 @@ function toggleDirectoryType(currentType, path)
             $('.btn-group button.directory-type').attr('data-type', 'folder');
 
             // Title
-            $('.top-information h1').removeClass("fa-folder").addClass("fa-folder-o");
+            $('.top-information h1 i').removeClass("fa-folder").addClass("fa-folder-o");
         } else {
             $('.btn-group button.directory-type').html('<i class="fa fa-folder" aria-hidden="true"></i> Is datapackage');
             $('.btn-group button.directory-type').attr('data-type', 'datapackage');
