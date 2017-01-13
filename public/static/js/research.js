@@ -206,11 +206,17 @@ function toggleDirectoryType(currentType, path)
         if (data.type == 'folder') {
             $('.btn-group button.directory-type').html('<i class="fa fa-folder-o" aria-hidden="true"></i> Is folder');
             $('.btn-group button.directory-type').attr('data-type', 'folder');
+
+            // Title
+            $('.top-information h1').removeClass("fa-folder").addClass("fa-folder-o");
         } else {
             $('.btn-group button.directory-type').html('<i class="fa fa-folder" aria-hidden="true"></i> Is datapackage');
             $('.btn-group button.directory-type').attr('data-type', 'datapackage');
+
+            // Title
+            $('.top-information h1').removeClass("fa-folder-o").addClass("fa-folder");
         }
     });
 
-    $('.btn-group button.directory-type').attr("disabled", "");
+    $('.btn-group button.directory-type').removeAttr("disabled");
 }
