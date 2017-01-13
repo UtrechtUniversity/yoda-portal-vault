@@ -68,7 +68,7 @@
 
 
         <div class="btn-group" role="group">
-            <button type="button" class="btn btn-default information-type" data-type="" data-path=""></button>
+            <button type="button" class="btn btn-default directory-type" data-type="" data-path=""></button>
 
 
             <!--

@@ -3,8 +3,8 @@ $( document ).ready(function() {
         searchSelectChanged($(this));
     });
 
-    $('.btn-group button.information-type').click(function(){
-        toggleButtonType($(this).attr('data-type'), $(this).attr('data-path'));
+    $('.btn-group button.directory-type').click(function(){
+        toggleDirectoryType($(this).attr('data-type'), $(this).attr('data-path'));
     });
 
     $(".search-btn").click(function(){
@@ -167,17 +167,17 @@ function topInformation(dir)
                 icon = "fa-folder-o";
 
                 // Folder toggle btn
-                $('.btn-group button.information-type').html('<i class="fa fa-folder-o" aria-hidden="true"></i> Is folder');
-                $('.btn-group button.information-type').attr('data-type', 'folder');
-                $('.btn-group button.information-type').attr('data-path', dir);
+                $('.btn-group button.directory-type').html('<i class="fa fa-folder-o" aria-hidden="true"></i> Is folder');
+                $('.btn-group button.directory-type').attr('data-type', 'folder');
+                $('.btn-group button.directory-type').attr('data-path', dir);
 
             } else if (type == 'Datapackage') {
                 icon = "fa-folder";
 
                 // Datapackage toggle btn
-                $('.btn-group button.information-type').html('<i class="fa fa-folder" aria-hidden="true"></i> Is datapackage');
-                $('.btn-group button.information-type').attr('data-type', 'datapackage');
-                $('.btn-group button.information-type').attr('data-path', dir);
+                $('.btn-group button.directory-type').html('<i class="fa fa-folder" aria-hidden="true"></i> Is datapackage');
+                $('.btn-group button.directory-type').attr('data-type', 'datapackage');
+                $('.btn-group button.directory-type').attr('data-path', dir);
             } else if (type == "Research Team") {
                 icon = "fa-users";
             }
@@ -188,7 +188,29 @@ function topInformation(dir)
     }
 }
 
-function toggleButton(currentType, path)
+function toggleDirectoryType(currentType, path)
 {
+    //
+    var btnText = $('.btn-group button.directory-type').html();
 
+    $('.btn-group button.directory-type').html(btnText + '<i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.directory-type').attr("disabled", "disabled");
+
+    if (currentType == 'folder') {
+        var newType = 'datapackage';
+    } else {
+        var newType = 'folder';
+    }
+
+    $.getJSON("browse/change_directory_type?path=" + path + "&type=" + newType, function(data){
+        if (data.type == 'folder') {
+            $('.btn-group button.directory-type').html('<i class="fa fa-folder-o" aria-hidden="true"></i> Is folder');
+            $('.btn-group button.directory-type').attr('data-type', 'folder');
+        } else {
+            $('.btn-group button.directory-type').html('<i class="fa fa-folder" aria-hidden="true"></i> Is datapackage');
+            $('.btn-group button.directory-type').attr('data-type', 'datapackage');
+        }
+    });
+
+    $('.btn-group button.directory-type').attr("disabled", "");
 }
