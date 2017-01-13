@@ -214,10 +214,10 @@ function toggleDirectoryType(currentType, path)
             $('.btn-group button.directory-type').attr('data-type', 'datapackage');
 
             // Title
-            $('.top-information h1 li').removeClass("fa-folder-o").addClass("fa-folder");
+            $('.top-information h1 i').removeClass("fa-folder-o").addClass("fa-folder");
         }
 
-        changeBrowserUrl(path);
+        buildFileBrowser(path);
     });
 
     $('.btn-group button.directory-type').removeAttr("disabled");
