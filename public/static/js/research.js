@@ -8,12 +8,12 @@ $( document ).ready(function() {
     });
 
     $(".search-btn").click(function(){
-        search($("#search-filter").val(), $("#search_concept").attr('data-type'));
+        search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'));
     });
 
     $("#search-filter").bind('keypress', function(e) {
         if(e.keyCode==13) {
-            search($("#search-filter").val(), $("#search_concept").attr('data-type'));
+            search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'));
         }
     });
 
@@ -31,7 +31,7 @@ function browse(dir)
     buildFileBrowser(dir);
 }
 
-function search(value, type)
+function search(value, type, itemsPerPage)
 {
     if (typeof value != 'undefined' && value.length > 0 ) {
         // Table columns definition
@@ -63,7 +63,7 @@ function search(value, type)
             "ajax": url,
             "processing": true,
             "serverSide": true,
-            "pageLength": 10,
+            "pageLength": browsePageItems,
             "drawCallback": function(settings) {
                 $( ".browse" ).on( "click", function() {
                     browse($(this).attr('data-path'));

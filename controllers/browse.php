@@ -76,6 +76,7 @@ class Browse extends MY_Controller
         );
         $draw = $this->input->get('draw');
         $itemsPerPage = $this->config->item('browser-items-per-page');
+        $totalItems = 0;
 
         $path = $pathStart;
         if (!empty($dirPath)) {
@@ -93,6 +94,7 @@ class Browse extends MY_Controller
         }
         
         $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+        $totalItems += $collections['summary']['total'];
         if ($collections['summary']['returned'] > 0) {
             foreach ($collections['rows'] as $row) {
                 $filePath = str_replace($pathStart, '', $row['path']);
@@ -105,6 +107,7 @@ class Browse extends MY_Controller
 
         // Objects
         $objects = $this->filesystem->browse($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
+        $totalItems += $objects['summary']['total'];
         if ($objects['summary']['returned'] > 0) {
             foreach ($objects['rows'] as $row) {
                 $filePath = str_replace($pathStart, '', $row['path']);
@@ -115,7 +118,7 @@ class Browse extends MY_Controller
             }
         }
 
-        $output = array('draw' => $draw, 'recordsTotal' => $collections['summary']['total'], 'recordsFiltered' => 0, 'data' => $rows);
+        $output = array('draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
 
 
 
@@ -143,6 +146,7 @@ class Browse extends MY_Controller
         );
         $draw = $this->input->get('draw');
         $itemsPerPage = $this->config->item('browser-items-per-page');
+        $totalItems = 0;
 
         $path = $pathStart;
         if (!empty($dirPath)) {
@@ -156,6 +160,7 @@ class Browse extends MY_Controller
         if ($type == 'filename') {
             $columns = array('Name', 'Location');
             $result = $this->filesystem->searchByName($rodsaccount, $path, $filter, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
+            $totalItems += $result['summary']['total'];
 
             if (isset($result['summary']) && $result['summary']['returned'] > 0) {
                 foreach ($result['rows'] as $row) {
@@ -173,6 +178,7 @@ class Browse extends MY_Controller
         if ($type == 'location') {
             $columns = array('Location');
             $result = $this->filesystem->searchByName($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+            $totalItems += $result['summary']['total'];
 
             if (isset($result['summary']) && $result['summary']['returned'] > 0) {
                 foreach ($result['rows'] as $row) {
@@ -187,6 +193,7 @@ class Browse extends MY_Controller
         // Search / metadata
         if ($type == 'metadata') {
             $result = $this->filesystem->searchByUserMetadata($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+            $totalItems += $result['summary']['total'];
 
             if (isset($result['summary']) && $result['summary']['returned'] > 0) {
                 foreach ($result['rows'] as $row) {
@@ -198,7 +205,7 @@ class Browse extends MY_Controller
             }
         }
 
-        $output = array('draw' => $draw, 'recordsTotal' => $result['summary']['total'], 'recordsFiltered' => 0, 'data' => $rows, 'columns' => $columns);
+        $output = array('draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows, 'columns' => $columns);
 
 
         echo json_encode($output);

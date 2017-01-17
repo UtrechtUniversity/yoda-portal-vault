@@ -1,4 +1,5 @@
 <script>
+    var browsePageItems = <?php echo $items; ?>;
     $( document ).ready(function() {
         $('#file-browser').DataTable( {
             "bFilter": false,
@@ -34,7 +35,7 @@
         <input type="hidden" name="search_param" value="all" id="search_param">
         <input type="text" class="form-control" id="search-filter" placeholder="Search term...">
         <span class="input-group-btn">
-            <button class="btn btn-default search-btn" type="button"><span class="glyphicon glyphicon-search"></span></button>
+            <button class="btn btn-default search-btn" data-items-per-page="<?php echo $items; ?>" type="button"><span class="glyphicon glyphicon-search"></span></button>
         </span>
     </div>
 
