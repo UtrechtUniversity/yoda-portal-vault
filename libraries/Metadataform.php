@@ -1,0 +1,168 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Metadataform {
+
+    public $CI;
+
+    public $elements = array();
+
+    private $permission = 'write';
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        // Get the CI instance
+        $this->CI =& get_instance();
+    }
+
+    //public function load($formElements, $values)
+    public function load($formElements)
+    {
+
+        foreach ($formElements as $group => $elements)
+        {
+           foreach($elements as $name => $properties)
+           {
+               $properties['group'] = $group;
+               //$properties['name'] = $name;
+
+               $this->add_element($properties);
+           }
+        }
+
+        return $this;
+    }
+
+    public function add_element($data)
+    {
+        // Create a new element
+        $element = new Element($this, $data);
+        // Assign the new element to the elements array
+        $this->elements[] = $element;
+
+        return true;
+    }
+
+    public function render($section = null)
+    {
+        $html = '';
+        // Render the entire form
+        foreach($this->elements as $element)
+        {
+            if (empty($section) || $section == $element->group) {
+                $html .= $element->render();
+            }
+        }
+        return $html;
+    }
+
+    public function show($section = null)
+    {
+        $html = $this->render($section);
+        return $html;
+    }
+
+    public function open($action, $class, $method = 'post')
+    {
+        return '<form method="' . $method . '" action="' . $action . '" class="' . $class . '">';
+    }
+
+    public function close()
+    {
+        return '</form>';
+    }
+
+    public function getSections()
+    {
+        $sections = array();
+
+        foreach($this->elements as $element)
+        {
+            $group = $element->group;
+            if (!in_array($group, $sections)) {
+                $sections[] = $group;
+            }
+        }
+
+        return $sections;
+    }
+
+    public function getPermission()
+    {
+        return $this->permission;
+    }
+
+    public function setPermission($permission)
+    {
+        $this->permission = $permission;
+    }
+}
+
+class Element {
+    public $form;
+    public $key;
+    public $label;
+    public $helpText;
+    public $type;
+    public $value = null;
+    public $options = array();
+    public $selected = array();
+    public $mandatory = FALSE;
+    public $group = null;
+    private $dir = 'metadata/fields/';
+    private $multipleAllowed = false;
+
+    /**
+     * Constructor
+     */
+    public function __construct($form, $data)
+    {
+        $this->form = $form;
+
+        $this->key = $data['key'];
+        $this->label = $data['label'];
+        $this->helpText = $data['helpText'];
+        $this->type = $data['type'];
+        $this->multipleAllowed = $data['multipleAllowed'];
+        $this->mandatory = $data['mandatory'];
+        $this->group = $data['group'];
+
+        if (isset($data['value'])) {
+            $this->value = $data['value'];
+        }
+
+        if ($this->type == 'select') {
+            $this->options = $data['elementSpecifics']['options'];
+        }
+    }
+
+    /**
+     * Renders element.
+     */
+    public function render()
+    {
+        $form = $this->form;
+        $permission = $form->getPermission();
+
+        // Temp (adding only)
+        if ($permission == 'write' && !empty($this->value)) {
+            $permission = 'read';
+        }
+
+        $data['e'] = $this;
+
+        $html = $this->form->CI->load->view($this->dir . $permission . '/' . $this->type, $data, TRUE);
+
+        return $html;
+    }
+
+    public function multipleAllowed()
+    {
+        return $this->multipleAllowed;
+    }
+}
+
+
+/* End of file Metadataform.php */

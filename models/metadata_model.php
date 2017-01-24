@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 
-class Metadata extends CI_Model {
+class Metadata_model extends CI_Model {
 
     var $CI = NULL;
 
@@ -11,7 +11,6 @@ class Metadata extends CI_Model {
         $this->CI =& get_instance();
     }
 
-    /*
     function read($rodsaccount, $directoryPath)
     {
         $metadataFile = $this->findPath($rodsaccount, $directoryPath);
@@ -39,25 +38,21 @@ class Metadata extends CI_Model {
 
         return false;
     }
-    */
-
-    /*
-    function write()
-    {
-
-    }
 
     function findPath($rodsaccount, $directoryPath)
     {
-        //$this->CI->load->model('filesystem');
-        //$details = $this->CI->filesystem->collectionDetails($rodsaccount, $directoryPath);
+        $this->CI->load->model('filesystem');
+        $details = $this->CI->filesystem->collectionDetails($rodsaccount, $directoryPath);
 
-        print_r($details);
-        exit;
+        if (isset($details['org_metadata'])) {
+            return $details['org_metadata'];
+        }
+
+        return false;
     }
 
-
-    function close()
+    /*
+    function write()
     {
 
     }
