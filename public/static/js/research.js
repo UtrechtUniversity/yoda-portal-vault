@@ -194,7 +194,7 @@ function toggleDirectoryType(currentType, path)
     var btnText = $('.btn-group button.directory-type').html();
 
     $('.btn-group button.directory-type').html(btnText + '<i class="fa fa-spinner fa-spin fa-fw"></i>');
-    $('.btn-group button.directory-type').attr("disabled", "disabled");
+    $('.btn-group button.directory-type').prop("disabled", true);
 
     if (currentType == 'folder') {
         var newType = 'datapackage';
@@ -218,7 +218,7 @@ function toggleDirectoryType(currentType, path)
         }
 
         buildFileBrowser(path);
+        
+        $('.btn-group button.directory-type').removeAttr("disabled");
     });
-
-    $('.btn-group button.directory-type').removeAttr("disabled");
 }
