@@ -11,6 +11,200 @@ class Metadata_form_model extends CI_Model {
         $this->CI =& get_instance();
     }
 
+
+    public function getFormElements() {
+        // load xsd and get all the info regarding restrictions
+        $xsdElements = $this->loadXsd(); // based on element names
+
+        $formData = $this->loadFormData();
+
+        $formGroupedElements = $this->loadFormElements();
+
+        $presentationElements = array();
+
+        $groupName = 'undefined';
+
+        foreach($formGroupedElements['Group'] as $formElements) {
+            foreach ($formElements as $key => $element) {
+                if($key == '@attributes') {
+                    $groupName = $element['name'];
+                }
+                else {
+                    $value = isset($formData[$key]) ? $formData[$key] : '';
+
+                    $elementOptions = array(); // holds the options
+                    $elementMaxLength = 0;
+                    // Determine restricitions/requirements for this
+
+                    switch ($xsdElements[$key]['type']){
+                        case 'xs:date':
+                            $type = 'date';
+                            break;
+                        case 'stringNormal':
+                            $type = 'text';
+                            $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
+                            break;
+                        case 'xs:integer':
+                            $type = 'text';
+                            $elementMaxLength = 100; // zelf verzonnen
+                            break;
+                        case 'xs:anyURI':
+                            $type = 'text';
+                            $elementMaxLength = 1024;
+                            break;
+                        case 'stringLong':
+                            $type = 'textarea';
+                            $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
+                            break;
+                        case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
+                        case 'optionsDatasetType':
+                        case 'optionsDatasetAccess':
+                        case 'optionsYesNo':
+                        case 'optionsOther':
+                            $elementOptions = $xsdElements[$key]['simpleTypeData']['options'];
+                            $type = 'select';
+                            break;
+                    }
+
+                    $mandatory = false;
+                    if($xsdElements[$key]['minOccurs']>=1) {
+                        $mandatory = true;
+                    }
+
+                    $multipleAllowed = false;
+                    if($xsdElements[$key]['maxOccurs']>=1 OR strtolower($xsdElements[$key]['maxOccurs'])=='unbounded') {
+                        $multipleAllowed = true;
+                    }
+
+                    //'select' has options
+                    // 'edit/multiline' has length
+                    // 'date' has nothing extra
+                    // Handled separately as these specifics might grow.
+                    $elementSpecifics = array(); // holds all element specific info
+                    if($type == 'text' OR $type == 'textarea') {
+                        $elementSpecifics = array('maxLength' => $elementMaxLength);
+                    }
+                    elseif($type == 'select'){
+                        $elementSpecifics = array('options' => $elementOptions);
+                    }
+
+                    $presentationElements[$groupName][] = array(
+                        'key' => $key,
+                        'value' => $value,
+                        'label' => $element['label'],
+                        'helpText' => $element['help'],
+                        'type' => $type,
+                        'mandatory' => $mandatory,
+                        'multipleAllowed' => $multipleAllowed,
+                        'elementSpecifics' => $elementSpecifics
+                    );
+                }
+            }
+        }
+        return $presentationElements;
+    }
+
+    public function loadXsd()
+    {
+        // 1) Build array with info for the simpleTypes used
+
+        $xml = simplexml_load_file('c:\temp\xml2\yoda-default.xsd', "SimpleXMLElement", 0,'xs',true);
+
+        // At first simpleType handling - gathering limitations/restrictions/requirements
+        $simpleTypeData = array();
+
+        foreach($xml->simpleType as $key => $stype) {
+            // simpleTye names
+            $simpleTypeAttributes = (array)$stype->attributes();
+
+            $simpleTypeName = $simpleTypeAttributes['@attributes']['name'];
+
+            $restriction = (array)$stype->restriction;
+
+            // typical handling here
+            if(isset($restriction['maxLength'])) {
+                $lengthArray = (array)$stype->restriction->maxLength->attributes();
+                $length = $lengthArray['@attributes']['value'];
+                $simpleTypeData[$simpleTypeName]['maxLength'] = $length;
+            }
+            if(isset($restriction['enumeration'])) {
+                $options = array();
+                foreach($stype->restriction->enumeration as $enum) {
+                    $optionsArray = (array)$enum->attributes();
+                    $options[] = $optionsArray['@attributes']['value'];
+                }
+                $simpleTypeData[$simpleTypeName]['options'] = $options;
+            }
+        }
+
+        $xsdElements = array();
+
+        $elements = $xml->element->complexType->sequence->element;
+
+        $supportedSimpleTypes = array_keys($simpleTypeData);
+        $supportedSimpleTypes[] = 'xs:date'; // add some standard xsd simpleTypes that should be working as well
+        $supportedSimpleTypes[] = 'xs:anyURI';
+        $supportedSimpleTypes[] = 'xs:integer';
+
+        foreach($elements as $element) {
+            $attributes = $element->attributes();
+
+            $elementName = '';
+            $elementType = '';
+            $minOccurs = 0;
+            $maxOccurs = 1;
+
+            foreach($attributes as $attribute=>$simpleXMLvalue) {
+                $arrayValue = (array)$simpleXMLvalue;
+                $value = $arrayValue[0];
+                switch ($attribute) {
+                    case 'name':
+                        $elementName = $value;
+                        break;
+                    case 'type':
+                        $elementType = $value;
+                        break;
+                    case 'minOccurs':
+                        $minOccurs = $value;
+                        break;
+                    case 'maxOccurs':
+                        $maxOccurs = $value;
+                        break;
+                }
+            }
+
+            // each relevant attribute has been processed.
+            if(in_array($elementType,$supportedSimpleTypes)) {
+                $xsdElements[$elementName] = array(
+                    'type' => $elementType,
+                    'minOccurs' => $minOccurs,
+                    'maxOccurs' => $maxOccurs,
+                    'simpleTypeData' => isset($simpleTypeData[$elementType]) ? $simpleTypeData[$elementType] : array()
+                );
+            }
+        }
+
+        return $xsdElements;
+    }
+
+    public function loadFormData()
+    {
+        $xmlData = simplexml_load_file('c:\temp\xml2\yoda-metadata.xml');
+
+        $json = json_encode($xmlData);
+
+        return json_decode($json,TRUE);
+    }
+
+    public function loadFormElements()
+    {
+        $xmlFormElements = simplexml_load_file('c:\temp\xml2\formelements.xml');
+
+        $json = json_encode($xmlFormElements);
+
+        return json_decode($json,TRUE);
+    }
+
     function load($rodsaccount, $directoryPath)
     {
         // formelements.xml
