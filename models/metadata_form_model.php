@@ -34,72 +34,82 @@ class Metadata_form_model extends CI_Model {
                 else {
                     $value = isset($formData[$key]) ? $formData[$key] : '';
 
-                    $elementOptions = array(); // holds the options
-                    $elementMaxLength = 0;
-                    // Determine restricitions/requirements for this
-
-                    switch ($xsdElements[$key]['type']){
-                        case 'xs:date':
-                            $type = 'date';
-                            break;
-                        case 'stringNormal':
-                            $type = 'text';
-                            $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
-                            break;
-                        case 'xs:integer':
-                            $type = 'text';
-                            $elementMaxLength = 100; // zelf verzonnen
-                            break;
-                        case 'xs:anyURI':
-                            $type = 'text';
-                            $elementMaxLength = 1024;
-                            break;
-                        case 'stringLong':
-                            $type = 'textarea';
-                            $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
-                            break;
-                        case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
-                        case 'optionsDatasetType':
-                        case 'optionsDatasetAccess':
-                        case 'optionsYesNo':
-                        case 'optionsOther':
-                            $elementOptions = $xsdElements[$key]['simpleTypeData']['options'];
-                            $type = 'select';
-                            break;
+                    // The number of values determine the number of elements to be created
+                    if(!is_array($value) ) {
+                        $valueArray = array();
+                        $valueArray[] = $value;
+                    }
+                    else {
+                        $valueArray = $value;
                     }
 
-                    $mandatory = false;
-                    if($xsdElements[$key]['minOccurs']>=1) {
-                        $mandatory = true;
-                    }
+                    foreach($valueArray as $keyValue) { // create an element for each of the values
+                        $elementOptions = array(); // holds the options
+                        $elementMaxLength = 0;
+                        // Determine restricitions/requirements for this
+                        switch ($xsdElements[$key]['type']){
+                            case 'xs:date':
+                                $type = 'date';
+                                break;
+                            case 'stringNormal':
+                                $type = 'text';
+                                $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
+                                break;
+                            case 'xs:integer':
+                                $type = 'text';
+                                $elementMaxLength = 100; // zelf verzonnen
+                                break;
+                            case 'xs:anyURI':
+                                $type = 'text';
+                                $elementMaxLength = 1024;
+                                break;
+                            case 'stringLong':
+                                $type = 'textarea';
+                                $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
+                                break;
+                            case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
+                            case 'optionsDatasetType':
+                            case 'optionsDatasetAccess':
+                            case 'optionsYesNo':
+                            case 'optionsOther':
+                                $elementOptions = $xsdElements[$key]['simpleTypeData']['options'];
+                                $type = 'select';
+                                break;
+                        }
 
-                    $multipleAllowed = false;
-                    if($xsdElements[$key]['maxOccurs']>=1 OR strtolower($xsdElements[$key]['maxOccurs'])=='unbounded') {
-                        $multipleAllowed = true;
-                    }
 
-                    //'select' has options
-                    // 'edit/multiline' has length
-                    // 'date' has nothing extra
-                    // Handled separately as these specifics might grow.
-                    $elementSpecifics = array(); // holds all element specific info
-                    if($type == 'text' OR $type == 'textarea') {
-                        $elementSpecifics = array('maxLength' => $elementMaxLength);
-                    }
-                    elseif($type == 'select'){
-                        $elementSpecifics = array('options' => $elementOptions);
-                    }
+                        $mandatory = false;
+                        if ($xsdElements[$key]['minOccurs'] >= 1) {
+                            $mandatory = true;
+                        }
 
-                    $presentationElements[$groupName][] = array(
-                        'key' => $key,
-                        'value' => $value,
-                        'label' => $element['label'],
-                        'helpText' => $element['help'],
-                        'type' => $type,
-                        'mandatory' => $mandatory,
-                        'multipleAllowed' => $multipleAllowed,
-                        'elementSpecifics' => $elementSpecifics
-                    );
+                        $multipleAllowed = false;
+                        if ($xsdElements[$key]['maxOccurs'] >= 1 OR strtolower($xsdElements[$key]['maxOccurs']) == 'unbounded') {
+                            $multipleAllowed = true;
+                        }
+
+                        //'select' has options
+                        // 'edit/multiline' has length
+                        // 'date' has nothing extra
+                        // Handled separately as these specifics might grow.
+                        $elementSpecifics = array(); // holds all element specific info
+                        if ($type == 'text' OR $type == 'textarea') {
+                            $elementSpecifics = array('maxLength' => $elementMaxLength);
+                        } elseif ($type == 'select') {
+                            $elementSpecifics = array('options' => $elementOptions);
+                        }
+
+                        $presentationElements[$groupName][] = array(
+                            'key' => $key,
+                            'value' => $keyValue,
+                            'label' => $element['label'],
+                            'helpText' => $element['help'],
+                            'type' => $type,
+                            'mandatory' => $mandatory,
+                            'multipleAllowed' => $multipleAllowed,
+                            'elementSpecifics' => $elementSpecifics
+                        );
+                    }
                 }
             }
         }
@@ -371,7 +381,7 @@ class Metadata_form_model extends CI_Model {
 		<Collection_Software></Collection_Software>
 		<Creator></Creator>
 		<Contributor></Contributor>
-		<PI_Contributor></PI_Contributor>
+d		<PI_Contributor></PI_Contributor>
 		<Unit_Analysis></Unit_Analysis>
 		<Location_Covered></Location_Covered>
 		<Start_Period_Dataset>2017-01-01</Start_Period_Dataset>
