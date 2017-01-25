@@ -25,7 +25,8 @@ class Metadata extends MY_Controller
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
 
-        $path =  $pathStart . '/grp-test';
+        $path = $this->input->get('path');
+        $fullPath =  $pathStart . $path;
         $formConfig = array();
         $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
 
@@ -36,7 +37,7 @@ class Metadata extends MY_Controller
 
         //$form = $this->metadataform->load($elements, $metadata);
         $form = $this->metadataform->load($elements);
-        $form->setPermission('read');
+        $form->setPermission('write');
 
         $this->load->view('common-start', array(
             'styleIncludes' => array(
@@ -55,6 +56,8 @@ class Metadata extends MY_Controller
         ));
 
         $this->data['form'] = $form;
+        $this->data['path'] = $path;
+        $this->data['fullPath'] = $fullPath;
 
         $this->load->view('metadata/form', $this->data);
         $this->load->view('common-end');

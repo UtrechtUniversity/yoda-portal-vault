@@ -7,12 +7,14 @@
 
         <?php if ($e->multipleAllowed()) { ?>
             <select name="<?php echo $e->key; ?>[]" class="form-control">
+                <option value="">-</option>
                 <?php foreach ($e->options as $option) { ?>
                     <option value="<?php echo $option; ?> <?php echo ($option == $e->value) ? 'selected' : ''; ?>"><?php echo $option; ?></option>
                 <?php } ?>
             </select>
         <?php } else { ?>
             <select name="<?php echo $e->key; ?>" class="form-control">
+                <option value="">-</option>
                 <?php foreach ($this->options as $option) { ?>
                     <option value="<?php echo $option; ?> <?php echo ($option == $e->value) ? 'selected' : ''; ?>"><?php echo $option; ?></option>
                 <?php } ?>
