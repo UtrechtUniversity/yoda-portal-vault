@@ -13,6 +13,21 @@ class Metadata_form_model extends CI_Model {
         $this->CI->load->model('filesystem');
     }
 
+    public function processPost($rodsaccount, $config, $postData) {
+        $metadata = array();
+
+        foreach($postData as $key=>$value) {
+            $metadata[] = array($key => addslashes($value));
+        }
+
+        $this->writeMetaDataAsXml($rodsaccount, $config['metadata'], $metadata);
+    }
+
+    public function writeMetaDataAsXml($rodsaccount, $path, $metadata) {
+        $this->CI->filesystem->writeXml($rodsaccount, $path, $metadata);
+    }
+
+
 
     public function getFormElements($rodsaccount, $config) {
         // load xsd and get all the info regarding restrictions
@@ -84,7 +99,7 @@ class Metadata_form_model extends CI_Model {
                         }
 
                         $multipleAllowed = false;
-                        if ($xsdElements[$key]['maxOccurs'] >= 1 OR strtolower($xsdElements[$key]['maxOccurs']) == 'unbounded') {
+                        if($xsdElements[$key]['maxOccurs']!='1') {
                             $multipleAllowed = true;
                         }
 

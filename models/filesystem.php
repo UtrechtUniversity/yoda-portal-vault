@@ -8,6 +8,29 @@ class Filesystem extends CI_Model {
         parent::__construct();
     }
 
+    /**
+     * @param $rodsaccount
+     * @param $path
+     * @param $metadata
+     *
+     * key value pairs to be written to .yoda-metadata.xml
+     *
+     */
+    function writeXml($rodsaccount, $path, $metadata)
+    {
+        $metedataFile = new ProdsFile($rodsaccount, $path);
+
+        $metedataFile->open("w+", 'demoResc' ); //$this->config->item('rodsDefaultResource')
+        $bytes = $metedataFile->write("<?xml version=\"1.0\"?>\n" );
+        $bytes += $metedataFile->write("<metadata>\n" );
+
+        foreach($metadata as $key=>$value) {
+            $bytes += $metedataFile->write('<' . $key . '>' . $value .'</' . $key . ">\n" );
+        }
+        $bytes += $metedataFile->write("</metadata>\n" );
+
+    }
+
     function read($rodsaccount, $file)
     {
         $fileContent = '';
