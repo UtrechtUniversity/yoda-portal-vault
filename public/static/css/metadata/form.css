@@ -42,3 +42,19 @@
     min-width: 100px;
     max-width: 100%;
 }
+
+fieldset{
+    border: solid 1px #DDD !important;
+    padding: 0 10px 10px 10px;
+    border-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+legend {
+    width: auto !important;
+    border: none;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 0 5px;
+    margin-bottom: 15px!important;
+}
