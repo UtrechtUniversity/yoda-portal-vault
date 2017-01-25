@@ -26,13 +26,17 @@ class Metadata extends MY_Controller
 
 
         $path =  $pathStart . '/grp-test';
-        //$metadata = $this->Metadata_model->read($rodsaccount, $path);
-        $elements = $this->Metadata_form_model->load($rodsaccount, $path);
+        $formConfig = array();
+        $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
+
+        //print_r($elements);
+        //exit;
 
         $this->load->library('metadataform');
 
         //$form = $this->metadataform->load($elements, $metadata);
         $form = $this->metadataform->load($elements);
+        $form->setPermission('read');
 
         $this->load->view('common-start', array(
             'styleIncludes' => array(

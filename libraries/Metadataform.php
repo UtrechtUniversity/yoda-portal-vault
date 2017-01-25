@@ -129,7 +129,7 @@ class Element {
         $this->mandatory = $data['mandatory'];
         $this->group = $data['group'];
 
-        if (isset($data['value'])) {
+        if (isset($data['value']) && !empty($data['value'])) {
             $this->value = $data['value'];
         }
 
@@ -146,10 +146,12 @@ class Element {
         $form = $this->form;
         $permission = $form->getPermission();
 
+        /*
         // Temp (adding only)
         if ($permission == 'write' && !empty($this->value)) {
             $permission = 'read';
         }
+        */
 
         $data['e'] = $this;
 

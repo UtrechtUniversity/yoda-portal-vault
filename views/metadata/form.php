@@ -8,7 +8,9 @@
             <div class="panel-body">
                 <div class="form-group">
                     <div class="col-sm-12">
+                        <?php if ($form->getPermission() == 'write') { ?>
                         <button type="submit" class="btn btn-primary">Submit</button>
+                        <?php } ?>
                         <button type="button" class="btn btn-danger pull-right">Delete all metadata</button>
                     </div>
                 </div>
@@ -22,7 +24,9 @@
 
                 <div class="form-group">
                     <div class="col-sm-12">
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <?php if ($form->getPermission() == 'write') { ?>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        <?php } ?>
                         <button type="button" class="btn btn-danger pull-right">Delete all metadata</button>
                     </div>
                 </div>

@@ -11,34 +11,39 @@ class Metadata_model extends CI_Model {
         $this->CI =& get_instance();
     }
 
-    function read($rodsaccount, $directoryPath)
+    // .yoda-metadata uitlezen.
+
+
+    function read($rodsaccount, $metadataFile)
     {
-        $metadataFile = $this->findPath($rodsaccount, $directoryPath);
+        //$metadataFile = $this->findPath($rodsaccount, $directoryPath);
 
-        if ($metadataFile !== false) {
-            // Open metadata file in read mode
-            $file = new ProdsFile($rodsaccount, $metadataFile);
-            $file->open("r");
+        // Open metadata file in read mode
+        $file = new ProdsFile($rodsaccount, $metadataFile);
+        $file->open("r");
 
-            // Grab the file content
-            $fileContent = "";
-            while ($str = $file->read(4096)) {
-                $fileContent .= $str;
-            }
-            //close the file pointer
-            $file->close();
+        // Grab the file content
+        $fileContent = "";
+        while ($str = $file->read(4096)) {
+            $fileContent .= $str;
+        }
+        //close the file pointer
+        $file->close();
 
-            $xml = new DOMDocument();
-            $xmlLoaded = $xml->loadXml($fileContent);
+        return $fileContent;
+        /*
+        $xml = new DOMDocument();
+        $xmlLoaded = $xml->loadXml($fileContent);
 
-            if ($xmlLoaded) {
-                return $xml;
-            }
+        if ($xmlLoaded) {
+            return $xml;
         }
 
         return false;
+        */
     }
 
+    /*
     function findPath($rodsaccount, $directoryPath)
     {
         $this->CI->load->model('filesystem');
@@ -50,6 +55,7 @@ class Metadata_model extends CI_Model {
 
         return false;
     }
+    */
 
     /*
     function write()

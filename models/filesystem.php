@@ -8,6 +8,29 @@ class Filesystem extends CI_Model {
         parent::__construct();
     }
 
+    function read($rodsaccount, $file)
+    {
+        $fileContent = '';
+
+        try {
+            $file = new ProdsFile($rodsaccount, $file);
+            $file->open("r");
+
+            // Grab the file content
+            while ($str = $file->read(4096)) {
+                $fileContent .= $str;
+            }
+            //close the file pointer
+            $file->close();
+
+            return $fileContent;
+
+        } catch(RODSException $e) {
+            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
+            exit;
+        }
+    }
+
 
     static public function searchRevisions($iRodsAccount, $path, $type, $orderBy, $orderSort, $limit, $offset = 0) {
         $output = array();
