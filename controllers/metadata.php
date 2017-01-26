@@ -19,25 +19,28 @@ class Metadata extends MY_Controller
     {
         $this->load->model('Metadata_model');
         $this->load->model('Metadata_form_model');
+        $this->load->model('filesystem');
 
 
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
-
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
-        $formConfig = array();
-        $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
-        //print_r($elements);
-        //exit;
+        $userType = $formConfig['userType'];
+        $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
 
         $this->load->library('metadataform');
 
         //$form = $this->metadataform->load($elements, $metadata);
         $form = $this->metadataform->load($elements);
-        $form->setPermission('write');
+        if ($formConfig['hasMetadataXml'] == 'true' || $userType == 'reader') {
+            $form->setPermission('read');
+        } else {
+            $form->setPermission('write');
+        }
 
         $this->load->view('common-start', array(
             'styleIncludes' => array(
@@ -58,10 +61,27 @@ class Metadata extends MY_Controller
         $this->data['form'] = $form;
         $this->data['path'] = $path;
         $this->data['fullPath'] = $fullPath;
+        $this->data['userType'] = $userType;
 
         $this->load->view('metadata/form', $this->data);
         $this->load->view('common-end');
 
+    }
+
+    function store()
+    {
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+
+        $this->load->model('Metadata_form_model');
+
+        $path = $this->input->get('path');
+        $fullPath =  $pathStart . $path;
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
+        $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+
+
+        return redirect('research/metadata/form?path=/research-test/meta', 'refresh');
     }
 
     /*
