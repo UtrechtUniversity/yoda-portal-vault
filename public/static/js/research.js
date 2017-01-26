@@ -7,6 +7,10 @@ $( document ).ready(function() {
         toggleDirectoryType($(this).attr('data-type'), $(this).attr('data-path'));
     });
 
+    $('.btn-group button.metadata-form').click(function(){
+        showMetadataForm($(this).attr('data-path'));
+    });
+
     $(".search-btn").click(function(){
         search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'));
     });
@@ -162,6 +166,7 @@ function topInformation(dir)
         $.getJSON("browse/top_data?dir=" + dir, function(data){
             var type = data.org_type;
             var icon = "fa-folder-o";
+            var metadata = data.user_metadata;
 
             if (type == 'Folder' || typeof type == 'undefined') {
                 icon = "fa-folder-o";
@@ -180,6 +185,14 @@ function topInformation(dir)
                 $('.btn-group button.directory-type').attr('data-path', dir);
             } else if (type == "Research Team") {
                 icon = "fa-users";
+            }
+
+            // User metadata
+            if (metadata) {
+                $('.btn-group button.metadata-form').attr('data-path', dir);
+                $('.btn-group button.metadata-form').show();
+            } else {
+                $('.btn-group button.metadata-form').hide();
             }
 
             $('.top-information h1').html('<i class="fa '+ icon +'" aria-hidden="true"></i> ' + data.basename);
@@ -221,4 +234,9 @@ function toggleDirectoryType(currentType, path)
         
         $('.btn-group button.directory-type').removeAttr("disabled");
     });
+}
+
+function showMetadataForm(path)
+{
+    window.location.href = 'metadata/form?path=' + path;
 }
