@@ -75,6 +75,7 @@ class Metadata_form_model extends CI_Model {
             $valueArray = array();
 
             $postValue = $this->CI->input->post($element);
+
             if(!is_array($postValue)) {
                 $valueArray[] = $postValue;
             }
@@ -135,6 +136,9 @@ class Metadata_form_model extends CI_Model {
                     }
                     else {
                         $valueArray = $value;
+                        if(count($valueArray)==0 ) {
+                            $valueArray = array('');
+                        }
                     }
 
                     foreach($valueArray as $keyValue) { // create an element for each of the values

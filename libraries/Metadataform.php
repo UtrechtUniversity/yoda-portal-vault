@@ -15,6 +15,7 @@ class Metadataform {
     {
         // Get the CI instance
         $this->CI =& get_instance();
+        $this->CI->load->helper('form');
     }
 
     //public function load($formElements, $values)
@@ -66,7 +67,9 @@ class Metadataform {
 
     public function open($action, $class, $method = 'post')
     {
-        return '<form method="' . $method . '" action="' . $action . '" class="' . $class . '">';
+        //return '<form method="' . $method . '" action="' . $action . '" class="' . $class . '">';
+        $options = array ('class' => $class);
+        return form_open($action, $options);
     }
 
     public function close()
