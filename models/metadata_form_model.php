@@ -13,20 +13,95 @@ class Metadata_form_model extends CI_Model {
         $this->CI->load->model('filesystem');
     }
 
-    public function processPost($rodsaccount, $config, $postData) {
+    /**
+     * @param $rodsaccount
+     * @param $config
+     * @return array
+     *
+     * returns all groupnames in an array for the requested for form (in $config['elements']
+     */
+    public function getFormGroupNamesAsArray($rodsaccount, $config) {
+        $formGroupedElements = $this->loadFormElements($rodsaccount, $config['elements']);
+
+        $groupNames = array();
+        foreach($formGroupedElements['Group'] as $formElements) {
+            foreach ($formElements as $key => $element) {
+                if ($key == '@attributes') {
+                    $groupNames[] = $element['name'];
+                }
+            }
+        }
+        return $groupNames;
+    }
+
+
+    /**
+     * @param $rodsaccount
+     * @param $config
+     * @return array
+     *
+     * returns all present form items in an array for the requested for form (in $config['elements'])
+     */
+    public function getFormElementsAsArray($rodsaccount, $config) {
+        $formGroupedElements = $this->loadFormElements($rodsaccount, $config['elements']);
+
+        $allElements = array();
+        foreach($formGroupedElements['Group'] as $formElements) {
+            foreach ($formElements as $key => $element) {
+                if ($key != '@attributes') {
+                    $allElements[] = $key;
+                }
+            }
+        }
+        return $allElements;
+    }
+
+    /**
+     * @param $rodsaccount
+     * @param $config
+     *
+     * Handles the posted information of a yoda form and puts the values, after escaping, in .yoda-metadata.xml
+     * The config holds the correct paths to form definitions and .yoda-metadata.xml
+     *
+     * NO VALIDATION OF DATA IS PERFORMED IN ANY WAY
+     */
+    public function processPost($rodsaccount, $config) {
         $metadata = array();
 
-        foreach($postData as $key=>$value) {
-            $metadata[] = array($key => addslashes($value));
+        $allElements = $this->getFormElementsAsArray($rodsaccount, $config);
+
+        // Step through all elements of the form
+        foreach($allElements as $element) {
+            $valueArray = array();
+
+            $postValue = $this->CI->input->post($element);
+            if(!is_array($postValue)) {
+                $valueArray[] = $postValue;
+            }
+            else {
+                $valueArray = $postValue;
+            }
+
+            //work through all the values for the perticular element
+            foreach($valueArray as $value) {
+                $metadata[] = array($element => addslashes($value));
+            }
         }
 
         $this->writeMetaDataAsXml($rodsaccount, $config['metadata'], $metadata);
     }
 
+    /**
+     * @param $rodsaccount
+     * @param $path
+     * @param $metadata
+     *
+     * Function that writes a key value pair to an xml file
+     *
+     */
     public function writeMetaDataAsXml($rodsaccount, $path, $metadata) {
         $this->CI->filesystem->writeXml($rodsaccount, $path, $metadata);
     }
-
 
 
     public function getFormElements($rodsaccount, $config) {
