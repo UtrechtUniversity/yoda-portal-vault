@@ -19,15 +19,15 @@ class Metadata extends MY_Controller
     {
         $this->load->model('Metadata_model');
         $this->load->model('Metadata_form_model');
+        $this->load->model('filesystem');
 
 
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
-
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
-        $formConfig = array();
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
         $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
 
         //print_r($elements);

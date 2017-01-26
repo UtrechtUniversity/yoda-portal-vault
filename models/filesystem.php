@@ -20,7 +20,7 @@ class Filesystem extends CI_Model {
     {
         $metedataFile = new ProdsFile($rodsaccount, $path);
 
-        $metedataFile->open("w+", 'demoResc' ); //$this->config->item('rodsDefaultResource')
+        $metedataFile->open("w+"); //$this->config->item('rodsDefaultResource')
         $bytes = $metedataFile->write("<?xml version=\"1.0\"?>\n" );
         $bytes += $metedataFile->write("<metadata>\n" );
 
@@ -49,9 +49,41 @@ class Filesystem extends CI_Model {
             return $fileContent;
 
         } catch(RODSException $e) {
+            print_r($file);
             print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
             exit;
         }
+    }
+
+    static public function metadataFormPaths($iRodsAccount, $path) {
+        $ruleBody = <<<'RULE'
+myRule {
+    iiPrepareMetadataForm(*path, *result);
+}
+
+
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array("*result")
+            );
+
+            $ruleResult = $rule->execute();
+            $output = json_decode($ruleResult['*result'], true);
+
+            return $output;
+
+        } catch(RODSException $e) {
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
     }
 
 
