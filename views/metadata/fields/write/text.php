@@ -6,7 +6,12 @@
     <div class="col-sm-6">
 
         <?php if ($e->multipleAllowed()) { ?>
-            <input type="text" class="form-control" name="<?php echo $e->key; ?>[]">
+            <div class="input-group">
+                <input type="text" class="form-control" name="<?php echo $e->key; ?>[]">
+                <span class="input-group-btn">
+                    <button class="btn btn-default extend-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                </span>
+            </div>
         <?php } else { ?>
             <input type="text" class="form-control" name="<?php echo $e->key; ?>">
         <?php } ?>

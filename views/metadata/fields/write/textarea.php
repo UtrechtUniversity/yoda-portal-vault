@@ -6,7 +6,12 @@
     <div class="col-sm-6">
 
         <?php if ($e->multipleAllowed()) { ?>
-            <textarea class="form-control" name="<?php echo $e->key; ?>[]"></textarea>
+            <div class="input-group">
+                <textarea class="form-control" name="<?php echo $e->key; ?>[]"></textarea>
+                <span class="input-group-btn">
+                    <button class="btn btn-default extend-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                </span>
+            </div>
         <?php } else { ?>
             <textarea class="form-control" name="<?php echo $e->key; ?>"></textarea>
         <?php } ?>
