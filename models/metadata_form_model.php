@@ -21,7 +21,7 @@ class Metadata_form_model extends CI_Model {
      * returns all groupnames in an array for the requested for form (in $config['elements']
      */
     public function getFormGroupNamesAsArray($rodsaccount, $config) {
-        $formGroupedElements = $this->loadFormElements($rodsaccount, $config['elements']);
+        $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
 
         $groupNames = array();
         foreach($formGroupedElements['Group'] as $formElements) {
@@ -43,7 +43,7 @@ class Metadata_form_model extends CI_Model {
      * returns all present form items in an array for the requested for form (in $config['elements'])
      */
     public function getFormElementsAsArray($rodsaccount, $config) {
-        $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementspath']);
+        $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
 
         $allElements = array();
         foreach($formGroupedElements['Group'] as $formElements) {
@@ -89,7 +89,7 @@ class Metadata_form_model extends CI_Model {
             }
         }
 
-        $this->writeMetaDataAsXml($rodsaccount, $config['metadataxmlpath'], $metadata);
+        $this->writeMetaDataAsXml($rodsaccount, $config['metadataXmlPath'], $metadata);
     }
 
     /**
@@ -107,15 +107,14 @@ class Metadata_form_model extends CI_Model {
 
     public function getFormElements($rodsaccount, $config) {
         // load xsd and get all the info regarding restrictions
-        $xsdElements = $this->loadXsd($rodsaccount, $config['xsdpath']); // based on element names
+        $xsdElements = $this->loadXsd($rodsaccount, $config['xsdPath']); // based on element names
 
         $formData = array();
-        if ($config['hasmetadataxml'] == 'true') {
-            $formData = $this->loadFormData($rodsaccount, $config['metadataxmlpath']);
+        if ($config['hasMetadataXml'] == 'true') {
+            $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
         }
 
-
-        $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementspath']);
+        $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
 
         $presentationElements = array();
 

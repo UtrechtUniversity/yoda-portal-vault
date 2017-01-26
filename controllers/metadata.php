@@ -28,14 +28,15 @@ class Metadata extends MY_Controller
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-        $userType = $formConfig['usertype'];
+
+        $userType = $formConfig['userType'];
         $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
 
         $this->load->library('metadataform');
 
         //$form = $this->metadataform->load($elements, $metadata);
         $form = $this->metadataform->load($elements);
-        if ($formConfig['hasmetadataxml'] == 'true' || $userType == 'reader') {
+        if ($formConfig['hasMetadataXml'] == 'true' || $userType == 'reader') {
             $form->setPermission('read');
         } else {
             $form->setPermission('write');
