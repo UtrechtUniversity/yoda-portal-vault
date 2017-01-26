@@ -81,7 +81,7 @@ class Metadata extends MY_Controller
         $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
 
 
-        return redirect('research/metadata/form?path=/research-test/meta', 'refresh');
+        return redirect('research/metadata/form?path=' . $path, 'refresh');
     }
 
     /*
