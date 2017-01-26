@@ -58,3 +58,7 @@ legend {
     padding: 0 5px;
     margin-bottom: 15px!important;
 }
+
+.fa.safe {
+    color: red;
+}
