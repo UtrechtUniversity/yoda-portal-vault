@@ -8,6 +8,34 @@ class Filesystem extends CI_Model {
         parent::__construct();
     }
 
+    /**
+     * @param $rodsaccount
+     * @param $path
+     * @param $metadata
+     *
+     * key value pairs to be written to .yoda-metadata.xml
+     *
+     */
+    function writeXml($rodsaccount, $path, $metadata)
+    {
+        $metedataFile = new ProdsFile($rodsaccount, $path);
+
+        $metedataFile->open("w+", $rodsaccount->default_resc); //$this->config->item('rodsDefaultResource')
+        $bytes = $metedataFile->write("<?xml version=\"1.0\"?>\n" );
+        $bytes += $metedataFile->write("<metadata>\n" );
+
+        foreach($metadata as $fields) {
+            foreach ($fields as $key => $value) {
+                $bytes += $metedataFile->write('<' . $key . '>' . $value .'</' . $key . ">\n" );
+            }
+        }
+        $bytes += $metedataFile->write("</metadata>\n" );
+
+        $metedataFile->close();
+        return $metadata;
+
+    }
+
     function read($rodsaccount, $file)
     {
         $fileContent = '';
@@ -26,8 +54,69 @@ class Filesystem extends CI_Model {
             return $fileContent;
 
         } catch(RODSException $e) {
+            print_r($file);
             print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
             exit;
+        }
+    }
+
+    static public function metadataFormPaths($iRodsAccount, $path) {
+        $ruleBody = <<<'RULE'
+myRule {
+    iiPrepareMetadataForm(*path, *result);
+}
+
+
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array("*result")
+            );
+
+            $ruleResult = $rule->execute();
+            $output = json_decode($ruleResult['*result'], true);
+
+            return $output;
+
+        } catch(RODSException $e) {
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
+    }
+
+    static public function removeAllMetadata($iRodsAccount, $path)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    iiRemoveAllMetadata(*path);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array()
+            );
+
+            $rule->execute();
+            return true;
+
+        } catch(RODSException $e) {
+            print_r($e);
+            exit;
+            return false;
         }
     }
 

@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-md-12">
-        <?php echo $form->open('research/metadata/store', 'form-horizontal metadata-form'); ?>
-        <a class="btn btn-default" href="/research/browse?dir=<?php echo $fullPath; ?>">Back to overview</a>
+        <?php echo $form->open('research/metadata/store?path=' . $path, 'form-horizontal metadata-form'); ?>
+        <a class="btn btn-default" href="/research/browse?dir=<?php echo $path; ?>">Back to overview</a>
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <h3 class="panel-title">Metadata form - <?php echo $path; ?></h3>
@@ -10,9 +10,11 @@
                 <div class="form-group">
                     <div class="col-sm-12">
                         <?php if ($form->getPermission() == 'write') { ?>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
                         <?php } ?>
-                        <button type="button" class="btn btn-danger pull-right">Delete all metadata</button>
+                        <?php if ($userType != 'reader' && $metadataExists) { ?>
+                            <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
+                        <?php } ?>
                     </div>
                 </div>
 
@@ -28,7 +30,9 @@
                         <?php if ($form->getPermission() == 'write') { ?>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         <?php } ?>
-                        <button type="button" class="btn btn-danger pull-right">Delete all metadata</button>
+                        <?php if ($userType != 'reader' && $metadataExists) { ?>
+                            <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
+                        <?php } ?>
                     </div>
                 </div>
             </div>

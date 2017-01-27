@@ -1,4 +1,8 @@
 $( document ).ready(function() {
+    if ($('#file-browser').length) {
+        startBrowsing(browseStartDir, browsePageItems);
+    }
+
     $(".dropdown-menu li a").click(function(){
         searchSelectChanged($(this));
     });
@@ -144,9 +148,37 @@ function buildFileBrowser(dir)
     }
 
     var fileBrowser = $('#file-browser').DataTable();
+
     fileBrowser.ajax.url(url).load();
 
     return true;
+}
+
+function startBrowsing(path, items)
+{
+    $('#file-browser').DataTable( {
+        "bFilter": false,
+        "bInfo": false,
+        "bLengthChange": false,
+        "ajax": "browse/data",
+        "processing": true,
+        "serverSide": true,
+        "iDeferLoading": 0,
+        "pageLength": items,
+        "drawCallback": function(settings) {
+            $( ".browse" ).on( "click", function() {
+                browse($(this).attr('data-path'));
+            });
+        }
+    });
+
+    if (path.length > 0) {
+        browse(path);
+    } else {
+        browse();
+    }
+
+
 }
 
 function changeBrowserUrl(path)
@@ -188,7 +220,7 @@ function topInformation(dir)
             }
 
             // User metadata
-            if (metadata) {
+            if (metadata == 'true') {
                 $('.btn-group button.metadata-form').attr('data-path', dir);
                 $('.btn-group button.metadata-form').show();
             } else {
@@ -207,7 +239,7 @@ function toggleDirectoryType(currentType, path)
     var btnText = $('.btn-group button.directory-type').html();
 
     $('.btn-group button.directory-type').html(btnText + '<i class="fa fa-spinner fa-spin fa-fw"></i>');
-    $('.btn-group button.directory-type').attr("disabled", "disabled");
+    $('.btn-group button.directory-type').prop("disabled", true);
 
     if (currentType == 'folder') {
         var newType = 'datapackage';
@@ -231,9 +263,9 @@ function toggleDirectoryType(currentType, path)
         }
 
         buildFileBrowser(path);
+        
+        $('.btn-group button.directory-type').removeAttr("disabled");
     });
-
-    $('.btn-group button.directory-type').removeAttr("disabled");
 }
 
 function showMetadataForm(path)

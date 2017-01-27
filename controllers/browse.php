@@ -43,6 +43,7 @@ class Browse extends MY_Controller
         ));
 
         $this->data['items'] = $this->config->item('browser-items-per-page');
+        $this->data['dir'] = $this->input->get('dir');
 
         $this->load->view('browse', $this->data);
         $this->load->view('common-end');

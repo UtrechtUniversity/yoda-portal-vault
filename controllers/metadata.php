@@ -19,34 +19,44 @@ class Metadata extends MY_Controller
     {
         $this->load->model('Metadata_model');
         $this->load->model('Metadata_form_model');
+        $this->load->model('filesystem');
 
 
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
-
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
-        $formConfig = array();
-        $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
-        //print_r($elements);
-        //exit;
+        $userType = $formConfig['userType'];
+        $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
 
         $this->load->library('metadataform');
 
         //$form = $this->metadataform->load($elements, $metadata);
         $form = $this->metadataform->load($elements);
-        $form->setPermission('write');
+        if ($formConfig['hasMetadataXml'] == 'true' || $userType == 'reader') {
+            $form->setPermission('read');
+        } else {
+            $form->setPermission('write');
+        }
+
+        $metadataExists = false;
+        if ($formConfig['hasMetadataXml'] == 'true') {
+            $metadataExists = true;
+        }
 
         $this->load->view('common-start', array(
             'styleIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
                 'lib/font-awesome/css/font-awesome.css',
+                'lib/sweetalert/sweetalert.css',
                 'css/metadata/form.css',
             ),
             'scriptIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.js',
+                'lib/sweetalert/sweetalert.min.js',
                 'js/metadata/form.js',
             ),
             'activeModule'   => $this->module->name(),
@@ -58,10 +68,46 @@ class Metadata extends MY_Controller
         $this->data['form'] = $form;
         $this->data['path'] = $path;
         $this->data['fullPath'] = $fullPath;
+        $this->data['userType'] = $userType;
+        $this->data['metadataExists'] = $metadataExists;
 
         $this->load->view('metadata/form', $this->data);
         $this->load->view('common-end');
 
+    }
+
+    function store()
+    {
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+
+        $this->load->model('Metadata_form_model');
+
+        $path = $this->input->get('path');
+        $fullPath =  $pathStart . $path;
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
+        $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+
+
+        return redirect('research/metadata/form?path=' . $path, 'refresh');
+    }
+
+    function delete()
+    {
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+
+        $this->load->model('filesystem');
+        $path = $this->input->get('path');
+        $fullPath =  $pathStart . $path;
+
+        $result = $this->filesystem->removeAllMetadata($rodsaccount, $fullPath);
+
+        if ($result) {
+            return redirect('research/browse?dir=' . $path, 'refresh');
+        } else {
+            return redirect('research/metadata/form?path=' . $path, 'refresh');
+        }
     }
 
     /*
