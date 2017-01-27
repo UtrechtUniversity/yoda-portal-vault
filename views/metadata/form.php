@@ -12,8 +12,8 @@
                         <?php if ($form->getPermission() == 'write') { ?>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         <?php } ?>
-                        <?php if ($userType != 'reader') { ?>
-                            <button type="button" class="btn btn-danger pull-right">Delete all metadata</button>
+                        <?php if ($userType != 'reader' && $metadataExists) { ?>
+                            <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
                         <?php } ?>
                     </div>
                 </div>
@@ -30,8 +30,8 @@
                         <?php if ($form->getPermission() == 'write') { ?>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         <?php } ?>
-                        <?php if ($userType != 'reader') { ?>
-                            <button type="button" class="btn btn-danger pull-right">Delete all metadata</button>
+                        <?php if ($userType != 'reader' && $metadataExists) { ?>
+                            <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
                         <?php } ?>
                     </div>
                 </div>

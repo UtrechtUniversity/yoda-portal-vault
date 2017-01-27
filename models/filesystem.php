@@ -91,6 +91,35 @@ RULE;
         return array();
     }
 
+    static public function removeAllMetadata($iRodsAccount, $path)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    iiRemoveAllMetadata(*path);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array()
+            );
+
+            $rule->execute();
+            return true;
+
+        } catch(RODSException $e) {
+            print_r($e);
+            exit;
+            return false;
+        }
+    }
+
 
     static public function searchRevisions($iRodsAccount, $path, $type, $orderBy, $orderSort, $limit, $offset = 0) {
         $output = array();

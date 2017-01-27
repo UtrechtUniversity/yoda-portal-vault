@@ -43,7 +43,7 @@
     max-width: 100%;
 }
 
-fieldset{
+.metadata-form fieldset{
     border: solid 1px #DDD !important;
     padding: 0 10px 10px 10px;
     border-bottom: 10px;
