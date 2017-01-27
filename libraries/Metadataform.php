@@ -128,7 +128,6 @@ class Element {
         $this->label = $data['label'];
         $this->helpText = $data['helpText'];
         $this->type = $data['type'];
-        $this->multipleAllowed = $data['multipleAllowed'];
         $this->mandatory = $data['mandatory'];
         $this->group = $data['group'];
 
@@ -138,6 +137,10 @@ class Element {
 
         if ($this->type == 'select') {
             $this->options = $data['elementSpecifics']['options'];
+        }
+
+        if (isset($data['multipleAllowed']) && $data['multipleAllowed']) {
+            $this->multipleAllowed = $data['multipleAllowed'];
         }
     }
 
