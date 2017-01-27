@@ -188,7 +188,7 @@ function topInformation(dir)
             }
 
             // User metadata
-            if (metadata) {
+            if (metadata == 'true') {
                 $('.btn-group button.metadata-form').attr('data-path', dir);
                 $('.btn-group button.metadata-form').show();
             } else {
