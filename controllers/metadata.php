@@ -46,10 +46,12 @@ class Metadata extends MY_Controller
             'styleIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
                 'lib/font-awesome/css/font-awesome.css',
+                'lib/sweetalert/sweetalert.css',
                 'css/metadata/form.css',
             ),
             'scriptIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.js',
+                'lib/sweetalert/sweetalert.min.js',
                 'js/metadata/form.js',
             ),
             'activeModule'   => $this->module->name(),
@@ -82,6 +84,23 @@ class Metadata extends MY_Controller
 
 
         return redirect('research/metadata/form?path=' . $path, 'refresh');
+    }
+
+    function delete()
+    {
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+
+        $path = $this->input->get('path');
+        $fullPath =  $pathStart . $path;
+
+        $result = $this->filesystem->removeAllMetadata($rodsaccount, $fullPath);
+
+        if ($result) {
+            return redirect('research/browse/path=' . $path, 'refresh');
+        } else {
+            return redirect('research/metadata/form?path=' . $path, 'refresh');
+        }
     }
 
     /*
