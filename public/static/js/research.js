@@ -1,4 +1,8 @@
 $( document ).ready(function() {
+    if ($('#file-browser').length) {
+        startBrowsing(browseStartDir, browsePageItems);
+    }
+
     $(".dropdown-menu li a").click(function(){
         searchSelectChanged($(this));
     });
@@ -144,9 +148,37 @@ function buildFileBrowser(dir)
     }
 
     var fileBrowser = $('#file-browser').DataTable();
+
     fileBrowser.ajax.url(url).load();
 
     return true;
+}
+
+function startBrowsing(path, items)
+{
+    $('#file-browser').DataTable( {
+        "bFilter": false,
+        "bInfo": false,
+        "bLengthChange": false,
+        "ajax": "browse/data",
+        "processing": true,
+        "serverSide": true,
+        "iDeferLoading": 0,
+        "pageLength": items,
+        "drawCallback": function(settings) {
+            $( ".browse" ).on( "click", function() {
+                browse($(this).attr('data-path'));
+            });
+        }
+    });
+
+    if (path.length > 0) {
+        browse(path);
+    } else {
+        browse();
+    }
+
+
 }
 
 function changeBrowserUrl(path)

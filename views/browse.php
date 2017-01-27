@@ -1,21 +1,6 @@
 <script>
     var browsePageItems = <?php echo $items; ?>;
-    $( document ).ready(function() {
-        $('#file-browser').DataTable( {
-            "bFilter": false,
-            "bInfo": false,
-            "bLengthChange": false,
-            "ajax": "browse/data",
-            "processing": true,
-            "serverSide": true,
-            "pageLength": <?php echo $items; ?>,
-            "drawCallback": function(settings) {
-                $( ".browse" ).on( "click", function() {
-                    browse($(this).attr('data-path'));
-                });
-            }
-        });
-    });
+    var browseStartDir = '<?php echo $dir; ?>';
 </script>
 
 <div class="row">
