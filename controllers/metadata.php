@@ -91,13 +91,14 @@ class Metadata extends MY_Controller
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
+        $this->load->model('filesystem');
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
 
         $result = $this->filesystem->removeAllMetadata($rodsaccount, $fullPath);
 
         if ($result) {
-            return redirect('research/browse/path=' . $path, 'refresh');
+            return redirect('research/browse?path=' . $path, 'refresh');
         } else {
             return redirect('research/metadata/form?path=' . $path, 'refresh');
         }
