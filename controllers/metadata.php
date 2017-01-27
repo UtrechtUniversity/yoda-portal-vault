@@ -42,6 +42,11 @@ class Metadata extends MY_Controller
             $form->setPermission('write');
         }
 
+        $metadataExists = false;
+        if ($formConfig['hasMetadataXml'] == 'true') {
+            $metadataExists = true;
+        }
+
         $this->load->view('common-start', array(
             'styleIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
@@ -64,6 +69,7 @@ class Metadata extends MY_Controller
         $this->data['path'] = $path;
         $this->data['fullPath'] = $fullPath;
         $this->data['userType'] = $userType;
+        $this->data['metadataExists'] = $metadataExists;
 
         $this->load->view('metadata/form', $this->data);
         $this->load->view('common-end');
