@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-md-12">
         <?php echo $form->open('research/metadata/store?path=' . $path, 'form-horizontal metadata-form'); ?>
-        <a class="btn btn-default" href="/research/browse?dir=<?php echo $fullPath; ?>">Back to overview</a>
+        <a class="btn btn-default" href="/research/browse?dir=<?php echo $path; ?>">Back to overview</a>
         <div class="panel panel-primary">
             <div class="panel-heading">
                 <h3 class="panel-title">Metadata form - <?php echo $path; ?></h3>

@@ -104,7 +104,7 @@ class Metadata extends MY_Controller
         $result = $this->filesystem->removeAllMetadata($rodsaccount, $fullPath);
 
         if ($result) {
-            return redirect('research/browse?path=' . $path, 'refresh');
+            return redirect('research/browse?dir=' . $path, 'refresh');
         } else {
             return redirect('research/metadata/form?path=' . $path, 'refresh');
         }
