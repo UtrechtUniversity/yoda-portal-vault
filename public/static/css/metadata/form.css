@@ -57,6 +57,7 @@ legend {
     font-weight: bold;
     padding: 0 5px;
     margin-bottom: 15px!important;
+    font-style: italic;
 }
 
 .fa.safe {
