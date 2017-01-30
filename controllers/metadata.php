@@ -32,21 +32,25 @@ class Metadata extends MY_Controller
         $userType = $formConfig['userType'];
         $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
 
-        $this->load->library('metadataform');
+        if ($elements) {
+            $this->load->library('metadataform');
 
-        //$form = $this->metadataform->load($elements, $metadata);
-        $form = $this->metadataform->load($elements);
-        if ($formConfig['hasMetadataXml'] == 'true' || $userType == 'reader') {
-            $form->setPermission('read');
+            //$form = $this->metadataform->load($elements, $metadata);
+            $form = $this->metadataform->load($elements);
+            if ($formConfig['hasMetadataXml'] == 'true' || $userType == 'reader') {
+                $form->setPermission('read');
+            } else {
+                $form->setPermission('write');
+            }
+
+            $metadataExists = false;
+            if ($formConfig['hasMetadataXml'] == 'true') {
+                $metadataExists = true;
+            }
         } else {
-            $form->setPermission('write');
+            $form = null;
+            $metadataExists = false;
         }
-
-        $metadataExists = false;
-        if ($formConfig['hasMetadataXml'] == 'true') {
-            $metadataExists = true;
-        }
-
         $this->load->view('common-start', array(
             'styleIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',

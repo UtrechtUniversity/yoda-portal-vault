@@ -112,9 +112,16 @@ class Metadata_form_model extends CI_Model {
         $formData = array();
         if ($config['hasMetadataXml'] == 'true') {
             $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
+
+            if ($formData === false) {
+                return false;
+            }
         }
 
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
+        if ($formGroupedElements === false) {
+            return false;
+        }
 
         $presentationElements = array();
 
@@ -219,6 +226,10 @@ class Metadata_form_model extends CI_Model {
         $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
         $xml = simplexml_load_string($fileContent, "SimpleXMLElement", 0,'xs',true);
 
+        if (empty($xml)) {
+            return false;
+        }
+
         // At first simpleType handling - gathering limitations/restrictions/requirements
         $simpleTypeData = array();
 
@@ -299,7 +310,17 @@ class Metadata_form_model extends CI_Model {
     public function loadFormData($rodsaccount, $path)
     {
         $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+
+        libxml_use_internal_errors(true);
         $xmlData = simplexml_load_string($fileContent);
+        $errors = libxml_get_errors();
+        libxml_clear_errors();
+
+        if(count($errors)) {
+            return false;
+        }
+
+
 
         $json = json_encode($xmlData);
 
@@ -309,6 +330,10 @@ class Metadata_form_model extends CI_Model {
     public function loadFormElements($rodsaccount, $path)
     {
         $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+
+        if (empty($fileContent)) {
+            return false;
+        }
         $xmlFormElements = simplexml_load_string($fileContent);
 
         $json = json_encode($xmlFormElements);
