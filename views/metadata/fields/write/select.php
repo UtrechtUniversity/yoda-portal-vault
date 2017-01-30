@@ -13,7 +13,7 @@
                 <select name="<?php echo $e->key; ?>[]" class="form-control">
                     <option value="">-</option>
                     <?php foreach ($e->options as $option) { ?>
-                        <option value="<?php echo $option; ?> <?php echo ($option == $e->value) ? 'selected' : ''; ?>"><?php echo $option; ?></option>
+                        <option value="<?php echo $option; ?>" <?php echo ($option == $e->value) ? 'selected' : ''; ?>><?php echo $option; ?></option>
                     <?php } ?>
                 </select>
                 <span class="input-group-btn">
@@ -24,7 +24,7 @@
             <select name="<?php echo $e->key; ?>" class="form-control">
                 <option value="">-</option>
                 <?php foreach ($e->options as $option) { ?>
-                    <option value="<?php echo $option; ?> <?php echo ($option == $e->value) ? 'selected' : ''; ?>"><?php echo $option; ?></option>
+                    <option value="<?php echo $option; ?>" <?php echo ($option == $e->value) ? 'selected' : ''; ?>><?php echo $option; ?></option>
                 <?php } ?>
             </select>
         <?php } ?>

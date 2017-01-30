@@ -203,6 +203,7 @@ class Metadata_form_model extends CI_Model {
                             'helpText' => $element['help'],
                             'type' => $type,
                             'mandatory' => $mandatory,
+                            'default' => isset($element['default']) ? $element['default'] : null,
                             'multipleAllowed' => $multipleAllowed,
                             'elementSpecifics' => $elementSpecifics
                         );
