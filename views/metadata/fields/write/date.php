@@ -1,7 +1,6 @@
 <div class="form-group">
     <label class="col-sm-2 control-label">
-        <?php echo $e->label; ?>
-        <i class="fa fa-question-circle" aria-hidden="true" data-toggle="tooltip" title="<?php echo $e->helpText; ?>"></i>
+        <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>"><?php echo $e->label; ?></span>
         <?php if ($e->mandatory) { ?>
             <i class="fa fa-lock safe" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
         <?php } ?>
@@ -18,7 +17,5 @@
         <?php } else { ?>
             <input type="text" class="form-control datepicker" name="<?php echo $e->key; ?>" readonly="true" value="<?php echo $e->value; ?>">
         <?php } ?>
-
-        <!--<p class="help-block"><?php echo $e->helpText; ?></p>-->
     </div>
 </div>
