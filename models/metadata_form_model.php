@@ -203,14 +203,21 @@ class Metadata_form_model extends CI_Model {
                             $elementSpecifics = array('options' => $elementOptions);
                         }
 
+                        // frontend value is the value that will be presented in the data field
+                        // If no metadata-file present, it will fall back to its default
+                        $frontendValue = (isset($element['default']) ? $element['default'] : null);
+
+                        if($config['hasMetadataXml'] == 'true') { // the value in the file supersedes default
+                            $frontendValue = html_entity_decode($keyValue);
+                        }
+
                         $presentationElements[$groupName][] = array(
                             'key' => $key,
-                            'value' => html_entity_decode($keyValue),
+                            'value' => $frontendValue,
                             'label' => $element['label'],
                             'helpText' => $element['help'],
                             'type' => $type,
                             'mandatory' => $mandatory,
-                            'default' => isset($element['default']) ? $element['default'] : null,
                             'multipleAllowed' => $multipleAllowed,
                             'elementSpecifics' => $elementSpecifics
                         );
