@@ -85,7 +85,7 @@ class Metadata_form_model extends CI_Model {
 
             //work through all the values for the perticular element
             foreach($valueArray as $value) {
-                $metadata[] = array($element => addslashes($value));
+                $metadata[] = array($element => htmlentities($value));
             }
         }
 
@@ -198,7 +198,7 @@ class Metadata_form_model extends CI_Model {
 
                         $presentationElements[$groupName][] = array(
                             'key' => $key,
-                            'value' => $keyValue,
+                            'value' => html_entity_decode($keyValue),
                             'label' => $element['label'],
                             'helpText' => $element['help'],
                             'type' => $type,
