@@ -133,8 +133,6 @@ class Element {
 
         if (isset($data['value']) && !empty($data['value'])) {
             $this->value = $data['value'];
-        } else if (isset($data['default']) && !empty($data['default'])) {
-            $this->value = $data['default'];
         }
 
         if ($this->type == 'select') {
