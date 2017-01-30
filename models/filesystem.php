@@ -54,9 +54,7 @@ class Filesystem extends CI_Model {
             return $fileContent;
 
         } catch(RODSException $e) {
-            print_r($file);
-            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
-            exit;
+            return false;
         }
     }
 
@@ -84,8 +82,7 @@ RULE;
             return $output;
 
         } catch(RODSException $e) {
-            echo $e->showStacktrace();
-            return array();
+            return false;
         }
 
         return array();
