@@ -173,13 +173,9 @@ class Metadata_form_model extends CI_Model {
                         $multipleAllowed = true;
                     }
 
-                    echo '<br>';
-                    echo 'multiAllowed: ' . $multipleAllowed;
-                    echo '<br>';
                     if(!$multipleAllowed) {
-                        if(count($valueArray)) {
-                            echo '<br>Single Element with mutliple entries: ' . count($valueArray);
-                            exit;
+                        if(count($valueArray)>1) {
+                            return false;
                         }
                     }
 
