@@ -85,7 +85,11 @@ class Metadata_form_model extends CI_Model {
 
             //work through all the values for the perticular element
             foreach($valueArray as $value) {
-                $metadata[] = array($element => htmlentities($value));
+
+                // no empty lines are allowed
+                if(!(empty($value) OR $value=='')) {
+                    $metadata[] = array($element => htmlentities($value));
+                }
             }
         }
 
