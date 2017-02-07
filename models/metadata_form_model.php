@@ -127,7 +127,22 @@ class Metadata_form_model extends CI_Model {
 
         $groupName = 'undefined';
 
-        foreach($formGroupedElements['Group'] as $formElements) {
+        // If there are multiple groups, the first should contain the number '0' as array-index .
+        // Otherwise, this is the direct descriptive information (i.e. not an array form.
+        // The software expects an array, so in the latter case should be an array)
+        $formAllGroupedElements = array();
+        foreach($formGroupedElements['Group'] as $index => $array) {
+            if($index=='0') {
+                // is the index of an array. So we have multiple groups.
+                $formAllGroupedElements = $formGroupedElements['Group'];
+            }
+            else {
+                $formAllGroupedElements[] = $formGroupedElements['Group']; // rewrite it as an indexable array as input for coming foreach
+            }
+            break;
+        }
+
+        foreach($formAllGroupedElements as $formElements) {
             foreach ($formElements as $key => $element) {
                 if($key == '@attributes') {
                     $groupName = $element['name'];
@@ -144,6 +159,23 @@ class Metadata_form_model extends CI_Model {
                         $valueArray = $value;
                         if(count($valueArray)==0 ) {
                             $valueArray = array('');
+                        }
+                    }
+
+                    // Mandatory no longer based on XSD but taken from formelements.xml
+                    $mandatory = false;
+                    if(isset($element['mandatory']) AND strtolower($element['mandatory'])=='true') {
+                        $mandatory = true;
+                    }
+
+                    $multipleAllowed = false;
+                    if($xsdElements[$key]['maxOccurs']!='1') {
+                        $multipleAllowed = true;
+                    }
+
+                    if(!$multipleAllowed) {
+                        if(count($valueArray)>1) {
+                            return false;
                         }
                     }
 
@@ -181,16 +213,6 @@ class Metadata_form_model extends CI_Model {
                                 break;
                         }
 
-
-                        $mandatory = false;
-                        if ($xsdElements[$key]['minOccurs'] >= 1) {
-                            $mandatory = true;
-                        }
-
-                        $multipleAllowed = false;
-                        if($xsdElements[$key]['maxOccurs']!='1') {
-                            $multipleAllowed = true;
-                        }
 
                         //'select' has options
                         // 'edit/multiline' has length
