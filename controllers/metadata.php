@@ -37,7 +37,7 @@ class Metadata extends MY_Controller
 
             //$form = $this->metadataform->load($elements, $metadata);
             $form = $this->metadataform->load($elements);
-            if ($formConfig['hasMetadataXml'] == 'true' || $userType == 'reader') {
+            if ($userType == 'reader') {
                 $form->setPermission('read');
             } else {
                 $form->setPermission('write');
