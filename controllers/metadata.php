@@ -56,11 +56,13 @@ class Metadata extends MY_Controller
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
                 'lib/font-awesome/css/font-awesome.css',
                 'lib/sweetalert/sweetalert.css',
+                'lib/select2/css/select2.min.css',
                 'css/metadata/form.css',
             ),
             'scriptIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.js',
                 'lib/sweetalert/sweetalert.min.js',
+                'lib/select2/js/select2.min.js',
                 'js/metadata/form.js',
             ),
             'activeModule'   => $this->module->name(),
