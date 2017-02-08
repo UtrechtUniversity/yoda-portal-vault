@@ -5,6 +5,7 @@ $(function () {
         changeMonth: true,
         changeYear: true
     });
+    $('select').select2();
 
     // Delete all metadata btn
     $( ".delete-all-metadata-btn" ).on('click', function(e){
