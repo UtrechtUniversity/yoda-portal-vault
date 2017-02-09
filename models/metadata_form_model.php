@@ -88,7 +88,7 @@ class Metadata_form_model extends CI_Model {
 
                 // no empty lines are allowed
                 if(!(empty($value) OR $value=='')) {
-                    $metadata[] = array($element => htmlentities($value));
+                    $metadata[] = array($element => $value);
                 }
             }
         }
@@ -234,7 +234,7 @@ class Metadata_form_model extends CI_Model {
                         $frontendValue = (isset($element['default']) ? $element['default'] : null);
 
                         if($config['hasMetadataXml'] == 'true') { // the value in the file supersedes default
-                            $frontendValue = html_entity_decode($keyValue);
+                            $frontendValue = html_entity_decode($keyValue, ENT_XML1);
                         }
 
                         $presentationElements[$groupName][] = array(

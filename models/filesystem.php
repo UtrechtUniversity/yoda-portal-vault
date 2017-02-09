@@ -21,19 +21,29 @@ class Filesystem extends CI_Model {
         $metedataFile = new ProdsFile($rodsaccount, $path);
 
         $metedataFile->open("w+", $rodsaccount->default_resc); //$this->config->item('rodsDefaultResource')
-        $bytes = $metedataFile->write("<?xml version=\"1.0\"?>\n" );
-        $bytes += $metedataFile->write("<metadata>\n" );
+
+
+        $xml = new DOMDocument( "1.0", "UTF-8" );
+
+        $xml_metadata = $xml->createElement( "metadata" );
 
         foreach($metadata as $fields) {
             foreach ($fields as $key => $value) {
-                $bytes += $metedataFile->write('<' . $key . '>' . $value .'</' . $key . ">\n" );
+                $xml_item = $xml->createElement( $key);
+                $xml_item->appendChild($xml->createTextNode($value));
+                $xml_metadata->appendChild( $xml_item );
             }
         }
-        $bytes += $metedataFile->write("</metadata>\n" );
+
+        $xml->appendChild($xml_metadata);
+
+        $xmlString = $xml->saveXML();
+
+        $metedataFile->write($xmlString);
 
         $metedataFile->close();
-        return $metadata;
 
+        return $metadata;
     }
 
     function read($rodsaccount, $file)
