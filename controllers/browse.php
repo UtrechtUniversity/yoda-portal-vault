@@ -199,8 +199,16 @@ class Browse extends MY_Controller
             if (isset($result['summary']) && $result['summary']['returned'] > 0) {
                 foreach ($result['rows'] as $row) {
                     $filePath = str_replace($pathStart, '', $row['path']);
+                    $matchParts = array();
+                    foreach ($row['matches'] as $match) {
+                        foreach ($match as $k => $value) {
+                            $matchParts[] = $k . ': ' . $value;
+                        }
+                    }
+
                     $rows[] = array(
-                        '<span class="browse" data-path="' . $filePath . '">' . trim($filePath, '/') . '</span>'
+                        '<span class="browse" data-path="' . $filePath . '">' . trim($filePath, '/') . '</span>',
+                        '<span class="matches" data-toggle="tooltip" title="'. implode(', ', $matchParts) .'">' .  count($row['matches']) .' matches</span>'
                     );
                 }
             }
