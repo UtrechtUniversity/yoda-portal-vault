@@ -46,6 +46,8 @@ function search(value, type, itemsPerPage)
         var columns = [];
         if (type == 'filename') {
             columns = ['Name', 'Location'];
+        } else if (type == 'metadata') {
+                columns = ['Location', 'Matches'];
         } else {
             columns = ['Location'];
         }
@@ -76,6 +78,8 @@ function search(value, type, itemsPerPage)
                 $( ".browse" ).on( "click", function() {
                     browse($(this).attr('data-path'));
                 });
+
+                $('.matches').tooltip();
             }
         });
 
