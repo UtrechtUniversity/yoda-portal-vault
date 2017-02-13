@@ -55,6 +55,7 @@ class Metadata extends MY_Controller
         } else {
             $form = null;
             $metadataExists = false;
+            $cloneMetadata = false;
         }
         $this->load->view('common-start', array(
             'styleIncludes' => array(
