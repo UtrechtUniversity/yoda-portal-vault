@@ -127,6 +127,36 @@ RULE;
         }
     }
 
+    static public function cloneMetadata($iRodsAccount, $path, $parentPath)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    iiCloneMetadataXml(*src, *dst);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*src" => $parentPath,
+                    "*dst" => $path,
+                ),
+                array()
+            );
+
+            $rule->execute();
+            return true;
+
+        } catch(RODSException $e) {
+            print_r($e);
+            exit;
+            return false;
+        }
+    }
+
 
     static public function searchRevisions($iRodsAccount, $path, $type, $orderBy, $orderSort, $limit, $offset = 0) {
         $output = array();

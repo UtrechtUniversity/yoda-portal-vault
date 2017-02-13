@@ -33,6 +33,10 @@
                                 <?php if ($userType != 'reader' && $metadataExists) { ?>
                                     <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
                                 <?php } ?>
+
+                                <?php if (($userType != 'reader' && $metadataExists === false) && $cloneMetadata) { ?>
+                                    <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo $path; ?>">Clone metadata</button>
+                                <?php } ?>
                             </div>
                         </div>
 

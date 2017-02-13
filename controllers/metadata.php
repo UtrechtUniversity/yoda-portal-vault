@@ -44,8 +44,13 @@ class Metadata extends MY_Controller
             }
 
             $metadataExists = false;
+            $cloneMetadata = false;
             if ($formConfig['hasMetadataXml'] == 'true') {
                 $metadataExists = true;
+            }
+
+            if ($formConfig['parentHasMetadataXml'] == 'true') {
+                $cloneMetadata = true;
             }
         } else {
             $form = null;
@@ -76,6 +81,7 @@ class Metadata extends MY_Controller
         $this->data['fullPath'] = $fullPath;
         $this->data['userType'] = $userType;
         $this->data['metadataExists'] = $metadataExists;
+        $this->data['cloneMetadata'] = $cloneMetadata;
 
         $this->load->view('metadata/form', $this->data);
         $this->load->view('common-end');
@@ -114,6 +120,26 @@ class Metadata extends MY_Controller
         } else {
             return redirect('research/metadata/form?path=' . $path, 'refresh');
         }
+    }
+
+    function clone_metadata()
+    {
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+
+        $this->load->model('filesystem');
+        $path = $this->input->get('path');
+        $fullPath =  $pathStart . $path;
+
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
+        if ($formConfig['parentHasMetadataXml'] == 'true') {
+            $xmlPath = $formConfig['metadataXmlPath'];
+            $xmlParentPath = $formConfig['parentMetadataXmlPath'];
+
+            $result = $this->filesystem->cloneMetadata($rodsaccount, $xmlPath, $xmlParentPath);
+        }
+
+        return redirect('research/metadata/form?path=' . $path, 'refresh');
     }
 
     /*
