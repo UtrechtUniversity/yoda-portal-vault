@@ -70,7 +70,10 @@ function search(value, type, itemsPerPage)
             "bFilter": false,
             "bInfo": false,
             "bLengthChange": false,
-            "ajax": url,
+            "ajax": {
+                "url": url,
+                "jsonp": false
+            },
             "processing": true,
             "serverSide": true,
             "pageLength": browsePageItems,
