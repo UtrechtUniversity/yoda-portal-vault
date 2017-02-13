@@ -45,8 +45,24 @@ class Metadata_form_model extends CI_Model {
     public function getFormElementsAsArray($rodsaccount, $config) {
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
 
+
+        // If there are multiple groups, the first should contain the number '0' as array-index .
+        // Otherwise, this is the direct descriptive information (i.e. not an array form.
+        // The software expects an array, so in the latter case should be an array)
+        $formAllGroupedElements = array();
+        foreach($formGroupedElements['Group'] as $index => $array) {
+            if($index=='0') {
+                // is the index of an array. So we have multiple groups.
+                $formAllGroupedElements = $formGroupedElements['Group'];
+            }
+            else {
+                $formAllGroupedElements[] = $formGroupedElements['Group']; // rewrite it as an indexable array as input for coming foreach
+            }
+            break;
+        }
+
         $allElements = array();
-        foreach($formGroupedElements['Group'] as $formElements) {
+        foreach($formAllGroupedElements as $formElements) {
             foreach ($formElements as $key => $element) {
                 if ($key != '@attributes') {
                     $allElements[] = $key;
