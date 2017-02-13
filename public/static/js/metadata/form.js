@@ -27,6 +27,26 @@ $(function () {
         });
     });
 
+    // clone metadata btn
+    $( ".clone-metadata-btn" ).on('click', function(e){
+        e.preventDefault();
+        var path = $(this).attr('data-path');
+        swal({
+                title: "Are you sure?",
+                text: "You will not be able to recover this action!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#ffcd00",
+                confirmButtonText: "Yes, clone metadata!",
+                closeOnConfirm: false
+            },
+            function(isConfirm){
+                if (isConfirm) {
+                    window.location.href = '/research/metadata/clone_metadata?path=' + path;
+                }
+            });
+    });
+
     $("button.duplicate-field").on( "click", function() {
         var field = $(this).closest('.form-group');
         duplicateField(field);
