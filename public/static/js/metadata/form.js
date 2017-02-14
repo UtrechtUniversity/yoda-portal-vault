@@ -33,7 +33,7 @@ $(function () {
         var path = $(this).attr('data-path');
         swal({
                 title: "Are you sure?",
-                text: "You will not be able to recover this action!",
+                text: "Entered metadata will be overwritten by cloning.",
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#ffcd00",
