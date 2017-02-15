@@ -54,7 +54,6 @@
 
 
         <div class="btn-group" role="group">
-            <button type="button" class="btn btn-default directory-type" data-type="" data-path=""></button>
             <button type="button" class="btn btn-default metadata-form" data-path=""><i class="fa fa-list" aria-hidden="true"></i> Metadata</button>
 
 

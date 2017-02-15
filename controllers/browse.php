@@ -226,33 +226,6 @@ class Browse extends MY_Controller
 
     }
 
-    public function change_directory_type()
-    {
-        $rodsaccount = $this->rodsuser->getRodsAccount();
-        $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $type = $this->input->get('type');
-        $path = $this->input->get('path');
-        $output = array();
-
-        if ($type == 'datapackage') {
-            // create datapackage Datapackage
-            $result = $this->filesystem->createDatapackage($rodsaccount, $pathStart . $path);
-            $beforeAction = 'folder';
-        } else {
-            // Demote Datapackage
-            $result = $this->filesystem->demoteDatapackage($rodsaccount, $pathStart . $path);
-            $beforeAction = 'datapackage';
-        }
-
-        if ($result) {
-            $output = array('success' => true, 'type' => $type);
-        } else {
-            $output = array('success' => false, 'type' => $beforeAction);
-        }
-
-        echo json_encode($output);
-    }
-
     public function test()
     {
 
