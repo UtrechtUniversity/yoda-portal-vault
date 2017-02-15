@@ -11,10 +11,8 @@
             </button>
             <ul class="dropdown-menu" role="menu">
                 <li><a href="#" data-type="filename">Filter by filename</a></li>
-                <li><a href="#" data-type="location">Filter by location</a></li>
+                <li><a href="#" data-type="location">Filter by folder</a></li>
                 <li><a href="#" data-type="metadata">Filter by metadata</a></li>
-                <li><a href="#" data-type="status">Filter by status</a></li>
-                <li><a href="#" data-type="revision">Find revision for name</a></li>
             </ul>
         </div>
         <input type="hidden" name="search_param" value="all" id="search_param">
