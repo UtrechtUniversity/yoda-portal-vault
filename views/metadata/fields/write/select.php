@@ -5,7 +5,7 @@
         <i class="fa fa-lock safe" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
         <?php } ?>
     </label>
-    <div class="col-sm-3">
+    <div class="col-sm-6">
 
         <?php if ($e->multipleAllowed()) { ?>
             <div class="input-group">
@@ -27,5 +27,16 @@
                 <?php } ?>
             </select>
         <?php } ?>
+    </div>
+    <div class="col-sm-1">
+        <?php if ($e->mandatory) { ?>
+            <i class="fa fa-check" style='color:<?php echo ($e->value ? 'green' : 'red' );?>;' aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
+        <?php } ?>
+    </div>
+    <div class="col-sm-3">
+        <?php foreach($e->messagesForUser as $message): ?>
+            <?php echo $message['messageText']; ?>
+            <br>
+        <?php endforeach; ?>
     </div>
 </div>

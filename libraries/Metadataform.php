@@ -6,7 +6,12 @@ class Metadataform {
 
     public $elements = array();
 
+    public $countMandatoryFilled = 0;
+
+    public $countMandatoryTotal = 0;
+
     private $permission = 'write';
+
 
     /**
      * Constructor
@@ -18,10 +23,51 @@ class Metadataform {
         $this->CI->load->helper('form');
     }
 
+    public function getCountMandatoryFilled()
+    {
+        return $this->countMandatoryFilled;
+    }
+
+    public function getCountMandatoryTotal()
+    {
+        return $this->countMandatoryTotal;
+    }
+
+    public function calculateMandatoryCompleteness($formElements)
+    {
+        $mandatoryCounts = array();
+
+        foreach ($formElements as $group => $elements) {
+
+            foreach ($elements as $name => $properties) {
+
+                // Some fields are multipleAllowed. This should only be counted as 1 field.
+                if($properties['mandatory']) {
+                    if(!isset($mandatoryCounts[$properties['key']])) {
+                        $mandatoryCounts[$properties['key']] = 0;
+                    }
+
+                    $markAsPresent = 0;
+                    if($properties['value']) {
+                        $markAsPresent = 1;
+                    }
+
+                    $mandatoryCounts[$properties['key']] = $markAsPresent;
+                }
+            }
+        }
+
+        foreach($mandatoryCounts as $markAsPresent) {
+            $this->countMandatoryTotal++;
+            if($markAsPresent) {
+                $this->countMandatoryFilled++;
+            }
+        }
+    }
+
     //public function load($formElements, $values)
     public function load($formElements)
     {
-
         foreach ($formElements as $group => $elements)
         {
            foreach($elements as $name => $properties)
@@ -50,6 +96,7 @@ class Metadataform {
     {
         $html = '';
         // Render the entire form
+
         foreach($this->elements as $element)
         {
             if (empty($section) || $section == $element->group) {
@@ -141,6 +188,22 @@ class Element {
 
         if (isset($data['multipleAllowed']) && $data['multipleAllowed']) {
             $this->multipleAllowed = $data['multipleAllowed'];
+        }
+
+        // item types will probably be extend in the future
+        $fieldsWithMaxLength = array('text',
+            'textarea');
+        if(in_array($this->type, $fieldsWithMaxLength)) {
+            $this->maxLength = 0;
+            if(isset($data['elementSpecifics']['maxLength'])) {
+                $this->maxLength = $data['elementSpecifics']['maxLength'];
+            }
+        }
+
+        // preparation for info to user
+        $this->messagesForUser = array();
+        if(is_array($data['messagesForUser'])) {
+            $this->messagesForUser = $data['messagesForUser'];
         }
     }
 

@@ -42,6 +42,8 @@ class Metadata extends MY_Controller
             } else {
                 $form->setPermission('write');
             }
+            // figure out the number of mandatory fields and how many actually hold data
+            $form->calculateMandatoryCompleteness($elements);
 
             $metadataExists = false;
             $cloneMetadata = false;

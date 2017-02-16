@@ -29,6 +29,9 @@
                             <div class="col-sm-12">
                                 <?php if ($form->getPermission() == 'write') { ?>
                                     <button type="submit" class="btn btn-primary">Submit</button>
+
+                                    Vault completeness: <?php echo $form->getCountMandatoryFilled(); ?> / <?php echo $form->getCountMandatoryTotal(); ?>
+
                                 <?php } ?>
                                 <?php if ($userType != 'reader' && $metadataExists) { ?>
                                     <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
