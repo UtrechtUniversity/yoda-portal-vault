@@ -45,6 +45,22 @@ class Browse extends MY_Controller
         $this->data['items'] = $this->config->item('browser-items-per-page');
         $this->data['dir'] = $this->input->get('dir');
 
+        // Remember search results
+        $searchTerm = '';
+        $searchType = 'filename';
+        $searchStart = 0;
+
+        if ($this->session->userdata('research-search-term')) {
+            $searchTerm = $this->session->userdata('research-search-term');
+            $searchType = $this->session->userdata('research-search-type');
+            $searchStart = $this->session->userdata('research-search-start');
+        }
+
+
+        $this->data['searchTerm'] = $searchTerm;
+        $this->data['searchType'] = $searchType;
+        $this->data['searchStart'] = $searchStart;
+
         $this->load->view('browse', $this->data);
         $this->load->view('common-end');
     }
@@ -157,6 +173,15 @@ class Browse extends MY_Controller
         $columns = array();
 
 
+        $this->session->set_userdata(
+            array(
+                'research-search-term' => $filter,
+                'research-search-start' => $start,
+                'research-search-type' => $type
+            )
+        );
+
+
         // Search / filename
         if ($type == 'filename') {
             $columns = array('Name', 'Location');
@@ -175,8 +200,8 @@ class Browse extends MY_Controller
 
         }
 
-        // Search / location
-        if ($type == 'location') {
+        // Search / folder
+        if ($type == 'folder') {
             $columns = array('Location');
             $result = $this->filesystem->searchByName($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
             $totalItems += $result['summary']['total'];
@@ -224,6 +249,13 @@ class Browse extends MY_Controller
 
         echo json_encode($output);
 
+    }
+
+    public function unset_search()
+    {
+        $this->session->unset_userdata('research-search-term');
+        $this->session->unset_userdata('research-search-start');
+        $this->session->unset_userdata('research-search-type');
     }
 
     public function test()

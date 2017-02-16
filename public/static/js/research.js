@@ -1,6 +1,12 @@
 $( document ).ready(function() {
     if ($('#file-browser').length) {
         startBrowsing(browseStartDir, browsePageItems);
+
+        // Rememeber search results
+        if (searchTerm.length > 0) {
+            search(searchTerm, searchType, browsePageItems, searchStart);
+        }
+
     }
 
     $(".dropdown-menu li a").click(function(){
@@ -35,9 +41,14 @@ function browse(dir)
     buildFileBrowser(dir);
 }
 
-function search(value, type, itemsPerPage)
+function search(value, type, itemsPerPage, displayStart)
 {
     if (typeof value != 'undefined' && value.length > 0 ) {
+        // Display start for first page load
+        if (typeof displayStart === 'undefined') {
+            displayStart = 0;
+        }
+
         // Table columns definition
         var columns = [];
         if (type == 'filename') {
@@ -73,6 +84,7 @@ function search(value, type, itemsPerPage)
             "processing": true,
             "serverSide": true,
             "pageLength": browsePageItems,
+            "displayStart": displayStart,
             "drawCallback": function(settings) {
                 $( ".browse" ).on( "click", function() {
                     browse($(this).attr('data-path'));
@@ -92,6 +104,7 @@ function search(value, type, itemsPerPage)
 function closeSearchResults()
 {
     $('.search-results').hide();
+    $.get("browse/unset_search");
 }
 
 function showSearchResults()
