@@ -1,6 +1,6 @@
 <script>
     var browsePageItems = <?php echo $items; ?>;
-    var browseStartDir = '<?php echo $dir; ?>';
+    var browseStartDir = '<?php echo addslashes($dir); ?>';
 </script>
 
 <div class="row">
