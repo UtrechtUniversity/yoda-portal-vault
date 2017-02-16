@@ -7,7 +7,15 @@
                 <h3 class="panel-title">Metadata form - <?php echo $path; ?></h3>
             </div>
             <div class="panel-body">
-                <p>it's not possible to load this form.</p>
+                <p>It is not possible to load this form due to the formatting of .yoda-metadata.xml.<br>
+                    Please check the structure of this file. <br>
+                    <br>
+                    When using the 'Delete all metadata' button beware that you will lose all data!
+
+                    <?php if ($userType != 'reader') { ?>
+                        <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
+                    <?php } ?>
+                </p>
             </div>
         </div>
     </div>
@@ -23,7 +31,16 @@
                 </div>
                 <div class="panel-body">
                     <?php if ($form === false) { ?>
-                        <p>it's not possible to load this form.</p>
+                        <p>It is not possible to load this form due to the formatting of .yoda-metadata.xml.<br>
+                            Please check the structure of this file. <br>
+                            <br>
+                            When using the 'Delete all metadata' button beware that you will lose all data!
+
+
+                            <?php if ($userType != 'reader' && $metadataExists) { ?>
+                                <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
+                            <?php } ?>
+                        </p>
                     <?php } else { ?>
                         <div class="form-group">
                             <div class="col-sm-12">

@@ -142,6 +142,15 @@ class Element {
         if (isset($data['multipleAllowed']) && $data['multipleAllowed']) {
             $this->multipleAllowed = $data['multipleAllowed'];
         }
+
+        $fieldsWithMaxLength = array('text',
+            'textarea');
+        if(in_array($this->type, $fieldsWithMaxLength)) {
+            $this->maxLength = 0;
+            if(isset($data['elementSpecifics']['maxLength'])) {
+                $this->maxLength = $data['elementSpecifics']['maxLength'];
+            }
+        }
     }
 
     /**
