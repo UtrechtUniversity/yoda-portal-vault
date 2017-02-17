@@ -18,7 +18,8 @@ $(function () {
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",
             confirmButtonText: "Yes, delete all metadata!",
-            closeOnConfirm: false
+            closeOnConfirm: false,
+            animation: false
         },
         function(isConfirm){
             if (isConfirm) {
@@ -38,7 +39,8 @@ $(function () {
                 showCancelButton: true,
                 confirmButtonColor: "#ffcd00",
                 confirmButtonText: "Yes, clone metadata!",
-                closeOnConfirm: false
+                closeOnConfirm: false,
+                animation: false
             },
             function(isConfirm){
                 if (isConfirm) {
