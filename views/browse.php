@@ -1,25 +1,22 @@
 <script>
     var browsePageItems = <?php echo $items; ?>;
-    var browseStartDir = '<?php echo $dir; ?>';
-    var searchTerm = '<?php echo $searchTerm; ?>';
-    var searchType = '<?php echo $searchType; ?>';
-    var searchStart = <?php echo $searchStart; ?>;
+    var browseStartDir = '<?php echo addslashes($dir); ?>';
 </script>
 
 <div class="row">
     <div class="input-group" style="margin-bottom:20px;">
         <div class="input-group-btn search-panel">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                <span id="search_concept" data-type="<?php echo $searchType; ?>">Filter by <?php echo $searchType; ?></span> <span class="caret"></span>
+                <span id="search_concept" data-type="filename">Filter by filename</span> <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
                 <li><a href="#" data-type="filename">Filter by filename</a></li>
-                <li><a href="#" data-type="folder">Filter by folder</a></li>
+                <li><a href="#" data-type="location">Filter by folder</a></li>
                 <li><a href="#" data-type="metadata">Filter by metadata</a></li>
             </ul>
         </div>
         <input type="hidden" name="search_param" value="all" id="search_param">
-        <input type="text" class="form-control" id="search-filter" placeholder="Search term..." value="<?php echo $searchTerm; ?>">
+        <input type="text" class="form-control" id="search-filter" placeholder="Search term...">
         <span class="input-group-btn">
             <button class="btn btn-default search-btn" data-items-per-page="<?php echo $items; ?>" type="button"><span class="glyphicon glyphicon-search"></span></button>
         </span>
