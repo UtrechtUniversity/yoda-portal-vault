@@ -59,17 +59,20 @@ function search(value, type, itemsPerPage, displayStart)
             columns = ['Location'];
         }
 
-        var tableHeaders;
-        $.each(columns, function(i, val){
-            tableHeaders += "<th>" + val + "</th>";
-        });
-
         // Destroy current Datatable
         var datatable = $('#search').DataTable();
         datatable.destroy();
 
+        var tableHeaders = '';
+        $.each(columns, function(i, val){
+            tableHeaders += "<th>" + val + "</th>";
+        });
+
         // Create the columns
         $('#search thead tr').html(tableHeaders);
+
+        // Remove table content
+        $('#search tbody').remove();
 
         // Initialize new Datatable
         var url = "browse/search?filter=" + value + "&type=" + type;
