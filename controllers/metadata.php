@@ -99,10 +99,17 @@ class Metadata extends MY_Controller
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-        $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
 
+        $userType = $formConfig['userType'];
 
-        return redirect('research/metadata/form?path=' . $path, 'refresh');
+        if($userType != 'reader') {
+            $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+            return redirect('research/metadata/form?path=' . $path, 'refresh');
+        }
+        else {
+            //get away from the form, user is (no longer) entitled to view it
+            return redirect('research/browse?dir=' . $path, 'refresh'); //
+        }
     }
 
     function delete()
@@ -114,13 +121,23 @@ class Metadata extends MY_Controller
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
 
-        $result = $this->filesystem->removeAllMetadata($rodsaccount, $fullPath);
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
-        if ($result) {
-            return redirect('research/browse?dir=' . $path, 'refresh');
-        } else {
-            return redirect('research/metadata/form?path=' . $path, 'refresh');
+        $userType = $formConfig['userType'];
+
+        if($userType != 'reader') {
+            $result = $this->filesystem->removeAllMetadata($rodsaccount, $fullPath);
+            if ($result) {
+                return redirect('research/browse?dir=' . $path, 'refresh');
+            } else {
+                return redirect('research/metadata/form?path=' . $path, 'refresh');
+            }
         }
+        else {
+            //get away from the form, user is (no longer) entitled to view it
+            return redirect('research/browse?dir=' . $path, 'refresh');
+        }
+
     }
 
     function clone_metadata()
