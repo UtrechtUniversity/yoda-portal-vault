@@ -19,10 +19,13 @@ ol.breadcrumb li.active {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: normal;
     width: 75%;
-    padding-top: 4px;
     float:left;
+
+    /*
+    line-height: normal;
+    padding-top: 4px;
+    */
 }
 
 .search-results {
@@ -31,4 +34,11 @@ ol.breadcrumb li.active {
 
 .top-information {
     display: none;
+}
+
+.panel-heading .input-group-sm {
+    margin: -7px; /* btn in panel heading */
+}
+.panel-footer  .input-group-sm {
+    margin: -6px; /* btn in panel footer */
 }

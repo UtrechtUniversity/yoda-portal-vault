@@ -23,10 +23,10 @@
     </div>
 
     <div class="panel panel-default search-results">
-        <div class="panel-heading">
-            <h3 class="panel-title">Search results for '<span class="search-string"></span>'</h3>
+        <div class="panel-heading clearfix">
+            <h3 class="panel-title pull-left">Search results for '<span class="search-string"></span>'</h3>
 
-            <button class="btn btn-default pull-right close-search-results">Close</button>
+            <button class="btn btn-default pull-right close-search-results input-group-sm has-feedback">Close</button>
             <div class="clearfix"></div>
         </div>
         <div class="panel-body">

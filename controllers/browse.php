@@ -88,12 +88,6 @@ class Browse extends MY_Controller
 
         // Collections
         $icon = 'fa-folder-o';
-        // Home path
-        if ($path == $pathStart) {
-            //$path = $path . '/grp-';
-            $icon = 'fa-users';
-        }
-        
         $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
         $totalItems += $collections['summary']['total'];
         if ($collections['summary']['returned'] > 0) {
