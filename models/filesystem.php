@@ -24,7 +24,7 @@ class Filesystem extends CI_Model {
 
 
         $xml = new DOMDocument( "1.0", "UTF-8" );
-	$xml->formatOutput = true;
+	    $xml->formatOutput = true;
 
         $xml_metadata = $xml->createElement( "metadata" );
 
