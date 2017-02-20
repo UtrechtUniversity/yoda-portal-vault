@@ -13,9 +13,9 @@
                 <span id="search_concept" data-type="<?php echo $searchType; ?>">Filter by <?php echo $searchType; ?></span> <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
-                <li><a href="#" data-type="filename">Filter by filename</a></li>
-                <li><a href="#" data-type="folder">Filter by folder</a></li>
-                <li><a href="#" data-type="metadata">Filter by metadata</a></li>
+                <li><a href="#" data-type="filename">Search by filename</a></li>
+                <li><a href="#" data-type="folder">Search by folder</a></li>
+                <li><a href="#" data-type="metadata">Search by metadata</a></li>
             </ul>
         </div>
         <input type="hidden" name="search_param" value="all" id="search_param">
@@ -26,14 +26,14 @@
     </div>
 
     <div class="panel panel-default search-results">
-        <div class="panel-heading">
-            <h3 class="panel-title">Search results for '<span class="search-string"></span>'</h3>
+        <div class="panel-heading clearfix">
+            <h3 class="panel-title pull-left">Search results for '<span class="search-string"></span>'</h3>
 
-            <button class="btn btn-default pull-right close-search-results">Close</button>
+            <button class="btn btn-default pull-right close-search-results input-group-sm has-feedback">Close</button>
             <div class="clearfix"></div>
         </div>
         <div class="panel-body">
-            <table class="table table-bordered" id="search" width="100%">
+            <table class="table yoda-table table-bordered" id="search" width="100%">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -78,7 +78,7 @@
         <div class="row">
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <table id="file-browser" class="table table-bordered">
+                    <table id="file-browser" class="table yoda-table table-bordered">
                         <thead>
                             <tr>
                                 <th>Name</th>
