@@ -104,6 +104,7 @@ function search(value, type, itemsPerPage, displayStart)
 function closeSearchResults()
 {
     $('.search-results').hide();
+    $('#search-filter').val('');
     $.get("browse/unset_search");
 }
 
