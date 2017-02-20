@@ -10,7 +10,7 @@
     <div class="input-group" style="margin-bottom:20px;">
         <div class="input-group-btn search-panel">
             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                <span id="search_concept" data-type="<?php echo $searchType; ?>">Filter by <?php echo $searchType; ?></span> <span class="caret"></span>
+                <span id="search_concept" data-type="<?php echo $searchType; ?>">Search by <?php echo $searchType; ?></span> <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
                 <li><a href="#" data-type="filename">Search by filename</a></li>
