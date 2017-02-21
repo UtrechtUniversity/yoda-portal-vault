@@ -153,10 +153,6 @@ class Browse extends MY_Controller
         $order = $this->input->get('order');
         $orderDir = $order[0]['dir'];
         $orderColumn = $order[0]['column'];
-        $orderColumns = array(
-            0 => 'COLL_NAME',
-            1 => 'COLL_MODIFY_TIME'
-        );
         $draw = $this->input->get('draw');
         $itemsPerPage = $this->config->item('browser-items-per-page');
         $totalItems = 0;
@@ -180,7 +176,10 @@ class Browse extends MY_Controller
 
         // Search / filename
         if ($type == 'filename') {
-            $columns = array('Name', 'Location');
+            $orderColumns = array(
+                0 => 'DATA_NAME',
+                1 => 'COLL_NAME'
+            );
             $result = $this->filesystem->searchByName($rodsaccount, $path, $filter, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
             $totalItems += $result['summary']['total'];
 
@@ -198,7 +197,9 @@ class Browse extends MY_Controller
 
         // Search / folder
         if ($type == 'folder') {
-            $columns = array('Location');
+            $orderColumns = array(
+                0 => 'COLL_NAME'
+            );
             $result = $this->filesystem->searchByName($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
             $totalItems += $result['summary']['total'];
 
@@ -214,6 +215,9 @@ class Browse extends MY_Controller
 
         // Search / metadata
         if ($type == 'metadata') {
+            $orderColumns = array(
+                0 => 'COLL_NAME'
+            );
             $result = $this->filesystem->searchByUserMetadata($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
             $totalItems += $result['summary']['total'];
 
@@ -240,7 +244,7 @@ class Browse extends MY_Controller
             }
         }
 
-        $output = array('draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows, 'columns' => $columns);
+        $output = array('draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
 
 
         echo json_encode($output);
