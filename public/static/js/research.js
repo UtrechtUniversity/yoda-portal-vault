@@ -35,7 +35,12 @@ $( document ).ready(function() {
 
 function browse(dir)
 {
-    var path = makeBreadcrumb(dir);
+    var urlDecodedDir = decodeURIComponent((dir + '').replace(/\+/g, '%20'));
+
+    makeBreadcrumb(urlDecodedDir);
+
+    var path = makeBreadcrumbPath(dir);
+
     changeBrowserUrl(path);
     topInformation(dir);
     buildFileBrowser(dir);
@@ -143,7 +148,8 @@ function makeBreadcrumb(dir)
 
     // Build html
     var totalParts = parts.length;
-    if (totalParts > 0) {
+
+    if (totalParts > 0 && parts[0]!='undefined') {
         var html = '<li class="browse">Home</li>';
         var path = "";
         $.each( parts, function( k, part ) {
@@ -161,9 +167,34 @@ function makeBreadcrumb(dir)
     }
 
     $('ol.breadcrumb').html(html);
+}
+
+function makeBreadcrumbPath(dir)
+{
+    var parts = [];
+    if (typeof dir != 'undefined') {
+        if (dir.length > 0) {
+            var elements = dir.split('/');
+
+            // Remove empty elements
+            var parts = $.map(elements, function (v) {
+                return v === "" ? null : v;
+            });
+        }
+    }
+
+    // Build html
+    var totalParts = parts.length;
+    if (totalParts > 0) {
+        var path = "";
+        $.each( parts, function( k, part ) {
+            path += "/" + part;
+        });
+    }
 
     return path;
 }
+
 
 function buildFileBrowser(dir)
 {
