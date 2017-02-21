@@ -51,17 +51,23 @@ class Browse extends MY_Controller
         $searchTerm = '';
         $searchType = 'filename';
         $searchStart = 0;
+        $searchOrderDir = 'asc';
+        $searchOrderColumn = 0;
 
         if ($this->session->userdata('research-search-term')) {
             $searchTerm = $this->session->userdata('research-search-term');
             $searchType = $this->session->userdata('research-search-type');
             $searchStart = $this->session->userdata('research-search-start');
+            $searchOrderDir = $this->session->userdata('research-search-order-dir');
+            $searchOrderColumn = $this->session->userdata('research-search-order-column');
         }
 
 
         $this->data['searchTerm'] = $searchTerm;
         $this->data['searchType'] = $searchType;
         $this->data['searchStart'] = $searchStart;
+        $this->data['searchOrderDir'] = $searchOrderDir;
+        $this->data['searchOrderColumn'] = $searchOrderColumn;
 
         $this->load->view('browse', $this->data);
         $this->load->view('common-end');
@@ -169,7 +175,9 @@ class Browse extends MY_Controller
             array(
                 'research-search-term' => $filter,
                 'research-search-start' => $start,
-                'research-search-type' => $type
+                'research-search-type' => $type,
+                'research-search-order-dir' => $orderDir,
+                'research-search-order-column' => $orderColumn
             )
         );
 
@@ -256,6 +264,8 @@ class Browse extends MY_Controller
         $this->session->unset_userdata('research-search-term');
         $this->session->unset_userdata('research-search-start');
         $this->session->unset_userdata('research-search-type');
+        $this->session->unset_userdata('research-search-order-dir');
+        $this->session->unset_userdata('research-search-order-column');
     }
 
     public function test()
