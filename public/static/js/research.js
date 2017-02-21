@@ -50,11 +50,13 @@ function search(value, type, itemsPerPage, displayStart)
         }
 
         // Table columns definition
+        var disableSorting = {};
         var columns = [];
         if (type == 'filename') {
             columns = ['Name', 'Location'];
         } else if (type == 'metadata') {
-                columns = ['Location', 'Matches'];
+            columns = ['Location', 'Matches'];
+            disableSorting = { 'bSortable': false, 'aTargets': [ -1 ] };
         } else {
             columns = ['Location'];
         }
@@ -94,7 +96,10 @@ function search(value, type, itemsPerPage, displayStart)
                 });
 
                 $('.matches').tooltip();
-            }
+            },
+            "aoColumnDefs": [
+                disableSorting
+            ]
         });
 
         $('.search-string').text(value);
