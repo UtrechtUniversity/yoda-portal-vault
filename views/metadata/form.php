@@ -11,7 +11,7 @@
                 </div>
             </div>
             <div class="panel-body">
-                <p>It is not possible to load this form due to the formatting of .yoda-metadata.xml.<br>
+                <p>It is not possible to load this form due to the formatting of the metadata xml file.<br>
                     Please check the structure of this file. <br>
                     <br>
                     When using the 'Delete all metadata' button beware that you will lose all data!
@@ -39,7 +39,7 @@
                 </div>
                 <div class="panel-body">
                     <?php if ($form === false) { ?>
-                        <p>It is not possible to load this form due to the formatting of .yoda-metadata.xml.<br>
+                        <p>It is not possible to load this form due to the formatting of the metadata xml file.<br>
                             Please check the structure of this file. <br>
                             <br>
                             When using the 'Delete all metadata' button beware that you will lose all data!
