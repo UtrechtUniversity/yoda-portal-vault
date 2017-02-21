@@ -7,7 +7,7 @@
                     Metadata form - <?php echo $path; ?>
                 </h3>
                 <div class="input-group-sm has-feedback pull-right">
-                    <a class="btn btn-default" href="/research/browse?dir=<?php echo $path; ?>">Close</a>
+                    <a class="btn btn-default" href="/research/browse?dir=<?php echo urlencode($path); ?>">Close</a>
                 </div>
             </div>
             <div class="panel-body">
@@ -27,14 +27,14 @@
 <?php } else { ?>
     <div class="row">
         <div class="col-md-12">
-            <?php echo $form->open('research/metadata/store?path=' . $path, 'form-horizontal metadata-form'); ?>
+            <?php echo $form->open('research/metadata/store?path=' . urlencode($path), 'form-horizontal metadata-form'); ?>
             <div class="panel panel-default">
                 <div class="panel-heading clearfix">
                     <h3 class="panel-title pull-left">
                         Metadata form - <?php echo $path; ?>
                     </h3>
                     <div class="input-group-sm has-feedback pull-right">
-                        <a class="btn btn-default" href="/research/browse?dir=<?php echo $path; ?>">Close</a>
+                        <a class="btn btn-default" href="/research/browse?dir=<?php echo urlencode($path); ?>">Close</a>
                     </div>
                 </div>
                 <div class="panel-body">
@@ -46,7 +46,7 @@
 
 
                             <?php if ($userType != 'reader' && $metadataExists) { ?>
-                                <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
+                                <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Delete all metadata</button>
                             <?php } ?>
                         </p>
                     <?php } else { ?>
@@ -56,11 +56,11 @@
                                     <button type="submit" class="btn btn-primary">Save</button>
                                 <?php } ?>
                                 <?php if ($userType != 'reader' && $metadataExists) { ?>
-                                    <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
+                                    <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Delete all metadata</button>
                                 <?php } ?>
 
                                 <?php if (($userType != 'reader' && $metadataExists === false) && $cloneMetadata) { ?>
-                                    <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo $path; ?>">Clone from parent folder</button>
+                                    <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Clone from parent folder</button>
                                 <?php } ?>
                             </div>
                         </div>

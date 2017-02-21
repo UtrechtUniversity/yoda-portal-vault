@@ -44,7 +44,8 @@ class Browse extends MY_Controller
         ));
 
         $this->data['items'] = $this->config->item('browser-items-per-page');
-        $this->data['dir'] = urldecode($this->input->get('dir'));
+
+        $this->data['dir'] = urlencode($this->input->get('dir')); // bij close button wordt hiermee iets gedaan
 
         // Remember search results
         $searchTerm = '';
