@@ -4,6 +4,8 @@
     var searchTerm = '<?php echo addslashes($searchTerm); ?>';
     var searchType = '<?php echo $searchType; ?>';
     var searchStart = <?php echo $searchStart; ?>;
+    var searchOrderDir = '<?php echo $searchOrderDir; ?>';
+    var searchOrderColumn = <?php echo $searchOrderColumn; ?>;
 </script>
 
 <div class="row">
