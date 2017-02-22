@@ -4,7 +4,7 @@ $( document ).ready(function() {
 
         // Rememeber search results
         if (searchTerm.length > 0) {
-            search(searchTerm, searchType, browsePageItems, searchStart);
+            search(searchTerm, searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
         }
 
     }
@@ -18,12 +18,12 @@ $( document ).ready(function() {
     });
 
     $(".search-btn").click(function(){
-        search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'));
+        search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     });
 
     $("#search-filter").bind('keypress', function(e) {
         if(e.keyCode==13) {
-            search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'));
+            search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
         }
     });
 
@@ -46,7 +46,7 @@ function browse(dir)
     buildFileBrowser(dir);
 }
 
-function search(value, type, itemsPerPage, displayStart)
+function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchOrderColumn)
 {
     if (typeof value != 'undefined' && value.length > 0 ) {
         // Display start for first page load
@@ -104,7 +104,8 @@ function search(value, type, itemsPerPage, displayStart)
             },
             "aoColumnDefs": [
                 disableSorting
-            ]
+            ],
+            "order": [[ searchOrderColumn, searchOrderDir ]]
         });
 
         $('.search-string').text(value);
