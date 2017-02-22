@@ -187,8 +187,14 @@ function makeBreadcrumbPath(dir)
     var totalParts = parts.length;
     if (totalParts > 0) {
         var path = "";
+        var index = 0;
         $.each( parts, function( k, part ) {
-            path += "/" + part;
+            if(index) {
+                path += "/" + part;
+            }
+            else {
+                path = part;
+            }
         });
     }
 
