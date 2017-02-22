@@ -195,6 +195,7 @@ function makeBreadcrumbPath(dir)
             else {
                 path = part;
             }
+            index++;
         });
     }
 
