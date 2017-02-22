@@ -215,7 +215,7 @@ class Browse extends MY_Controller
                 foreach ($result['rows'] as $row) {
                     $filePath = str_replace($pathStart, '', $row['path']);
                     $rows[] = array(
-                        '<span class="browse" data-path="' . $filePath . '">' . trim($filePath, '/') . '</span>'
+                        '<span class="browse" data-path="' . $filePath . '">' . trim(str_replace(' ','&nbsp;',$filePath), '/') . '</span>'
                     );
                 }
             }
