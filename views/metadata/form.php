@@ -30,7 +30,15 @@
                                 <?php if ($form->getPermission() == 'write') { ?>
                                     <button type="submit" class="btn btn-primary">Submit</button>
 
-                                    Vault completeness: <?php echo $form->getCountMandatoryFilled(); ?> / <?php echo $form->getCountMandatoryTotal(); ?>
+                                    <?php $completeness =  ceil(100 * $form->getCountMandatoryFilled() /  $form->getCountMandatoryTotal());
+                                        echo $completeness;
+            
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="<?php echo $completeness ?>"
+                                             aria-valuemin="0" aria-valuemax="100" style="width:<?php echo $completeness ?>%">
+                                            <?php echo $completeness ?>%
+                                        </div>
+                                    </div>
 
                                 <?php } ?>
                                 <?php if ($userType != 'reader' && $metadataExists) { ?>
