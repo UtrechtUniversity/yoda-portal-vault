@@ -158,9 +158,9 @@ function makeBreadcrumb(dir)
 
             // Active item
             if (k == (totalParts-1)) {
-                html += '<li class="active">' + part + '</li>';
+                html += '<li class="active">' + part.replace(/ /g, "&nbsp;") + '</li>';
             } else {
-                html += '<li class="browse" data-path="' + path + '">' + part + '</li>';
+                html += '<li class="browse" data-path="' + path + '">' + part.replace(/ /g, "&nbsp;") + '</li>';
             }
         });
     } else {
@@ -271,7 +271,7 @@ function topInformation(dir)
                 $('.btn-group button.metadata-form').hide();
             }
 
-            $('.top-information h1').html('<i class="fa '+ icon +'" aria-hidden="true"></i> ' + data.basename);
+            $('.top-information h1').html('<i class="fa '+ icon +'" aria-hidden="true"></i> ' + data.basename.replace(/ /g, "&nbsp;"));
             $('.top-information').show();
         });
     }
