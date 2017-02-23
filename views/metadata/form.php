@@ -56,6 +56,21 @@
 
                                     <button type="submit" class="btn btn-primary">Save</button>
 
+                                    <?php
+                                        $total = $form->getCountMandatoryTotal();
+                                        if($total==0) {
+                                            $completeness = 100;
+                                        }
+                                        else {
+                                            $completeness =  ceil(100 * $form->getCountMandatoryFilled() / $total);
+                                        } ?>
+                                    <span  style="cursor:pointer;" aria-hidden="true" data-toggle="tooltip" title="Required for the vault:  <?php echo $total; ?>, currently filled required fields: <?php  echo $form->getCountMandatoryFilled(); ?>">
+                                        <i class="fa fa-check" style="color:<?php echo $completeness>19 ? '#00CC00': '#F0F0F0' ?>;"></i>
+                                        <i class="fa fa-check" style="color:<?php echo $completeness>39 ? '#00CC00': '#F0F0F0' ?>;"></i>
+                                        <i class="fa fa-check" style="color:<?php echo $completeness>59 ? '#00CC00': '#F0F0F0' ?>;"></i>
+                                        <i class="fa fa-check" style="color:<?php echo $completeness>79 ? '#00CC00': '#F0F0F0' ?>;"></i>
+                                        <i class="fa fa-check" style="color:<?php echo $completeness>99 ? '#00CC00': '#F0F0F0' ?>"></i>
+                                    </span>
 
                                 <?php } ?>
                                 <?php if ($userType != 'reader' && $metadataExists) { ?>
@@ -71,31 +86,6 @@
 
                             </div>
                         </div>
-                        <fieldset>
-                            <legend>Form completeness for vault</legend>
-
-                            <div class="form-group">
-                                <label class="col-sm-2 control-label">
-                                    Completeness
-                                </label>
-                                <div class="col-sm-6">
-                                    <div class="progress">
-                                        <?php $completeness =  ceil(100 * $form->getCountMandatoryFilled() /  $form->getCountMandatoryTotal()); ?>
-
-                                        <div class="progress-bar" role="progressbar" aria-valuenow="<?php echo $completeness ?>"
-                                             aria-valuemin="0" aria-valuemax="100" style="width:<?php echo $completeness ?>%">
-                                            <?php echo $completeness ?>%
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-4">
-                                    <?php echo $form->getCountMandatoryFilled() ?>
-                                    of
-                                    <?php echo $form->getCountMandatoryTotal() ?> mandatory fields present
-                                </div>
-                            </div>
-
-                        </fieldset>
 
                         <?php foreach ($form->getSections() as $k => $name) { ?>
                             <fieldset>
