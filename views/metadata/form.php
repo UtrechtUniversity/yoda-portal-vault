@@ -1,13 +1,25 @@
 <?php if (empty($form)) { ?>
 <div class="row">
     <div class="col-md-12">
-        <a class="btn btn-default" href="/research/browse?dir=<?php echo $path; ?>">Back to overview</a>
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title">Metadata form - <?php echo $path; ?></h3>
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title pull-left">
+                    Metadata form - <?php echo $path; ?>
+                </h3>
+                <div class="input-group-sm has-feedback pull-right">
+                    <a class="btn btn-default" href="/research/browse?dir=<?php echo urlencode($path); ?>">Close</a>
+                </div>
             </div>
             <div class="panel-body">
-                <p>it's not possible to load this form.</p>
+                <p>It is not possible to load this form due to the formatting of the metadata xml file.<br>
+                    Please check the structure of this file. <br>
+                    <br>
+                    When using the 'Delete all metadata' button beware that you will lose all data!
+
+                    <?php if ($userType != 'reader') { ?>
+                        <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
+                    <?php } ?>
+                </p>
             </div>
         </div>
     </div>
@@ -15,41 +27,75 @@
 <?php } else { ?>
     <div class="row">
         <div class="col-md-12">
-            <?php echo $form->open('research/metadata/store?path=' . $path, 'form-horizontal metadata-form'); ?>
-            <a class="btn btn-default" href="/research/browse?dir=<?php echo $path; ?>">Back to overview</a>
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Metadata form - <?php echo $path; ?></h3>
+            <?php echo $form->open('research/metadata/store?path=' . urlencode($path), 'form-horizontal metadata-form'); ?>
+            <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                    <h3 class="panel-title pull-left">
+                        Metadata form - <?php echo $path; ?>
+                    </h3>
+                    <div class="input-group-sm has-feedback pull-right">
+                        <a class="btn btn-default" href="/research/browse?dir=<?php echo urlencode($path); ?>">Close</a>
+                    </div>
                 </div>
                 <div class="panel-body">
                     <?php if ($form === false) { ?>
-                        <p>it's not possible to load this form.</p>
+                        <p>It is not possible to load this form due to the formatting of the metadata xml file.<br>
+                            Please check the structure of this file. <br>
+                            <br>
+                            When using the 'Delete all metadata' button beware that you will lose all data!
+
+
+                            <?php if ($userType != 'reader' && $metadataExists) { ?>
+                                <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Delete all metadata</button>
+                            <?php } ?>
+                        </p>
                     <?php } else { ?>
                         <div class="form-group">
                             <div class="col-sm-12">
                                 <?php if ($form->getPermission() == 'write') { ?>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
 
-                                    <?php $completeness =  ceil(100 * $form->getCountMandatoryFilled() /  $form->getCountMandatoryTotal());
-                                        echo $completeness;
-            
+                                    <button type="submit" class="btn btn-primary">Save</button>
+
+
+                                <?php } ?>
+                                <?php if ($userType != 'reader' && $metadataExists) { ?>
+                                    <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Delete all metadata</button>
+                                <?php } ?>
+
+                                <?php if (($userType != 'reader' && $metadataExists === false) && $cloneMetadata) { ?>
+                                    <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Clone from parent folder</button>
+                                <?php } ?>
+                            </div>
+                            <div class="col-sm-12">
+
+
+                            </div>
+                        </div>
+                        <fieldset>
+                            <legend>Form completeness for vault</legend>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">
+                                    Completeness
+                                </label>
+                                <div class="col-sm-6">
                                     <div class="progress">
+                                        <?php $completeness =  ceil(100 * $form->getCountMandatoryFilled() /  $form->getCountMandatoryTotal()); ?>
+
                                         <div class="progress-bar" role="progressbar" aria-valuenow="<?php echo $completeness ?>"
                                              aria-valuemin="0" aria-valuemax="100" style="width:<?php echo $completeness ?>%">
                                             <?php echo $completeness ?>%
                                         </div>
                                     </div>
-
-                                <?php } ?>
-                                <?php if ($userType != 'reader' && $metadataExists) { ?>
-                                    <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
-                                <?php } ?>
-
-                                <?php if (($userType != 'reader' && $metadataExists === false) && $cloneMetadata) { ?>
-                                    <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo $path; ?>">Clone from parent folder</button>
-                                <?php } ?>
+                                </div>
+                                <div class="col-sm-4">
+                                    <?php echo $form->getCountMandatoryFilled() ?>
+                                    of
+                                    <?php echo $form->getCountMandatoryTotal() ?> mandatory fields present
+                                </div>
                             </div>
-                        </div>
+
+                        </fieldset>
 
                         <?php foreach ($form->getSections() as $k => $name) { ?>
                             <fieldset>
@@ -61,15 +107,19 @@
                         <div class="form-group">
                             <div class="col-sm-12">
                                 <?php if ($form->getPermission() == 'write') { ?>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="submit" class="btn btn-primary">Save</button>
                                 <?php } ?>
                                 <?php if ($userType != 'reader' && $metadataExists) { ?>
                                     <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
                                 <?php } ?>
+
+                                <?php if (($userType != 'reader' && $metadataExists === false) && $cloneMetadata) { ?>
+                                    <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo $path; ?>">Clone from parent folder</button>
+                                <?php } ?>
                             </div>
                         </div>
                     <?php } ?>
-                </div>
+                </di>
             </div>
             <?php echo $form->close(); ?>
         </div>

@@ -26,7 +26,9 @@ class Metadata extends MY_Controller
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
         $path = $this->input->get('path');
+
         $fullPath =  $pathStart . $path;
+
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
         $userType = $formConfig['userType'];
@@ -44,6 +46,7 @@ class Metadata extends MY_Controller
             }
             // figure out the number of mandatory fields and how many actually hold data
             $form->calculateMandatoryCompleteness($elements);
+
 
             $metadataExists = false;
             $cloneMetadata = false;
@@ -100,11 +103,20 @@ class Metadata extends MY_Controller
 
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
+
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-        $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
 
+        $userType = $formConfig['userType'];
 
-        return redirect('research/metadata/form?path=' . $path, 'refresh');
+        if($userType != 'reader') {
+            $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+
+            return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+        }
+        else {
+            //get away from the form, user is (no longer) entitled to view it
+            return redirect('research/browse?dir=' . urlencode($path), 'refresh'); //
+        }
     }
 
     function delete()
@@ -116,13 +128,23 @@ class Metadata extends MY_Controller
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
 
-        $result = $this->filesystem->removeAllMetadata($rodsaccount, $fullPath);
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
-        if ($result) {
-            return redirect('research/browse?dir=' . $path, 'refresh');
-        } else {
-            return redirect('research/metadata/form?path=' . $path, 'refresh');
+        $userType = $formConfig['userType'];
+
+        if($userType != 'reader') {
+            $result = $this->filesystem->removeAllMetadata($rodsaccount, $fullPath);
+            if ($result) {
+                return redirect('research/browse?dir=' . urlencode($path), 'refresh');
+            } else {
+                return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+            }
         }
+        else {
+            //get away from the form, user is (no longer) entitled to view it
+            return redirect('research/browse?dir=' . urlencode($path), 'refresh');
+        }
+
     }
 
     function clone_metadata()
@@ -142,7 +164,7 @@ class Metadata extends MY_Controller
             $result = $this->filesystem->cloneMetadata($rodsaccount, $xmlPath, $xmlParentPath);
         }
 
-        return redirect('research/metadata/form?path=' . $path, 'refresh');
+        return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
     }
 
     /*

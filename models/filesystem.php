@@ -24,6 +24,7 @@ class Filesystem extends CI_Model {
 
 
         $xml = new DOMDocument( "1.0", "UTF-8" );
+	    $xml->formatOutput = true;
 
         $xml_metadata = $xml->createElement( "metadata" );
 
@@ -424,66 +425,6 @@ RULE;
         }
 
         return array();
-    }
-
-    static public function createDatapackage($iRodsAccount, $path)
-    {
-        $output = array();
-
-        $ruleBody = <<<'RULE'
-myRule {
-    iiCreateDatapackage(*path);
-}
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*path" => $path
-                ),
-                array()
-            );
-
-            $rule->execute();
-
-            return true;
-
-        } catch(RODSException $e) {
-            //return false;
-            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
-            print_r($path);
-            //print_r($e->showStacktrace());
-            exit;
-        }
-    }
-
-    static public function demoteDatapackage($iRodsAccount, $path)
-    {
-        $output = array();
-
-        $ruleBody = <<<'RULE'
-myRule {
-    iiDemoteDatapackage(*path);
-}
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*path" => $path
-                ),
-                array()
-            );
-
-            $rule->execute();
-
-            return true;
-
-        } catch(RODSException $e) {
-            return false;
-        }
     }
 
     static public function getStudiesInformation($iRodsAccount, $limit = 0, $offset = 0, $search = false) {

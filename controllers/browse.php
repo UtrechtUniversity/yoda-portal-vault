@@ -24,6 +24,7 @@ class Browse extends MY_Controller
 
     public function index()
     {
+
         $this->load->view('common-start', array(
             'styleIncludes' => array(
                 'css/research.css',
@@ -43,7 +44,30 @@ class Browse extends MY_Controller
         ));
 
         $this->data['items'] = $this->config->item('browser-items-per-page');
-        $this->data['dir'] = $this->input->get('dir');
+
+        $this->data['dir'] = urlencode($this->input->get('dir'));
+
+        // Remember search results
+        $searchTerm = '';
+        $searchType = 'filename';
+        $searchStart = 0;
+        $searchOrderDir = 'asc';
+        $searchOrderColumn = 0;
+
+        if ($this->session->userdata('research-search-term')) {
+            $searchTerm = $this->session->userdata('research-search-term');
+            $searchType = $this->session->userdata('research-search-type');
+            $searchStart = $this->session->userdata('research-search-start');
+            $searchOrderDir = $this->session->userdata('research-search-order-dir');
+            $searchOrderColumn = $this->session->userdata('research-search-order-column');
+        }
+
+
+        $this->data['searchTerm'] = $searchTerm;
+        $this->data['searchType'] = $searchType;
+        $this->data['searchStart'] = $searchStart;
+        $this->data['searchOrderDir'] = $searchOrderDir;
+        $this->data['searchOrderColumn'] = $searchOrderColumn;
 
         $this->load->view('browse', $this->data);
         $this->load->view('common-end');
@@ -88,19 +112,13 @@ class Browse extends MY_Controller
 
         // Collections
         $icon = 'fa-folder-o';
-        // Home path
-        if ($path == $pathStart) {
-            //$path = $path . '/grp-';
-            $icon = 'fa-users';
-        }
-        
         $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
         $totalItems += $collections['summary']['total'];
         if ($collections['summary']['returned'] > 0) {
             foreach ($collections['rows'] as $row) {
                 $filePath = str_replace($pathStart, '', $row['path']);
                 $rows[] = array(
-                    '<span class="browse" data-path="'. $filePath .'"><i class="fa ' . $icon .'" aria-hidden="true"></i> ' . trim($row['basename'], '/') . '</span>',
+                    '<span class="browse" data-path="'. urlencode($filePath) .'"><i class="fa ' . $icon .'" aria-hidden="true"></i> ' . trim(str_replace(' ', '&nbsp;',$row['basename']), '/') . '</span>',
                     date('Y-m-d H:i:s', $row['modify_time'])
                 );
             }
@@ -113,7 +131,7 @@ class Browse extends MY_Controller
             foreach ($objects['rows'] as $row) {
                 $filePath = str_replace($pathStart, '', $row['path']);
                 $rows[] = array(
-                    '<span data-path="'. $filePath .'"><i class="fa fa-file-o" aria-hidden="true"></i> ' . trim($row['basename'], '/') . '</span>',
+                    '<span data-path="'. urlencode($filePath) .'"><i class="fa fa-file-o" aria-hidden="true"></i> ' . trim($row['basename'], '/') . '</span>',
                     date('Y-m-d H:i:s', $row['modify_time'])
                 );
             }
@@ -141,10 +159,6 @@ class Browse extends MY_Controller
         $order = $this->input->get('order');
         $orderDir = $order[0]['dir'];
         $orderColumn = $order[0]['column'];
-        $orderColumns = array(
-            0 => 'COLL_NAME',
-            1 => 'COLL_MODIFY_TIME'
-        );
         $draw = $this->input->get('draw');
         $itemsPerPage = $this->config->item('browser-items-per-page');
         $totalItems = 0;
@@ -157,9 +171,23 @@ class Browse extends MY_Controller
         $columns = array();
 
 
+        $this->session->set_userdata(
+            array(
+                'research-search-term' => $filter,
+                'research-search-start' => $start,
+                'research-search-type' => $type,
+                'research-search-order-dir' => $orderDir,
+                'research-search-order-column' => $orderColumn
+            )
+        );
+
+
         // Search / filename
         if ($type == 'filename') {
-            $columns = array('Name', 'Location');
+            $orderColumns = array(
+                0 => 'DATA_NAME',
+                1 => 'COLL_NAME'
+            );
             $result = $this->filesystem->searchByName($rodsaccount, $path, $filter, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
             $totalItems += $result['summary']['total'];
 
@@ -175,9 +203,11 @@ class Browse extends MY_Controller
 
         }
 
-        // Search / location
-        if ($type == 'location') {
-            $columns = array('Location');
+        // Search / folder
+        if ($type == 'folder') {
+            $orderColumns = array(
+                0 => 'COLL_NAME'
+            );
             $result = $this->filesystem->searchByName($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
             $totalItems += $result['summary']['total'];
 
@@ -185,7 +215,7 @@ class Browse extends MY_Controller
                 foreach ($result['rows'] as $row) {
                     $filePath = str_replace($pathStart, '', $row['path']);
                     $rows[] = array(
-                        '<span class="browse" data-path="' . $filePath . '">' . trim($filePath, '/') . '</span>'
+                        '<span class="browse" data-path="' . $filePath . '">' . trim(str_replace(' ','&nbsp;',$filePath), '/') . '</span>'
                     );
                 }
             }
@@ -193,6 +223,9 @@ class Browse extends MY_Controller
 
         // Search / metadata
         if ($type == 'metadata') {
+            $orderColumns = array(
+                0 => 'COLL_NAME'
+            );
             $result = $this->filesystem->searchByUserMetadata($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
             $totalItems += $result['summary']['total'];
 
@@ -219,38 +252,20 @@ class Browse extends MY_Controller
             }
         }
 
-        $output = array('draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows, 'columns' => $columns);
+        $output = array('draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
 
 
         echo json_encode($output);
 
     }
 
-    public function change_directory_type()
+    public function unset_search()
     {
-        $rodsaccount = $this->rodsuser->getRodsAccount();
-        $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $type = $this->input->get('type');
-        $path = $this->input->get('path');
-        $output = array();
-
-        if ($type == 'datapackage') {
-            // create datapackage Datapackage
-            $result = $this->filesystem->createDatapackage($rodsaccount, $pathStart . $path);
-            $beforeAction = 'folder';
-        } else {
-            // Demote Datapackage
-            $result = $this->filesystem->demoteDatapackage($rodsaccount, $pathStart . $path);
-            $beforeAction = 'datapackage';
-        }
-
-        if ($result) {
-            $output = array('success' => true, 'type' => $type);
-        } else {
-            $output = array('success' => false, 'type' => $beforeAction);
-        }
-
-        echo json_encode($output);
+        $this->session->unset_userdata('research-search-term');
+        $this->session->unset_userdata('research-search-start');
+        $this->session->unset_userdata('research-search-type');
+        $this->session->unset_userdata('research-search-order-dir');
+        $this->session->unset_userdata('research-search-order-column');
     }
 
     public function test()

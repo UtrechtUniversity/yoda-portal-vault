@@ -10,7 +10,9 @@ $(function () {
     // Delete all metadata btn
     $( ".delete-all-metadata-btn" ).on('click', function(e){
         e.preventDefault();
+
         var path = $(this).attr('data-path');
+
         swal({
             title: "Are you sure?",
             text: "You will not be able to recover this action!",
@@ -18,7 +20,8 @@ $(function () {
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",
             confirmButtonText: "Yes, delete all metadata!",
-            closeOnConfirm: false
+            closeOnConfirm: false,
+            animation: false
         },
         function(isConfirm){
             if (isConfirm) {
@@ -38,7 +41,8 @@ $(function () {
                 showCancelButton: true,
                 confirmButtonColor: "#ffcd00",
                 confirmButtonText: "Yes, clone metadata!",
-                closeOnConfirm: false
+                closeOnConfirm: false,
+                animation: false
             },
             function(isConfirm){
                 if (isConfirm) {

@@ -256,6 +256,7 @@ class Metadata_form_model extends CI_Model {
                             $frontendValue = html_entity_decode($keyValue, ENT_XML1);
                         }
 
+/* Possibly for future use
                         $messagesForUser = array();
 
                         if (($type == 'text' OR $type == 'textarea')
@@ -295,7 +296,7 @@ class Metadata_form_model extends CI_Model {
                             $messagesForUser[] = array('messageNumber' => -100,
                                 'messageText' => 'Mandatory value missing');
                         }
-
+*/
 
                         $presentationElements[$groupName][] = array(
                             'key' => $key,
@@ -306,7 +307,7 @@ class Metadata_form_model extends CI_Model {
                             'mandatory' => $mandatory,
                             'multipleAllowed' => $multipleAllowed,
                             'elementSpecifics' => $elementSpecifics,
-                            'messagesForUser' => $messagesForUser
+                            //'messagesForUser' => $messagesForUser  //possibly for future use
                         );
                     }
                 }

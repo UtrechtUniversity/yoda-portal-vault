@@ -13,6 +13,7 @@ class Metadataform {
     private $permission = 'write';
 
 
+
     /**
      * Constructor
      */
@@ -200,11 +201,22 @@ class Element {
             }
         }
 
+/* Possible functure mesage handling
         // preparation for info to user
         $this->messagesForUser = array();
         if(is_array($data['messagesForUser'])) {
             $this->messagesForUser = $data['messagesForUser'];
         }
+
+        // ADD to metadata/fields/write partials the following
+    <div class="col-sm-3">
+        <?php foreach($e->messagesForUser as $message): ?>
+            <?php echo $message['messageText']; ?>
+            <br>
+        <?php endforeach; ?>
+    </div>
+
+*/
     }
 
     /**

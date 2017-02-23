@@ -1,14 +1,16 @@
 $( document ).ready(function() {
     if ($('#file-browser').length) {
         startBrowsing(browseStartDir, browsePageItems);
+
+        // Rememeber search results
+        if (searchTerm.length > 0) {
+            search(searchTerm, searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+        }
+
     }
 
     $(".dropdown-menu li a").click(function(){
         searchSelectChanged($(this));
-    });
-
-    $('.btn-group button.directory-type').click(function(){
-        toggleDirectoryType($(this).attr('data-type'), $(this).attr('data-path'));
     });
 
     $('.btn-group button.metadata-form').click(function(){
@@ -16,12 +18,12 @@ $( document ).ready(function() {
     });
 
     $(".search-btn").click(function(){
-        search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'));
+        search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     });
 
     $("#search-filter").bind('keypress', function(e) {
         if(e.keyCode==13) {
-            search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'));
+            search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
         }
     });
 
@@ -33,36 +35,51 @@ $( document ).ready(function() {
 
 function browse(dir)
 {
-    var path = makeBreadcrumb(dir);
+    var urlDecodedDir = decodeURIComponent((dir + '').replace(/\+/g, '%20'));
+
+    makeBreadcrumb(urlDecodedDir);
+
+    var path = makeBreadcrumbPath(dir);
+
     changeBrowserUrl(path);
     topInformation(dir);
     buildFileBrowser(dir);
 }
 
-function search(value, type, itemsPerPage)
+function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchOrderColumn)
 {
     if (typeof value != 'undefined' && value.length > 0 ) {
+        // Display start for first page load
+        if (typeof displayStart === 'undefined') {
+            displayStart = 0;
+        }
+
         // Table columns definition
+        var disableSorting = {};
         var columns = [];
         if (type == 'filename') {
             columns = ['Name', 'Location'];
         } else if (type == 'metadata') {
-                columns = ['Location', 'Matches'];
+            columns = ['Location', 'Matches'];
+            disableSorting = { 'bSortable': false, 'aTargets': [ -1 ] };
         } else {
             columns = ['Location'];
         }
-
-        var tableHeaders;
-        $.each(columns, function(i, val){
-            tableHeaders += "<th>" + val + "</th>";
-        });
 
         // Destroy current Datatable
         var datatable = $('#search').DataTable();
         datatable.destroy();
 
+        var tableHeaders = '';
+        $.each(columns, function(i, val){
+            tableHeaders += "<th>" + val + "</th>";
+        });
+
         // Create the columns
         $('#search thead tr').html(tableHeaders);
+
+        // Remove table content
+        $('#search tbody').remove();
 
         // Initialize new Datatable
         var url = "browse/search?filter=" + value + "&type=" + type;
@@ -77,13 +94,18 @@ function search(value, type, itemsPerPage)
             "processing": true,
             "serverSide": true,
             "pageLength": browsePageItems,
+            "displayStart": displayStart,
             "drawCallback": function(settings) {
                 $( ".browse" ).on( "click", function() {
                     browse($(this).attr('data-path'));
                 });
 
                 $('.matches').tooltip();
-            }
+            },
+            "aoColumnDefs": [
+                disableSorting
+            ],
+            "order": [[ searchOrderColumn, searchOrderDir ]]
         });
 
         $('.search-string').text(value);
@@ -96,6 +118,8 @@ function search(value, type, itemsPerPage)
 function closeSearchResults()
 {
     $('.search-results').hide();
+    $('#search-filter').val('');
+    $.get("browse/unset_search");
 }
 
 function showSearchResults()
@@ -125,7 +149,8 @@ function makeBreadcrumb(dir)
 
     // Build html
     var totalParts = parts.length;
-    if (totalParts > 0) {
+
+    if (totalParts > 0 && parts[0]!='undefined') {
         var html = '<li class="browse">Home</li>';
         var path = "";
         $.each( parts, function( k, part ) {
@@ -133,9 +158,9 @@ function makeBreadcrumb(dir)
 
             // Active item
             if (k == (totalParts-1)) {
-                html += '<li class="active">' + part + '</li>';
+                html += '<li class="active">' + part.replace(/ /g, "&nbsp;") + '</li>';
             } else {
-                html += '<li class="browse" data-path="' + path + '">' + part + '</li>';
+                html += '<li class="browse" data-path="' + path + '">' + part.replace(/ /g, "&nbsp;") + '</li>';
             }
         });
     } else {
@@ -143,9 +168,41 @@ function makeBreadcrumb(dir)
     }
 
     $('ol.breadcrumb').html(html);
+}
+
+function makeBreadcrumbPath(dir)
+{
+    var parts = [];
+    if (typeof dir != 'undefined') {
+        if (dir.length > 0) {
+            var elements = dir.split('/');
+
+            // Remove empty elements
+            var parts = $.map(elements, function (v) {
+                return v === "" ? null : v;
+            });
+        }
+    }
+
+    // Build html
+    var totalParts = parts.length;
+    if (totalParts > 0) {
+        var path = "";
+        var index = 0;
+        $.each( parts, function( k, part ) {
+            if(index) {
+                path += "/" + part;
+            }
+            else {
+                path = part;
+            }
+            index++;
+        });
+    }
 
     return path;
 }
+
 
 function buildFileBrowser(dir)
 {
@@ -203,28 +260,8 @@ function topInformation(dir)
     $('.top-information').hide();
     if (typeof dir != 'undefined') {
         $.getJSON("browse/top_data?dir=" + dir, function(data){
-            var type = data.org_type;
             var icon = "fa-folder-o";
             var metadata = data.user_metadata;
-
-            if (type == 'Folder' || typeof type == 'undefined') {
-                icon = "fa-folder-o";
-
-                // Folder toggle btn
-                $('.btn-group button.directory-type').html('<i class="fa fa-folder-o" aria-hidden="true"></i> Is folder');
-                $('.btn-group button.directory-type').attr('data-type', 'folder');
-                $('.btn-group button.directory-type').attr('data-path', dir);
-
-            } else if (type == 'Datapackage') {
-                icon = "fa-folder";
-
-                // Datapackage toggle btn
-                $('.btn-group button.directory-type').html('<i class="fa fa-folder" aria-hidden="true"></i> Is datapackage');
-                $('.btn-group button.directory-type').attr('data-type', 'datapackage');
-                $('.btn-group button.directory-type').attr('data-path', dir);
-            } else if (type == "Research Team") {
-                icon = "fa-users";
-            }
 
             // User metadata
             if (metadata == 'true') {
@@ -234,45 +271,10 @@ function topInformation(dir)
                 $('.btn-group button.metadata-form').hide();
             }
 
-            $('.top-information h1').html('<i class="fa '+ icon +'" aria-hidden="true"></i> ' + data.basename);
+            $('.top-information h1').html('<i class="fa '+ icon +'" aria-hidden="true"></i> ' + data.basename.replace(/ /g, "&nbsp;"));
             $('.top-information').show();
         });
     }
-}
-
-function toggleDirectoryType(currentType, path)
-{
-    //
-    var btnText = $('.btn-group button.directory-type').html();
-
-    $('.btn-group button.directory-type').html(btnText + '<i class="fa fa-spinner fa-spin fa-fw"></i>');
-    $('.btn-group button.directory-type').prop("disabled", true);
-
-    if (currentType == 'folder') {
-        var newType = 'datapackage';
-    } else {
-        var newType = 'folder';
-    }
-
-    $.getJSON("browse/change_directory_type?path=" + path + "&type=" + newType, function(data){
-        if (data.type == 'folder') {
-            $('.btn-group button.directory-type').html('<i class="fa fa-folder-o" aria-hidden="true"></i> Is folder');
-            $('.btn-group button.directory-type').attr('data-type', 'folder');
-
-            // Title
-            $('.top-information h1 i').removeClass("fa-folder").addClass("fa-folder-o");
-        } else {
-            $('.btn-group button.directory-type').html('<i class="fa fa-folder" aria-hidden="true"></i> Is datapackage');
-            $('.btn-group button.directory-type').attr('data-type', 'datapackage');
-
-            // Title
-            $('.top-information h1 i').removeClass("fa-folder-o").addClass("fa-folder");
-        }
-
-        buildFileBrowser(path);
-        
-        $('.btn-group button.directory-type').removeAttr("disabled");
-    });
 }
 
 function showMetadataForm(path)
