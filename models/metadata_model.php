@@ -11,9 +11,7 @@ class Metadata_model extends CI_Model {
         $this->CI =& get_instance();
     }
 
-    // .yoda-metadata uitlezen.
-
-
+    // read yoda-metadata.
     function read($rodsaccount, $metadataFile)
     {
         //$metadataFile = $this->findPath($rodsaccount, $directoryPath);
@@ -31,37 +29,6 @@ class Metadata_model extends CI_Model {
         $file->close();
 
         return $fileContent;
-        /*
-        $xml = new DOMDocument();
-        $xmlLoaded = $xml->loadXml($fileContent);
-
-        if ($xmlLoaded) {
-            return $xml;
-        }
-
-        return false;
-        */
     }
-
-    /*
-    function findPath($rodsaccount, $directoryPath)
-    {
-        $this->CI->load->model('filesystem');
-        $details = $this->CI->filesystem->collectionDetails($rodsaccount, $directoryPath);
-
-        if (isset($details['org_metadata'])) {
-            return $details['org_metadata'];
-        }
-
-        return false;
-    }
-    */
-
-    /*
-    function write()
-    {
-
-    }
-    */
 }
 
