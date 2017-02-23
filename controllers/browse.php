@@ -267,24 +267,4 @@ class Browse extends MY_Controller
         $this->session->unset_userdata('research-search-order-dir');
         $this->session->unset_userdata('research-search-order-column');
     }
-
-    public function test()
-    {
-
-        $rodsaccount = $this->rodsuser->getRodsAccount();
-        $pathStart = $this->pathlibrary->getPathStart($this->config);
-
-        $path = $pathStart;
-
-        //print_r($rodsaccount);
-        //print_r($pathStart);
-
-
-
-        //$result = $this->filesystem->browse($rodsaccount, $path, "Collection", "COLL_NAME", "desc", 25, 0);
-        $result = $this->filesystem->browse($rodsaccount, $path, "DataObject", "COLL_NAME", "desc", 25, 0);
-        //$result = $this->filesystem->searchByName($rodsaccount, $path, 'test', "DataObject", "COLL_NAME", "desc", 25, 0);
-
-        print_r($result);
-    }
 }
