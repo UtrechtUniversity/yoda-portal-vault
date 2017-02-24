@@ -64,12 +64,12 @@
                                         else {
                                             $completeness =  ceil(100 * $form->getCountMandatoryFilled() / $total);
                                         } ?>
-                                    <span  style="cursor:pointer;" aria-hidden="true" data-toggle="tooltip" title="Required for the vault:  <?php echo $total; ?>, currently filled required fields: <?php  echo $form->getCountMandatoryFilled(); ?>">
-                                        <i class="fa fa-check" style="color:<?php echo $completeness>19 ? '#00CC00': '#F0F0F0' ?>;"></i>
-                                        <i class="fa fa-check" style="color:<?php echo $completeness>39 ? '#00CC00': '#F0F0F0' ?>;"></i>
-                                        <i class="fa fa-check" style="color:<?php echo $completeness>59 ? '#00CC00': '#F0F0F0' ?>;"></i>
-                                        <i class="fa fa-check" style="color:<?php echo $completeness>79 ? '#00CC00': '#F0F0F0' ?>;"></i>
-                                        <i class="fa fa-check" style="color:<?php echo $completeness>99 ? '#00CC00': '#F0F0F0' ?>"></i>
+                                    <span  class="add-pointer" aria-hidden="true" data-toggle="tooltip" title="Required for the vault:  <?php echo $total; ?>, currently filled required fields: <?php  echo $form->getCountMandatoryFilled(); ?>">
+                                        <i class="fa fa-check <?php echo $completeness>19 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                        <i class="fa fa-check <?php echo $completeness>39 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                        <i class="fa fa-check <?php echo $completeness>59 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                        <i class="fa fa-check <?php echo $completeness>79 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                        <i class="fa fa-check <?php echo $completeness>99 ? 'form-required-present': 'form-required-missing'; ?>"></i>
                                     </span>
 
                                 <?php } ?>

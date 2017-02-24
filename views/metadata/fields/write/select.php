@@ -5,10 +5,8 @@
             <?php if($metadataExists) { ?>
                 <span class="fa-stack ">
                     <i class="fa fa-lock safe fa-stack-1x" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
-
                     <?php if($e->value) { ?>
-
-                        <i class="fa fa-check fa-stack-1x" style="color:#00CC00;margin-left:5px;margin-top:-5px;"></i>
+                        <i class="fa fa-check fa-stack-1x checkmark-green-top-right"></i>
                     <?php } ?>
                 </span>
             <?php } else { ?>
