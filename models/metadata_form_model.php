@@ -210,6 +210,7 @@ class Metadata_form_model extends CI_Model {
                             case 'stringNormal':
                                 $type = 'text';
                                 $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
+                                $elementMaxLength = 10;
                                 break;
                             case 'xs:integer':
                                 $type = 'text';
@@ -222,6 +223,7 @@ class Metadata_form_model extends CI_Model {
                             case 'stringLong':
                                 $type = 'textarea';
                                 $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
+                                $elementMaxLength = 25;
                                 break;
                             case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
                             case 'optionsDatasetType':
@@ -253,6 +255,48 @@ class Metadata_form_model extends CI_Model {
                             $frontendValue = html_entity_decode($keyValue, ENT_XML1);
                         }
 
+/* Possibly for future use
+                        $messagesForUser = array();
+
+                        if (($type == 'text' OR $type == 'textarea')
+                            AND strlen($frontendValue)>$elementMaxLength) {
+
+                            $messagesForUser[] = array('messageNumber' => -200,
+                                'messageText' => 'Value in file is too long, truncated at position ' . $elementMaxLength . '<br>Original value: \'<i>' . $frontendValue . '</i>\'');
+
+                            $frontendValue = substr($frontendValue, 0, $elementMaxLength);
+                        }
+
+                        if (($type == 'select' AND $frontendValue)) {
+                            if(!in_array($frontendValue, $elementOptions)) {
+
+                                $messagesForUser[] = array('messageNumber' => -300,
+                                    'messageText' => 'Value in file is not a valid option: \'<i>' .$frontendValue . '</i>\'');
+
+                                $frontendValue = '';
+                            }
+                        }
+
+                        if (($type == 'date' AND $frontendValue)) {
+                            $date = DateTime::createFromFormat('Y-m-d', $frontendValue);
+                            $date_errors = DateTime::getLastErrors();
+
+                            if ($date_errors['warning_count'] + $date_errors['error_count'] > 0) {
+                                $messagesForUser[] = array('messageNumber' => -400,
+                                    'messageText' => 'Value in file is not a valid date: \'<i>' .$frontendValue . '</i>\'');
+
+                                $frontendValue = '';
+                            }
+
+                        }
+
+                        // mandatory signaling at the last as values could be erroneous and taken out
+                        if($mandatory AND !$frontendValue) {
+                            $messagesForUser[] = array('messageNumber' => -100,
+                                'messageText' => 'Mandatory value missing');
+                        }
+*/
+
                         $presentationElements[$groupName][] = array(
                             'key' => $key,
                             'value' => $frontendValue,
@@ -261,7 +305,8 @@ class Metadata_form_model extends CI_Model {
                             'type' => $type,
                             'mandatory' => $mandatory,
                             'multipleAllowed' => $multipleAllowed,
-                            'elementSpecifics' => $elementSpecifics
+                            'elementSpecifics' => $elementSpecifics,
+                            //'messagesForUser' => $messagesForUser  //possibly for future use
                         );
                     }
                 }

@@ -53,7 +53,25 @@
                         <div class="form-group">
                             <div class="col-sm-12">
                                 <?php if ($form->getPermission() == 'write') { ?>
+
                                     <button type="submit" class="btn btn-primary">Save</button>
+
+                                    <?php
+                                        $total = $form->getCountMandatoryTotal();
+                                        if($total==0) {
+                                            $completeness = 100;
+                                        }
+                                        else {
+                                            $completeness =  ceil(100 * $form->getCountMandatoryFilled() / $total);
+                                        } ?>
+                                    <span  class="add-pointer" aria-hidden="true" data-toggle="tooltip" title="Required for the vault:  <?php echo $total; ?>, currently filled required fields: <?php  echo $form->getCountMandatoryFilled(); ?>">
+                                        <i class="fa fa-check <?php echo $completeness>19 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                        <i class="fa fa-check <?php echo $completeness>39 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                        <i class="fa fa-check <?php echo $completeness>59 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                        <i class="fa fa-check <?php echo $completeness>79 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                        <i class="fa fa-check <?php echo $completeness>99 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                    </span>
+
                                 <?php } ?>
                                 <?php if ($userType != 'reader' && $metadataExists) { ?>
                                     <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Delete all metadata</button>
@@ -62,6 +80,10 @@
                                 <?php if (($userType != 'reader' && $metadataExists === false) && $cloneMetadata) { ?>
                                     <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Clone from parent folder</button>
                                 <?php } ?>
+                            </div>
+                            <div class="col-sm-12">
+
+
                             </div>
                         </div>
 
@@ -87,7 +109,7 @@
                             </div>
                         </div>
                     <?php } ?>
-                </div>
+                </di>
             </div>
             <?php echo $form->close(); ?>
         </div>

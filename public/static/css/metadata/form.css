@@ -63,6 +63,24 @@ legend {
     color: red;
 }
 
+.fa.checkmark-green-top-right {
+    color:#00CC00;
+    margin-left:5px;
+    margin-top:-5px;
+}
+
+.fa.form-required-present {
+    color:#00CC00;
+}
+
+.fa.form-required-missing {
+    color:#F0F0F0;
+}
+
+.add-pointer {
+    cursor: pointer
+}
+
 .panel-heading .input-group-sm {
     margin: -7px; /* Search box */
 }
