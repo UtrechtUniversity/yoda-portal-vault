@@ -210,11 +210,10 @@ class Metadata_form_model extends CI_Model {
                             case 'stringNormal':
                                 $type = 'text';
                                 $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
-                                $elementMaxLength = 10;
                                 break;
                             case 'xs:integer':
                                 $type = 'text';
-                                $elementMaxLength = 100; // zelf verzonnen
+                                $elementMaxLength = 1024;
                                 break;
                             case 'xs:anyURI':
                                 $type = 'text';
@@ -223,7 +222,6 @@ class Metadata_form_model extends CI_Model {
                             case 'stringLong':
                                 $type = 'textarea';
                                 $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
-                                $elementMaxLength = 25;
                                 break;
                             case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
                             case 'optionsDatasetType':
