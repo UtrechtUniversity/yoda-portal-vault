@@ -250,7 +250,7 @@ class Metadata_form_model extends CI_Model {
                         $frontendValue = (isset($element['default']) ? $element['default'] : null);
 
                         if($config['hasMetadataXml'] == 'true') { // the value in the file supersedes default
-                            $frontendValue = html_entity_decode($keyValue, ENT_XML1);
+                            $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');
                         }
 
 /* Possibly for future use
