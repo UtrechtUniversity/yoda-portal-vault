@@ -39,7 +39,7 @@ class Metadata extends MY_Controller
 
             //$form = $this->metadataform->load($elements, $metadata);
             $form = $this->metadataform->load($elements);
-            if ($userType == 'reader') {
+            if ($userType == 'reader' || count($formConfig['collLocks']) > 0) {
                 $form->setPermission('read');
             } else {
                 $form->setPermission('write');

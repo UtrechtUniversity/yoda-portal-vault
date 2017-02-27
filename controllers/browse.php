@@ -267,4 +267,32 @@ class Browse extends MY_Controller
         $this->session->unset_userdata('research-search-order-dir');
         $this->session->unset_userdata('research-search-order-column');
     }
+
+    public function change_folder_status()
+    {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $status = $this->input->get('status');
+        $path = $this->input->get('path');
+        $output = array();
+
+        $beforeAction = 'PROTECTED';
+
+        if ($status == 'PROTECTED') {
+            // Protect Folder
+            $result = $this->filesystem->protectFolder($rodsaccount, $pathStart . $path);
+            $beforeAction = 'UNPROTECTED';
+        } else if ($status == 'UNPROTECTED') {
+            // Unprotect folder
+            $result = $this->filesystem->unprotectFolder($rodsaccount, $pathStart . $path);
+        }
+
+        if ($result) {
+            $output = array('success' => true, 'status' => $status);
+        } else {
+            $output = array('success' => false, 'status' => $beforeAction);
+        }
+
+        echo json_encode($output);
+    }
 }

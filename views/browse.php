@@ -58,18 +58,7 @@
 
         <div class="btn-group" role="group">
             <button type="button" class="btn btn-default metadata-form" data-path=""><i class="fa fa-list" aria-hidden="true"></i> Metadata</button>
-
-
-            <!--
-            <button type="button" class="btn btn-default" data-type=""><i class="fa fa-folder-o" aria-hidden="true"></i> Is folder</button>
-            <button class="btn btn-default disabled" href="#">
-                <i class="fa fa-unlock"></i> Unlocked
-            </button>
-            <button type="button" class="btn btn-default disabled">
-                <i class="fa fa-university" aria-hidden="true"></i>
-                Save to vault</button>
-            <button type="button" class="btn btn-default">Edit metadata</button>
-            -->
+            <button type="button" class="btn btn-default folder-status" data-status="" data-path=""></button>
         </div>
     </div>
 
