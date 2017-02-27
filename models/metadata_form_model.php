@@ -187,7 +187,6 @@ class Metadata_form_model extends CI_Model {
                     if(isset($element['mandatory']) AND strtolower($element['mandatory'])=='true') {
                         $mandatory = true;
                     }
-                    $mandatory = true;
 
                     $multipleAllowed = false;
                     if($xsdElements[$key]['maxOccurs']!='1') {
