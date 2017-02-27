@@ -154,7 +154,7 @@ function makeBreadcrumb(dir)
         var html = '<li class="browse">Home</li>';
         var path = "";
         $.each( parts, function( k, part ) {
-            path += "/" + part;
+            path += "%2F" + part;
 
             // Active item
             if (k == (totalParts-1)) {
