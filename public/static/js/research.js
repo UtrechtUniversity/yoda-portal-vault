@@ -17,6 +17,11 @@ $( document ).ready(function() {
         showMetadataForm($(this).attr('data-path'));
     });
 
+    $('.btn-group button.folder-status').click(function(){
+        toggleFolderStatus($(this).attr('data-status'), $(this).attr('data-path'));
+
+    });
+
     $(".search-btn").click(function(){
         search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     });
@@ -260,8 +265,10 @@ function topInformation(dir)
     $('.top-information').hide();
     if (typeof dir != 'undefined') {
         $.getJSON("browse/top_data?dir=" + dir, function(data){
-            var icon = "fa-folder-o";
+            var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
             var metadata = data.user_metadata;
+            var status = data.org_status;
+            var userType = data.userType;
 
             // User metadata
             if (metadata == 'true') {
@@ -271,10 +278,75 @@ function topInformation(dir)
                 $('.btn-group button.metadata-form').hide();
             }
 
-            $('.top-information h1').html('<i class="fa '+ icon +'" aria-hidden="true"></i> ' + data.basename.replace(/ /g, "&nbsp;"));
+            // folder status
+            if (typeof status != 'undefined') {
+                if (status == 'UNPROTECTED') {
+                    $('.btn-group button.folder-status').text('Unprotected');
+                    $('.btn-group button.folder-status').attr('data-status', 'UNPROTECTED');
+                } else {
+                    $('.btn-group button.folder-status').text('protected');
+                    $('.btn-group button.folder-status').attr('data-status', 'PROTECTED');
+
+                    icon = '<span class="fa-stack"><i class="fa fa-folder-o fa-stack-2x"></i><i class="fa fa-shield fa-stack-1x"></i></span>';
+
+                    // Lock position check
+                    var rootLock = data.org_root_collection;
+                    var path = data.path;
+                    if (typeof rootLock != 'undefined') {
+                        if (rootLock == path) {
+                            $('.btn-group button.folder-status').show();
+                        } else {
+                            $('.btn-group button.folder-status').hide();
+                        }
+                    }
+                }
+                $('.btn-group button.folder-status').attr('data-path', dir);
+            }
+
+            if (userType == 'reader') {
+                // Hide folder status button
+                $('.btn-group button.folder-status').hide();
+            }
+
+            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + data.basename.replace(/ /g, "&nbsp;"));
             $('.top-information').show();
         });
     }
+}
+
+function toggleFolderStatus(currentStatus, path)
+{
+    // Get current button text
+    var btnText = $('.btn-group button.folder-status').html();
+
+    // Set spinner & disable button
+    $('.btn-group button.folder-status').html(btnText + '<i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').prop("disabled", true);
+
+    if (currentStatus == 'PROTECTED') {
+        var newStatus = 'UNPROTECTED';
+    } else {
+        var newStatus = 'PROTECTED';
+    }
+
+    // Change folder status call
+    $.getJSON("browse/change_folder_status?path=" + path + "&status=" + newStatus, function(data) {
+        if (data.status == 'PROTECTED') {
+            $('.btn-group button.folder-status').text('Protected');
+            $('.btn-group button.folder-status').attr('data-status', 'PROTECTED');
+            var icon = '<span class="fa-stack"><i class="fa fa-folder-o fa-stack-2x"></i><i class="fa fa-shield fa-stack-1x"></i></span>';
+        } else {
+            $('.btn-group button.folder-status').text('Unprotected');
+            $('.btn-group button.folder-status').attr('data-status', 'UNPROTECTED');
+            var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
+        }
+
+        // Change icon
+        $('.top-information h1 .icon').empty().html(icon);
+
+        // Remove disable attribute
+        $('.btn-group button.folder-status').removeAttr("disabled");
+    });
 }
 
 function showMetadataForm(path)

@@ -42,3 +42,11 @@ ol.breadcrumb li.active {
 .panel-footer  .input-group-sm {
     margin: -6px; /* btn in panel footer */
 }
+
+.top-information h1 .icon .fa-stack {
+    font-size:22px;
+}
+
+.top-information h1 .icon .fa-stack .fa-shield.fa-stack-1x {
+    margin-top: 2px;
+}

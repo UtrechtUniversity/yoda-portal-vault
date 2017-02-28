@@ -426,5 +426,62 @@ RULE;
 
         return array();
     }
+
+    static public function protectFolder($iRodsAccount, $path)
+    {
+        $ruleBody = <<<'RULE'
+myRule {
+    iiFolderProtect(*path);
+}
+
+
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array('*result')
+            );
+
+            $rule->execute();
+            return true;
+
+        } catch(RODSException $e) {
+            print_r($e);
+            exit;
+
+            return false;
+        }
+    }
+
+    static public function unprotectFolder($iRodsAccount, $path)
+    {
+        $ruleBody = <<<'RULE'
+myRule {
+    iiFolderUnprotect(*path);
+}
+
+
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array()
+            );
+
+            $rule->execute();
+            return true;
+
+        } catch(RODSException $e) {
+            return false;
+        }
+    }
 }
 
