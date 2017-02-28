@@ -280,7 +280,7 @@ function topInformation(dir)
 
             // folder status
             if (typeof status != 'undefined') {
-                if (status == 'UNPROTECTED' || typeof status == 'undefined') {
+                if (status == 'UNPROTECTED') {
                     $('.btn-group button.folder-status').text('Unprotected');
                     $('.btn-group button.folder-status').attr('data-status', 'UNPROTECTED');
                 } else {
@@ -288,6 +288,17 @@ function topInformation(dir)
                     $('.btn-group button.folder-status').attr('data-status', 'PROTECTED');
 
                     icon = '<span class="fa-stack"><i class="fa fa-folder-o fa-stack-2x"></i><i class="fa fa-shield fa-stack-1x"></i></span>';
+
+                    // Lock position check
+                    var rootLock = data.org_root_collection;
+                    var path = data.path;
+                    if (typeof rootLock != 'undefined') {
+                        if (rootLock == path) {
+                            $('.btn-group button.folder-status').show();
+                        } else {
+                            $('.btn-group button.folder-status').hide();
+                        }
+                    }
                 }
                 $('.btn-group button.folder-status').attr('data-path', dir);
             }
