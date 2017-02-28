@@ -55,6 +55,16 @@ $(function () {
         var field = $(this).closest('.form-group');
         duplicateField(field);
     });
+
+    // Disable enter key
+    $('.metadata-form').on('keyup keypress', function(e) {
+        var keyCode = e.keyCode || e.which;
+        if (keyCode === 13) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
 });
 
 function duplicateField(field)
