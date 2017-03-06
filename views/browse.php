@@ -20,11 +20,15 @@
                 <li><a href="#" data-type="metadata">Search by metadata</a></li>
             </ul>
         </div>
-        <input type="hidden" name="search_param" value="all" id="search_param">
-        <input type="text" class="form-control" id="search-filter" placeholder="Search term..." value="<?php echo $searchTerm; ?>">
-        <span class="input-group-btn">
+        <div class="search-term">
+            <input type="hidden" name="search_param" value="all" id="search_param">
+        </div>
+        <input type="text" class="form-control search-term" id="search-filter" placeholder="Search term..." value="<?php echo $searchTerm; ?>">
+        <span class="input-group-btn search-term">
             <button class="btn btn-default search-btn" data-items-per-page="<?php echo $items; ?>" type="button"><span class="glyphicon glyphicon-search"></span></button>
         </span>
+
+        <label class="radio-inline search-status"><input type="radio" name="status" value="submitted">Submitted</label>
     </div>
 
     <div class="panel panel-default search-results">

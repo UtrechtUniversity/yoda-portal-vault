@@ -29,7 +29,6 @@ class Browse extends MY_Controller
             'styleIncludes' => array(
                 'css/research.css',
                 'lib/datatables/css/dataTables.bootstrap.min.css',
-                //'lib/materialdesignicons/css/materialdesignicons.min.css'
                 'lib/font-awesome/css/font-awesome.css'
             ),
             'scriptIncludes' => array(
@@ -40,7 +39,7 @@ class Browse extends MY_Controller
             'activeModule'   => $this->module->name(),
             'user' => array(
                 'username' => $this->rodsuser->getUsername(),
-            ),
+            )
         ));
 
         $this->data['items'] = $this->config->item('browser-items-per-page');
