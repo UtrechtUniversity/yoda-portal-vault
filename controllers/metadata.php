@@ -39,14 +39,13 @@ class Metadata extends MY_Controller
 
             //$form = $this->metadataform->load($elements, $metadata);
             $form = $this->metadataform->load($elements);
-            if ($userType == 'reader' || count($formConfig['collLocks']) > 0) {
+            if ($userType == 'reader') {
                 $form->setPermission('read');
             } else {
                 $form->setPermission('write');
             }
             // figure out the number of mandatory fields and how many actually hold data
             $form->calculateMandatoryCompleteness($elements);
-
 
             $metadataExists = false;
             $cloneMetadata = false;
@@ -62,6 +61,14 @@ class Metadata extends MY_Controller
             $metadataExists = false;
             $cloneMetadata = false;
         }
+
+        // Check locks
+        if (count($formConfig['metadataxmlLocks']) > 0 || count($formConfig['collLocks']) > 0) {
+            $form->setPermission('read');
+            $cloneMetadata = false;
+            $metadataExists = false;
+        }
+
         $this->load->view('common-start', array(
             'styleIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
