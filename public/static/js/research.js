@@ -269,6 +269,7 @@ function topInformation(dir)
             var metadata = data.user_metadata;
             var status = data.org_status;
             var userType = data.userType;
+            var showStatusBtn = false;
 
             // User metadata
             if (metadata == 'true') {
@@ -297,14 +298,22 @@ function topInformation(dir)
             var path = data.path;
             if (typeof rootLock != 'undefined') {
                 if (rootLock == path) {
-                    $('.btn-group button.folder-status').show();
-                } else {
-                    $('.btn-group button.folder-status').hide();
+                    showStatusBtn = true;
                 }
+            } else {
+                // No root lock, show the btn.
+                showStatusBtn = true;
             }
 
             if (userType == 'reader') {
-                // Hide folder status button
+                // Hide folder status button for read permission
+                showStatusBtn = false;
+            }
+
+            // Handle status btn
+            if (showStatusBtn) {
+                $('.btn-group button.folder-status').show();
+            } else {
                 $('.btn-group button.folder-status').hide();
             }
 
