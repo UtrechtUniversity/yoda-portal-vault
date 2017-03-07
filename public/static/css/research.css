@@ -50,3 +50,12 @@ ol.breadcrumb li.active {
 .top-information h1 .icon .fa-stack .fa-shield.fa-stack-1x {
     margin-top: 2px;
 }
+
+.hide {
+    display: none;
+}
+
+.search-status {
+    margin-top: 5px;
+    margin-left: 5px;
+}

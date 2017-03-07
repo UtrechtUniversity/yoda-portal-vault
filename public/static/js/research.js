@@ -5,6 +5,8 @@ $( document ).ready(function() {
         // Rememeber search results
         if (searchTerm.length > 0) {
             search(searchTerm, searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+        } else if (searchStatusValue.length > 0) {
+            search(searchStatusValue, 'status', browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
         }
 
     }
@@ -30,6 +32,10 @@ $( document ).ready(function() {
         if(e.keyCode==13) {
             search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
         }
+    });
+
+    $( ".search-status input:radio" ).change(function() {
+        search($(this).val(), 'status', $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     });
 
     $(".close-search-results").click(function() {
@@ -113,7 +119,15 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             "order": [[ searchOrderColumn, searchOrderDir ]]
         });
 
-        $('.search-string').text(value);
+        if (type == 'status') {
+            value = value.toLowerCase();
+            $('.search-string').text(value.substr(0,1).toUpperCase() + value.substr(1));
+        } else {
+            $('.search-string').text(value);
+
+            // uncheck all status values
+            $( ".search-status input:radio" ).prop('checked', false);
+        }
         showSearchResults();
     }
 
@@ -136,6 +150,14 @@ function searchSelectChanged(sel)
 {
     $("#search_concept").html(sel.text());
     $("#search_concept").attr('data-type', sel.attr('data-type'));
+
+    if (sel.attr('data-type') == 'status') {
+        $('.search-term').hide();
+        $('.search-status').removeClass('hide').show();
+    } else {
+        $('.search-term').removeClass('hide').show();
+        $('.search-status').hide();
+    }
 }
 
 function makeBreadcrumb(dir)
