@@ -36,13 +36,13 @@
             <div class="col-sm-11">
                 <?php if ($e->multipleAllowed()) { ?>
                     <div class="input-group">
-                        <input type="text" class="form-control datepicker" name="<?php echo $e->key; ?>[]" readonly="true" value="<?php echo $e->value; ?>">
+                        <input type="text" class="form-control datepicker" name="<?php echo $e->key; ?>[]" readonly="true" value="<?php echo htmlentities($e->value); ?>">
                         <span class="input-group-btn">
                             <button class="btn btn-default duplicate-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
                         </span>
                     </div>
                 <?php } else { ?>
-                    <input type="text" class="form-control datepicker" name="<?php echo $e->key; ?>" readonly="true" value="<?php echo $e->value; ?>">
+                    <input type="text" class="form-control datepicker" name="<?php echo $e->key; ?>" readonly="true" value="<?php echo htmlentities($e->value); ?>">
                 <?php } ?>
             </div>
         </div>

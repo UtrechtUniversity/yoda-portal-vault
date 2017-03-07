@@ -38,7 +38,7 @@
                     <div class="input-group">
                         <input type="text"
                             <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
-                               class="form-control" name="<?php echo $e->key; ?>[]" value="<?php echo $e->value; ?>">
+                               class="form-control" name="<?php echo $e->key; ?>[]" value="<?php echo htmlentities($e->value); ?>">
                         <span class="input-group-btn">
                             <button class="btn btn-default duplicate-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
                         </span>
@@ -47,7 +47,7 @@
 
                     <input type="text"
                         <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
-                           class="form-control" name="<?php echo $e->key; ?>" value="<?php echo $e->value; ?>">
+                           class="form-control" name="<?php echo $e->key; ?>" value="<?php echo htmlentities($e->value); ?>">
 
                 <?php } ?>
             </div>

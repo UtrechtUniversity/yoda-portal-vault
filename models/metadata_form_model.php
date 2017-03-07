@@ -125,12 +125,21 @@ class Metadata_form_model extends CI_Model {
     }
 
 
-    public function getFormElements($rodsaccount, $config) {
+    public function getFormElements($rodsaccount, $config)
+    {
         // load xsd and get all the info regarding restrictions
         $xsdElements = $this->loadXsd($rodsaccount, $config['xsdPath']); // based on element names
 
+        $writeMode = true;
+        if ($config['userType'] == 'reader') {
+            $writeMode = false; // Distinnction made as readers, in case of no xml-file being present, should  NOT get default values
+        }
+
+        $metadataPresent = false;
+
         $formData = array();
         if ($config['hasMetadataXml'] == 'true') {
+            $metadataPresent = true;
             $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
 
             if ($formData === false) {
@@ -246,11 +255,12 @@ class Metadata_form_model extends CI_Model {
                         }
 
                         // frontend value is the value that will be presented in the data field
-                        // If no metadata-file present, it will fall back to its default
-                        $frontendValue = (isset($element['default']) ? $element['default'] : null);
+                        // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
+                        $frontendValue = (isset($element['default']) AND $writeMode) ? $element['default'] : null;
 
                         if($config['hasMetadataXml'] == 'true') { // the value in the file supersedes default
                             $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');
+                            $frontendValue = $keyValue;
                         }
 
 /* Possibly for future use
