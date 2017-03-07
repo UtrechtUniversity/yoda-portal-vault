@@ -48,13 +48,19 @@ class Browse extends MY_Controller
 
         // Remember search results
         $searchTerm = '';
+        $searchStatusValue = '';
         $searchType = 'filename';
         $searchStart = 0;
         $searchOrderDir = 'asc';
         $searchOrderColumn = 0;
 
-        if ($this->session->userdata('research-search-term')) {
-            $searchTerm = $this->session->userdata('research-search-term');
+        if ($this->session->userdata('research-search-term') || $this->session->userdata('research-search-status-value')) {
+            if ($this->session->userdata('research-search-term')) {
+                $searchTerm = $this->session->userdata('research-search-term');
+            }
+            if ($this->session->userdata('research-search-status-value')) {
+                $searchStatusValue = $this->session->userdata('research-search-status-value');
+            }
             $searchType = $this->session->userdata('research-search-type');
             $searchStart = $this->session->userdata('research-search-start');
             $searchOrderDir = $this->session->userdata('research-search-order-dir');
@@ -63,10 +69,21 @@ class Browse extends MY_Controller
 
 
         $this->data['searchTerm'] = $searchTerm;
+        $this->data['searchStatusValue'] = $searchStatusValue;
         $this->data['searchType'] = $searchType;
         $this->data['searchStart'] = $searchStart;
         $this->data['searchOrderDir'] = $searchOrderDir;
         $this->data['searchOrderColumn'] = $searchOrderColumn;
+
+        $showStatus = false;
+        $showTerm = false;
+        if ($searchType == 'status') {
+            $showStatus = true;
+        } else {
+            $showTerm = true;
+        }
+        $this->data['showStatus'] = $showStatus;
+        $this->data['showTerm'] = $showTerm;
 
         $this->load->view('browse', $this->data);
         $this->load->view('common-end');
@@ -169,7 +186,7 @@ class Browse extends MY_Controller
         $rows = array();
         $columns = array();
 
-
+        // Set basic search params
         $this->session->set_userdata(
             array(
                 'research-search-term' => $filter,
@@ -180,6 +197,16 @@ class Browse extends MY_Controller
             )
         );
 
+        // Unset values
+        $this->session->unset_userdata('research-search-term');
+        $this->session->unset_userdata('research-search-status-value');
+
+        // Set value for term or status value
+        if ($type == 'status') {
+            $this->session->set_userdata('research-search-status-value', $filter);
+        } else {
+            $this->session->set_userdata('research-search-term', $filter);
+        }
 
         // Search / filename
         if ($type == 'filename') {
@@ -246,6 +273,24 @@ class Browse extends MY_Controller
                     $rows[] = array(
                         '<span class="browse" data-path="' . $filePath . '">' . trim($filePath, '/') . '</span>',
                         '<span class="matches" data-toggle="tooltip" title="'. implode(', ', $matchParts) . ($i == 5 ? '...' : '') .'">' .  count($row['matches']) .' field(s)</span>'
+                    );
+                }
+            }
+        }
+
+        // Search / status
+        if ($type == 'status') {
+            $orderColumns = array(
+                0 => 'COLL_NAME'
+            );
+            $result = $this->filesystem->searchByOrgMetadata($rodsaccount, $path, $filter, "status", $orderColumns[$orderColumn], $orderDir, $length, $start);
+            $totalItems += $result['summary']['total'];
+
+            if (isset($result['summary']) && $result['summary']['returned'] > 0) {
+                foreach ($result['rows'] as $row) {
+                    $filePath = str_replace($pathStart, '', $row['path']);
+                    $rows[] = array(
+                        '<span class="browse" data-path="' . $filePath . '">' . trim(str_replace(' ','&nbsp;',$filePath), '/') . '</span>'
                     );
                 }
             }

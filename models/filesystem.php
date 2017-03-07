@@ -427,6 +427,59 @@ RULE;
         return array();
     }
 
+    static public function searchByOrgMetadata($iRodsAccount, $path, $string, $type, $orderBy, $orderSort, $limit, $offset = 0)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    *l = int(*limit);
+    *o = int(*offset);
+
+    iiSearchByOrgMetadata(*path, *searchstring, *attrname, *orderby, *ascdesc, *l, *o, *result);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path,
+                    "*searchstring" => $string,
+                    "*attrname" => $type,
+                    "*orderby" => $orderBy,
+                    "*ascdesc" => $orderSort,
+                    "*limit" => $limit,
+                    "*offset" => $offset
+                ),
+                array("*result")
+            );
+
+            $ruleResult = $rule->execute();
+            $results = json_decode($ruleResult['*result'], true);
+
+            $summary = $results[0];
+            unset($results[0]);
+
+            $rows = $results;
+            $output = array(
+                'summary' => $summary,
+                'rows' => $rows
+            );
+
+            return $output;
+
+        } catch(RODSException $e) {
+            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
+            exit;
+
+            echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
+    }
+
     static public function protectFolder($iRodsAccount, $path)
     {
         $ruleBody = <<<'RULE'

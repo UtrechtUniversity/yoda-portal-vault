@@ -2,6 +2,7 @@
     var browsePageItems = <?php echo $items; ?>;
     var browseStartDir = '<?php echo $dir; ?>';
     var searchTerm = '<?php echo addslashes($searchTerm); ?>';
+    var searchStatusValue = '<?php echo addslashes($searchStatusValue); ?>';
     var searchType = '<?php echo $searchType; ?>';
     var searchStart = <?php echo $searchStart; ?>;
     var searchOrderDir = '<?php echo $searchOrderDir; ?>';
@@ -18,17 +19,20 @@
                 <li><a href="#" data-type="filename">Search by filename</a></li>
                 <li><a href="#" data-type="folder">Search by folder</a></li>
                 <li><a href="#" data-type="metadata">Search by metadata</a></li>
+                <li><a href="#" data-type="status">Search by status</a></li>
             </ul>
         </div>
         <div class="search-term">
             <input type="hidden" name="search_param" value="all" id="search_param">
         </div>
-        <input type="text" class="form-control search-term" id="search-filter" placeholder="Search term..." value="<?php echo $searchTerm; ?>">
-        <span class="input-group-btn search-term">
+        <input type="text" class="form-control search-term<?php echo $showStatus ? ' hide' : ''; ?>" id="search-filter" placeholder="Search term..." value="<?php echo $searchTerm; ?>">
+        <span class="input-group-btn search-term<?php echo $showStatus ? ' hide' : ''; ?>">
             <button class="btn btn-default search-btn" data-items-per-page="<?php echo $items; ?>" type="button"><span class="glyphicon glyphicon-search"></span></button>
         </span>
 
-        <label class="radio-inline search-status"><input type="radio" name="status" value="submitted">Submitted</label>
+        <div class="search-status<?php echo $showTerm ? ' hide' : ''; ?>">
+            <label class="radio-inline"><input type="radio" name="status" value="SUBMITTED"<?php echo $searchStatusValue == 'SUBMITTED' ? ' checked' : ''; ?>>Submitted</label>
+        </div>
     </div>
 
     <div class="panel panel-default search-results">
