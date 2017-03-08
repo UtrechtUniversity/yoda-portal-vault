@@ -87,11 +87,17 @@
                             </div>
                         </div>
 
-                        <?php foreach ($form->getSections() as $k => $name) { ?>
-                            <fieldset>
-                                <legend><?php echo $name; ?></legend>
-                                <?php echo $form->show($name); ?>
-                            </fieldset>
+                        <?php if ($userType == 'reader' && $metadataExists === false) { ?>
+                            <p>
+                                There is no metadata present for this folder.
+                            </p>
+                        <?php } else { ?>
+                            <?php foreach ($form->getSections() as $k => $name) { ?>
+                                <fieldset>
+                                    <legend><?php echo $name; ?></legend>
+                                    <?php echo $form->show($name); ?>
+                                </fieldset>
+                            <?php } ?>
                         <?php } ?>
 
                         <div class="form-group">
