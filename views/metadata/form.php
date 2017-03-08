@@ -56,20 +56,12 @@
 
                                     <button type="submit" class="btn btn-primary">Save</button>
 
-                                    <?php
-                                        $total = $form->getCountMandatoryTotal();
-                                        if($total==0) {
-                                            $completeness = 100;
-                                        }
-                                        else {
-                                            $completeness =  ceil(100 * $form->getCountMandatoryFilled() / $total);
-                                        } ?>
-                                    <span  class="add-pointer" aria-hidden="true" data-toggle="tooltip" title="Required for the vault:  <?php echo $total; ?>, currently filled required fields: <?php  echo $form->getCountMandatoryFilled(); ?>">
-                                        <i class="fa fa-check <?php echo $completeness>19 ? 'form-required-present': 'form-required-missing'; ?>"></i>
-                                        <i class="fa fa-check <?php echo $completeness>39 ? 'form-required-present': 'form-required-missing'; ?>"></i>
-                                        <i class="fa fa-check <?php echo $completeness>59 ? 'form-required-present': 'form-required-missing'; ?>"></i>
-                                        <i class="fa fa-check <?php echo $completeness>79 ? 'form-required-present': 'form-required-missing'; ?>"></i>
-                                        <i class="fa fa-check <?php echo $completeness>99 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                    <span  class="add-pointer" aria-hidden="true" data-toggle="tooltip" title="Required for the vault:  <?php echo $form->getCountMandatoryTotal(); ?>, currently filled required fields: <?php  echo $form->getCountMandatoryFilled(); ?>">
+                                        <i class="fa fa-check <?php echo $metadataCompleteness>19 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                        <i class="fa fa-check <?php echo $metadataCompleteness>39 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                        <i class="fa fa-check <?php echo $metadataCompleteness>59 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                        <i class="fa fa-check <?php echo $metadataCompleteness>79 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                        <i class="fa fa-check <?php echo $metadataCompleteness>99 ? 'form-required-present': 'form-required-missing'; ?>"></i>
                                     </span>
 
                                 <?php } ?>
@@ -87,7 +79,7 @@
                             </div>
                         </div>
 
-                        <?php if ($userType == 'reader' && $metadataExists === false) { ?>
+                        <?php if ($form->getPermission() == 'read' && $realMetadataExists === false) { ?>
                             <p>
                                 There is no metadata present for this folder.
                             </p>
@@ -115,7 +107,7 @@
                             </div>
                         </div>
                     <?php } ?>
-                </di>
+                </div>
             </div>
             <?php echo $form->close(); ?>
         </div>

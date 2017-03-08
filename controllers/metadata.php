@@ -31,6 +31,8 @@ class Metadata extends MY_Controller
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
+        $metadataCompleteness = 0; // mandatory completeness for the metadata
+
         $userType = $formConfig['userType'];
         $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
 
@@ -47,6 +49,15 @@ class Metadata extends MY_Controller
             // figure out the number of mandatory fields and how many actually hold data
             $form->calculateMandatoryCompleteness($elements);
 
+            // calculate metadataCompleteness with
+            $total = $form->getCountMandatoryTotal();
+            if($total==0) {
+                $metadataCompleteness = 100;
+            }
+            else {
+                $metadataCompleteness =  ceil(100 * $form->getCountMandatoryFilled() / $total);
+            }
+
             $metadataExists = false;
             $cloneMetadata = false;
             if ($formConfig['hasMetadataXml'] == 'true') {
@@ -62,6 +73,8 @@ class Metadata extends MY_Controller
             $cloneMetadata = false;
         }
 
+        $realMetadataExists = $metadataExists; // keep it as this is the true state of metadata being present or not.
+
         // Check locks
         if (count($formConfig['metadataxmlLocks']) > 0 || count($formConfig['collLocks']) > 0) {
             $form->setPermission('read');
@@ -71,7 +84,7 @@ class Metadata extends MY_Controller
 
         $this->load->view('common-start', array(
             'styleIncludes' => array(
-                'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
+                'lib/jqueryui-datepicker/jquery-ui-1.1.1.css',
                 'lib/font-awesome/css/font-awesome.css',
                 'lib/sweetalert/sweetalert.css',
                 'lib/select2/css/select2.min.css',
@@ -95,6 +108,9 @@ class Metadata extends MY_Controller
         $this->data['userType'] = $userType;
         $this->data['metadataExists'] = $metadataExists;
         $this->data['cloneMetadata'] = $cloneMetadata;
+
+        $this->data['realMetadataExists'] = $realMetadataExists; // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
+        $this->data['metadataCompleteness'] = $metadataCompleteness;
 
         $this->load->view('metadata/form', $this->data);
         $this->load->view('common-end');
