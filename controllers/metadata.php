@@ -69,6 +69,13 @@ class Metadata extends MY_Controller
             $metadataExists = false;
         }
 
+        $total = $form->getCountMandatoryTotal();
+        if ($total==0) {
+            $completeness = 100;
+        } else {
+            $completeness =  ceil(100 * $form->getCountMandatoryFilled() / $total);
+        }
+
         $this->load->view('common-start', array(
             'styleIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
@@ -95,6 +102,8 @@ class Metadata extends MY_Controller
         $this->data['userType'] = $userType;
         $this->data['metadataExists'] = $metadataExists;
         $this->data['cloneMetadata'] = $cloneMetadata;
+        $this->data['completeness'] = $completeness;
+        $this->data['total'] = $total;
 
         $this->load->view('metadata/form', $this->data);
         $this->load->view('common-end');
@@ -112,17 +121,24 @@ class Metadata extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-
         $userType = $formConfig['userType'];
 
-        if($userType != 'reader') {
-            $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+        if ($this->input->post('vault_submission')) {
+            // Do vault submission
+            $this->load->library('vaultsubmission');
+            $result = $this->vaultsubmission->validate($formConfig['xsdPath'], $formConfig['metadataXmlPath']);
+        } else {
+            // save metadata xml
 
-            return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
-        }
-        else {
-            //get away from the form, user is (no longer) entitled to view it
-            return redirect('research/browse?dir=' . urlencode($path), 'refresh'); //
+            if($userType != 'reader') {
+                $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+
+                return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+            }
+            else {
+                //get away from the form, user is (no longer) entitled to view it
+                return redirect('research/browse?dir=' . urlencode($path), 'refresh'); //
+            }
         }
     }
 

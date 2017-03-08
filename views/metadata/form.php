@@ -55,21 +55,15 @@
                                 <?php if ($form->getPermission() == 'write') { ?>
 
                                     <button type="submit" class="btn btn-primary">Save</button>
-
-                                    <?php
-                                        $total = $form->getCountMandatoryTotal();
-                                        if($total==0) {
-                                            $completeness = 100;
-                                        }
-                                        else {
-                                            $completeness =  ceil(100 * $form->getCountMandatoryFilled() / $total);
-                                        } ?>
+                                    <?php if ($completeness == 100) { ?>
+                                        <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Vault Submission</button>
+                                    <?php } ?>
                                     <span  class="add-pointer" aria-hidden="true" data-toggle="tooltip" title="Required for the vault:  <?php echo $total; ?>, currently filled required fields: <?php  echo $form->getCountMandatoryFilled(); ?>">
-                                        <i class="fa fa-check <?php echo $completeness>19 ? 'form-required-present': 'form-required-missing'; ?>"></i>
-                                        <i class="fa fa-check <?php echo $completeness>39 ? 'form-required-present': 'form-required-missing'; ?>"></i>
-                                        <i class="fa fa-check <?php echo $completeness>59 ? 'form-required-present': 'form-required-missing'; ?>"></i>
-                                        <i class="fa fa-check <?php echo $completeness>79 ? 'form-required-present': 'form-required-missing'; ?>"></i>
-                                        <i class="fa fa-check <?php echo $completeness>99 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                    <i class="fa fa-check <?php echo $completeness>19 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                    <i class="fa fa-check <?php echo $completeness>39 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                    <i class="fa fa-check <?php echo $completeness>59 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                    <i class="fa fa-check <?php echo $completeness>79 ? 'form-required-present': 'form-required-missing'; ?>"></i>
+                                    <i class="fa fa-check <?php echo $completeness>99 ? 'form-required-present': 'form-required-missing'; ?>"></i>
                                     </span>
 
                                 <?php } ?>
