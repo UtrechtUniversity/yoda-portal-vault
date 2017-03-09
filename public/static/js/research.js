@@ -321,6 +321,8 @@ function topInformation(dir)
                 } else if (status == 'SUBMITTED') {
                     $('.btn-group button.folder-status').text('Submitted');
                     $('.btn-group button.folder-status').attr('data-status', 'SUBMITTED');
+
+                    icon = '<span class="fa-stack"><i class="fa fa-folder-o fa-stack-2x"></i><i class="fa fa-shield fa-stack-1x"></i></span>';
                 } else {
                     $('.btn-group button.folder-status').text('Protected');
                     $('.btn-group button.folder-status').attr('data-status', 'PROTECTED');
