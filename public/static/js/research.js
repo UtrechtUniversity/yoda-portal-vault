@@ -282,6 +282,7 @@ function startBrowsing(path, items)
 
 function changeBrowserUrl(path)
 {
+
     var url = window.location.pathname;
     if (typeof path != 'undefined') {
         url += "?dir=" +  path;

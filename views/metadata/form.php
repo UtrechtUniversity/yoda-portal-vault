@@ -31,7 +31,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading clearfix">
                     <h3 class="panel-title pull-left">
-                        Metadata form - <?php echo $path; ?>
+                        Metadata form - <?php echo str_replace(' ', '&nbsp;', htmlentities( trim( $path ))); ?>
                     </h3>
                     <div class="input-group-sm has-feedback pull-right">
                         <a class="btn btn-default" href="/research/browse?dir=<?php echo urlencode($path); ?>">Close</a>
