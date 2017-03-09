@@ -28,7 +28,7 @@
                             <?php } ?>
                         </span>
                     <?php } else { ?>
-                        <i class="fa fa-lock safe" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
+                        <i class="fa fa-lock safe-single" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
                     <?php } ?>
                 <?php } ?>
             </div>
