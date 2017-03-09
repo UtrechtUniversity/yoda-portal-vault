@@ -82,6 +82,21 @@ class Metadata extends MY_Controller
             $metadataExists = false;
         }
 
+        $total = $form->getCountMandatoryTotal();
+        if ($total==0) {
+            $completeness = 100;
+        } else {
+            $completeness =  ceil(100 * $form->getCountMandatoryFilled() / $total);
+        }
+
+        // Submit To Vault btn
+        $submitToVaultBtn = false;
+        $lockStatus = $formConfig['lockFound'];
+        $folderStatus = $formConfig['folderStatus'];
+        if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'UNPROTECTED') && $form->getPermission() == 'write') {
+            $submitToVaultBtn = true;
+        }
+
         $this->load->view('common-start', array(
             'styleIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.1.1.css',
@@ -102,12 +117,20 @@ class Metadata extends MY_Controller
             ),
         ));
 
+        $flashMessage = $this->session->flashdata('flashMessage');
+        $flashMessageType = $this->session->flashdata('flashMessageType');
+
         $this->data['form'] = $form;
         $this->data['path'] = $path;
         $this->data['fullPath'] = $fullPath;
         $this->data['userType'] = $userType;
         $this->data['metadataExists'] = $metadataExists;
         $this->data['cloneMetadata'] = $cloneMetadata;
+        $this->data['completeness'] = $completeness;
+        $this->data['total'] = $total;
+        $this->data['submitToVaultBtn'] = $submitToVaultBtn;
+        $this->data['flashMessage'] = $flashMessage;
+        $this->data['flashMessageType'] = $flashMessageType;
 
         $this->data['realMetadataExists'] = $realMetadataExists; // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
         $this->data['metadataCompleteness'] = $metadataCompleteness;
@@ -128,17 +151,42 @@ class Metadata extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-
         $userType = $formConfig['userType'];
 
-        if($userType != 'reader') {
-            $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+        if ($this->input->post('vault_submission')) {
+            // Do vault submission
+            $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
+            $result = $this->vaultsubmission->validate();
+
+            if ($result === true) {
+                $submitResult = $this->vaultsubmission->setSubmitFlag();
+                if ($submitResult) {
+                    $this->session->set_flashdata('flashMessage', 'The folder is successfully submitted.');
+                    $this->session->set_flashdata('flashMessageType', 'success');
+                } else {
+                    $this->session->set_flashdata('flashMessage', 'There was an locking error encountered while submitting this folder.');
+                    $this->session->set_flashdata('flashMessageType', 'danger');
+                }
+            } else {
+                $this->session->set_flashdata('flashMessage', implode('<br>', $result));
+                $this->session->set_flashdata('flashMessageType', 'danger');
+            }
 
             return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
-        }
-        else {
-            //get away from the form, user is (no longer) entitled to view it
-            return redirect('research/browse?dir=' . urlencode($path), 'refresh'); //
+        } else {
+            // save metadata xml
+
+            if($userType != 'reader') {
+                if ($this->input->server('REQUEST_METHOD') == 'POST') {
+                    $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+                }
+
+                return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+            }
+            else {
+                //get away from the form, user is (no longer) entitled to view it
+                return redirect('research/browse?dir=' . urlencode($path), 'refresh'); //
+            }
         }
     }
 
