@@ -46,13 +46,9 @@ $( document ).ready(function() {
 
 function browse(dir)
 {
-    var urlDecodedDir = decodeURIComponent((dir + '').replace(/\+/g, '%20'));
+    makeBreadcrumb(dir);
 
-    makeBreadcrumb(urlDecodedDir);
-
-    var path = makeBreadcrumbPath(dir);
-
-    changeBrowserUrl(path);
+    changeBrowserUrl(dir);
     topInformation(dir);
     buildFileBrowser(dir);
 }
@@ -160,8 +156,10 @@ function searchSelectChanged(sel)
     }
 }
 
-function makeBreadcrumb(dir)
+function makeBreadcrumb(urlEncodedDir)
 {
+    var dir = decodeURIComponent((urlEncodedDir + '').replace(/\+/g, '%20'));
+
     var parts = [];
     if (typeof dir != 'undefined') {
         if (dir.length > 0) {
@@ -181,13 +179,14 @@ function makeBreadcrumb(dir)
         var html = '<li class="browse">Home</li>';
         var path = "";
         $.each( parts, function( k, part ) {
-            path += "%2F" + part;
+            path += "%2F" + encodeURIComponent(part);
 
             // Active item
+            valueString = htmlEncode(part).replace(/ /g, "&nbsp;");
             if (k == (totalParts-1)) {
-                html += '<li class="active">' + part.replace(/ /g, "&nbsp;") + '</li>';
+                html += '<li class="active">' + valueString + '</li>';
             } else {
-                html += '<li class="browse" data-path="' + path + '">' + part.replace(/ /g, "&nbsp;") + '</li>';
+                html += '<li class="browse" data-path="' + path + '">' + valueString + '</li>';
             }
         });
     } else {
@@ -196,6 +195,14 @@ function makeBreadcrumb(dir)
 
     $('ol.breadcrumb').html(html);
 }
+
+function htmlEncode(value){
+    //create a in-memory div, set it's inner text(which jQuery automatically encodes)
+    //then grab the encoded contents back out.  The div never exists on the page.
+    return $('<div/>').text(value).html();
+}
+
+
 
 function makeBreadcrumbPath(dir)
 {
@@ -217,6 +224,7 @@ function makeBreadcrumbPath(dir)
         var path = "";
         var index = 0;
         $.each( parts, function( k, part ) {
+
             if(index) {
                 path += "/" + part;
             }
@@ -274,6 +282,7 @@ function startBrowsing(path, items)
 
 function changeBrowserUrl(path)
 {
+
     var url = window.location.pathname;
     if (typeof path != 'undefined') {
         url += "?dir=" +  path;

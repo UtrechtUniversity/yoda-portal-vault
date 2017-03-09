@@ -1,6 +1,6 @@
 <script>
     var browsePageItems = <?php echo $items; ?>;
-    var browseStartDir = '<?php echo $dir; ?>';
+    var browseStartDir = '<?php echo urlencode($dir); ?>';
     var searchTerm = '<?php echo addslashes($searchTerm); ?>';
     var searchStatusValue = '<?php echo addslashes($searchStatusValue); ?>';
     var searchType = '<?php echo $searchType; ?>';

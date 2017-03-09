@@ -44,7 +44,7 @@ class Browse extends MY_Controller
 
         $this->data['items'] = $this->config->item('browser-items-per-page');
 
-        $this->data['dir'] = urlencode($this->input->get('dir'));
+        $this->data['dir'] = $this->input->get('dir');
 
         // Remember search results
         $searchTerm = '';
@@ -134,7 +134,7 @@ class Browse extends MY_Controller
             foreach ($collections['rows'] as $row) {
                 $filePath = str_replace($pathStart, '', $row['path']);
                 $rows[] = array(
-                    '<span class="browse" data-path="'. urlencode($filePath) .'"><i class="fa ' . $icon .'" aria-hidden="true"></i> ' . trim(str_replace(' ', '&nbsp;',$row['basename']), '/') . '</span>',
+                    '<span class="browse" data-path="'. urlencode($filePath) .'"><i class="fa ' . $icon .'" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities( trim( $row['basename'], '/'))) . '</span>',
                     date('Y-m-d H:i:s', $row['modify_time'])
                 );
             }
@@ -147,7 +147,7 @@ class Browse extends MY_Controller
             foreach ($objects['rows'] as $row) {
                 $filePath = str_replace($pathStart, '', $row['path']);
                 $rows[] = array(
-                    '<span data-path="'. urlencode($filePath) .'"><i class="fa fa-file-o" aria-hidden="true"></i> ' . trim($row['basename'], '/') . '</span>',
+                    '<span data-path="'. urlencode($filePath) .'"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities( trim( $row['basename'], '/'))) . '</span>',
                     date('Y-m-d H:i:s', $row['modify_time'])
                 );
             }
@@ -155,11 +155,7 @@ class Browse extends MY_Controller
 
         $output = array('draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
 
-
-
         echo json_encode($output);
-
-
     }
 
     public function search()
@@ -221,12 +217,11 @@ class Browse extends MY_Controller
                 foreach ($result['rows'] as $row) {
                     $filePath = str_replace($pathStart, '', $row['parent']);
                     $rows[] = array(
-                        '<i class="fa fa-file-o" aria-hidden="true"></i> ' . $row['basename'],
-                        '<span class="browse" data-path="' . $filePath . '">' . $filePath . '</span>'
+                        '<i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities( trim( $row['basename']))),
+                        '<span class="browse" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>'
                     );
                 }
             }
-
         }
 
         // Search / folder
@@ -240,8 +235,10 @@ class Browse extends MY_Controller
             if (isset($result['summary']) && $result['summary']['returned'] > 0) {
                 foreach ($result['rows'] as $row) {
                     $filePath = str_replace($pathStart, '', $row['path']);
+
+                    //str_replace(' ', '&nbsp;', htmlentities( trim( $row['basename'], '/')))
                     $rows[] = array(
-                        '<span class="browse" data-path="' . $filePath . '">' . trim(str_replace(' ','&nbsp;',$filePath), '/') . '</span>'
+                        '<span class="browse" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>'
                     );
                 }
             }
@@ -271,7 +268,7 @@ class Browse extends MY_Controller
                     }
 
                     $rows[] = array(
-                        '<span class="browse" data-path="' . $filePath . '">' . trim($filePath, '/') . '</span>',
+                        '<span class="browse" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>',
                         '<span class="matches" data-toggle="tooltip" title="'. implode(', ', $matchParts) . ($i == 5 ? '...' : '') .'">' .  count($row['matches']) .' field(s)</span>'
                     );
                 }
@@ -290,7 +287,7 @@ class Browse extends MY_Controller
                 foreach ($result['rows'] as $row) {
                     $filePath = str_replace($pathStart, '', $row['path']);
                     $rows[] = array(
-                        '<span class="browse" data-path="' . $filePath . '">' . trim(str_replace(' ','&nbsp;',$filePath), '/') . '</span>'
+                        '<span class="browse" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>'
                     );
                 }
             }
