@@ -99,7 +99,7 @@ class Metadata extends MY_Controller
 
         $this->load->view('common-start', array(
             'styleIncludes' => array(
-                'lib/jqueryui-datepicker/jquery-ui-1.1.1.css',
+                'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
                 'lib/font-awesome/css/font-awesome.css',
                 'lib/sweetalert/sweetalert.css',
                 'lib/select2/css/select2.min.css',
