@@ -50,13 +50,19 @@
                             <?php } ?>
                         </p>
                     <?php } else { ?>
+
+                        <?php if ($flashMessage) { ?>
+                            <div class="alert alert-<?php echo $flashMessageType; ?>">
+                                <?php echo $flashMessage; ?>
+                            </div>
+                        <?php } ?>
                         <div class="form-group">
                             <div class="col-sm-12">
                                 <?php if ($form->getPermission() == 'write') { ?>
 
                                     <button type="submit" class="btn btn-primary">Save</button>
-                                    <?php if ($completeness == 100) { ?>
-                                        <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Vault Submission</button>
+                                    <?php if ($completeness == 100 && $submitToVaultBtn) { ?>
+                                        <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit to vault</button>
                                     <?php } ?>
                                     <span  class="add-pointer" aria-hidden="true" data-toggle="tooltip" title="Required for the vault:  <?php echo $total; ?>, currently filled required fields: <?php  echo $form->getCountMandatoryFilled(); ?>">
                                     <i class="fa fa-check <?php echo $completeness>19 ? 'form-required-present': 'form-required-missing'; ?>"></i>

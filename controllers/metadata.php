@@ -76,6 +76,14 @@ class Metadata extends MY_Controller
             $completeness =  ceil(100 * $form->getCountMandatoryFilled() / $total);
         }
 
+        // Submit To Vault btn
+        $submitToVaultBtn = false;
+        $lockStatus = $formConfig['lockFound'];
+        $folderStatus = $formConfig['folderStatus'];
+        if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'UNPROTECTED') && $form->getPermission() == 'write') {
+            $submitToVaultBtn = true;
+        }
+
         $this->load->view('common-start', array(
             'styleIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
@@ -96,6 +104,9 @@ class Metadata extends MY_Controller
             ),
         ));
 
+        $flashMessage = $this->session->flashdata('flashMessage');
+        $flashMessageType = $this->session->flashdata('flashMessageType');
+
         $this->data['form'] = $form;
         $this->data['path'] = $path;
         $this->data['fullPath'] = $fullPath;
@@ -104,6 +115,9 @@ class Metadata extends MY_Controller
         $this->data['cloneMetadata'] = $cloneMetadata;
         $this->data['completeness'] = $completeness;
         $this->data['total'] = $total;
+        $this->data['submitToVaultBtn'] = $submitToVaultBtn;
+        $this->data['flashMessage'] = $flashMessage;
+        $this->data['flashMessageType'] = $flashMessageType;
 
         $this->load->view('metadata/form', $this->data);
         $this->load->view('common-end');
@@ -125,13 +139,31 @@ class Metadata extends MY_Controller
 
         if ($this->input->post('vault_submission')) {
             // Do vault submission
-            $this->load->library('vaultsubmission');
-            $result = $this->vaultsubmission->validate($formConfig['xsdPath'], $formConfig['metadataXmlPath']);
+            $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
+            $result = $this->vaultsubmission->validate();
+
+            if ($result === true) {
+                $submitResult = $this->vaultsubmission->setSubmitFlag();
+                if ($submitResult) {
+                    $this->session->set_flashdata('flashMessage', 'The folder is successfully submitted.');
+                    $this->session->set_flashdata('flashMessageType', 'success');
+                } else {
+                    $this->session->set_flashdata('flashMessage', 'There was an locking error encountered while submitting this folder.');
+                    $this->session->set_flashdata('flashMessageType', 'danger');
+                }
+            } else {
+                $this->session->set_flashdata('flashMessage', implode('<br>', $result));
+                $this->session->set_flashdata('flashMessageType', 'danger');
+            }
+
+            return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
         } else {
             // save metadata xml
 
             if($userType != 'reader') {
-                $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+                if ($this->input->server('REQUEST_METHOD') == 'POST') {
+                    $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+                }
 
                 return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
             }

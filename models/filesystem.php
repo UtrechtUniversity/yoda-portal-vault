@@ -128,6 +128,33 @@ RULE;
         }
     }
 
+    static public function submitFolderToVault($iRodsAccount, $path)
+    {
+        $ruleBody = <<<'RULE'
+myRule {
+    iiFolderSubmit(*path);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array()
+            );
+
+            $rule->execute();
+            return true;
+
+        } catch(RODSException $e) {
+            return false;
+        }
+    }
+
+
+
     static public function cloneMetadata($iRodsAccount, $path, $parentPath)
     {
         $output = array();
