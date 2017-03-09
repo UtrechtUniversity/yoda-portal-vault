@@ -288,8 +288,8 @@ function topInformation(dir)
     if (typeof dir != 'undefined') {
         $.getJSON("browse/top_data?dir=" + dir, function(data){
             var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
-            var metadata = data.user_metadata;
-            var status = data.org_status;
+            var metadata = data.userMetadata;
+            var status = data.folderStatus;
             var userType = data.userType;
             var showStatusBtn = false;
 
@@ -316,18 +316,21 @@ function topInformation(dir)
             }
 
             // Lock position check
-            var rootLock = data.org_lock_protect;
+            var lockFound = data.lockFound;
             var path = data.path;
-            if (typeof rootLock != 'undefined') {
-                if (rootLock == path) {
+            if (lockFound != "no") {
+                if (lockFound == "here") {
                     showStatusBtn = true;
-                }
+                } else {
+		    // Lock is either on descendant or ancestor Folder
+		    showStatusBtn = false;
+		}
             } else {
-                // No root lock, show the btn.
+                // No lock found, show the btn.
                 showStatusBtn = true;
             }
 
-            if (userType == 'reader') {
+            if (userType != 'normal' && userType != "manager") {
                 // Hide folder status button for read permission
                 showStatusBtn = false;
             }

@@ -41,10 +41,10 @@ class Metadata extends MY_Controller
 
             //$form = $this->metadataform->load($elements, $metadata);
             $form = $this->metadataform->load($elements);
-            if ($userType == 'reader') {
-                $form->setPermission('read');
-            } else {
+            if ($userType == 'normal' || $userType == 'manager') {
                 $form->setPermission('write');
+            } else {
+                $form->setPermission('read');
             }
             // figure out the number of mandatory fields and how many actually hold data
             $form->calculateMandatoryCompleteness($elements);
@@ -76,7 +76,7 @@ class Metadata extends MY_Controller
         $realMetadataExists = $metadataExists; // keep it as this is the true state of metadata being present or not.
 
         // Check locks
-        if (count($formConfig['metadataxmlLocks']) > 0 || count($formConfig['collLocks']) > 0) {
+        if ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") {
             $form->setPermission('read');
             $cloneMetadata = false;
             $metadataExists = false;
