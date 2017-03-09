@@ -19,9 +19,12 @@ $( document ).ready(function() {
         showMetadataForm($(this).attr('data-path'));
     });
 
-    $('.btn-group button.folder-status').click(function(){
-        toggleFolderStatus($(this).attr('data-status'), $(this).attr('data-path'));
-
+    $('.btn-group button.folder-status').click(function() {
+        if ($(this).attr('data-status') == 'SUBMITTED') {
+            alert('Functionality to be developed in coming sprints.');
+        } else {
+            toggleFolderStatus($(this).attr('data-status'), $(this).attr('data-path'));
+        }
     });
 
     $(".search-btn").click(function(){
@@ -315,8 +318,11 @@ function topInformation(dir)
                 if (status == 'UNPROTECTED') {
                     $('.btn-group button.folder-status').text('Unprotected');
                     $('.btn-group button.folder-status').attr('data-status', 'UNPROTECTED');
+                } else if (status == 'SUBMITTED') {
+                    $('.btn-group button.folder-status').text('Submitted');
+                    $('.btn-group button.folder-status').attr('data-status', 'SUBMITTED');
                 } else {
-                    $('.btn-group button.folder-status').text('protected');
+                    $('.btn-group button.folder-status').text('Protected');
                     $('.btn-group button.folder-status').attr('data-status', 'PROTECTED');
 
                     icon = '<span class="fa-stack"><i class="fa fa-folder-o fa-stack-2x"></i><i class="fa fa-shield fa-stack-1x"></i></span>';
