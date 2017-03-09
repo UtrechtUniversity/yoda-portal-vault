@@ -307,6 +307,7 @@ class Browse extends MY_Controller
         $this->session->unset_userdata('research-search-type');
         $this->session->unset_userdata('research-search-order-dir');
         $this->session->unset_userdata('research-search-order-column');
+        $this->session->unset_userdata('research-search-status-value');
     }
 
     public function change_folder_status()
