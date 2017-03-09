@@ -131,7 +131,7 @@ class Metadata_form_model extends CI_Model {
         $xsdElements = $this->loadXsd($rodsaccount, $config['xsdPath']); // based on element names
 
         $writeMode = true;
-        if ($config['userType'] == 'reader') {
+        if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
             $writeMode = false; // Distinnction made as readers, in case of no xml-file being present, should  NOT get default values
         }
 

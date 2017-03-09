@@ -16,7 +16,7 @@
                     <br>
                     When using the 'Delete all metadata' button beware that you will lose all data!
 
-                    <?php if ($userType != 'reader') { ?>
+                    <?php if ($userType == 'normal' || $userType == 'manager') { ?>
                         <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
                     <?php } ?>
                 </p>
@@ -45,7 +45,7 @@
                             When using the 'Delete all metadata' button beware that you will lose all data!
 
 
-                            <?php if ($userType != 'reader' && $metadataExists) { ?>
+                            <?php if ($form->getPermission() == 'write' && $metadataExists) { ?>
                                 <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Delete all metadata</button>
                             <?php } ?>
                         </p>
@@ -65,11 +65,11 @@
                                     </span>
 
                                 <?php } ?>
-                                <?php if ($userType != 'reader' && $metadataExists) { ?>
+                                <?php if ($form->getPermission() == 'write' && $metadataExists) { ?>
                                     <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Delete all metadata</button>
                                 <?php } ?>
 
-                                <?php if (($userType != 'reader' && $metadataExists === false) && $cloneMetadata) { ?>
+                                <?php if (($form->getPermission() == 'write' && $metadataExists === false) && $cloneMetadata) { ?>
                                     <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Clone from parent folder</button>
                                 <?php } ?>
                             </div>
@@ -97,11 +97,11 @@
                                 <?php if ($form->getPermission() == 'write') { ?>
                                     <button type="submit" class="btn btn-primary">Save</button>
                                 <?php } ?>
-                                <?php if ($userType != 'reader' && $metadataExists) { ?>
+                                <?php if ($form->getPermission() == 'write' && $metadataExists) { ?>
                                     <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
                                 <?php } ?>
 
-                                <?php if (($userType != 'reader' && $metadataExists === false) && $cloneMetadata) { ?>
+                                <?php if (($form->getPermission() == 'write' && $metadataExists === false) && $cloneMetadata) { ?>
                                     <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo $path; ?>">Clone from parent folder</button>
                                 <?php } ?>
                             </div>
