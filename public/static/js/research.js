@@ -138,6 +138,7 @@ function closeSearchResults()
 {
     $('.search-results').hide();
     $('#search-filter').val('');
+    $(".search-status input:radio").prop('checked', false);
     $.get("browse/unset_search");
 }
 
