@@ -204,6 +204,9 @@ class Browse extends MY_Controller
             $this->session->set_userdata('research-search-term', $filter);
         }
 
+        // $filter is changed as iRods cannot handle '%' and '_'
+        $filter = str_replace(array('%', '_'), array('\\%','\\_'), $filter);
+
         // Search / filename
         if ($type == 'filename') {
             $orderColumns = array(
