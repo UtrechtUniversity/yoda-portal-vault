@@ -269,7 +269,7 @@ class Browse extends MY_Controller
 
                     $rows[] = array(
                         '<span class="browse" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>',
-                        '<span class="matches" data-toggle="tooltip" title="'. implode(', ', $matchParts) . ($i == 5 ? '...' : '') .'">' .  count($row['matches']) .' field(s)</span>'
+                        '<span class="matches" data-toggle="tooltip" title="'. htmlentities( implode(', ', $matchParts)) . ($i == 5 ? '...' : '') .'">' .  count($row['matches']) .' field(s)</span>'
                     );
                 }
             }
