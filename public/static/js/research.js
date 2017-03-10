@@ -92,7 +92,7 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
         $('#search tbody').remove();
 
         // Initialize new Datatable
-        var url = "browse/search?filter=" + value + "&type=" + type;
+        var url = "browse/search?filter=" + encodeURIComponent(value) + "&type=" + type;
         $('#search').DataTable( {
             "bFilter": false,
             "bInfo": false,
@@ -118,11 +118,13 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             "order": [[ searchOrderColumn, searchOrderDir ]]
         });
 
+
         if (type == 'status') {
             value = value.toLowerCase();
             $('.search-string').text(value.substr(0,1).toUpperCase() + value.substr(1));
         } else {
-            $('.search-string').text(value);
+            var valueHtmlEncoded = htmlEncode(value);
+            $('.search-string').html(valueHtmlEncoded.replace(/ /g, '&nbsp;'));
 
             // uncheck all status values
             $( ".search-status input:radio" ).prop('checked', false);
