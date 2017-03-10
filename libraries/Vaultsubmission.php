@@ -38,7 +38,7 @@ class Vaultsubmission
         // Lock error
         $lockResult = $this->checkLock();
         if (!$lockResult) {
-            $messages[] = 'there was an locking error encountered';
+            $messages[] = 'An locking error occurred';
         }
 
         if (count($messages) > 0) {
