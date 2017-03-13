@@ -362,7 +362,10 @@ function topInformation(dir)
                 $('.btn-group button.folder-status').hide();
             }
 
-            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + data.basename.replace(/ /g, "&nbsp;"));
+            // data.basename.replace(/ /g, "&nbsp;")
+            folderName = htmlEncode(data.basename).replace(/ /g, "&nbsp;");
+
+            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName);
             $('.top-information').show();
         });
     }
