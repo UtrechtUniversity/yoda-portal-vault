@@ -4,7 +4,7 @@ $( document ).ready(function() {
 
         // Rememeber search results
         if (searchTerm.length > 0) {
-            search(searchTerm, searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+            search(decodeURIComponent(searchTerm), searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
         } else if (searchStatusValue.length > 0) {
             search(searchStatusValue, 'status', browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
         }

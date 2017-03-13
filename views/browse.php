@@ -1,7 +1,7 @@
 <script>
     var browsePageItems = <?php echo $items; ?>;
     var browseStartDir = '<?php echo urlencode($dir); ?>';
-    var searchTerm = '<?php echo addslashes($searchTerm); ?>';
+    var searchTerm = '<?php echo addslashes(urlencode($searchTerm)); ?>';
     var searchStatusValue = '<?php echo addslashes($searchStatusValue); ?>';
     var searchType = '<?php echo $searchType; ?>';
     var searchStart = <?php echo $searchStart; ?>;
@@ -25,7 +25,7 @@
         <div class="search-term">
             <input type="hidden" name="search_param" value="all" id="search_param">
         </div>
-        <input type="text" class="form-control search-term<?php echo $showStatus ? ' hide' : ''; ?>" id="search-filter" placeholder="Search term..." value="<?php echo $searchTerm; ?>">
+        <input type="text" class="form-control search-term<?php echo $showStatus ? ' hide' : ''; ?>" id="search-filter" placeholder="Search term..." value="<?php echo htmlentities($searchTerm); ?>">
         <span class="input-group-btn search-term<?php echo $showStatus ? ' hide' : ''; ?>">
             <button class="btn btn-default search-btn" data-items-per-page="<?php echo $items; ?>" type="button"><span class="glyphicon glyphicon-search"></span></button>
         </span>

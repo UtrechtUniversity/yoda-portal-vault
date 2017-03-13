@@ -67,8 +67,8 @@ class Browse extends MY_Controller
             $searchOrderColumn = $this->session->userdata('research-search-order-column');
         }
 
-
         $this->data['searchTerm'] = $searchTerm;
+
         $this->data['searchStatusValue'] = $searchStatusValue;
         $this->data['searchType'] = $searchType;
         $this->data['searchStart'] = $searchStart;
