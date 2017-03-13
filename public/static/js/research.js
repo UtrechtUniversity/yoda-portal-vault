@@ -123,8 +123,7 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             value = value.toLowerCase();
             $('.search-string').text(value.substr(0,1).toUpperCase() + value.substr(1));
         } else {
-            var valueHtmlEncoded = htmlEncode(value);
-            $('.search-string').html(valueHtmlEncoded.replace(/ /g, '&nbsp;'));
+            $('.search-string').html(htmlEncode($('#search-filter').val()));
 
             // uncheck all status values
             $( ".search-status input:radio" ).prop('checked', false);
