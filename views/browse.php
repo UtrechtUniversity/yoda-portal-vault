@@ -1,7 +1,7 @@
 <script>
     var browsePageItems = <?php echo $items; ?>;
     var browseStartDir = '<?php echo urlencode($dir); ?>';
-    var searchTerm = '<?php echo addslashes(urlencode($searchTerm)); ?>';
+    var searchTerm = '<?php echo str_replace('+',' ',addslashes(urlencode( $searchTerm))); ?>';
     var searchStatusValue = '<?php echo addslashes($searchStatusValue); ?>';
     var searchType = '<?php echo $searchType; ?>';
     var searchStart = <?php echo $searchStart; ?>;

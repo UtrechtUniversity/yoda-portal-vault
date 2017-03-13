@@ -91,6 +91,7 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
         // Remove table content
         $('#search tbody').remove();
 
+
         // Initialize new Datatable
         var url = "browse/search?filter=" + encodeURIComponent(value) + "&type=" + type;
         $('#search').DataTable( {
@@ -123,7 +124,7 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             value = value.toLowerCase();
             $('.search-string').text(value.substr(0,1).toUpperCase() + value.substr(1));
         } else {
-            $('.search-string').html(htmlEncode($('#search-filter').val()));
+            $('.search-string').html( htmlEncode(value).replace(/ /g, "&nbsp;") );
 
             // uncheck all status values
             $( ".search-status input:radio" ).prop('checked', false);
