@@ -208,7 +208,7 @@ class Browse extends MY_Controller
         $filter = str_replace(array('\\', '%', '_'),
                             array('\\\\', '\\%','\\_'),
                             $filter);
-        
+
         // Search / filename
         if ($type == 'filename') {
             $orderColumns = array(
