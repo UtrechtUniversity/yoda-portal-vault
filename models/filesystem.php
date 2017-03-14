@@ -232,6 +232,8 @@ RULE;
     {
         $output = array();
 
+        $path = str_replace("`", "\\`", $path);
+
         $ruleBody = <<<'RULE'
 myRule {
     iiCollectionDetails(*path, *result);
