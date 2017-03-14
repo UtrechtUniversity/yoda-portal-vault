@@ -7,7 +7,7 @@
     margin-bottom: 20px;
 }
 
-.browse {
+.browse, .browse-search {
     cursor: pointer;
 }
 
