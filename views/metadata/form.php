@@ -62,11 +62,11 @@
 
                                     <button type="submit" class="btn btn-primary">Save</button>
 
-                                    <?php if ($completeness == 100 && $submitToVaultBtn) { ?>
+                                    <?php if ($metadataCompleteness == 100 && $submitToVaultBtn) { ?>
                                         <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit to vault</button>
                                     <?php } ?>
 
-                                    <span  class="add-pointer" aria-hidden="true" data-toggle="tooltip" title="Required for the vault:  <?php echo $form->getCountMandatoryTotal(); ?>, currently filled required fields: <?php  echo $form->getCountMandatoryFilled(); ?>">
+                                    <span  class="add-pointer" aria-hidden="true" data-toggle="tooltip" title="Required for the vault:  <?php echo $mandatoryTotal; ?>, currently filled required fields: <?php  echo $mandatoryFilled; ?>">
                                         <i class="fa fa-check <?php echo $metadataCompleteness>19 ? 'form-required-present': 'form-required-missing'; ?>"></i>
                                         <i class="fa fa-check <?php echo $metadataCompleteness>39 ? 'form-required-present': 'form-required-missing'; ?>"></i>
                                         <i class="fa fa-check <?php echo $metadataCompleteness>59 ? 'form-required-present': 'form-required-missing'; ?>"></i>
