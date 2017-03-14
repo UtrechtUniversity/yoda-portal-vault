@@ -4,7 +4,7 @@ $( document ).ready(function() {
 
         // Rememeber search results
         if (searchTerm.length > 0) {
-            search(searchTerm, searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+            search(decodeURIComponent(searchTerm), searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
         } else if (searchStatusValue.length > 0) {
             search(searchStatusValue, 'status', browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
         }
@@ -91,6 +91,7 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
         // Remove table content
         $('#search tbody').remove();
 
+
         // Initialize new Datatable
         var url = "browse/search?filter=" + encodeURIComponent(value) + "&type=" + type;
         $('#search').DataTable( {
@@ -123,8 +124,7 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             value = value.toLowerCase();
             $('.search-string').text(value.substr(0,1).toUpperCase() + value.substr(1));
         } else {
-            var valueHtmlEncoded = htmlEncode(value);
-            $('.search-string').html(valueHtmlEncoded.replace(/ /g, '&nbsp;'));
+            $('.search-string').html( htmlEncode(value).replace(/ /g, "&nbsp;") );
 
             // uncheck all status values
             $( ".search-status input:radio" ).prop('checked', false);
@@ -362,7 +362,10 @@ function topInformation(dir)
                 $('.btn-group button.folder-status').hide();
             }
 
-            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + data.basename.replace(/ /g, "&nbsp;"));
+            // data.basename.replace(/ /g, "&nbsp;")
+            folderName = htmlEncode(data.basename).replace(/ /g, "&nbsp;");
+
+            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName);
             $('.top-information').show();
         });
     }

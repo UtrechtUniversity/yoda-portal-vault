@@ -32,8 +32,11 @@ class Metadata extends MY_Controller
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
         $metadataCompleteness = 0; // mandatory completeness for the metadata
+        $mandatoryTotal = 0;
+        $mandatoryFilled = 0;
 
         $userType = $formConfig['userType'];
+
         $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
 
         if ($elements) {
@@ -46,16 +49,18 @@ class Metadata extends MY_Controller
             } else {
                 $form->setPermission('read');
             }
+
             // figure out the number of mandatory fields and how many actually hold data
             $form->calculateMandatoryCompleteness($elements);
 
             // calculate metadataCompleteness with
-            $total = $form->getCountMandatoryTotal();
-            if($total==0) {
+            $mandatoryTotal = $form->getCountMandatoryTotal();
+            $mandatoryFilled = $form->getCountMandatoryFilled();
+            if($mandatoryTotal==0) {
                 $metadataCompleteness = 100;
             }
             else {
-                $metadataCompleteness =  ceil(100 * $form->getCountMandatoryFilled() / $total);
+                $metadataCompleteness =  ceil(100 * $mandatoryFilled / $mandatoryTotal);
             }
 
             $metadataExists = false;
@@ -72,7 +77,6 @@ class Metadata extends MY_Controller
             $metadataExists = false;
             $cloneMetadata = false;
         }
-
         $realMetadataExists = $metadataExists; // keep it as this is the true state of metadata being present or not.
 
         // Check locks
@@ -82,19 +86,17 @@ class Metadata extends MY_Controller
             $metadataExists = false;
         }
 
-        $total = $form->getCountMandatoryTotal();
-        if ($total==0) {
-            $completeness = 100;
-        } else {
-            $completeness =  ceil(100 * $form->getCountMandatoryFilled() / $total);
-        }
 
-        // Submit To Vault btn
-        $submitToVaultBtn = false;
-        $lockStatus = $formConfig['lockFound'];
-        $folderStatus = $formConfig['folderStatus'];
-        if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'UNPROTECTED') && $form->getPermission() == 'write') {
-            $submitToVaultBtn = true;
+        // Corrupt metadata causes no $form to be created.
+        // The following code (before adding 'if ($form) ' crashes ($form->getPermission() ) the application http error 500
+        if ($form) {
+            // Submit To Vault btn
+            $submitToVaultBtn = false;
+            $lockStatus = $formConfig['lockFound'];
+            $folderStatus = $formConfig['folderStatus'];
+            if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'UNPROTECTED') && $form->getPermission() == 'write') {
+                $submitToVaultBtn = true;
+            }
         }
 
         $this->load->view('common-start', array(
@@ -126,18 +128,19 @@ class Metadata extends MY_Controller
         $this->data['userType'] = $userType;
         $this->data['metadataExists'] = $metadataExists;
         $this->data['cloneMetadata'] = $cloneMetadata;
-        $this->data['completeness'] = $completeness;
-        $this->data['total'] = $total;
+
+        $this->data['mandatoryTotal'] = $mandatoryTotal;
+        $this->data['mandatoryFilled'] = $mandatoryFilled;
+        $this->data['metadataCompleteness'] = $metadataCompleteness;
+
         $this->data['submitToVaultBtn'] = $submitToVaultBtn;
         $this->data['flashMessage'] = $flashMessage;
         $this->data['flashMessageType'] = $flashMessageType;
 
         $this->data['realMetadataExists'] = $realMetadataExists; // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
-        $this->data['metadataCompleteness'] = $metadataCompleteness;
 
         $this->load->view('metadata/form', $this->data);
         $this->load->view('common-end');
-
     }
 
     function store()

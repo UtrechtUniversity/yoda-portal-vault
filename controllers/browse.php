@@ -67,8 +67,8 @@ class Browse extends MY_Controller
             $searchOrderColumn = $this->session->userdata('research-search-order-column');
         }
 
-
         $this->data['searchTerm'] = $searchTerm;
+
         $this->data['searchStatusValue'] = $searchStatusValue;
         $this->data['searchType'] = $searchType;
         $this->data['searchStart'] = $searchStart;
@@ -203,6 +203,11 @@ class Browse extends MY_Controller
         } else {
             $this->session->set_userdata('research-search-term', $filter);
         }
+
+        // $filter is changed as iRods cannot handle '%' and '_' and \
+        $filter = str_replace(array('\\', '%', '_'),
+                            array('\\\\', '\\%','\\_'),
+                            $filter);
 
         // Search / filename
         if ($type == 'filename') {
