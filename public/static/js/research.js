@@ -107,9 +107,10 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             "pageLength": browsePageItems,
             "displayStart": displayStart,
             "drawCallback": function(settings) {
-                $( ".browse" ).on( "click", function() {
+                $( ".browse-search" ).on( "click", function() {
                     browse($(this).attr('data-path'));
                 });
+
 
                 $('.matches').tooltip();
             },
