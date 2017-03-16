@@ -1,9 +1,5 @@
 <?php
 
-    if(!($permissions[$this->config->item('role:contributor')] OR $permissions[$this->config->item('role:reader')])){
-        // insufficient rights
-        return false;
-    }
 
 ?>
 <div class="col-md-12">
@@ -40,11 +36,11 @@
                                         <button type="button" class="btn btn-default btn-rev-download"><i class="fa fa-download" aria-hidden="true"></i> Download</button>
 
 
-                                        <?php if($permissions[$this->config->item('role:contributor')]): ?>
+                                        <?php if(true): ?>
                                             <button type="button" class="btn btn-default btn-rev-actualise"><i class="fa fa-magic" aria-hidden="true"></i> Actualise</button>
                                         <?php endif; ?>
 
-                                        <?php if($permissions[$this->config->item('role:contributor')]): ?>
+                                        <?php if(true): ?>
                                             <button class="btn btn-default disabled btn-rev-delete" disabled>
                                                 <i class="fa fa-remove"></i> Delete
                                             </button>
