@@ -37,11 +37,10 @@ function datasetRowClickForDetails(obj, dtTable) {
 
     var tr = obj.closest('tr'),
         row = dtTable.row(tr),
-        objectId = 3, //@todo $('td:eq(1)', tr).text(),
+        studyId = tr.find("td:first").html(),
+        objectId = $('td:eq(1)', tr).text(),
         revisionObjectId = '',
         revisionStudyID = '';
-
-    console.log(objectId);
 
     if ( row.child.isShown() ) {
         // This row is already open - close it
@@ -52,7 +51,7 @@ function datasetRowClickForDetails(obj, dtTable) {
         // Open row for panel information
 
         $.ajax({
-            url: 'revision/detail/' + objectId,
+            url: 'revision/detail/' + studyId + '/' + objectId,
             type: 'GET',
             dataType: 'json',
             success: function(data) {
