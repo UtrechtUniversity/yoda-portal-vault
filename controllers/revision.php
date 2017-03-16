@@ -87,19 +87,12 @@ class Revision extends MY_Controller
         $searchArgument = 'blabla'; //@todo: to be added from front end later
         $result = $this->revisionmodel->search($rodsaccount, $searchArgument, $path, $orderColumns[$orderColumn], $orderDir, $length, $start);
 
-        //var_dump($result);exit;
-
         // records filtered is 0????
         // dit is als de search box van datatables zelf wordt gebruikt ... dat is nu niet het geval.
         $output = array('draw' => $draw, 'recordsTotal' => $result['summary']['total'], 'recordsFiltered' => 0, 'data' => array());
 
         if ($result['summary']['returned'] > 0) {
             foreach ($result['rows'] as $row) {
-                //$path = str_replace($pathStart, '', $row['path']);
-//                $output['data'][] = array(
-//                    '<span class="browse" data-path="'. $path .'">' . trim($row['basename'], '/') . '</span>',
-//                    date('Y-m-d H:i:s', $row['modify_time'])
-//                );
                 $output['data'][] = array(
                     $row['study'],
                     $row['object'],
