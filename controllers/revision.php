@@ -21,6 +21,7 @@ class Revision extends MY_Controller
 
         $this->load->library('module', array(__DIR__));
         $this->load->library('pathlibrary');
+
     }
 
     /**
@@ -45,10 +46,38 @@ class Revision extends MY_Controller
                 'username' => $this->rodsuser->getUsername(),
             ),
         ));
+
+        $this->data['items'] = $this->config->item('browser-items-per-page');
+        $this->data['dlgPageItems'] = 5;
+
+        $this->data['dir'] = $this->input->get('dir');
+
         $this->load->view('revision', $this->data);
         $this->load->view('common-end');
     }
 
+    public function restore($objectId)
+    {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+
+        $this->output->enable_profiler(FALSE);
+        $this->output->set_content_type('application/json');
+
+        $targetDir = $this->input->get('targetdir');
+
+        $path = $pathStart;
+        if (!empty($targetDir)) {
+            $path .= $targetDir;
+        }
+
+        $output = array(
+            'hasError' => FALSE,
+            'result' => TRUE
+        );
+
+        echo json_encode($output);
+    }
 
     public function data()
     {

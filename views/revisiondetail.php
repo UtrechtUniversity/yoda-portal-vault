@@ -1,7 +1,3 @@
-<?php
-
-
-?>
 <div class="col-md-12">
     <div class="row">
 <!--        <div class="panel panel-default">-->
@@ -17,7 +13,7 @@
                     </thead>
                     <tbody>
                         <?php foreach($revisionFiles as $file): ?>
-                            <tr data-object-id="<?php echo $file->revisionObjectId; ?>" data-study-id="<?php echo $file->revisionStudyId; ?>">
+                            <tr>
                                 <td>
                                     <?php echo $file->revisionName ?>
                                 </td>
@@ -37,7 +33,7 @@
 
 
                                         <?php if(true): ?>
-                                            <button type="button" class="btn btn-default btn-rev-actualise"><i class="fa fa-magic" aria-hidden="true"></i> Actualise</button>
+                                            <button type="button" class="btn btn-default btn-revision-select-dialog" data-objectid="<?php echo $file->revisionObjectId; ?>"><i class="fa fa-magic" aria-hidden="true"></i> RestoreFile</button>
                                         <?php endif; ?>
 
                                         <?php if(true): ?>
@@ -56,3 +52,14 @@
 <!--        </div>-->
 <!--    </div>-->
 </div>
+<script>
+    $( document ).ready(function() {
+
+        $('.btn-revision-select-dialog').on('click', function(){
+
+            window.parent.showFolderSelectDialog($(this).data('objectid'));
+        });
+
+    });
+
+</script>

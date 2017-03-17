@@ -1,3 +1,51 @@
+<script>
+    var browsePageItems = <?php echo $items; ?>;
+    var browseDlgPageItems = <?php echo $dlgPageItems; ?>;
+    var browseStartDir = '<?php echo urlencode($dir); ?>';
+</script>
+
+<div class="modal" id="select-folder">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Select folder</span>
+            </div>
+
+            <input type="hidden" id="restoration-objectid" value="">
+
+            <ol class="breadcrumb dlg-breadcrumb">
+                <li class="active">Home</li>
+            </ol>
+
+            <div class="modal-body">
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <table id="folder-browser" class="table yoda-table table-bordered">
+                                    <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Modified date</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn button btn-success" id="btn-restore"><i class="fa fa-magic" aria-hidden="true"></i> Restore your file</button>
+                <button class="btn button grey" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
 <div class="row">
     <div class="col-xs-12">
         <div class="input-group" style="margin-bottom:20px;">
@@ -20,6 +68,7 @@
         </div>
     </div>
 </div>
+
 
 <div class="row">
 
