@@ -33,7 +33,6 @@ class Revision extends MY_Controller
             'styleIncludes' => array(
                 'css/research.css',
                 'lib/datatables/css/dataTables.bootstrap.min.css',
-                //'lib/materialdesignicons/css/materialdesignicons.min.css'
                 'lib/font-awesome/css/font-awesome.css'
             ),
             'scriptIncludes' => array(
@@ -50,7 +49,7 @@ class Revision extends MY_Controller
         $this->data['items'] = $this->config->item('browser-items-per-page');
         $this->data['dlgPageItems'] = 5;
 
-        $this->data['dir'] = $this->input->get('dir');
+        $this->data['search'] = $this->input->get('search');
 
         $this->load->view('revision', $this->data);
         $this->load->view('common-end');

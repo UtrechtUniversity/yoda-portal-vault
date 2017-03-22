@@ -64,6 +64,14 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             displayStart = 0;
         }
 
+        // Find revision
+        if (type == 'revision') {
+            $('#search').hide();
+            $('.search-results').hide();
+            window.location.href = "revision?filter=" + encodeURIComponent(value);
+            return false;
+        }
+
         // Table columns definition
         var disableSorting = {};
         var columns = [];
