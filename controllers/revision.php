@@ -137,7 +137,6 @@ class Revision extends MY_Controller
 
         $htmlDetail =  $this->load->view('revisiondetail',
             array('revisionFiles' => $revisionFiles,
-                'objectId' => $objectId,
                 'permissions' => $this->permissions
             ),
             true);

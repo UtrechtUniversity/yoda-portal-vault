@@ -15,7 +15,7 @@ $( document ).ready(function() {
         "ajax": url,
         "processing": true,
         "serverSide": true,
-        "pageLength": 25,
+        "pageLength": revisionItemsPerPage,
         "drawCallback": function(settings) {
             mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
         }
@@ -110,7 +110,7 @@ function startBrowsing(path, items)
             "processing": true,
             "serverSide": true,
             "iDeferLoading": 0,
-            "pageLength": revisionItemsPerPage,
+            "pageLength": browseDlgPageItems,
             "drawCallback": function (settings) {
                 $(".browse").on("click", function () {
                     browse($(this).attr('data-path'));
