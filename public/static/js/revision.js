@@ -28,14 +28,18 @@ $( document ).ready(function() {
     });
 
     $('.btn-search').on('click', function(){
-        mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
-        mainTable.ajax.reload();
+        if ($(this).val().length > 0) {
+            mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
+            mainTable.ajax.reload();
+        }
     });
 
     $("#search-term").bind('keypress', function(e) {
-        if(e.keyCode==13) {
-            mainTable.ajax.url('revision/data?searchArgument=' + $(this).val());
-            mainTable.ajax.reload();
+        if (e.keyCode==13) {
+            if ($(this).val().length > 0) {
+                mainTable.ajax.url('revision/data?searchArgument=' + $(this).val());
+                mainTable.ajax.reload();
+            }
         }
     });
 
