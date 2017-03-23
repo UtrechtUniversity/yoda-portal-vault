@@ -9,7 +9,7 @@
                 <span class="modal-title">Select folder</span>
             </div>
 
-            <input type="hidden" id="restoration-objectid" value="">
+            <input type="text" id="restoration-objectid" value="">
 
             <ol class="breadcrumb dlg-breadcrumb">
                 <li class="active">Home</li>
@@ -20,6 +20,11 @@
                     <div class="row">
                         <div class="panel panel-default">
                             <div class="panel-body">
+
+                                <p class="alert-panel" style="color:red;">
+                                    <i class="fa fa-exclamation-triangle"></i> Something went wrong restoring the file!
+                                </p>
+
                                 <table id="folder-browser" class="table yoda-table table-bordered">
                                     <thead>
                                     <tr>

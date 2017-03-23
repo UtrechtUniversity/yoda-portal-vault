@@ -100,10 +100,16 @@ class Browse extends MY_Controller
         echo json_encode($output);
     }
 
-    /*
+    /**
+     * @param int $restrict
+     * @param string $excludeOnMetadataPresence
+     *
      * $restrict offers the possibilty to distinguish collecting folders and / or files
+     *
+     * $excludeOnMetadataPresence is a string holding keys of metadata that must NOT be present. If present in a row, this data is excluded from presentation
+     *
      */
-    public function data($restrict=0)
+    public function data( $restrict = 0, $excludeOnMetadataPresence = '')
     {
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
@@ -133,14 +139,28 @@ class Browse extends MY_Controller
         if($restrict=='collections' OR !$restrict) {
             $icon = 'fa-folder-o';
             $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+
+            //print_r($collections);exit;
+
             $totalItems += $collections['summary']['total'];
             if ($collections['summary']['returned'] > 0) {
                 foreach ($collections['rows'] as $row) {
-                    $filePath = str_replace($pathStart, '', $row['path']);
-                    $rows[] = array(
-                        '<span class="browse" data-path="' . urlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                        date('Y-m-d H:i:s', $row['modify_time'])
-                    );
+
+                    $toBeExcludedOnMetadata = explode(',', $excludeOnMetadataPresence);
+                    $allowed = true;
+                    foreach ($toBeExcludedOnMetadata as $md) {
+                        if (isset($row[$md])) {
+                            $allowed = false;
+                            break;
+                        }
+                    }
+                    if ($allowed) {
+                        $filePath = str_replace($pathStart, '', $row['path']);
+                        $rows[] = array(
+                            '<span class="browse" data-path="' . urlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                            date('Y-m-d H:i:s', $row['modify_time'])
+                        );
+                    }
                 }
             }
         }
@@ -151,11 +171,22 @@ class Browse extends MY_Controller
             $totalItems += $objects['summary']['total'];
             if ($objects['summary']['returned'] > 0) {
                 foreach ($objects['rows'] as $row) {
-                    $filePath = str_replace($pathStart, '', $row['path']);
-                    $rows[] = array(
-                        '<span data-path="' . urlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                        date('Y-m-d H:i:s', $row['modify_time'])
-                    );
+
+                    $toBeExcludedOnMetadata = explode(',', $excludeOnMetadataPresence);
+                    $allowed = true;
+                    foreach ($toBeExcludedOnMetadata as $md) {
+                        if (isset($row[$md])) {
+                            $allowed = false;
+                            break;
+                        }
+                    }
+                    if ($allowed) {
+                        $filePath = str_replace($pathStart, '', $row['path']);
+                        $rows[] = array(
+                            '<span data-path="' . urlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                            date('Y-m-d H:i:s', $row['modify_time'])
+                        );
+                    }
                 }
             }
         }

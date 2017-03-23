@@ -21,7 +21,6 @@ $( document ).ready(function() {
         }
     } );
 
-
     // Click on file browser -> open revision details
     $('#file-browser tbody').on('click', 'tr', function () {
         datasetRowClickForDetails($(this), mainTable);
@@ -50,16 +49,24 @@ $( document ).ready(function() {
 function restoreRevision()
 {
     var restorationObjectId = $('#restoration-objectid').val();
-    //alert('urlEncoded path: ' + urlEncodedPath);
 
     $.ajax({
         url: 'revision/restore/' + restorationObjectId + '?targetdir=' + urlEncodedPath,
         type: 'GET',
         dataType: 'json',
         success: function(data) {
-            if(!data.hasError){
-                alert(data.result);
+            if (!data.hasError) {
+
                 $('#select-folder').modal('hide');
+
+                alert('Restoration went: ' + data.result + ' - ' + data.hasError);
+
+                //window.location.href = window.location.href;
+            }
+            else {
+                alertPanelShow();
+
+                alert('Restoration went: ' + data.result + ' - ' + data.hasError);
             }
         },
     });
@@ -71,8 +78,25 @@ function showFolderSelectDialog(restorationObjectId, path)
 {
     $('#restoration-objectid').val(restorationObjectId);
 
+    alertPanelHide()
     startBrowsing(path, browseDlgPageItems);
     $('#select-folder').modal('show');
+}
+
+function alertPanelShow()
+{
+    var panel = $('.alert-panel')
+    if (panel.hasClass('hide')) {
+        panel.removeClass('hide');
+    }
+}
+
+function alertPanelHide()
+{
+    var panel = $('.alert-panel')
+    if (!panel.hasClass('hide')) {
+        panel.addClass('hide');
+    }
 }
 
 function startBrowsing(path, items)
@@ -150,13 +174,11 @@ function makeBreadcrumb(urlEncodedDir)
     $('ol.dlg-breadcrumb').html(html);
 }
 
-
 function htmlEncode(value){
     //create a in-memory div, set it's inner text(which jQuery automatically encodes)
     //then grab the encoded contents back out.  The div never exists on the page.
     return $('<div/>').text(value).html();
 }
-
 
 function changeBrowserUrl(path)
 {
@@ -165,7 +187,7 @@ function changeBrowserUrl(path)
 
 function buildFileBrowser(dir)
 {
-    var url = "browse/data/collections";
+    var url = "browse/data/collections/org_lock_protect";
     if (typeof dir != 'undefined') {
         url += "?dir=" +  dir;
     }
@@ -179,7 +201,6 @@ function buildFileBrowser(dir)
 
 
 // Functions for handling of the revision table
-
 function datasetRowClickForDetails(obj, dtTable) {
 
     var tr = obj.closest('tr');
@@ -211,5 +232,3 @@ function datasetRowClickForDetails(obj, dtTable) {
         });
     }
 }
-
-

@@ -54,7 +54,7 @@ class Revision extends MY_Controller
         $this->load->view('common-end');
     }
 
-    public function restore($objectId)
+    public function restore($revisionId)
     {
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
@@ -69,8 +69,10 @@ class Revision extends MY_Controller
             $path .= $targetDir;
         }
 
+        $result = $this->filesystem->restoreRevision($rodsaccount, $path, $revisionId);
+
         $output = array(
-            'hasError' => FALSE,
+            'hasError' => !$result,
             'result' => TRUE
         );
 
