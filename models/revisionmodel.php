@@ -8,7 +8,7 @@ class RevisionModel extends CI_Model {
         parent::__construct();
     }
 
-    static public function search($iRodsAccount, $searchArgument, $path, $orderBy, $orderSort, $limit, $offset = 0)
+    static public function searchByString($iRodsAccount, $searchstring, $orderBy, $orderSort, $limit, $offset = 0)
     {
         $output = array();
 
@@ -16,61 +16,76 @@ class RevisionModel extends CI_Model {
 myRule {
     *l = int(*limit);
     *o = int(*offset);
-    iiBrowse(*path, *orderby, *ascdesc, *l, *o, *result);
+
+    uuRevisionSearchByOriginalPath(*searchstring, *orderby, *ascdesc, *l, *o, *result);
 }
 RULE;
         try {
-            if (true) { // return faked rows and meta information
-                $rows = array();
-
-                $totalRows = 95;
-                for ($i = $offset; ($i < $totalRows AND ($i - $offset < $limit)); $i++) {
-                    $rows[] = array('study' => 'test',
-                        'object' => 'object' . $i,
-                        'name' => 'name-' . $i,
-                        'date' => 'date-' . $i,
-                        'path' => 'path-' . $i,
-                    );
-                }
-
-                $output = array('summary' => array(
-                    'total' => $totalRows,
-                    'returned' => sizeof($rows)
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*searchstring" => $searchstring,
+                    "*orderby" => $orderBy,
+                    "*ascdesc" => $orderSort,
+                    "*limit" => $limit,
+                    "*offset" => $offset
                 ),
-                    'rows' => $rows);
-                return $output;
-            } else {
-                $rule = new ProdsRule(
-                    $iRodsAccount,
-                    $ruleBody,
-                    array(
-                        "*path" => $path,
-                        "*orderby" => $orderBy,
-                        "*ascdesc" => $orderSort,
-                        "*limit" => $limit,
-                        "*offset" => $offset
-                    ),
-                    array("*result")
-                );
+                array("*result")
+            );
 
-                $ruleResult = $rule->execute();
-                $results = json_decode($ruleResult['*result'], true);
-                $summary = $results[0];
-                unset($results[0]);
-                $rows = $results;
-                $output = array(
-                    'summary' => $summary,
-                    'rows' => $rows
-                );
-            }
+            $ruleResult = $rule->execute();
+            $results = json_decode($ruleResult['*result'], true);
+
+            $summary = $results[0];
+            unset($results[0]);
+
+            $rows = $results;
+            $output = array(
+                'summary' => $summary,
+                'rows' => $rows
+            );
+
             return $output;
-        } catch (RODSException $e) {
+
+        } catch(RODSException $e) {
             print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
             exit;
+
             echo $e->showStacktrace();
             return array();
         }
+
         return array();
+    }
+
+    static public function listByPath($iRodsAccount, $path)
+    {
+        $ruleBody = <<<'RULE'
+myRule {
+    uuRevisionList(*path, *result);
+}
+
+
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path
+                ),
+                array("*result")
+            );
+
+            $ruleResult = $rule->execute();
+            $results = json_decode($ruleResult['*result'], true);
+
+            return $results;
+
+        } catch(RODSException $e) {
+            return false;
+        }
     }
 }
 
