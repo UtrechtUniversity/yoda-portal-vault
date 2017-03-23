@@ -22,6 +22,11 @@
                     <div class="row">
                         <div class="panel panel-default">
                             <div class="panel-body">
+
+                                <p class="alert-panel" style="color:red;">
+                                    <i class="fa fa-exclamation-triangle"></i> Something went wrong restoring the file!
+                                </p>
+
                                 <table id="folder-browser" class="table yoda-table table-bordered">
                                     <thead>
                                     <tr>

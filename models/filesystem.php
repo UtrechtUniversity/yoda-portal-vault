@@ -609,5 +609,31 @@ RULE;
             return false;
         }
     }
+
+    static public function restoreRevision($iRodsAccount, $path, $revisionId) {
+
+        $ruleBody = <<<'RULE'
+myRule {
+        uuRevisionRestore(*revision_id, *overwrite);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*revision_id" => 10497,
+                    "*overwrite" => '0'
+                ),
+                array()
+            );
+
+            $ruleResult = $rule->execute();
+            return true;
+
+        } catch(RODSException $e) {
+            return false;
+        }
+    }
 }
 

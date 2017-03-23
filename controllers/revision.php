@@ -56,7 +56,7 @@ class Revision extends MY_Controller
         $this->load->view('common-end');
     }
 
-    public function restore($objectId)
+    public function restore($revisionId)
     {
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
@@ -71,8 +71,10 @@ class Revision extends MY_Controller
             $path .= $targetDir;
         }
 
+        $result = $this->filesystem->restoreRevision($rodsaccount, $path, $revisionId);
+
         $output = array(
-            'hasError' => FALSE,
+            'hasError' => !$result,
             'result' => TRUE
         );
 
@@ -166,7 +168,7 @@ class Revision extends MY_Controller
                 'revisionName' => $fakeFiles[$objectId],
                 'revisionDate' => '28/11/2016 08:32:12',
                 'revisionSize' => '22k',
-                'revisionPath' => '//grp-test/Project-test'
+                'revisionPath' => '/nluu1dev/home/research-revisiontest'
             ),
             (object)array(
                 'revisionStudyId' => 'test',
@@ -174,9 +176,8 @@ class Revision extends MY_Controller
                 'revisionName' => $fakeFiles[$objectId],
                 'revisionDate' => '27/11/2016 08:15:44',
                 'revisionSize' => '20k',
-                'revisionPath' => '//grp-test/Project-test'),
+                'revisionPath' => '/nluu1dev/home/research-revisiontest'),
         );
-
 
         $htmlDetail =  $this->load->view('revisiondetail',
             array('revisionFiles' => $revisionFiles,
@@ -194,82 +195,4 @@ class Revision extends MY_Controller
 
     }
 
-    /**
-     * @param $studyId
-     * @param $objectId
-     *
-     * objectId should match study
-     *
-     * permissions are arranged on study level
-     *
-     * If permitted actualize this file
-     */
-    public function actualise($studyId, $objectId)
-    {
-        $this->output->enable_profiler(FALSE);
-        $this->output->set_content_type('application/json');
-
-        $this->permissions = $this->study->getIntakeStudyPermissions($studyId);
-
-        // validation
-
-        // actual functionality
-
-        $response = array('hasError' => true
-        );
-        echo json_encode($response);
-    }
-
-    /**
-     * @param $studyId
-     * @param $objectId
-     *
-     * objectId should match study
-     *
-     * permissions are arranged on study level
-     *
-     * If permitted download this file
-     */
-    public function download($studyId, $objectid)
-    {
-        $this->output->enable_profiler(FALSE);
-        $this->output->set_content_type('application/json');
-
-        $this->permissions = $this->study->getIntakeStudyPermissions($studyId);
-
-        // validation
-
-        // actual functionality
-
-        $response = array('hasError' => true
-        );
-        echo json_encode($response);
-    }
-
-    /**
-     * @param $studyId
-     * @param $objectId
-     *
-     * objectId should match study
-     *
-     * permissions are arranged on study level
-     *
-     *
-     * If permitted delete this file
-     */
-    public function delete($studyId, $objectid)
-    {
-        $this->output->enable_profiler(FALSE);
-        $this->output->set_content_type('application/json');
-
-        $this->permissions = $this->study->getIntakeStudyPermissions($studyId);
-
-        // validation
-
-        // actual functionality
-
-        $response = array('hasError' => true
-        );
-        echo json_encode($response);
-    }
 }

@@ -33,7 +33,7 @@
 
 
                                         <?php if(true): ?>
-                                            <button type="button" class="btn btn-default btn-revision-select-dialog" data-objectid="<?php echo $file->revisionObjectId; ?>"><i class="fa fa-magic" aria-hidden="true"></i> RestoreFile</button>
+                                            <button type="button" class="btn btn-default btn-revision-select-dialog" data-objectid="10506"><i class="fa fa-magic" aria-hidden="true"></i> RestoreFile</button>
                                         <?php endif; ?>
 
                                         <?php if(true): ?>
