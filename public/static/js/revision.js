@@ -1,16 +1,22 @@
 var urlEncodedPath = '',
     folderBrowser = null;
 
-
 $( document ).ready(function() {
+    var url = "revision/data";
+    if ($('#search-term').val().length > 0) {
+        searchArgument = $('#search-term').val();
+        url += '?searchArgument=' + encodeURIComponent($('#search-term').val());
+    }
+
+    console.log(url);
     var mainTable = $('#file-browser').DataTable( {
         "bFilter": false,
-        "bInfo": true,
-        "bLengthChange": true,
-        "ajax": "revision/data",
+        "bInfo": false,
+        "bLengthChange": false,
+        "ajax": url,
         "processing": true,
         "serverSide": true,
-        "iDisplayLength": 10,
+        "pageLength": 25,
         "drawCallback": function(settings) {
             mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
         }
@@ -56,11 +62,11 @@ function restoreRevision()
 
 // functions for handling of folder selection - easy point of entry for select-folder functionality from the panels within dataTables
 // objectid is the Id of the revision that has to be restored
-function showFolderSelectDialog(restorationObjectId)
+function showFolderSelectDialog(restorationObjectId, path)
 {
     $('#restoration-objectid').val(restorationObjectId);
 
-    startBrowsing(browseStartDir, browseDlgPageItems);
+    startBrowsing(path, browseDlgPageItems);
     $('#select-folder').modal('show');
 }
 
@@ -75,7 +81,7 @@ function startBrowsing(path, items)
             "processing": true,
             "serverSide": true,
             "iDeferLoading": 0,
-            "pageLength": 5,
+            "pageLength": revisionItemsPerPage,
             "drawCallback": function (settings) {
                 $(".browse").on("click", function () {
                     browse($(this).attr('data-path'));
@@ -171,11 +177,9 @@ function buildFileBrowser(dir)
 
 function datasetRowClickForDetails(obj, dtTable) {
 
-    var tr = obj.closest('tr'),
-        row = dtTable.row(tr),
-        objectId = $('td:eq(1)', tr).text(),
-        revisionObjectId = '',
-        revisionStudyID = '';
+    var tr = obj.closest('tr');
+    var row = dtTable.row(tr);
+    var path = $('td:eq(0) span', tr).attr('data-path');
 
     if ( row.child.isShown() ) {
         // This row is already open - close it
@@ -186,7 +190,7 @@ function datasetRowClickForDetails(obj, dtTable) {
         // Open row for panel information
 
         $.ajax({
-            url: 'revision/detail/' + objectId,
+            url: 'revision/detail?path=' + path,
             type: 'GET',
             dataType: 'json',
             success: function(data) {

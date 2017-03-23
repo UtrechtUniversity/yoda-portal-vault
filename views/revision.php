@@ -1,9 +1,7 @@
 <script>
-    var browsePageItems = <?php echo $items; ?>;
+    var revisionItemsPerPage = <?php echo $items; ?>;
     var browseDlgPageItems = <?php echo $dlgPageItems; ?>;
-    var browseStartDir = '<?php echo urlencode($dir); ?>';
 </script>
-
 <div class="modal" id="select-folder">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -47,39 +45,16 @@
 
 
 <div class="row">
-    <div class="col-xs-12">
-        <div class="input-group" style="margin-bottom:20px;">
-            <div class="input-group-btn search-panel">
-<!--                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">-->
-<!--                    <span id="search_concept">Filter by name</span> <span class="caret"></span>-->
-<!--                </button>-->
-<!--                <ul class="dropdown-menu" role="menu">-->
-<!--                    <li><a href="#contains">Filter by Name</a></li>-->
-<!--                    <li><a href="#its_equal">Filter by Metadata</a></li>-->
-<!--                    <li><a href="#its_equal">Filter by Status</a></li>-->
-<!--                    <li><a href="#its_equal">Find revision for name</a></li>-->
-<!--                </ul>-->
-            </div>
-            <input type="hidden" name="search_param" value="all" id="search_param">
-            <input type="text" class="form-control" name="searchArgument" placeholder="Search term...">
-            <span class="input-group-btn">
-                        <button class="btn btn-default btn-search" type="button"><span class="glyphicon glyphicon-search"></span></button>
-                    </span>
-        </div>
+    <div class="input-group" style="margin-bottom:20px;">
+        <input type="text" class="form-control" id="search-term" name="searchArgument" placeholder="Search term..." value="<?php echo htmlentities($filter); ?>">
+        <span class="input-group-btn">
+            <button class="btn btn-default btn-search" type="button"><span class="glyphicon glyphicon-search"></span></button>
+        </span>
     </div>
 </div>
 
 
 <div class="row">
-
-    <ol class="breadcrumb">
-        <li>Home</li>
-        <li>gpr-test</li>
-        <li><strong>Project-test</strong></li>
-    </ol>
-    <h1><i class="fa fa-folder-o" aria-hidden="true"></i>Project-test</h1>
-
-
     <div class="col-md-12">
         <div class="row">
         <div class="panel panel-default">
@@ -87,11 +62,8 @@
                 <table id="file-browser" class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>studyID</th>
-                            <th>objectID</th>
                             <th>Name</th>
-                            <th>Revision date</th>
-                            <th>Path</th>
+                            <th>Number of revisions</th>
                         </tr>
                     </thead>
                 </table>
