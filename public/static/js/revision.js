@@ -32,6 +32,13 @@ $( document ).ready(function() {
         mainTable.ajax.reload();
     });
 
+    $("#search-term").bind('keypress', function(e) {
+        if(e.keyCode==13) {
+            mainTable.ajax.url('revision/data?searchArgument=' + $(this).val());
+            mainTable.ajax.reload();
+        }
+    });
+
 
     // Button to actually restore the file
     $('#btn-restore').on('click', function(){
