@@ -100,7 +100,10 @@ class Browse extends MY_Controller
         echo json_encode($output);
     }
 
-    public function data()
+    /*
+     * $restrict offers the possibilty to distinguish collecting folders and / or files
+     */
+    public function data($restrict=0)
     {
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
@@ -127,29 +130,33 @@ class Browse extends MY_Controller
 
 
         // Collections
-        $icon = 'fa-folder-o';
-        $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
-        $totalItems += $collections['summary']['total'];
-        if ($collections['summary']['returned'] > 0) {
-            foreach ($collections['rows'] as $row) {
-                $filePath = str_replace($pathStart, '', $row['path']);
-                $rows[] = array(
-                    '<span class="browse" data-path="'. urlencode($filePath) .'"><i class="fa ' . $icon .'" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities( trim( $row['basename'], '/'))) . '</span>',
-                    date('Y-m-d H:i:s', $row['modify_time'])
-                );
+        if($restrict=='collections' OR !$restrict) {
+            $icon = 'fa-folder-o';
+            $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+            $totalItems += $collections['summary']['total'];
+            if ($collections['summary']['returned'] > 0) {
+                foreach ($collections['rows'] as $row) {
+                    $filePath = str_replace($pathStart, '', $row['path']);
+                    $rows[] = array(
+                        '<span class="browse" data-path="' . urlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                        date('Y-m-d H:i:s', $row['modify_time'])
+                    );
+                }
             }
         }
 
         // Objects
-        $objects = $this->filesystem->browse($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
-        $totalItems += $objects['summary']['total'];
-        if ($objects['summary']['returned'] > 0) {
-            foreach ($objects['rows'] as $row) {
-                $filePath = str_replace($pathStart, '', $row['path']);
-                $rows[] = array(
-                    '<span data-path="'. urlencode($filePath) .'"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities( trim( $row['basename'], '/'))) . '</span>',
-                    date('Y-m-d H:i:s', $row['modify_time'])
-                );
+        if($restrict=='objects' OR !$restrict) {
+            $objects = $this->filesystem->browse($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
+            $totalItems += $objects['summary']['total'];
+            if ($objects['summary']['returned'] > 0) {
+                foreach ($objects['rows'] as $row) {
+                    $filePath = str_replace($pathStart, '', $row['path']);
+                    $rows[] = array(
+                        '<span data-path="' . urlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                        date('Y-m-d H:i:s', $row['modify_time'])
+                    );
+                }
             }
         }
 

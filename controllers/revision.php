@@ -17,47 +17,10 @@ class Revision extends MY_Controller
 
         $this->load->model('filesystem'); //@todo: komt te vervallen!!
         $this->load->model('rodsuser');
-        $this->load->model('dataset');
         $this->load->model('revisionmodel');
 
         $this->load->library('module', array(__DIR__));
         $this->load->library('pathlibrary');
-
-        $this->studies = $this->dataset->getStudies($this->rodsuser->getRodsAccount());
-        sort($this->studies);
-
-        // Handle permissions of this user
-        //  [0]=> string(3) "jjj"
-        // [1]=> string(4) "piet"
-        // [2]=> string(12) "project-test"
-        // [3]=> string(3) "roy"
-        // [4]=> string(6) "study2"
-        // [5]=> string(4) "test"
-        // [6]=> string(12) "vault-study2"
-        // [7]=> string(10) "vault-test"
-        $studyID = 'test';
-        $this->load->model('study');
-
-        /*
-        //$this->load->model('dataset');
-        $this->load->model('filesystem');
-        $this->load->model('rodsuser');
-        //$this->load->model('metadatamodel');
-        //$this->load->model('metadataschemareader');
-        $this->load->helper('date');
-        $this->load->helper('language');
-        //$this->load->helper('intake');
-        $this->load->helper('form');
-        $this->load->language('intake');
-        $this->load->language('errors');
-        $this->load->language('form_errors');
-        $this->load->library('module', array(__DIR__));
-        $this->load->library('metadatafields');
-        $this->load->library('pathlibrary');
-        $this->load->library('SSP');
-        $this->studies = $this->dataset->getStudies($this->rodsuser->getRodsAccount());
-        sort($this->studies);
-        */
     }
 
     /**
@@ -69,7 +32,6 @@ class Revision extends MY_Controller
             'styleIncludes' => array(
                 'css/research.css',
                 'lib/datatables/css/dataTables.bootstrap.min.css',
-                //'lib/materialdesignicons/css/materialdesignicons.min.css'
                 'lib/font-awesome/css/font-awesome.css'
             ),
             'scriptIncludes' => array(
@@ -82,116 +44,76 @@ class Revision extends MY_Controller
                 'username' => $this->rodsuser->getUsername(),
             ),
         ));
+
+        $this->data['items'] = $this->config->item('revision-items-per-page');
+        $this->data['dlgPageItems'] = $this->config->item('revision-dialog-items-per-page');
+
+        $this->data['filter'] = $this->input->get('filter');
+
         $this->load->view('revision', $this->data);
         $this->load->view('common-end');
     }
 
-
-    /**
-     * gathering data for the main page - Actual files
-     */
-    public function data_org()
+    public function restore($objectId)
     {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+
         $this->output->enable_profiler(FALSE);
         $this->output->set_content_type('application/json');
 
-        $output = array('draw' => $this->input->get('draw'), 'recordsTotal' => 4, 'recordsFiltered' => 0, 'data' => array());
-        $output['data'][] = array(
-            'test',
-            '1',
-            '<i class="fa fa-file-word-o" aria-hidden="true"></i> Start versie met plaatjes.docx',
-            '2016-11-28 16:43:21',
-            'grp-test/Project-test'
-        );
-        $output['data'][] = array(
-            'test',
-            '2',
-            '<i class="fa fa-file-powerpoint-o" aria-hidden="true"></i> Analysed social data.pptx',
-            '2016-11-28 11:23:22',
-            'grp-test/Project-test'
-        );
-        $output['data'][] = array(
-            //'<i class="fa fa-lock" aria-hidden="true"></i> Datapackage 1',
-            'test',
-            '3',
-            '<i class="fa fa-file-pdf-o" aria-hidden="true"></i> YoDa is fun.pdf',
-            '2016-11-28 14:03:22',
-            'grp-test/Project-test'
-        );
-        $output['data'][] = array(
-            //'<i class="fa fa-lock" aria-hidden="true"></i> Datapackage 1',
-            'test',
-            '4',
-            '<i class="fa fa-file-excel-o" aria-hidden="true"></i> iLab.xls',
-            '2016-11-28 14:03:22',
-            'grp-test/Project-test/SUBFOLDER'
+        $targetDir = $this->input->get('targetdir');
+
+        $path = $pathStart;
+        if (!empty($targetDir)) {
+            $path .= $targetDir;
+        }
+
+        $output = array(
+            'hasError' => FALSE,
+            'result' => TRUE
         );
 
         echo json_encode($output);
-
     }
 
     public function data()
     {
-        $this->output->enable_profiler(FALSE);
-        $this->output->set_content_type('application/json');
-
         $rodsaccount = $this->rodsuser->getRodsAccount();
-
-        //$pathStart = $this->pathlibrary->getPathStart($this->config);
-
-        $searchArgument = $this->input->get('searchArgument'); // nodig???
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
 
         $start = $this->input->get('start');
         $length = $this->input->get('length');
         $order = $this->input->get('order');
         $orderDir = $order[0]['dir'];
         $orderColumn = $order[0]['column'];
+        $draw = $this->input->get('draw');
 
         $orderColumns = array( // ordering columns on the corresponding iRods column names
-            0 => 'COLL_NAME',
-            1 => 'COLL_MODIFY_TIME',
-            2 => 'Tobedone',
-            3 => 'Tobedone',
-            4 => 'Tobedone',
+            0 => 'COLL_NAME'
         );
 
-        $draw = $this->input->get('draw'); // wat is dit?? har
+        $searchArgument = $this->input->get('searchArgument');
+        // $searchArgument is changed as iRods cannot handle '%' and '_' and \
+        $searchArgument = str_replace(array('\\', '%', '_'),
+            array('\\\\', '\\%','\\_'),
+            $searchArgument);
 
-        $path = 'blablabla'; //$pathStart;  moet worden gerelateerd aan de revisie-zone
+        $rows = array();
+        $result = $this->revisionmodel->searchByString($rodsaccount, $searchArgument, $orderColumns[$orderColumn], $orderDir, $length, $start);
+        $totalItems = $result['summary']['total'];
 
-//        if (!empty($dirPath)) {
-//            $path .= $dirPath;
-//        }
-
-
-        $searchArgument = 'blabla'; //@todo: to be added from front end later
-        $result = $this->revisionmodel->search($rodsaccount, $searchArgument, $path, $orderColumns[$orderColumn], $orderDir, $length, $start);
-
-        //var_dump($result);exit;
-
-        // records filtered is 0????
-        // dit is als de search box van datatables zelf wordt gebruikt ... dat is nu niet het geval.
-        $output = array('draw' => $draw, 'recordsTotal' => $result['summary']['total'], 'recordsFiltered' => 0, 'data' => array());
-
-        if ($result['summary']['returned'] > 0) {
+        if (isset($result['summary']) && $result['summary']['returned'] > 0) {
             foreach ($result['rows'] as $row) {
-                //$path = str_replace($pathStart, '', $row['path']);
-//                $output['data'][] = array(
-//                    '<span class="browse" data-path="'. $path .'">' . trim($row['basename'], '/') . '</span>',
-//                    date('Y-m-d H:i:s', $row['modify_time'])
-//                );
-                $output['data'][] = array(
-                    $row['study'],
-                    $row['object'],
-                    $row['name'],
-                    $row['date'],
-                    $row['path'],
+                $filePath = str_replace($pathStart, '', $row['originalPath']);
+                $rows[] = array(
+                    '<span data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>',
+                    $row['numberOfRevisions']
                 );
             }
         }
-        $output['recordsTotal'] = 95;
-        $output['recordsFiltered'] = 95;
+
+        $output = array('draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
 
         echo json_encode($output);
     }
@@ -202,46 +124,14 @@ class Revision extends MY_Controller
      *
      * Present the revisions of the specific objectId if permitted
      */
-    public function detail($studyId, $objectId)
+    public function detail()
     {
-        $this->output->enable_profiler(FALSE);
-        $this->output->set_content_type('application/json');
+        $path = $this->input->get('path');
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $fullPath = $pathStart . $path;
 
-        $this->permissions = $this->study->getIntakeStudyPermissions($studyId);
-
-        if(!($this->permissions[$this->config->item('role:contributor')] OR $this->permissions[$this->config->item('role:reader')])){
-            // insufficient rights
-            exit;
-        }
-
-        // @todo: Validate whether objectId belongs to study
-
-
-        // @todo: get the revisions via rule
-        $fakeFiles = array(
-            1 => 'Start versie met plaatjes.docx',
-            2 => 'Analysed social data.pptx',
-            3 => 'YoDa is fun.pdf',
-            4 => 'iLab.xls'
-        );
-
-        $revisionFiles = array(
-            (object)array(
-                'revisionStudyId' => 'test',
-                'revisionObjectId'     => $objectId . '-1',
-                'revisionName' => $fakeFiles[$objectId],
-                'revisionDate' => '28/11/2016 08:32:12',
-                'revisionSize' => '22k',
-                'revisionPath' => '//grp-test/Project-test'
-            ),
-            (object)array(
-                'revisionStudyId' => 'test',
-                'revisionObjectId'     => $objectId . '-2',
-                'revisionName' => $fakeFiles[$objectId],
-                'revisionDate' => '27/11/2016 08:15:44',
-                'revisionSize' => '20k',
-                'revisionPath' => '//grp-test/Project-test'),
-        );
+        $revisionFiles = $this->revisionmodel->listByPath($rodsaccount, $fullPath);
 
         $htmlDetail =  $this->load->view('revisiondetail',
             array('revisionFiles' => $revisionFiles,
@@ -256,84 +146,5 @@ class Revision extends MY_Controller
                 'output' => $htmlDetail
             )
         );
-    }
-
-    /**
-     * @param $studyId
-     * @param $objectId
-     *
-     * objectId should match study
-     *
-     * permissions are arranged on study level
-     *
-     * If permitted actualize this file
-     */
-    public function actualise($studyId, $objectId)
-    {
-        $this->output->enable_profiler(FALSE);
-        $this->output->set_content_type('application/json');
-
-        $this->permissions = $this->study->getIntakeStudyPermissions($studyId);
-
-        // validation
-
-        // actual functionality
-
-        $response = array('hasError' => true
-        );
-        echo json_encode($response);
-    }
-
-    /**
-     * @param $studyId
-     * @param $objectId
-     *
-     * objectId should match study
-     *
-     * permissions are arranged on study level
-     *
-     * If permitted download this file
-     */
-    public function download($studyId, $objectid)
-    {
-        $this->output->enable_profiler(FALSE);
-        $this->output->set_content_type('application/json');
-
-        $this->permissions = $this->study->getIntakeStudyPermissions($studyId);
-
-        // validation
-
-        // actual functionality
-
-        $response = array('hasError' => true
-        );
-        echo json_encode($response);
-    }
-
-    /**
-     * @param $studyId
-     * @param $objectId
-     *
-     * objectId should match study
-     *
-     * permissions are arranged on study level
-     *
-     *
-     * If permitted delete this file
-     */
-    public function delete($studyId, $objectid)
-    {
-        $this->output->enable_profiler(FALSE);
-        $this->output->set_content_type('application/json');
-
-        $this->permissions = $this->study->getIntakeStudyPermissions($studyId);
-
-        // validation
-
-        // actual functionality
-
-        $response = array('hasError' => true
-        );
-        echo json_encode($response);
     }
 }

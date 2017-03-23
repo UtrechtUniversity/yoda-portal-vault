@@ -1,11 +1,3 @@
-<?php
-
-    if(!($permissions[$this->config->item('role:contributor')] OR $permissions[$this->config->item('role:reader')])){
-        // insufficient rights
-        return false;
-    }
-
-?>
 <div class="col-md-12">
     <div class="row">
 <!--        <div class="panel panel-default">-->
@@ -13,42 +5,26 @@
                 <table id="" class="table" >
                     <thead>
                     <tr>
-                        <th>Revisions</th>
                         <th>Revision date</th>
-                        <th>File size</th>
-                        <th>Path</th>
+                        <th>Owner</th>
+                        <th>Size</th>
                     </tr>
                     </thead>
                     <tbody>
-                        <?php foreach($revisionFiles as $file): ?>
-                            <tr data-object-id="<?php echo $file->revisionObjectId; ?>" data-study-id="<?php echo $file->revisionStudyId; ?>">
+                        <?php foreach($revisionFiles as $row): ?>
+                            <tr>
                                 <td>
-                                    <?php echo $file->revisionName ?>
+                                    <?php echo date('Y-m-d H:i:s', $row['org_original_modify_time']); ?>
                                 </td>
                                 <td>
-                                    <?php echo $file->revisionDate ?>
+                                    <?php echo $row['org_original_data_owner_name']; ?>
                                 </td>
                                 <td>
-                                    <?php echo $file->revisionSize ?>
-                                </td>
-                                <td>
-                                    <?php echo $file->revisionPath ?>
+                                    <?php echo $row['filesize'] ?> bytes
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group" aria-label="...">
-                                        <?php // all that can get here are allowed .. no specific ?>
-                                        <button type="button" class="btn btn-default btn-rev-download"><i class="fa fa-download" aria-hidden="true"></i> Download</button>
-
-
-                                        <?php if($permissions[$this->config->item('role:contributor')]): ?>
-                                            <button type="button" class="btn btn-default btn-rev-actualise"><i class="fa fa-magic" aria-hidden="true"></i> Actualise</button>
-                                        <?php endif; ?>
-
-                                        <?php if($permissions[$this->config->item('role:contributor')]): ?>
-                                            <button class="btn btn-default disabled btn-rev-delete" disabled>
-                                                <i class="fa fa-remove"></i> Delete
-                                            </button>
-                                        <?php endif; ?>
+                                        <button type="button" class="btn btn-default btn-revision-select-dialog" data-objectid="<?php echo $row['id']; ?>" data-path=""><i class="fa fa-magic" aria-hidden="true"></i> Restore</button>
                                     </div>
                                 </td>
                             </tr>
@@ -60,3 +36,16 @@
 <!--        </div>-->
 <!--    </div>-->
 </div>
+<script>
+    $( document ).ready(function() {
+
+        $('.btn-revision-select-dialog').on('click', function(){
+            var id = $(this).data('objectid');
+            var path = $(this).data('path');
+
+            window.parent.showFolderSelectDialog(id, path);
+        });
+
+    });
+
+</script>
