@@ -75,7 +75,7 @@ class Revision extends MY_Controller
         $reasonError = '';
 
         if ($result != "Success") {
-            $hasError = true;
+                        $hasError = true;
             $reasonError = $result;
         }
 

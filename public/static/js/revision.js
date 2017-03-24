@@ -59,6 +59,9 @@ function restoreRevision()
             if (!data.hasError) {
                 $('#select-folder').modal('hide');
                 alertMainPanelShow();
+
+                //console.log(urlEncodedPath);
+                window.location.href = '/research/?dir=' + urlEncodedPath;
             }
             else {
                 alertPanelShow();
