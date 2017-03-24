@@ -17,7 +17,7 @@ $( document ).ready(function() {
         "serverSide": true,
         "pageLength": revisionItemsPerPage,
         "drawCallback": function(settings) {
-            mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
+            mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($('#search-term').val()));
         }
     } );
 
@@ -27,17 +27,16 @@ $( document ).ready(function() {
     });
 
     $('.btn-search').on('click', function(){
-        mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
+        mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($('#search-term').val()));
         mainTable.ajax.reload();
     });
 
     $("#search-term").bind('keypress', function(e) {
         if(e.keyCode==13) {
-            mainTable.ajax.url('revision/data?searchArgument=' + $(this).val());
+            mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($(this).val()));
             mainTable.ajax.reload();
         }
     });
-
 
     // Button to actually restore the file
     $('#btn-restore').on('click', function(){
