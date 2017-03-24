@@ -92,7 +92,7 @@ class Revision extends MY_Controller
         $draw = $this->input->get('draw');
 
         $orderColumns = array( // ordering columns on the corresponding iRods column names
-            0 => 'COLL_NAME'
+            0 => 'META_DATA_ATTR_VALUE'
         );
 
         $searchArgument = $this->input->get('searchArgument');

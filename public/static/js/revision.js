@@ -16,6 +16,11 @@ $( document ).ready(function() {
         "processing": true,
         "serverSide": true,
         "pageLength": revisionItemsPerPage,
+        "ordering": false,
+        "columns": [
+            { "width": "70%" },
+            { "width": "30%" }
+        ],
         "drawCallback": function(settings) {
             mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
         }
@@ -232,7 +237,7 @@ function datasetRowClickForDetails(obj, dtTable) {
                     tr.addClass('shown');
 
                 }
-            },
+            }
         });
     }
 }
