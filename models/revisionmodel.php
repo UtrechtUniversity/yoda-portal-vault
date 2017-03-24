@@ -87,5 +87,38 @@ RULE;
             return false;
         }
     }
+
+    static public function restoreRevision($iRodsAccount, $path, $revisionId) {
+//
+//        echo $path;
+//
+//        echo $revisionId;
+
+        $ruleBody = <<<'RULE'
+myRule {
+        uuRevisionRestore(*revisionId, *target, *overwrite, *status);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*revisionId" => $revisionId,
+                    "*target" => $path,
+                    "*overwrite" => "yes"
+                ),
+                array("*status")
+            );
+
+            $ruleResult = $rule->execute();
+
+            return $ruleResult['*status'];
+            //return true;
+
+        } catch(RODSException $e) {
+            return false;
+        }
+    }
 }
 

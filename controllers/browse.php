@@ -134,24 +134,32 @@ class Browse extends MY_Controller
         }
         $rows = array();
 
+        $toBeExcludedOnMetadata = explode(',', $excludeOnMetadataPresence);
 
         // Collections
-        if($restrict=='collections' OR !$restrict) {
+        if ($restrict=='collections' OR !$restrict) {
             $icon = 'fa-folder-o';
             $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
-
-            //print_r($collections);exit;
 
             $totalItems += $collections['summary']['total'];
             if ($collections['summary']['returned'] > 0) {
                 foreach ($collections['rows'] as $row) {
 
-                    $toBeExcludedOnMetadata = explode(',', $excludeOnMetadataPresence);
                     $allowed = true;
                     foreach ($toBeExcludedOnMetadata as $md) {
-                        if (isset($row[$md])) {
-                            $allowed = false;
-                            break;
+                        if ($md == 'org_lock_protect') { // special case for locking
+                            if (isset($row['org_lock_protect'])) {
+                                if($row['org_lock_protect'] <= $row['path']) {
+                                    $allowed = false;
+                                    break;
+                                }
+                            }
+                        }
+                        else {
+                            if (isset($row[$md])) {
+                                $allowed = false;
+                                break;
+                            }
                         }
                     }
                     if ($allowed) {
@@ -172,7 +180,6 @@ class Browse extends MY_Controller
             if ($objects['summary']['returned'] > 0) {
                 foreach ($objects['rows'] as $row) {
 
-                    $toBeExcludedOnMetadata = explode(',', $excludeOnMetadataPresence);
                     $allowed = true;
                     foreach ($toBeExcludedOnMetadata as $md) {
                         if (isset($row[$md])) {

@@ -69,11 +69,19 @@ class Revision extends MY_Controller
             $path .= $targetDir;
         }
 
-        $result = $this->filesystem->restoreRevision($rodsaccount, $path, $revisionId);
+        $result = $this->revisionmodel->restoreRevision($rodsaccount, $path, $revisionId);
+
+        $hasError = false;
+        $reasonError = '';
+
+        if ($result != "Success") {
+                        $hasError = true;
+            $reasonError = $result;
+        }
 
         $output = array(
-            'hasError' => !$result,
-            'result' => TRUE
+            'hasError' => $hasError,
+            'reasonError' => $reasonError
         );
 
         echo json_encode($output);

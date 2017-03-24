@@ -22,7 +22,7 @@ $( document ).ready(function() {
             { "width": "30%" }
         ],
         "drawCallback": function(settings) {
-            mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
+            mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($('#search-term').val()));
         }
     } );
 
@@ -31,22 +31,21 @@ $( document ).ready(function() {
         datasetRowClickForDetails($(this), mainTable);
     });
 
-    $('.btn-search').on('click', function(){
-        if ($(this).val().length > 0) {
-            mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
+    $('.btn-search').on('click', function() {
+        if ($('#search-term').val().length > 0) {
+            alertMainPanelHide()
+            mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($('#search-term').val()));
             mainTable.ajax.reload();
         }
     });
 
     $("#search-term").bind('keypress', function(e) {
-        if (e.keyCode==13) {
-            if ($(this).val().length > 0) {
-                mainTable.ajax.url('revision/data?searchArgument=' + $(this).val());
-                mainTable.ajax.reload();
-            }
+        if (e.keyCode==13 && $('#search-term').val().length > 0) {
+            alertMainPanelHide()
+            mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($(this).val()));
+            mainTable.ajax.reload();
         }
     });
-
 
     // Button to actually restore the file
     $('#btn-restore').on('click', function(){
@@ -65,17 +64,16 @@ function restoreRevision()
         dataType: 'json',
         success: function(data) {
             if (!data.hasError) {
-
                 $('#select-folder').modal('hide');
+                alertMainPanelShow();
 
-                alert('Restoration went: ' + data.result + ' - ' + data.hasError);
-
-                //window.location.href = window.location.href;
+                //console.log(urlEncodedPath);
+                window.location.href = '/research/?dir=' + urlEncodedPath;
             }
             else {
                 alertPanelShow();
 
-                alert('Restoration went: ' + data.result + ' - ' + data.hasError);
+                alert('Restoration went: ' + data.reasonError );
             }
         },
     });
@@ -87,10 +85,29 @@ function showFolderSelectDialog(restorationObjectId, path)
 {
     $('#restoration-objectid').val(restorationObjectId);
 
+    alertMainPanelHide();
     alertPanelHide()
+
     startBrowsing(path, browseDlgPageItems);
     $('#select-folder').modal('show');
 }
+
+function alertMainPanelShow()
+{
+    var panel = $('.alert-panel-main')
+    if (panel.hasClass('hide')) {
+        panel.removeClass('hide');
+    }
+}
+
+function alertMainPanelHide()
+{
+    var panel = $('.alert-panel-main')
+    if (!panel.hasClass('hide')) {
+        panel.addClass('hide');
+    }
+}
+
 
 function alertPanelShow()
 {
