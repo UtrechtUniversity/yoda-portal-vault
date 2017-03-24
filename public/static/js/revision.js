@@ -16,6 +16,11 @@ $( document ).ready(function() {
         "processing": true,
         "serverSide": true,
         "pageLength": 25,
+        "ordering": false,
+        "columns": [
+            { "width": "70%" },
+            { "width": "30%" }
+        ],
         "drawCallback": function(settings) {
             mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
         }
