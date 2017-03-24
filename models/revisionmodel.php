@@ -96,8 +96,7 @@ RULE;
 
         $ruleBody = <<<'RULE'
 myRule {
-        *overwriteflag = int(*overwrite);
-        uuRevisionRestore(*revisionId, *target, *overwriteflag, *status);
+        uuRevisionRestore(*revisionId, *target, *overwrite, *status);
 }
 RULE;
         try {
@@ -107,13 +106,15 @@ RULE;
                 array(
                     "*revisionId" => $revisionId,
                     "*target" => $path,
-                    "*overwrite" => 1
+                    "*overwrite" => "yes"
                 ),
                 array("*status")
             );
 
             $ruleResult = $rule->execute();
-            return true;
+
+            return $ruleResult['*status'];
+            //return true;
 
         } catch(RODSException $e) {
             return false;

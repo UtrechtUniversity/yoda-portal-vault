@@ -9,7 +9,7 @@
                 <span class="modal-title">Select folder</span>
             </div>
 
-            <input type="text" id="restoration-objectid" value="">
+            <input type="hidden" id="restoration-objectid" value="">
 
             <ol class="breadcrumb dlg-breadcrumb">
                 <li class="active">Home</li>
@@ -66,6 +66,11 @@
                         <button class="btn btn-default btn-search" type="button"><span class="glyphicon glyphicon-search"></span></button>
                     </span>
                 </div>
+
+                <p class="alert-panel-main hide" style="color:green;">
+                    <i class="fa fa-check"></i> Your file was successfully restored!
+                </p>
+
 
                 <table id="file-browser" class="table table-bordered">
                     <thead>
