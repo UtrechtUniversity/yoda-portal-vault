@@ -34,6 +34,7 @@ $( document ).ready(function() {
 
     $('.btn-search').on('click', function(){
         if ($(this).val().length > 0) {
+            changeUrlSearchFilter($(this).val());
             mainTable.ajax.url('revision/data?searchArgument=' + $('.form-control[name="searchArgument"]').val());
             mainTable.ajax.reload();
         }
@@ -42,6 +43,7 @@ $( document ).ready(function() {
     $("#search-term").bind('keypress', function(e) {
         if (e.keyCode==13) {
             if ($(this).val().length > 0) {
+                changeUrlSearchFilter($(this).val());
                 mainTable.ajax.url('revision/data?searchArgument=' + $(this).val());
                 mainTable.ajax.reload();
             }
@@ -54,6 +56,12 @@ $( document ).ready(function() {
         restoreRevision();
     });
 });
+
+function changeUrlSearchFilter(filter)
+{
+    var url = window.location.pathname + "?filter=" +  encodeURIComponent(filter);
+    history.replaceState({} , {}, url);
+}
 
 // Restoration of file
 function restoreRevision()
