@@ -34,7 +34,7 @@ $( document ).ready(function() {
     $('.btn-search').on('click', function() {
         if ($('#search-term').val().length > 0) {
             alertMainPanelHide();
-            changeUrlSearchFilter($(this).val());
+            changeUrlSearchFilter($('#search-term').val());
             mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($('#search-term').val()));
             mainTable.ajax.reload();
         }
