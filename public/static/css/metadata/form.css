@@ -94,3 +94,7 @@ legend {
 .panel-footer  .input-group-sm {
     margin: -6px; /* Search box */
 }
+
+#ui-datepicker-div {
+    z-index: 999!important;
+}
