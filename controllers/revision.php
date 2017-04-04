@@ -54,7 +54,21 @@ class Revision extends MY_Controller
         $this->load->view('common-end');
     }
 
-    public function restore($revisionId)
+    /**
+     * @param $revisionId
+     * @param string $overwrite - {'no', 'yes'}
+
+     * Restore a revision based upon its revision-id
+     *
+     * This process starts from the folder selection dialog.
+     *
+     * Initially it is not allowed to overwrite a file by the same name in the selected restoration collection.
+     * If this occurs, the user gets prompted to overwrite of or not (place next to file with an extra timestamp to be able to distinguish the files)
+     *
+     *
+     *
+     */
+    public function restore($revisionId, $overwriteFlag='restore_no_overwrite')
     {
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
@@ -69,19 +83,40 @@ class Revision extends MY_Controller
             $path .= $targetDir;
         }
 
-        $result = $this->revisionmodel->restoreRevision($rodsaccount, $path, $revisionId);
+        $response = $this->revisionmodel->restoreRevision($rodsaccount, $path, $revisionId, $overwriteFlag);
 
-        $hasError = false;
-        $reasonError = '';
+        // default front end state
+        $frontEndState = 'UNRECOVERABLE';
+        $statusInfo = '(999) Unknown error - no defined state';
 
-        if ($result != "Success") {
-                        $hasError = true;
-            $reasonError = $result;
+        switch ($response['status']) {
+            case 'Unrecoverable':
+                $statusInfo = $response['statusInfo'];
+                $frontEndState = 'UNRECOVERABLE';
+                break;
+            case 'RevisionNotFound':
+                $statusInfo = '(100) The selected revision was not found could not be found. Please select another.';
+                $frontEndState = 'UNRECOVERABLE';
+                break;
+
+            case 'TargetPathDoesNotExist':
+                $frontEndState = 'PROMPT_SelectPathAgain';
+                break;
+            case 'FileExists':
+                $frontEndState = 'PROMPT_Overwrite';
+                break;
+            case 'PermissionDenied':
+                $frontEndState = 'PROMPT_PermissionDenied';
+                break;
+
+            case 'Success':
+                $frontEndState = 'SUCCESS';
+                break;
         }
 
         $output = array(
-            'hasError' => $hasError,
-            'reasonError' => $reasonError
+            'status' => $frontEndState,
+            'statusInfo' => $statusInfo
         );
 
         echo json_encode($output);
@@ -116,8 +151,9 @@ class Revision extends MY_Controller
         if (isset($result['summary']) && $result['summary']['returned'] > 0) {
             foreach ($result['rows'] as $row) {
                 $filePath = str_replace($pathStart, '', $row['originalPath']);
+
                 $rows[] = array(
-                    '<span data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>',
+                    '<span data-path="' . urlencode($filePath) . '" data-collection-exists="' . $row['collectionExists'] . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>',
                     $row['numberOfRevisions']
                 );
             }
@@ -129,22 +165,39 @@ class Revision extends MY_Controller
     }
 
     /**
-     * @param $studyId
-     * @param $objectId
-     *
      * Present the revisions of the specific objectId if permitted
+     *
+     * The table holding all revisions that was searched for holds whether a revision collection exists (at moment of population)
+     * This is passed as parameter 'collection_exists' in url
      */
     public function detail()
     {
         $path = $this->input->get('path');
+        $collectionExists = ($this->input->get('collection_exists') == 'true');
+
+
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $fullPath = $pathStart . $path;
 
         $revisionFiles = $this->revisionmodel->listByPath($rodsaccount, $fullPath);
 
+        // For the revision restore dialog it has to be known whether this path still exists.
+        // If so, browsing will start from that (original) location.
+        // If not, browsing will start from HOME
+        $pathInfo = pathinfo($path);
+        $revisionStartPath = $pathInfo['dirname'];
+
+        //if (!$this->revisionmodel->collectionExists($rodsaccount, $pathStart . $revisionStartPath)) {
+        if (!$collectionExists) {
+            $revisionStartPath = '';
+        }
+
         $htmlDetail =  $this->load->view('revisiondetail',
-            array('revisionFiles' => $revisionFiles,
+            array(
+                'collectionExists' => $collectionExists,
+                'revisionStartPath' => $revisionStartPath,
+                'revisionFiles' => $revisionFiles,
                 'permissions' => $this->permissions
             ),
             true);

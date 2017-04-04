@@ -33,7 +33,6 @@ $( document ).ready(function() {
 
     $('.btn-search').on('click', function() {
         if ($('#search-term').val().length > 0) {
-            alertMainPanelHide();
             changeUrlSearchFilter($('#search-term').val());
             mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($('#search-term').val()));
             mainTable.ajax.reload();
@@ -42,7 +41,7 @@ $( document ).ready(function() {
 
     $("#search-term").bind('keypress', function(e) {
         if (e.keyCode==13 && $('#search-term').val().length > 0) {
-            alertMainPanelHide();
+            //alertMainPanelHide();
             changeUrlSearchFilter($(this).val());
             mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($(this).val()));
             mainTable.ajax.reload();
@@ -51,8 +50,18 @@ $( document ).ready(function() {
 
     // Button to actually restore the file
     $('#btn-restore').on('click', function(){
-        restoreRevision();
+        //restoreRevision('restore_no_overwrite');
+        restoreRevision('restore_no_overwrite');
     });
+
+    $('#btn-restore-overwrite').on('click', function(){
+        restoreRevision('restore_overwrite');
+    });
+
+    $('#btn-restore-next-to').on('click', function(){
+        restoreRevision('restore_next_to');
+    });
+
 });
 
 function changeUrlSearchFilter(filter)
@@ -62,28 +71,39 @@ function changeUrlSearchFilter(filter)
 }
 
 // Restoration of file
-function restoreRevision()
+function restoreRevision(overwriteFlag)
 {
     var restorationObjectId = $('#restoration-objectid').val();
 
     $.ajax({
-        url: 'revision/restore/' + restorationObjectId + '?targetdir=' + urlEncodedPath,
+        url: 'revision/restore/' + restorationObjectId + '/' + overwriteFlag + '?targetdir=' + urlEncodedPath,
         type: 'GET',
         dataType: 'json',
         success: function(data) {
-            if (!data.hasError) {
-                $('#select-folder').modal('hide');
-                alertMainPanelShow();
+            alertPanelsHide();
 
-                //console.log(urlEncodedPath);
+            if(data.status== 'UNRECOVERABLE') {
+                $('.alert-panel-error').removeClass('hide');
+                $('.alert-panel-error span').html('Error information: ' + data.statusInfo);
+            }
+            else if (data.status == 'PROMPT_Overwrite') {
+                $('.alert-panel-overwrite').removeClass('hide');
+            }
+            else if (data.status == 'PROMPT_SelectPathAgain') {
+                $('.alert-panel-path-not-exists').removeClass('hide');
+            }
+            else if (data.status == 'PROMPT_PermissionDenied') {
+                $('.alert-panel-path-permission-denied').removeClass('hide')
+            }
+            else if (data.status == 'SUCCESS') {
                 window.location.href = '/research/?dir=' + urlEncodedPath;
             }
-            else {
-                alertPanelShow();
-
-                alert('Restoration went: ' + data.reasonError );
-            }
         },
+        error: function(data) {
+            alertPanelsHide();
+            $('.alert-panel-error').removeClass('hide');
+            $('.alert-panel-error span').html('Something went wrong. Please check your internet connection');
+        }
     });
 }
 
@@ -93,44 +113,19 @@ function showFolderSelectDialog(restorationObjectId, path)
 {
     $('#restoration-objectid').val(restorationObjectId);
 
-    alertMainPanelHide();
-    alertPanelHide()
+    alertPanelsHide()
 
     startBrowsing(path, browseDlgPageItems);
     $('#select-folder').modal('show');
 }
 
-function alertMainPanelShow()
+function alertPanelsHide()
 {
-    var panel = $('.alert-panel-main')
-    if (panel.hasClass('hide')) {
-        panel.removeClass('hide');
-    }
-}
-
-function alertMainPanelHide()
-{
-    var panel = $('.alert-panel-main')
-    if (!panel.hasClass('hide')) {
-        panel.addClass('hide');
-    }
-}
-
-
-function alertPanelShow()
-{
-    var panel = $('.alert-panel')
-    if (panel.hasClass('hide')) {
-        panel.removeClass('hide');
-    }
-}
-
-function alertPanelHide()
-{
-    var panel = $('.alert-panel')
-    if (!panel.hasClass('hide')) {
-        panel.addClass('hide');
-    }
+    $('.alert-panel').each(function( index ) {
+        if (!$( this ).hasClass('hide') ) {
+            $(this).addClass('hide');
+        }
+    });
 }
 
 function startBrowsing(path, items)
@@ -164,7 +159,7 @@ function browse(dir)
     makeBreadcrumb(dir);
 
     changeBrowserUrl(dir);
-//    topInformation(dir);
+
     buildFileBrowser(dir);
 }
 
@@ -240,6 +235,7 @@ function datasetRowClickForDetails(obj, dtTable) {
     var tr = obj.closest('tr');
     var row = dtTable.row(tr);
     var path = $('td:eq(0) span', tr).attr('data-path');
+    var collection_exists = $('td:eq(0) span', tr).attr('data-collection-exists');
 
     if ( row.child.isShown() ) {
         // This row is already open - close it
@@ -250,7 +246,7 @@ function datasetRowClickForDetails(obj, dtTable) {
         // Open row for panel information
 
         $.ajax({
-            url: 'revision/detail?path=' + path,
+            url: 'revision/detail?path=' + path + '&collection_exists=' + collection_exists,
             type: 'GET',
             dataType: 'json',
             success: function(data) {

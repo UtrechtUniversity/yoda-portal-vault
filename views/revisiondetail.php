@@ -2,6 +2,9 @@
     <div class="row">
 <!--        <div class="panel panel-default">-->
 <!--            <div class="panel-body">-->
+                <?php if (!$collectionExists): ?>
+                    <i class="fa fa-exclamation-circle"></i> This collection no longer exists.
+                <?php endif; ?>
                 <table id="" class="table" >
                     <thead>
                     <tr>
@@ -24,7 +27,7 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group" aria-label="...">
-                                        <button type="button" class="btn btn-default btn-revision-select-dialog" data-objectid="<?php echo $row['id']; ?>" data-path=""><i class="fa fa-magic" aria-hidden="true"></i> Restore</button>
+                                        <button type="button" class="btn btn-default btn-revision-select-dialog" data-objectid="<?php echo $row['id']; ?>" data-path="<?php echo $revisionStartPath; ?>"><i class="fa fa-magic" aria-hidden="true"></i> Restore</button>
                                     </div>
                                 </td>
                             </tr>
