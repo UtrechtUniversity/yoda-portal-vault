@@ -35,9 +35,10 @@ class Revision extends MY_Controller
                 'lib/font-awesome/css/font-awesome.css'
             ),
             'scriptIncludes' => array(
-                'js/revision.js',
                 'lib/datatables/js/jquery.dataTables.min.js',
                 'lib/datatables/js/dataTables.bootstrap.min.js',
+                'js/revision.js',
+                'js/search.js',
             ),
             'activeModule'   => $this->module->name(),
             'user' => array(
@@ -49,6 +50,37 @@ class Revision extends MY_Controller
         $this->data['dlgPageItems'] = $this->config->item('revision-dialog-items-per-page');
 
         $this->data['filter'] = $this->input->get('filter');
+
+        // Search results data
+        $searchTerm = '';
+        $searchStatusValue = '';
+        $searchType = 'filename';
+        $searchStart = 0;
+        $searchOrderDir = 'asc';
+        $searchOrderColumn = 0;
+        $searchItemsPerPage = $this->config->item('search-items-per-page');
+
+        if ($this->session->userdata('research-search-term') || $this->session->userdata('research-search-status-value')) {
+            if ($this->session->userdata('research-search-term')) {
+                $searchTerm = $this->session->userdata('research-search-term');
+            }
+            if ($this->session->userdata('research-search-status-value')) {
+                $searchStatusValue = $this->session->userdata('research-search-status-value');
+            }
+            $searchType = $this->session->userdata('research-search-type');
+            $searchStart = $this->session->userdata('research-search-start');
+            $searchOrderDir = $this->session->userdata('research-search-order-dir');
+            $searchOrderColumn = $this->session->userdata('research-search-order-column');
+        }
+        $showStatus = false;
+        $showTerm = false;
+        if ($searchType == 'status') {
+            $showStatus = true;
+        } else {
+            $showTerm = true;
+        }
+        $searchData = compact('searchTerm', 'searchStatusValue', 'searchType', 'searchStart', 'searchOrderDir', 'searchOrderColumn', 'showStatus', 'showTerm', 'searchItemsPerPage');
+        $this->data['searchHtml'] = $this->load->view('search', $searchData, true);
 
         $this->load->view('revision', $this->data);
         $this->load->view('common-end');
