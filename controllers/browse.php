@@ -102,14 +102,14 @@ class Browse extends MY_Controller
 
     /**
      * @param int $restrict
-     * @param string $excludeOnMetadataPresence
+     * @param string $interveneOnMetadataKeys
      *
      * $restrict offers the possibilty to distinguish collecting folders and / or files
      *
-     * $excludeOnMetadataPresence is a string holding keys of metadata that must NOT be present. If present in a row, this data is excluded from presentation
+     * $interveneOnMetadataKeys is a string holding keys of metadata that must NOT be present. If present in a row, this data is excluded from presentation
      *
      */
-    public function data( $restrict = 0, $excludeOnMetadataPresence = '')
+    public function data( $restrict = 0, $interveneOnMetadataKeys = '')
     {
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
@@ -134,7 +134,7 @@ class Browse extends MY_Controller
         }
         $rows = array();
 
-        $toBeExcludedOnMetadata = explode(',', $excludeOnMetadataPresence);
+        $interveningKeys = explode(',', $interveneOnMetadataKeys);
 
         // Collections
         if ($restrict=='collections' OR !$restrict) {
@@ -144,25 +144,7 @@ class Browse extends MY_Controller
             $totalItems += $collections['summary']['total'];
             if ($collections['summary']['returned'] > 0) {
                 foreach ($collections['rows'] as $row) {
-
-                    $allowed = true;
-                    foreach ($toBeExcludedOnMetadata as $md) {
-                        if ($md == 'org_lock_protect') { // special case for locking
-                            if (isset($row['org_lock_protect'])) {
-                                if($row['org_lock_protect'] <= $row['path']) {
-                                    $allowed = false;
-                                    break;
-                                }
-                            }
-                        }
-                        else {
-                            if (isset($row[$md])) {
-                                $allowed = false;
-                                break;
-                            }
-                        }
-                    }
-                    if ($allowed) {
+                    if ($this->_allowRowWhenBrowsing($row, $interveningKeys)) {
                         $filePath = str_replace($pathStart, '', $row['path']);
                         $rows[] = array(
                             '<span class="browse" data-path="' . urlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
@@ -179,15 +161,7 @@ class Browse extends MY_Controller
             $totalItems += $objects['summary']['total'];
             if ($objects['summary']['returned'] > 0) {
                 foreach ($objects['rows'] as $row) {
-
-                    $allowed = true;
-                    foreach ($toBeExcludedOnMetadata as $md) {
-                        if (isset($row[$md])) {
-                            $allowed = false;
-                            break;
-                        }
-                    }
-                    if ($allowed) {
+                    if ($this->_allowRowWhenBrowsing($row, $interveningKeys)) {
                         $filePath = str_replace($pathStart, '', $row['path']);
                         $rows[] = array(
                             '<span data-path="' . urlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
@@ -202,6 +176,39 @@ class Browse extends MY_Controller
 
         echo json_encode($output);
     }
+
+
+    /**
+     * @param $row
+     * @param $restrictingKeys
+     * @return bool
+     *
+     * function that decides whether a row is allowed to be presented based upon information that is in the metadata, or simply the presence of a metadata key
+     */
+    private function _allowRowWhenBrowsing(&$row, &$restrictingKeys )
+    {
+        $allowed = true;
+        foreach ($restrictingKeys as $key) {
+            if ($key == 'org_lock_protect') { // special case for locking
+                if (isset($row['org_lock_protect'])) {
+                    if($row['org_lock_protect'] <= $row['path']) {
+                        $allowed = false;
+                        break;
+                    }
+                }
+            }
+            else {
+                if (isset($row[$key])) {  // simply check the presence of this key and it restricts showing of this row
+                    $allowed = false;
+                    break;
+                }
+            }
+        }
+
+        return $allowed;
+    }
+
+
 
     public function search()
     {

@@ -21,9 +21,24 @@
                         <div class="panel panel-default">
                             <div class="panel-body">
 
-                                <p class="alert-panel" style="color:red;">
-                                    <i class="fa fa-exclamation-triangle"></i> Something went wrong restoring the file!
+                                <p class="alert-panel-error alert-panel hide" style="color:red;">
+                                    <i class="fa fa-exclamation-triangle"></i> Something has gone wrong
+                                    <br>
+                                    <span></span>
                                 </p>
+
+                                <p class="alert-panel-overwrite alert-panel hide">
+                                    <i class="fa fa-question-circle"></i> This file already exists. Please chose:
+                                    <br>
+                                    <button class="btn btn-danger" id="btn-restore-overwrite"><i class="fa fa-file-o" aria-hidden="true"></i> Overwrite</button>
+                                    <button class="btn btn-info" id="btn-restore-next-to"><i class="fa fa-files-o" aria-hidden="true"></i> Place revision next to original</button>
+                                    <button class="btn button grey" data-dismiss="modal">Cancel</button>
+                                </p>
+
+                                <p class="alert-panel-path-not-exists alert-panel hide">
+                                    <i class="fa fa-question-circle"></i> The folder you selected does not exist anymore. Please select another.
+                                </p>
+
 
                                 <table id="folder-browser" class="table yoda-table table-bordered">
                                     <thead>
@@ -66,11 +81,6 @@
                         <button class="btn btn-default btn-search" type="button"><span class="glyphicon glyphicon-search"></span></button>
                     </span>
                 </div>
-
-                <p class="alert-panel-main hide" style="color:green;">
-                    <i class="fa fa-check"></i> Your file was successfully restored!
-                </p>
-
 
                 <table id="file-browser" class="table table-bordered">
                     <thead>
