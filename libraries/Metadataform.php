@@ -193,7 +193,8 @@ class Element {
 
         // item types will probably be extend in the future
         $fieldsWithMaxLength = array('text',
-            'textarea');
+            'textarea',
+            'numeric');
         if(in_array($this->type, $fieldsWithMaxLength)) {
             $this->maxLength = 0;
             if(isset($data['elementSpecifics']['maxLength'])) {

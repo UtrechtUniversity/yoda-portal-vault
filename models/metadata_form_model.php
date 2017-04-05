@@ -221,8 +221,8 @@ class Metadata_form_model extends CI_Model {
                                 $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
                                 break;
                             case 'xs:integer':
-                                $type = 'text';
-                                $elementMaxLength = 1024;
+                                $type = 'numeric';
+                                $elementMaxLength = 10;  // arbitrary length for this moment
                                 break;
                             case 'xs:anyURI':
                                 $type = 'text';
@@ -248,7 +248,7 @@ class Metadata_form_model extends CI_Model {
                         // 'date' has nothing extra
                         // Handled separately as these specifics might grow.
                         $elementSpecifics = array(); // holds all element specific info
-                        if ($type == 'text' OR $type == 'textarea') {
+                        if ($type == 'text' OR $type == 'textarea' OR $type=='numeric') {
                             $elementSpecifics = array('maxLength' => $elementMaxLength);
                         } elseif ($type == 'select') {
                             $elementSpecifics = array('options' => $elementOptions);
