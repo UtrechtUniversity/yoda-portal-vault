@@ -152,7 +152,7 @@ RULE;
      */
 
 
-    static public function restoreRevision($iRodsAccount, $path, $revisionId, $overwriteFlag = 'restore_no_overwrite')
+    static public function restoreRevision($iRodsAccount, $path, $revisionId, $overwriteFlag = 'restore_no_overwrite', $newFileName='')
     {
         $ruleBody = <<<'RULE'
 myRule {
@@ -166,7 +166,8 @@ RULE;
                 array(
                     "*revisionId" => $revisionId,
                     "*target" => $path,
-                    "*overwrite" => $overwriteFlag
+                    "*overwrite" => $overwriteFlag,
+                    "*newFileName" => $newFileName
                 ),
                 array("*status",
                     "*statusInfo"
