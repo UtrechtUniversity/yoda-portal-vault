@@ -65,7 +65,20 @@ $(function () {
         }
     });
 
+    // numeric validation
+    $('.numeric-field').keypress(validateNumber);
 });
+
+function validateNumber(event) {
+    var key = window.event ? event.keyCode : event.which;
+    if (event.keyCode === 8 || event.keyCode === 46) {
+        return true;
+    } else if ( key < 48 || key > 57 ) {
+        return false;
+    } else {
+        return true;
+    }
+}
 
 function duplicateField(field)
 {
@@ -76,6 +89,10 @@ function duplicateField(field)
         duplicateField(newFieldGroup);
     });
     newFieldGroup.find('[data-toggle="tooltip"]').tooltip();
+
+    if (newField.hasClass('numeric-field')) {
+        newField.keypress(validateNumber);
+    }
 
     if (newField.hasClass('datepicker')) {
         newField.removeClass('hasDatepicker');
