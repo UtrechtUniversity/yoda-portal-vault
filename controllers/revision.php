@@ -58,7 +58,7 @@ class Revision extends MY_Controller
                 'research-search-start' => 0,
                 'research-search-type' => 'revision',
                 'research-search-order-dir' => 'ASC',
-                'research-search-order-column' => 'META_DATA_ATTR_VALUE'
+                'research-search-order-column' => 0
             )
         );
         $searchTerm = $this->input->get('filter');
