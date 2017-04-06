@@ -77,13 +77,14 @@ class Revision extends MY_Controller
         $this->output->set_content_type('application/json');
 
         $targetDir = $this->input->get('targetdir');
+        $newFileName = $this->input->get('newFileName'); // new file name as entered by user when option is 'restore_next_to'
 
         $path = $pathStart;
         if (!empty($targetDir)) {
             $path .= $targetDir;
         }
 
-        $response = $this->revisionmodel->restoreRevision($rodsaccount, $path, $revisionId, $overwriteFlag);
+        $response = $this->revisionmodel->restoreRevision($rodsaccount, $path, $revisionId, $overwriteFlag, $newFileName);
 
         // default front end state
         $frontEndState = 'UNRECOVERABLE';
@@ -101,6 +102,9 @@ class Revision extends MY_Controller
 
             case 'TargetPathDoesNotExist':
                 $frontEndState = 'PROMPT_SelectPathAgain';
+                break;
+            case 'FileExistsEnteredByUser':
+                $frontEndState = 'PROMPT_FileExistsEnteredByUser';
                 break;
             case 'FileExists':
                 $frontEndState = 'PROMPT_Overwrite';
@@ -188,7 +192,6 @@ class Revision extends MY_Controller
         $pathInfo = pathinfo($path);
         $revisionStartPath = $pathInfo['dirname'];
 
-        //if (!$this->revisionmodel->collectionExists($rodsaccount, $pathStart . $revisionStartPath)) {
         if (!$collectionExists) {
             $revisionStartPath = '';
         }
