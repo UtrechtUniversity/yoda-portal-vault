@@ -1,6 +1,7 @@
 <script>
     var revisionItemsPerPage = <?php echo $items; ?>;
     var browseDlgPageItems = <?php echo $dlgPageItems; ?>;
+    var view = 'revision';
 </script>
 <div class="modal" id="select-folder">
     <div class="modal-dialog">
@@ -66,34 +67,32 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="panel panel-default">
-            <div class="panel-heading clearfix">
-                <h3 class="panel-title pull-left">
-                    Revisions
-                </h3>
-                <div class="input-group-sm has-feedback pull-right">
-                    <a class="btn btn-default" href="/research/browse">Close</a>
-                </div>
-            </div>
-            <div class="panel-body">
-                <div class="input-group" style="margin-bottom:20px;">
-                    <input type="text" class="form-control" id="search-term" name="searchArgument" placeholder="Search term..." value="<?php echo htmlentities($filter); ?>">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default btn-search" type="button"><span class="glyphicon glyphicon-search"></span></button>
-                    </span>
-                </div>
+<?php echo $searchHtml; ?>
 
-                <table id="file-browser" class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Number of revisions</th>
-                        </tr>
-                    </thead>
-                </table>
+<div class="row">
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <h3 class="panel-title pull-left">
+                Revisions
+            </h3>
+            <div class="input-group-sm has-feedback pull-right">
+                <a class="btn btn-default" href="/research/browse">Close</a>
             </div>
+        </div>
+        <div class="panel-body">
+            <p class="alert-panel-main hide" style="color:green;">
+                <i class="fa fa-check"></i> Your file was successfully restored!
+            </p>
+
+
+            <table id="file-browser" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Number of revisions</th>
+                    </tr>
+                </thead>
+            </table>
         </div>
     </div>
 </div>

@@ -1,19 +1,7 @@
 $( document ).ready(function() {
     if ($('#file-browser').length) {
         startBrowsing(browseStartDir, browsePageItems);
-
-        // Rememeber search results
-        if (searchTerm.length > 0) {
-            search(decodeURIComponent(searchTerm), searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
-        } else if (searchStatusValue.length > 0) {
-            search(searchStatusValue, 'status', browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
-        }
-
     }
-
-    $(".dropdown-menu li a").click(function(){
-        searchSelectChanged($(this));
-    });
 
     $('.btn-group button.metadata-form').click(function(){
         showMetadataForm($(this).attr('data-path'));
@@ -26,25 +14,6 @@ $( document ).ready(function() {
             toggleFolderStatus($(this).attr('data-status'), $(this).attr('data-path'));
         }
     });
-
-    $(".search-btn").click(function(){
-        search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
-    });
-
-    $("#search-filter").bind('keypress', function(e) {
-        if(e.keyCode==13) {
-            search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
-        }
-    });
-
-    $( ".search-status input:radio" ).change(function() {
-        search($(this).val(), 'status', $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
-    });
-
-    $(".close-search-results").click(function() {
-        closeSearchResults();
-    });
-
 });
 
 function browse(dir)
@@ -54,121 +23,6 @@ function browse(dir)
     changeBrowserUrl(dir);
     topInformation(dir);
     buildFileBrowser(dir);
-}
-
-function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchOrderColumn)
-{
-    if (typeof value != 'undefined' && value.length > 0 ) {
-        // Display start for first page load
-        if (typeof displayStart === 'undefined') {
-            displayStart = 0;
-        }
-
-        // Find revision
-        if (type == 'revision') {
-            $('#search').hide();
-            $('.search-results').hide();
-            window.location.href = "revision?filter=" + encodeURIComponent(value);
-            return false;
-        }
-
-        // Table columns definition
-        var disableSorting = {};
-        var columns = [];
-        if (type == 'filename') {
-            columns = ['Name', 'Location'];
-        } else if (type == 'metadata') {
-            columns = ['Location', 'Matches'];
-            disableSorting = { 'bSortable': false, 'aTargets': [ -1 ] };
-        } else {
-            columns = ['Location'];
-        }
-
-        // Destroy current Datatable
-        var datatable = $('#search').DataTable();
-        datatable.destroy();
-
-        var tableHeaders = '';
-        $.each(columns, function(i, val){
-            tableHeaders += "<th>" + val + "</th>";
-        });
-
-        // Create the columns
-        $('#search thead tr').html(tableHeaders);
-
-        // Remove table content
-        $('#search tbody').remove();
-
-
-        // Initialize new Datatable
-        var url = "browse/search?filter=" + encodeURIComponent(value) + "&type=" + type;
-        $('#search').DataTable( {
-            "bFilter": false,
-            "bInfo": false,
-            "bLengthChange": false,
-            "ajax": {
-                "url": url,
-                "jsonp": false
-            },
-            "processing": true,
-            "serverSide": true,
-            "pageLength": browsePageItems,
-            "displayStart": displayStart,
-            "drawCallback": function(settings) {
-                $( ".browse-search" ).on( "click", function() {
-                    browse($(this).attr('data-path'));
-                });
-
-
-                $('.matches').tooltip();
-            },
-            "aoColumnDefs": [
-                disableSorting
-            ],
-            "order": [[ searchOrderColumn, searchOrderDir ]]
-        });
-
-
-        if (type == 'status') {
-            value = value.toLowerCase();
-            $('.search-string').text(value.substr(0,1).toUpperCase() + value.substr(1));
-        } else {
-            $('.search-string').html( htmlEncode(value).replace(/ /g, "&nbsp;") );
-
-            // uncheck all status values
-            $( ".search-status input:radio" ).prop('checked', false);
-        }
-        showSearchResults();
-    }
-
-    return true;
-}
-
-function closeSearchResults()
-{
-    $('.search-results').hide();
-    $('#search-filter').val('');
-    $(".search-status input:radio").prop('checked', false);
-    $.get("browse/unset_search");
-}
-
-function showSearchResults()
-{
-    $('.search-results').show();
-}
-
-function searchSelectChanged(sel)
-{
-    $("#search_concept").html(sel.text());
-    $("#search_concept").attr('data-type', sel.attr('data-type'));
-
-    if (sel.attr('data-type') == 'status') {
-        $('.search-term').hide();
-        $('.search-status').removeClass('hide').show();
-    } else {
-        $('.search-term').removeClass('hide').show();
-        $('.search-status').hide();
-    }
 }
 
 function makeBreadcrumb(urlEncodedDir)
@@ -216,8 +70,6 @@ function htmlEncode(value){
     //then grab the encoded contents back out.  The div never exists on the page.
     return $('<div/>').text(value).html();
 }
-
-
 
 function makeBreadcrumbPath(dir)
 {

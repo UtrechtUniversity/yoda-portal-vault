@@ -20,6 +20,11 @@
 $config['browser-items-per-page'] = 10;
 
 /**
+ * Search config
+ */
+$config['search-items-per-page'] = 10;
+
+/**
  * Revision config
  */
 

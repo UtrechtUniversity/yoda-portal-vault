@@ -3,9 +3,9 @@ var urlEncodedPath = '',
 
 $( document ).ready(function() {
     var url = "revision/data";
-    if ($('#search-term').val().length > 0) {
-        searchArgument = $('#search-term').val();
-        url += '?searchArgument=' + encodeURIComponent($('#search-term').val());
+    if ($('#search-filter').val().length > 0) {
+        searchArgument = $('#search-filter').val();
+        url += '?searchArgument=' + encodeURIComponent($('#search-filter').val());
     }
 
     var mainTable = $('#file-browser').DataTable( {
@@ -22,7 +22,7 @@ $( document ).ready(function() {
             { "width": "30%" }
         ],
         "drawCallback": function(settings) {
-            mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($('#search-term').val()));
+            mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($('#search-filter').val()));
         }
     } );
 
@@ -31,17 +31,16 @@ $( document ).ready(function() {
         datasetRowClickForDetails($(this), mainTable);
     });
 
-    $('.btn-search').on('click', function() {
-        if ($('#search-term').val().length > 0) {
-            changeUrlSearchFilter($('#search-term').val());
-            mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($('#search-term').val()));
+    $('.search-btn').on('click', function() {
+        if ($('#search-filter').val().length > 0) {
+            changeUrlSearchFilter($("#search-filter").val());
+            mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($('#search-filter').val()));
             mainTable.ajax.reload();
         }
     });
 
-    $("#search-term").bind('keypress', function(e) {
-        if (e.keyCode==13 && $('#search-term').val().length > 0) {
-            //alertMainPanelHide();
+    $("#search-filter").bind('keypress', function(e) {
+        if (e.keyCode==13 && $('#search-filter').val().length > 0) {
             changeUrlSearchFilter($(this).val());
             mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($(this).val()));
             mainTable.ajax.reload();
