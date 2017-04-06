@@ -186,5 +186,6 @@ class Search extends MY_Controller
 
         $this->session->set_userdata('research-search-term', $value);
         $this->session->set_userdata('research-search-type', $type);
+        $this->session->set_userdata('research-search-start', 0);
     }
 }

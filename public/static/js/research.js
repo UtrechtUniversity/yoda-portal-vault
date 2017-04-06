@@ -1,14 +1,6 @@
 $( document ).ready(function() {
     if ($('#file-browser').length) {
         startBrowsing(browseStartDir, browsePageItems);
-
-        // Rememeber search results
-        if (searchTerm.length > 0) {
-            search(decodeURIComponent(searchTerm), searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
-        } else if (searchStatusValue.length > 0) {
-            search(searchStatusValue, 'status', browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
-        }
-
     }
 
     $('.btn-group button.metadata-form').click(function(){

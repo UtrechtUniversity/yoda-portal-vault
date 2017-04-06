@@ -4,16 +4,22 @@
     var searchType = '<?php echo $searchType; ?>';
     var searchStart = <?php echo $searchStart; ?>;
     var searchOrderDir = '<?php echo $searchOrderDir; ?>';
-    var searchOrderColumn = <?php echo $searchOrderColumn; ?>;
+    var searchOrderColumn = '<?php echo $searchOrderColumn; ?>';
     var searchPageItems = <?php echo $searchItemsPerPage; ?>;
 </script>
 
 <div class="row">
     <div class="input-group" style="margin-bottom:20px;">
         <div class="input-group-btn search-panel">
-            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                <span id="search_concept" data-type="<?php echo $searchType; ?>">Search by <?php echo $searchType; ?></span> <span class="caret"></span>
-            </button>
+            <?php if ($searchType == 'revision') { ?>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    <span id="search_concept" data-type="<?php echo $searchType; ?>">Search revision by name</span> <span class="caret"></span>
+                </button>
+            <?php } else { ?>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    <span id="search_concept" data-type="<?php echo $searchType; ?>">Search by <?php echo $searchType; ?></span> <span class="caret"></span>
+                </button>
+            <?php } ?>
             <ul class="dropdown-menu" role="menu">
                 <li><a href="#" data-type="filename">Search by filename</a></li>
                 <li><a href="#" data-type="folder">Search by folder</a></li>

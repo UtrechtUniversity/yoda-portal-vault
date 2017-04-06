@@ -31,10 +31,11 @@ $( document ).ready(function() {
         datasetRowClickForDetails($(this), mainTable);
     });
 
-    $('.btn-search').on('click', function() {
+    $('.search-btn').on('click', function() {
+        console.log('halo');
         if ($('#search-filter').val().length > 0) {
             alertMainPanelHide();
-            changeUrlSearchFilter($('#search-term').val());
+            changeUrlSearchFilter($("#search-filter").val());
             mainTable.ajax.url('revision/data?searchArgument=' + encodeURIComponent($('#search-filter').val()));
             mainTable.ajax.reload();
         }
