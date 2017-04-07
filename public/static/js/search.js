@@ -1,10 +1,10 @@
 $( document ).ready(function() {
     if ($('#file-browser').length && (view == 'browse' && searchType != 'revision')) {
         // Rememeber search results
-        if (searchTerm.length > 0) {
-            search(decodeURIComponent(searchTerm), searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
-        } else if (searchStatusValue.length > 0) {
+        if (searchStatusValue.length > 0 && $( ".search-status input:radio" ).is(":checked")) {
             search(searchStatusValue, 'status', browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+        } else if (searchTerm.length > 0) {
+            search(decodeURIComponent(searchTerm), searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
         }
     }
 
