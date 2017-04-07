@@ -61,6 +61,10 @@ $( document ).ready(function() {
         restoreRevision('restore_next_to');
     });
 
+    $('#btn-cancel-overite-dialog').on('click', function(){
+        alertPanelsHide();
+    });
+
 });
 
 function changeUrlSearchFilter(filter)
@@ -72,29 +76,51 @@ function changeUrlSearchFilter(filter)
 // Restoration of file
 function restoreRevision(overwriteFlag)
 {
-    var restorationObjectId = $('#restoration-objectid').val();
+    if (typeof urlEncodedPath == 'undefined') {
+        errorMessage = 'The HOME folder cannot be used for restoration purposes';
+        $('.alert-panel-warning').removeClass('hide');
+        $('.alert-panel-warning span').html(errorMessage);
+        return;
+    }
+
+    var restorationObjectId = $('#restoration-objectid').val(),
+        newFileName = $('#newFileName').val();
+        ;
+
+    if(newFileName.length==0 && overwriteFlag == 'restore_next_to') {
+        alert('Please enter a name for the file you want to restore');
+        return;
+    }
 
     $.ajax({
-        url: 'revision/restore/' + restorationObjectId + '/' + overwriteFlag + '?targetdir=' + urlEncodedPath,
+        url: 'revision/restore/' + restorationObjectId + '/' + overwriteFlag + '?targetdir=' + urlEncodedPath + '&newFileName=' +  encodeURIComponent(newFileName),
         type: 'GET',
         dataType: 'json',
         success: function(data) {
-            alertPanelsHide();
 
             if(data.status== 'UNRECOVERABLE') {
+                alertPanelsHide();
                 $('.alert-panel-error').removeClass('hide');
                 $('.alert-panel-error span').html('Error information: ' + data.statusInfo);
             }
             else if (data.status == 'PROMPT_Overwrite') {
+                alertPanelsHide();
                 $('.alert-panel-overwrite').removeClass('hide');
             }
             else if (data.status == 'PROMPT_SelectPathAgain') {
+                alertPanelsHide();
                 $('.alert-panel-path-not-exists').removeClass('hide');
             }
+            else if (data.status == 'PROMPT_FileExistsEnteredByUser') {
+                alert('This filename already exists. Please enter another.');
+                return false;
+            }
             else if (data.status == 'PROMPT_PermissionDenied') {
+                alertPanelsHide();
                 $('.alert-panel-path-permission-denied').removeClass('hide')
             }
             else if (data.status == 'SUCCESS') {
+                alertPanelsHide();
                 window.location.href = '/research/?dir=' + urlEncodedPath;
             }
         },
@@ -210,6 +236,7 @@ function htmlEncode(value){
 
 function changeBrowserUrl(path)
 {
+    alertPanelsHide();
     urlEncodedPath = path;
 }
 
