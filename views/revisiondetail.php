@@ -23,7 +23,7 @@
                                     <?php echo $row['org_original_data_owner_name']; ?>
                                 </td>
                                 <td>
-                                    <?php echo $row['filesize'] ?> bytes
+                                    <?php echo $row['org_original_filesize'] ?> bytes
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group" aria-label="...">
