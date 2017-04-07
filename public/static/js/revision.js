@@ -87,6 +87,11 @@ function restoreRevision(overwriteFlag)
         newFileName = $('#newFileName').val();
         ;
 
+    if(newFileName.length==0 && overwriteFlag == 'restore_next_to') {
+        alert('Please enter a name for the file you want to restore');
+        return;
+    }
+
     $.ajax({
         url: 'revision/restore/' + restorationObjectId + '/' + overwriteFlag + '?targetdir=' + urlEncodedPath + '&newFileName=' +  encodeURIComponent(newFileName),
         type: 'GET',
