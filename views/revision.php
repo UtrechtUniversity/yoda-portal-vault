@@ -36,8 +36,8 @@
                                     <i class="fa fa-question-circle"></i> This file already exists. Please choose:
                                     <br>
                                     <button class="btn btn-danger" id="btn-restore-overwrite"><i class="fa fa-file-o" aria-hidden="true"></i> Overwrite</button>
-                                    <input type="text" placeholder="Enter new filename" id="newFileName">
                                     <button class="btn btn-info" id="btn-restore-next-to"><i class="fa fa-files-o" aria-hidden="true"></i> Restore as new file</button>
+                                    <input type="text"  placeholder="Enter new filename" id="newFileName">
                                     <button class="btn button grey"  id="btn-cancel-overite-dialog" >Cancel</button>
                                 </p>
 
