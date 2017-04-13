@@ -27,7 +27,7 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group" aria-label="...">
-                                        <button type="button" class="btn btn-default btn-revision-select-dialog" data-objectid="<?php echo $row['id']; ?>" data-path="<?php echo $revisionStartPath; ?>"><i class="fa fa-magic" aria-hidden="true"></i> Restore</button>
+                                        <button type="button" class="btn btn-default btn-revision-select-dialog" data-orgfilename="<?php echo $orgFileName; ?>" data-objectid="<?php echo $row['id']; ?>" data-path="<?php echo $revisionStartPath; ?>"><i class="fa fa-magic" aria-hidden="true"></i> Restore</button>
                                     </div>
                                 </td>
                             </tr>
@@ -43,10 +43,11 @@
     $( document ).ready(function() {
 
         $('.btn-revision-select-dialog').on('click', function(){
-            var id = $(this).data('objectid');
-            var path = $(this).data('path');
+            var id = $(this).data('objectid'),
+                path = $(this).data('path'),
+                orgFileName = $(this).data('orgfilename');
 
-            window.parent.showFolderSelectDialog(id, path);
+            window.parent.showFolderSelectDialog(id, path, orgFileName);
         });
 
     });

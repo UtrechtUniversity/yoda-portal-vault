@@ -50,6 +50,7 @@ $( document ).ready(function() {
     // Button to actually restore the file
     $('#btn-restore').on('click', function(){
         //restoreRevision('restore_no_overwrite');
+        $('.cover').removeClass('hide');
         restoreRevision('restore_no_overwrite');
     });
 
@@ -62,7 +63,7 @@ $( document ).ready(function() {
     });
 
     $('#btn-cancel-overite-dialog').on('click', function(){
-        alertPanelsHide();
+        $('.cover').addClass('hide');
     });
 
 });
@@ -85,7 +86,6 @@ function restoreRevision(overwriteFlag)
 
     var restorationObjectId = $('#restoration-objectid').val(),
         newFileName = $('#newFileName').val();
-        ;
 
     if(newFileName.length==0 && overwriteFlag == 'restore_next_to') {
         alert('Please enter a name for the file you want to restore');
@@ -134,9 +134,12 @@ function restoreRevision(overwriteFlag)
 
 // functions for handling of folder selection - easy point of entry for select-folder functionality from the panels within dataTables
 // objectid is the Id of the revision that has to be restored
-function showFolderSelectDialog(restorationObjectId, path)
+function showFolderSelectDialog(restorationObjectId, path, orgFileName)
 {
     $('#restoration-objectid').val(restorationObjectId);
+    $('#newFileName').val(orgFileName);
+    $('#path').html( '<strong>' + path + '</strong>');
+    $('#orgFileName').html('<strong>' + orgFileName + '</strong>');
 
     alertPanelsHide()
 

@@ -212,12 +212,16 @@ class Revision extends MY_Controller
         $pathInfo = pathinfo($path);
         $revisionStartPath = $pathInfo['dirname'];
 
+        $parts = pathinfo($path);
+        $orgFileName = $parts['basename'];
+
         if (!$collectionExists) {
             $revisionStartPath = '';
         }
 
         $htmlDetail =  $this->load->view('revisiondetail',
             array(
+                'orgFileName' => $orgFileName,
                 'collectionExists' => $collectionExists,
                 'revisionStartPath' => $revisionStartPath,
                 'revisionFiles' => $revisionFiles,
