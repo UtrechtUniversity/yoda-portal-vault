@@ -53,16 +53,19 @@ $( document ).ready(function() {
         restoreRevision('restore_no_overwrite');
     });
 
-    $('#btn-restore-overwrite').on('click', function(){
+    $('#btn-restore-overwrite').on('click', function(event){
+        event.preventDefault();
         restoreRevision('restore_overwrite');
     });
 
-    $('#btn-restore-next-to').on('click', function(){
+    $('#btn-restore-next-to').on('click', function(event){
+        event.preventDefault();
         restoreRevision('restore_next_to');
     });
 
     $('#btn-cancel-overite-dialog').on('click', function(){
-        alertPanelsHide();
+        $('.cover').addClass('hide');
+        $('.revision-restore-dialog').removeClass('hide');
     });
 
 });
@@ -85,7 +88,6 @@ function restoreRevision(overwriteFlag)
 
     var restorationObjectId = $('#restoration-objectid').val(),
         newFileName = $('#newFileName').val();
-        ;
 
     if(newFileName.length==0 && overwriteFlag == 'restore_next_to') {
         alert('Please enter a name for the file you want to restore');
@@ -106,6 +108,8 @@ function restoreRevision(overwriteFlag)
             else if (data.status == 'PROMPT_Overwrite') {
                 alertPanelsHide();
                 $('.alert-panel-overwrite').removeClass('hide');
+                $('.cover').removeClass('hide');
+                $('.revision-restore-dialog').addClass('hide');
             }
             else if (data.status == 'PROMPT_SelectPathAgain') {
                 alertPanelsHide();
@@ -134,9 +138,13 @@ function restoreRevision(overwriteFlag)
 
 // functions for handling of folder selection - easy point of entry for select-folder functionality from the panels within dataTables
 // objectid is the Id of the revision that has to be restored
-function showFolderSelectDialog(restorationObjectId, path)
+function showFolderSelectDialog(restorationObjectId, path, orgFileName)
 {
     $('#restoration-objectid').val(restorationObjectId);
+    $('#newFileName').val(orgFileName);
+    //$('#path').html( '<strong>' + path + '</strong>');
+    $('#path').html(path);
+    $('#orgFileName').html('<strong>' + orgFileName + '</strong>');
 
     alertPanelsHide()
 
