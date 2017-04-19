@@ -59,3 +59,15 @@ ol.breadcrumb li.active {
     margin-top: 5px;
     margin-left: 5px;
 }
+
+.restore-exists.cover {
+    background-color: #ffffff;
+    border-radius: 5px;
+    left: 0;
+    opacity: 1;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index:1000;
+    padding:15px;
+}

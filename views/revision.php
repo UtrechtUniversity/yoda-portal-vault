@@ -3,23 +3,9 @@
     var browseDlgPageItems = <?php echo $dlgPageItems; ?>;
     var view = 'revision';
 </script>
-<style>
-    .cover {
-        background-color: #ffffff;
-        border-radius: 5px;
-        height: 100%;
-        left: 0;
-        opacity: 1;
-        position: absolute;
-        top: 0;
-        width: 100%;
-        z-index:1000;
-        padding:15px;
-    }
-</style>
 
 <div class="modal" id="select-folder">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <span class="modal-title">Select folder to restore revision</span>
@@ -32,41 +18,36 @@
             </ol>
 
             <div class="modal-body">
-                <div class="col-md-12">
-                    <div class="row">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
+                <div class="panel panel-default revision-restore-dialog">
+                    <div class="panel-body">
 
-                                <p class="alert-panel-error alert-panel hide" style="color:red;">
-                                    <i class="fa fa-exclamation-triangle"></i> Something has gone wrong
-                                    <br>
-                                    <span></span>
-                                </p>
-                                <p class="alert-panel-warning alert-panel hide" >
-                                    <i class="fa fa-exclamation-circle"></i>
-                                    <span></span>
-                                </p>
+                        <p class="alert-panel-error alert-panel hide" style="color:red;">
+                            <i class="fa fa-exclamation-triangle"></i> Something has gone wrong
+                            <br>
+                            <span></span>
+                        </p>
+                        <p class="alert-panel-warning alert-panel hide" >
+                            <i class="fa fa-exclamation-circle"></i>
+                            <span></span>
+                        </p>
 
 
-                                <p class="alert-panel-path-not-exists alert-panel hide">
-                                    <i class="fa fa-exclamation-circle"></i> The folder you selected does not exist anymore. Please select another folder.
-                                </p>
-                                <p class="alert-panel-path-permission-denied alert-panel hide">
-                                    <i class="fa fa-exclamation-circle"></i> You do not have enough permissions for the folder you selected. Please select another folder.
-                                </p>
+                        <p class="alert-panel-path-not-exists alert-panel hide">
+                            <i class="fa fa-exclamation-circle"></i> The folder you selected does not exist anymore. Please select another folder.
+                        </p>
+                        <p class="alert-panel-path-permission-denied alert-panel hide">
+                            <i class="fa fa-exclamation-circle"></i> You do not have enough permissions for the folder you selected. Please select another folder.
+                        </p>
 
 
-                                <table id="folder-browser" class="table yoda-table table-bordered">
-                                    <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Modified date</th>
-                                    </tr>
-                                    </thead>
-                                </table>
-                            </div>
-
-                        </div>
+                        <table id="folder-browser" class="table yoda-table table-bordered">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Modified date</th>
+                            </tr>
+                            </thead>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -75,7 +56,7 @@
                 <button class="btn button btn-success" id="btn-restore"><i class="fa fa-magic" aria-hidden="true"></i> Restore your file</button>
                 <button class="btn button grey" data-dismiss="modal">Close</button>
             </div>
-            <div id="coverAll" class="cover hide">
+            <div id="coverAll" class="cover restore-exists hide">
                 <div class="panel panel-default">
                     <div class="panel-heading clearfix">
                         <h3 class="panel-title pull-left">
@@ -87,36 +68,25 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <p class="alert-panel-overwrite alert-panel hide">
-                            The file
-                            <span id="orgFileName"></span>
-                            <br>
-                            <br>in folder
 
-                            <span id='path'> </span>
-                            <br><br>
-                            already exists.
-                            <br>
-                            <div class="col-md-6">
-                                You can choose to overwrite this file
-                            </div>
-                            <div class="col-md-6">
-                                Enter new name for the revision you want to restore
-                            </div>
 
-                            <div class="col-md-6">
-                            </div>
-                            <div class="col-md-6">
+                        <div class="alert alert-warning">
+                            The file <span id="orgFileName"></span> (location: <span id='path'> </span>) already exists.
+                        </div>
+
+                        <form class="form-inline pull-left">
+                            <p>Overwrite this file</p>
+                            <button class="btn btn-danger" id="btn-restore-overwrite">Overwrite</button>
+                        </form>
+
+                        <form class="form-inline pull-right">
+                            <p>Enter new name for the revision you want to restore</p>
+                            <div class="form-group">
+                                <label for="newFileName">New filename</label>
                                 <input type="text"  class="form-control" placeholder="Enter new filename" id="newFileName">
                             </div>
-
-                            <div class="col-md-6">
-                                <button class="btn btn-danger form-control" id="btn-restore-overwrite"><i class="fa fa-file-o" aria-hidden="true"></i> Overwrite</button>
-                            </div>
-                            <div class="col-md-6">
-                                <button class="btn btn-info form-control" id="btn-restore-next-to"><i class="fa fa-files-o" aria-hidden="true"></i> Restore with a new filename</button>
-                            </div>
-                        </p>
+                            <button  class="btn btn-primary" id="btn-restore-next-to">Restore with a new filename</button>
+                        </form>
                     </div>
                 </div>
             </div>

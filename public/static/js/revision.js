@@ -50,20 +50,22 @@ $( document ).ready(function() {
     // Button to actually restore the file
     $('#btn-restore').on('click', function(){
         //restoreRevision('restore_no_overwrite');
-        $('.cover').removeClass('hide');
         restoreRevision('restore_no_overwrite');
     });
 
-    $('#btn-restore-overwrite').on('click', function(){
+    $('#btn-restore-overwrite').on('click', function(event){
+        event.preventDefault();
         restoreRevision('restore_overwrite');
     });
 
-    $('#btn-restore-next-to').on('click', function(){
+    $('#btn-restore-next-to').on('click', function(event){
+        event.preventDefault();
         restoreRevision('restore_next_to');
     });
 
     $('#btn-cancel-overite-dialog').on('click', function(){
         $('.cover').addClass('hide');
+        $('.revision-restore-dialog').removeClass('hide');
     });
 
 });
@@ -106,6 +108,8 @@ function restoreRevision(overwriteFlag)
             else if (data.status == 'PROMPT_Overwrite') {
                 alertPanelsHide();
                 $('.alert-panel-overwrite').removeClass('hide');
+                $('.cover').removeClass('hide');
+                $('.revision-restore-dialog').addClass('hide');
             }
             else if (data.status == 'PROMPT_SelectPathAgain') {
                 alertPanelsHide();
@@ -138,7 +142,8 @@ function showFolderSelectDialog(restorationObjectId, path, orgFileName)
 {
     $('#restoration-objectid').val(restorationObjectId);
     $('#newFileName').val(orgFileName);
-    $('#path').html( '<strong>' + path + '</strong>');
+    //$('#path').html( '<strong>' + path + '</strong>');
+    $('#path').html(path);
     $('#orgFileName').html('<strong>' + orgFileName + '</strong>');
 
     alertPanelsHide()
