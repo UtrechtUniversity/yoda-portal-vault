@@ -50,7 +50,7 @@
                     </div>
                     <div class="panel-body">
                         <div class="alert alert-warning">
-                            The file <span id="orgFileName"></span> (location: <span id='path'> </span>) already exists.
+                            The file <strong><span id="orgFileName"></span></strong> (location: <span id='path'> </span>) already exists.
                         </div>
                         <div class="alert alert-danger hide" id="alertBox">
                             The file <span id="duplicate"></span> The renamed file already you try to add already exists.

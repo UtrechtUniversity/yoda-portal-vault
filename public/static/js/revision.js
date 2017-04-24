@@ -157,10 +157,10 @@ function showFolderSelectDialog(restorationObjectId, path, orgFileName)
     $('#restoration-objectid').val(restorationObjectId);
     $('#newFileName').val(decodedFileName.replace(/\+/g, ' '));
     //$('#path').html( '<strong>' + path + '</strong>');
-    $('#path').html(decodeURIComponent(path).replace(/\+/g, '%20'));
-    $('#orgFileName').html('<strong>' + decodedFileName.replace(/\+/g, '%20') + '</strong>');
 
-    //alertPanelsHide();
+    $('#path').text(decodeURIComponent(path).replace(/\+/g, '%20'));
+
+    $('#orgFileName').text(decodedFileName.replace(/\+/g, '%20'));
 
     startBrowsing(path, browseDlgPageItems);
     $('#select-folder').modal('show');
