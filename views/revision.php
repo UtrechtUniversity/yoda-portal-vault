@@ -21,25 +21,6 @@
                 <div class="panel panel-default revision-restore-dialog">
                     <div class="panel-body">
 
-                        <p class="alert-panel-error alert-panel hide" style="color:red;">
-                            <i class="fa fa-exclamation-triangle"></i> Something has gone wrong
-                            <br>
-                            <span></span>
-                        </p>
-                        <p class="alert-panel-warning alert-panel hide" >
-                            <i class="fa fa-exclamation-circle"></i>
-                            <span></span>
-                        </p>
-
-
-                        <p class="alert-panel-path-not-exists alert-panel hide">
-                            <i class="fa fa-exclamation-circle"></i> The folder you selected does not exist anymore. Please select another folder.
-                        </p>
-                        <p class="alert-panel-path-permission-denied alert-panel hide">
-                            <i class="fa fa-exclamation-circle"></i> You do not have enough permissions for the folder you selected. Please select another folder.
-                        </p>
-
-
                         <table id="folder-browser" class="table yoda-table table-bordered">
                             <thead>
                             <tr>
@@ -68,10 +49,11 @@
                         </div>
                     </div>
                     <div class="panel-body">
-
-
                         <div class="alert alert-warning">
                             The file <span id="orgFileName"></span> (location: <span id='path'> </span>) already exists.
+                        </div>
+                        <div class="alert alert-danger hide" id="alertBox">
+                            The file <span id="duplicate"></span> The renamed file already you try to add already exists.
                         </div>
 
                         <form class="form-inline pull-left">

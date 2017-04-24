@@ -76,6 +76,16 @@ function changeUrlSearchFilter(filter)
     history.replaceState({} , {}, url);
 }
 
+function setAlert(message)
+{
+    var obj = $('#alertBox');
+    if (obj.hasClass('hide')) {
+        obj.removeClass('hide');
+    }
+    obj.html(message);
+}
+
+
 // Restoration of file
 function restoreRevision(overwriteFlag)
 {
@@ -90,7 +100,7 @@ function restoreRevision(overwriteFlag)
         newFileName = $('#newFileName').val();
 
     if(newFileName.length==0 && overwriteFlag == 'restore_next_to') {
-        alert('Please enter a name for the file you want to restore');
+        setAlert('Please enter a name for the file you want to restore');
         return;
     }
 
@@ -101,37 +111,39 @@ function restoreRevision(overwriteFlag)
         success: function(data) {
 
             if(data.status== 'UNRECOVERABLE') {
-                alertPanelsHide();
+               // alertPanelsHide();
                 $('.alert-panel-error').removeClass('hide');
                 $('.alert-panel-error span').html('Error information: ' + data.statusInfo);
             }
             else if (data.status == 'PROMPT_Overwrite') {
-                alertPanelsHide();
+                //alertPanelsHide();
                 $('.alert-panel-overwrite').removeClass('hide');
                 $('.cover').removeClass('hide');
                 $('.revision-restore-dialog').addClass('hide');
             }
             else if (data.status == 'PROMPT_SelectPathAgain') {
-                alertPanelsHide();
-                $('.alert-panel-path-not-exists').removeClass('hide');
+                //alertPanelsHide();
+                //$('.alert-panel-path-not-exists').removeClass('hide');
+                setAlert('The folder you selected does not exist anymore. Please select another folder.');
             }
             else if (data.status == 'PROMPT_FileExistsEnteredByUser') {
-                alert('This filename already exists. Please enter another.');
+                setAlert('This filename already exists. Please enter another.');
                 return false;
             }
             else if (data.status == 'PROMPT_PermissionDenied') {
-                alertPanelsHide();
-                $('.alert-panel-path-permission-denied').removeClass('hide')
+                //alertPanelsHide();
+                //$('.alert-panel-path-permission-denied').removeClass('hide')
+                setAlert('You do not have enough permissions for the folder you selected. Please select another folder.');
             }
             else if (data.status == 'SUCCESS') {
-                alertPanelsHide();
+                //alertPanelsHide();
                 window.location.href = '/research/?dir=' + urlEncodedPath;
             }
         },
         error: function(data) {
-            alertPanelsHide();
-            $('.alert-panel-error').removeClass('hide');
-            $('.alert-panel-error span').html('Something went wrong. Please check your internet connection');
+            //alertPanelsHide();
+            //$('.alert-panel-error').removeClass('hide');
+            setAlert('Something went wrong. Please check your internet connection');
         }
     });
 }
@@ -140,26 +152,21 @@ function restoreRevision(overwriteFlag)
 // objectid is the Id of the revision that has to be restored
 function showFolderSelectDialog(restorationObjectId, path, orgFileName)
 {
-    $('#restoration-objectid').val(restorationObjectId);
-    $('#newFileName').val(orgFileName);
-    //$('#path').html( '<strong>' + path + '</strong>');
-    $('#path').html(path);
-    $('#orgFileName').html('<strong>' + orgFileName + '</strong>');
+    var decodedFileName = decodeURIComponent(orgFileName);
 
-    alertPanelsHide()
+    $('#restoration-objectid').val(restorationObjectId);
+    $('#newFileName').val(decodedFileName.replace(/\+/g, ' '));
+    //$('#path').html( '<strong>' + path + '</strong>');
+    $('#path').html(decodeURIComponent(path).replace(/\+/g, '%20'));
+    $('#orgFileName').html('<strong>' + decodedFileName.replace(/\+/g, '%20') + '</strong>');
+
+    //alertPanelsHide();
 
     startBrowsing(path, browseDlgPageItems);
     $('#select-folder').modal('show');
 }
 
-function alertPanelsHide()
-{
-    $('.alert-panel').each(function( index ) {
-        if (!$( this ).hasClass('hide') ) {
-            $(this).addClass('hide');
-        }
-    });
-}
+
 
 function startBrowsing(path, items)
 {
@@ -244,7 +251,7 @@ function htmlEncode(value){
 
 function changeBrowserUrl(path)
 {
-    alertPanelsHide();
+    //alertPanelsHide();
     urlEncodedPath = path;
 }
 
