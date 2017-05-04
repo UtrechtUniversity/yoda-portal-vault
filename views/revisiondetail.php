@@ -27,7 +27,10 @@
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group" aria-label="...">
-                                        <button type="button" class="btn btn-default btn-revision-select-dialog" data-orgfilename="<?php echo $orgFileName; ?>" data-objectid="<?php echo $row['id']; ?>" data-path="<?php echo $revisionStartPath; ?>"><i class="fa fa-magic" aria-hidden="true"></i> Restore</button>
+                                        <button type="button" class="btn btn-default btn-revision-select-dialog"
+                                                data-orgfilename="<?php echo urlencode($orgFileName); ?>"
+                                                data-objectid="<?php echo $row['id']; ?>"
+                                                data-path="<?php echo urlencode($revisionStartPath); ?>"><i class="fa fa-magic" aria-hidden="true"></i> Restore</button>
                                     </div>
                                 </td>
                             </tr>

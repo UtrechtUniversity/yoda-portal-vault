@@ -37,7 +37,7 @@
                 <?php if ($e->multipleAllowed()) { ?>
                     <div class="input-group">
                         <input type="text"
-                               placeholder="Enter a valid numeric number..."
+                               placeholder="Enter a valid number..."
                             <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
                                class="form-control numeric-field" name="<?php echo $e->key; ?>[]" value="<?php echo htmlentities($e->value); ?>">
                         <span class="input-group-btn">
@@ -47,7 +47,7 @@
                 <?php } else { ?>
 
                     <input type="text"
-                           placeholder="Enter a valid numeric number..."
+                           placeholder="Enter a valid number..."
                         <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
                            class="form-control numeric-field" name="<?php echo $e->key; ?>" value="<?php echo htmlentities($e->value); ?>">
 
