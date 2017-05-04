@@ -509,11 +509,11 @@ RULE;
         return array();
     }
 
-    static public function protectFolder($iRodsAccount, $path)
+    static public function lockFolder($iRodsAccount, $path)
     {
         $ruleBody = <<<'RULE'
 myRule {
-    iiFolderProtect(*path);
+    iiFolderLock(*folder);
 }
 
 
@@ -523,7 +523,7 @@ RULE;
                 $iRodsAccount,
                 $ruleBody,
                 array(
-                    "*path" => $path
+                    "*folder" => $path
                 ),
                 array('*result')
             );
@@ -539,11 +539,11 @@ RULE;
         }
     }
 
-    static public function unprotectFolder($iRodsAccount, $path)
+    static public function unlockFolder($iRodsAccount, $path)
     {
         $ruleBody = <<<'RULE'
 myRule {
-    iiFolderUnprotect(*path);
+    iiFolderUnlock(*folder);
 }
 
 
@@ -553,7 +553,7 @@ RULE;
                 $iRodsAccount,
                 $ruleBody,
                 array(
-                    "*path" => $path
+                    "*folder" => $path
                 ),
                 array()
             );

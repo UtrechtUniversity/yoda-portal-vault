@@ -14,11 +14,27 @@
     <div class="top-information">
         <h1></h1>
 
+        <div class="row">
+            <div class="col-md-12">
+                <div class="top-info-buttons">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
+                        <button type="button" class="btn btn-default toggle-folder-status" data-status="" data-path=""></button>
+                    </div>
 
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-default metadata-form" data-path=""><i class="fa fa-list" aria-hidden="true"></i> Metadata</button>
-            <button type="button" class="btn btn-default folder-status" data-status="" data-path=""></button>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default folder-status" disabled="disabled">
+                            Actions</button>
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span><span class="sr-only">Actions</span>
+                        </button>
+                        <ul class="dropdown-menu action-list" role="menu">
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div>
 
 

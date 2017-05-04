@@ -207,15 +207,15 @@ class Browse extends MY_Controller
         $path = $this->input->get('path');
         $output = array();
 
-        $beforeAction = 'PROTECTED';
+        $beforeAction = 'LOCKED';
 
-        if ($status == 'PROTECTED') {
-            // Protect Folder
-            $result = $this->filesystem->protectFolder($rodsaccount, $pathStart . $path);
-            $beforeAction = 'UNPROTECTED';
-        } else if ($status == 'UNPROTECTED') {
-            // Unprotect folder
-            $result = $this->filesystem->unprotectFolder($rodsaccount, $pathStart . $path);
+        if ($status == 'LOCKED') {
+            // Lock Folder
+            $result = $this->filesystem->lockFolder($rodsaccount, $pathStart . $path);
+            $beforeAction = 'UNLOCKED';
+        } else if ($status == 'UNLOCKED') {
+            // Unlock folder
+            $result = $this->filesystem->unlockFolder($rodsaccount, $pathStart . $path);
         }
 
         if ($result) {
