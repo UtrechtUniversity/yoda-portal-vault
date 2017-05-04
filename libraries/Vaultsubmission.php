@@ -38,7 +38,7 @@ class Vaultsubmission
         // Lock error
         $lockResult = $this->checkLock();
         if (!$lockResult) {
-            $messages[] = 'An locking error occurred';
+            $messages[] = 'A locking error occurred';
         }
 
         if (count($messages) > 0) {
@@ -56,6 +56,16 @@ class Vaultsubmission
         }
 
         return $result;
+    }
+
+    public function clearSubmitFlag(&$status, &$statusInfo)
+    {
+        $data = ''; //unused in this situtation
+        $this->CI->filesystem->UnsubmitFolderToVault($this->account, $this->folder, $status, $statusInfo);
+
+        //echo $statusInfo; exit;
+
+
     }
 
     private function validateXsd($xsdFilePath, $metadataFilePath)
@@ -108,12 +118,12 @@ class Vaultsubmission
         return $invalidFields;
     }
 
-    private function checkLock()
+    public function checkLock()
     {
         $lockStatus = $this->formConfig['lockFound'];
         $folderStatus = $this->formConfig['folderStatus'];
 
-        if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'UNPROTECTED')) {
+        if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == '')) {
             return true;
         }
 

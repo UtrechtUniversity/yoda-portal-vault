@@ -22,7 +22,6 @@ class Filesystem extends CI_Model {
 
         $metedataFile->open("w+", $rodsaccount->default_resc); //$this->config->item('rodsDefaultResource')
 
-
         $xml = new DOMDocument( "1.0", "UTF-8" );
 	    $xml->formatOutput = true;
 
@@ -153,7 +152,40 @@ RULE;
         }
     }
 
+    // Clear the status of the
+    static public function UnsubmitFolderToVault($iRodsAccount, $path, &$status, &$statusInfo)
+    {
+        $ruleBody = <<<'RULE'
+myRule {
+    iiFrontEndFolderUnsubmit(*path, *data, *status, *statusInfo);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path,
+                ),
+                array('*data',
+                    '*status',
+                    '*statusInfo'
+                )
+            );
 
+            $result = $rule->execute();
+
+            //*data is not used in this case
+            $status = $result['*status'];
+            $statusInfo = $result['*statusInfo'];
+
+            return true;
+
+        } catch(RODSException $e) {
+            $status = 'UNRECOVERABLE';
+            $statusInfo = $e->rodsErrAbbrToCode($e->getCodeAbbr());
+        }
+    }
 
     static public function cloneMetadata($iRodsAccount, $path, $parentPath)
     {
