@@ -3,10 +3,6 @@
     margin-top:10px;
 }
 
-.btn-group {
-    margin-bottom: 20px;
-}
-
 .browse, .browse-search {
     cursor: pointer;
 }
@@ -34,6 +30,18 @@ ol.breadcrumb li.active {
 
 .top-information {
     display: none;
+}
+
+.top-info-buttons {
+    border-top: 1.5px dotted #F5F5F5;
+    border-bottom: 1.5px dotted #F5F5F5;
+    margin-bottom: 10px;
+    padding: 10px 0;
+}
+
+.top-info-buttons .btn-group .toggle-folder-status,
+.top-info-buttons .btn-group .metadata-form {
+    margin-right: 10px;
 }
 
 .panel-heading .input-group-sm {
