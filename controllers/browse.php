@@ -46,6 +46,14 @@ class Browse extends MY_Controller
         $this->data['items'] = $this->config->item('browser-items-per-page');
         $this->data['dir'] = $this->input->get('dir');
 
+        /// Hdr test purposes
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+
+        $fullPath =  $pathStart . $this->input->get('dir');
+
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
+
         // Search results data
         $searchTerm = '';
         $searchStatusValue = '';
