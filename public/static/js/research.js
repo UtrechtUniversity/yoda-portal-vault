@@ -14,6 +14,10 @@ $( document ).ready(function() {
             toggleFolderStatus($(this).attr('data-status'), $(this).attr('data-path'));
         }
     });
+
+    $("body").on("click", "a.action-submit", function() {
+        submitToVault($(this).attr('data-folder'));
+    });
 });
 
 function browse(dir)
@@ -191,12 +195,17 @@ function topInformation(dir)
 
                     $('.btn-group button.folder-status').text('Locked');
                     actions['submit'] = 'Submit to vault';
+                } else if (status == 'SUBMITTED') {
+                    $('.btn-group button.toggle-folder-status').text('Unlock');
+                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    $('.btn-group button.folder-status').text('Submitted');
+                    actions['unsubmit'] = 'Unsubmit';
                 }
                 var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
                 $('.btn-group button.toggle-folder-status').attr('data-path', dir);
 
                 // Handle actions
-                handleActionsList(actions);
+                handleActionsList(actions, dir);
                 $('.top-info-buttons').show();
             } else {
                 $('.top-info-buttons').hide();
@@ -222,6 +231,12 @@ function topInformation(dir)
                 showStatusBtn = false;
             }
 
+            if (typeof status != 'undefined') {
+                if (status == 'SUBMITTED') {
+                    showStatusBtn = false;
+                }
+            }
+
             // Handle status btn
             if (showStatusBtn) {
                 $('.btn-group button.toggle-folder-status').show();
@@ -239,14 +254,14 @@ function topInformation(dir)
     }
 }
 
-function handleActionsList(actions)
+function handleActionsList(actions, folder)
 {
     var html = '';
-    var possibleActions = ['submit'];
+    var possibleActions = ['submit', 'unsubmit'];
 
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
-            html += '<li><a href="#" class="action-' + value + '">' + actions[value] + '</a></li>';
+            html += '<li><a class="action-' + value + '" data-folder="' + folder + '">' + actions[value] + '</a></li>';
         }
     });
 
@@ -282,7 +297,7 @@ function toggleFolderStatus(newStatus, path)
 
             $('.btn-group button.folder-status').text('Actions');
         }
-        handleActionsList(actions);
+        handleActionsList(actions, path);
 
         // Change icon
         $('.top-information h1 .icon').empty().html(icon);
@@ -295,4 +310,39 @@ function toggleFolderStatus(newStatus, path)
 function showMetadataForm(path)
 {
     window.location.href = 'metadata/form?path=' + path;
+}
+
+
+function submitToVault(folder)
+{
+    if (typeof folder != 'undefined') {
+        // Set spinner & disable button
+        var btnText = $('.btn-group button.folder-status').html();
+        $('.btn-group button.folder-status').html('Submit to vault <i class="fa fa-spinner fa-spin fa-fw"></i>');
+        $('.btn-group button.folder-status').prop("disabled", true);
+        $('.btn-group button.folder-status').next().prop("disabled", true);
+
+        $.getJSON("vault/submit?path=" + folder, function (data) {
+            if (data.status == 'success') {
+                $('.btn-group button.folder-status').html('Submitted');
+
+                // Set folder status -> Locked
+                $('.btn-group button.toggle-folder-status').text('Unlock');
+                $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                $('.btn-group button.toggle-folder-status').prop("disabled", true);
+
+                // Set ubsibmit action
+                var actions = [];
+                actions['ubsubmit'] = 'Unsubmit';
+                handleActionsList(actions, folder);
+            } else {
+                $('.btn-group button.folder-status').html(btnText);
+            }
+
+            $('.btn-group button.folder-status').removeAttr("disabled");
+            $('.btn-group button.folder-status').next().removeAttr("disabled");
+
+            alert(data.text)
+        });
+    }
 }

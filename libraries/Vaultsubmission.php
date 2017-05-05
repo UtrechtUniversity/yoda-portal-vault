@@ -66,7 +66,7 @@ class Vaultsubmission
 
         libxml_use_internal_errors(true);
         $xml = new DOMDocument();
-        $xml->loadXML($metadataContent);
+        @$xml->loadXML($metadataContent);
         $isValid = $xml->schemaValidateSource($xsdContent);
 
         if (!$isValid) {
@@ -113,7 +113,7 @@ class Vaultsubmission
         $lockStatus = $this->formConfig['lockFound'];
         $folderStatus = $this->formConfig['folderStatus'];
 
-        if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'UNPROTECTED')) {
+        if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == '')) {
             return true;
         }
 

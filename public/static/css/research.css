@@ -44,6 +44,10 @@ ol.breadcrumb li.active {
     margin-right: 10px;
 }
 
+.action-list li {
+    cursor: pointer;
+}
+
 .panel-heading .input-group-sm {
     margin: -7px; /* btn in panel heading */
 }
