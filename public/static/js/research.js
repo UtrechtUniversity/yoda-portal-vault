@@ -18,6 +18,10 @@ $( document ).ready(function() {
     $("body").on("click", "a.action-submit", function() {
         submitToVault($(this).attr('data-folder'));
     });
+
+    $("body").on("click", "a.action-unsubmit", function() {
+        unsubmitToVault($(this).attr('data-folder'));
+    });
 });
 
 function browse(dir)
@@ -334,16 +338,42 @@ function submitToVault(folder)
 
                 // Set ubsibmit action
                 var actions = [];
-                actions['ubsubmit'] = 'Unsubmit';
+                actions['unsubmit'] = 'Unsubmit';
+                handleActionsList(actions, folder);
+            } else {
+                $('.btn-group button.folder-status').html(btnText);
+                alert(data.text);
+            }
+
+            $('.btn-group button.folder-status').next().removeAttr("disabled");
+        });
+    }
+}
+
+function unsubmitToVault(folder) {
+    if (typeof folder != 'undefined') {
+        var btnText = $('.btn-group button.folder-status').html();
+        $('.btn-group button.folder-status').html('Unsubmit to vault <i class="fa fa-spinner fa-spin fa-fw"></i>');
+        $('.btn-group button.folder-status').prop("disabled", true);
+        $('.btn-group button.folder-status').next().prop("disabled", true);
+        $.getJSON("vault/unsubmit?path=" + folder, function (data) {
+            if (data.status == 'SUCCESS') {
+                // Set folder status -> Locked
+                $('.btn-group button.toggle-folder-status').text('Unlock');
+                $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                $('.btn-group button.folder-status').html('Locked');
+                $('.btn-group button.toggle-folder-status').removeAttr("disabled");
+
+                // Set submit action
+                var actions = [];
+                actions['submit'] = 'Submit to vault';
                 handleActionsList(actions, folder);
             } else {
                 $('.btn-group button.folder-status').html(btnText);
             }
 
-            $('.btn-group button.folder-status').removeAttr("disabled");
             $('.btn-group button.folder-status').next().removeAttr("disabled");
-
-            alert(data.text)
         });
+
     }
 }
