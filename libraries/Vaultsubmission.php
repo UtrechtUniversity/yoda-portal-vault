@@ -76,7 +76,7 @@ class Vaultsubmission
 
         libxml_use_internal_errors(true);
         $xml = new DOMDocument();
-        $xml->loadXML($metadataContent);
+        @$xml->loadXML($metadataContent);
         $isValid = $xml->schemaValidateSource($xsdContent);
 
         if (!$isValid) {
