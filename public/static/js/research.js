@@ -194,10 +194,13 @@ function topInformation(dir)
                 }
                 var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
                 $('.btn-group button.toggle-folder-status').attr('data-path', dir);
-            }
 
-            // Handle actions
-            handleActionsList(actions);
+                // Handle actions
+                handleActionsList(actions);
+                $('.top-info-buttons').show();
+            } else {
+                $('.top-info-buttons').hide();
+            }
 
             // Lock position check
             var lockFound = data.lockFound;
@@ -222,8 +225,9 @@ function topInformation(dir)
             // Handle status btn
             if (showStatusBtn) {
                 $('.btn-group button.toggle-folder-status').show();
+                $('.btn-group button.toggle-folder-status').prop("disabled", false);
             } else {
-                $('.btn-group button.toggle-folder-status').hide();
+                $('.btn-group button.toggle-folder-status').prop("disabled", true);
             }
 
             // data.basename.replace(/ /g, "&nbsp;")
