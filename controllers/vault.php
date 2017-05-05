@@ -59,6 +59,17 @@ class Vault extends MY_Controller
     {
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $dirPath = $this->input->get('folder');
+        $path = $this->input->get('path');
+        $fullPath =  $pathStart . $path;
+
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
+        $folderStatus = $formConfig['folderStatus'];
+        $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
+
+        if ($folderStatus == 'SUBMITTED') {
+            $this->vaultsubmission->clearSubmitFlag($status, $statusInfo);
+        }
+
+        echo json_encode(array('status' => $status));
     }
 }
