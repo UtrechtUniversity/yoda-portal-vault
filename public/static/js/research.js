@@ -189,6 +189,7 @@ function topInformation(dir)
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
 
                     actions['submit'] = 'Submit to vault';
+                    $('.btn-group button.folder-status').text('Actions');
                 } else if (status == 'LOCKED') { // Locked folder
                     $('.btn-group button.toggle-folder-status').text('Unlock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
