@@ -175,6 +175,7 @@ function topInformation(dir)
             var metadata = data.userMetadata;
             var status = data.folderStatus;
             var userType = data.userType;
+            var isDatamanager = data.isDatamanager;
             var showStatusBtn = false;
             var actions = [];
 
@@ -231,9 +232,22 @@ function topInformation(dir)
                 showStatusBtn = true;
             }
 
-            if (userType != 'normal' && userType != "manager") {
+            if (userType == 'reader') {
                 // Hide folder status button for read permission
                 showStatusBtn = false;
+                // disable status dropdown.
+                $('.btn-group button.folder-status').next().prop("disabled", true);
+
+            }
+
+            if (isDatamanager == 'yes') {
+                // Check rights as datamanager.
+                if (userType != 'manager' || userType != 'manager') {
+                    // Hide folder status button for read permission
+                    showStatusBtn = false;
+                    // disable status dropdown.
+                    $('.btn-group button.folder-status').next().prop("disabled", true);
+                }
             }
 
             if (typeof status != 'undefined') {
