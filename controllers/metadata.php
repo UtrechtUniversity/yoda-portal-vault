@@ -217,6 +217,7 @@ class Metadata extends MY_Controller
                 if ($folderStatus == 'SUBMITTED') {
                     $this->vaultsubmission->clearSubmitFlag($status, $message);
                     if ($status == 'SUCCESS') {
+                        $message = 'This folder was successfully unsubmitted from the vault';
                         $messageType = 'success';
                     }
                     else {

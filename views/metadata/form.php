@@ -60,7 +60,7 @@
                             <div class="col-sm-12">
 
                                 <?php if ($showUnsubmitBtn) { ?>
-                                    <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit</button>
+                                    <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit from vault</button>
                                 <?php } ?>
 
                                 <?php if ($form->getPermission() == 'write') { ?>
@@ -109,7 +109,7 @@
                         <div class="form-group">
                             <div class="col-sm-12">
                                 <?php if ($showUnsubmitBtn) { ?>
-                                    <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit</button>
+                                    <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit from vault</button>
                                 <?php } ?>
 
                                 <?php if ($form->getPermission() == 'write') { ?>

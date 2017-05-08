@@ -152,12 +152,15 @@ RULE;
         }
     }
 
-    // Clear the status of the
+    // Clear the SUBMITTED status of the folder
     static public function UnsubmitFolderToVault($iRodsAccount, $path, &$status, &$statusInfo)
     {
+        $status = 'SUCCESS';
+        $statusInfo = '';
+
         $ruleBody = <<<'RULE'
 myRule {
-    iiFrontEndFolderUnsubmit(*path, *data, *status, *statusInfo);
+    iiFolderUnsubmit(*folder);
 }
 RULE;
         try {
@@ -165,25 +168,21 @@ RULE;
                 $iRodsAccount,
                 $ruleBody,
                 array(
-                    "*path" => $path,
+                    "*folder" => $path,
                 ),
-                array('*data',
-                    '*status',
-                    '*statusInfo'
-                )
+                array()
             );
 
             $result = $rule->execute();
-
-            //*data is not used in this case
-            $status = $result['*status'];
-            $statusInfo = $result['*statusInfo'];
 
             return true;
 
         } catch(RODSException $e) {
             $status = 'UNRECOVERABLE';
             $statusInfo = $e->rodsErrAbbrToCode($e->getCodeAbbr());
+            echo 'error2';exit;
+
+            return false;
         }
     }
 

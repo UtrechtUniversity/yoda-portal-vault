@@ -60,12 +60,8 @@ class Vaultsubmission
 
     public function clearSubmitFlag(&$status, &$statusInfo)
     {
-        $data = ''; //unused in this situtation
-        $this->CI->filesystem->UnsubmitFolderToVault($this->account, $this->folder, $status, $statusInfo);
 
-        //echo $statusInfo; exit;
-
-
+        return $this->CI->filesystem->UnsubmitFolderToVault($this->account, $this->folder, $status, $statusInfo);
     }
 
     private function validateXsd($xsdFilePath, $metadataFilePath)
