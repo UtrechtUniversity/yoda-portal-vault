@@ -242,7 +242,7 @@ function topInformation(dir)
 
             if (isDatamanager == 'yes') {
                 // Check rights as datamanager.
-                if (userType != 'manager' || userType != 'manager') {
+                if (userType != 'manager' && userType != 'normal') {
                     // Hide folder status button for read permission
                     showStatusBtn = false;
                     // disable status dropdown.
