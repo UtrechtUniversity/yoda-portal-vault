@@ -69,7 +69,8 @@
 
                                 <?php if ($metadataCompleteness == 100 && $submitToVaultBtn) { ?>
                                     <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit to vault</button>
-                                <?php } elseif($form->getPermission() == 'write') { ?>
+                                <?php } ?>
+                                <?php if($form->getPermission() == 'write') { ?>
                                     <span  class="add-pointer" aria-hidden="true" data-toggle="tooltip" title="Required for the vault:  <?php echo $mandatoryTotal; ?>, currently filled required fields: <?php  echo $mandatoryFilled; ?>">
                                         <i class="fa fa-check <?php echo $metadataCompleteness>19 ? 'form-required-present': 'form-required-missing'; ?>"></i>
                                         <i class="fa fa-check <?php echo $metadataCompleteness>39 ? 'form-required-present': 'form-required-missing'; ?>"></i>
