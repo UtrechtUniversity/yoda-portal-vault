@@ -60,7 +60,7 @@
                             <div class="col-sm-12">
 
                                 <?php if ($showUnsubmitBtn) { ?>
-                                    <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit from vault</button>
+                                    <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit</button>
                                 <?php } ?>
 
                                 <?php if ($form->getPermission() == 'write') { ?>
@@ -68,7 +68,7 @@
                                 <?php } ?>
 
                                 <?php if ($metadataCompleteness == 100 && $submitToVaultBtn) { ?>
-                                    <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit to vault</button>
+                                    <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit</button>
                                 <?php } ?>
                                 <?php if($form->getPermission() == 'write') { ?>
                                     <span  class="add-pointer" aria-hidden="true" data-toggle="tooltip" title="Required for the vault:  <?php echo $mandatoryTotal; ?>, currently filled required fields: <?php  echo $mandatoryFilled; ?>">
@@ -110,14 +110,14 @@
                         <div class="form-group">
                             <div class="col-sm-12">
                                 <?php if ($showUnsubmitBtn) { ?>
-                                    <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit from vault</button>
+                                    <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit</button>
                                 <?php } ?>
 
                                 <?php if ($form->getPermission() == 'write') { ?>
                                     <button type="submit" class="btn btn-primary">Save</button>
                                 <?php } ?>
                                 <?php if ($metadataCompleteness == 100 && $submitToVaultBtn) { ?>
-                                    <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit to vault</button>
+                                    <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit</button>
                                 <?php } ?>
                                 <?php if ($form->getPermission() == 'write' && $metadataExists) { ?>
                                     <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>

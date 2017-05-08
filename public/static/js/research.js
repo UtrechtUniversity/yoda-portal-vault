@@ -193,14 +193,14 @@ function topInformation(dir)
                     $('.btn-group button.toggle-folder-status').text('Lock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
 
-                    actions['submit'] = 'Submit to vault';
+                    actions['submit'] = 'Submit';
                     $('.btn-group button.folder-status').text('Actions');
                 } else if (status == 'LOCKED') { // Locked folder
                     $('.btn-group button.toggle-folder-status').text('Unlock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
 
                     $('.btn-group button.folder-status').text('Locked');
-                    actions['submit'] = 'Submit to vault';
+                    actions['submit'] = 'Submit';
                 } else if (status == 'SUBMITTED') {
                     $('.btn-group button.toggle-folder-status').text('Unlock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
@@ -300,7 +300,7 @@ function toggleFolderStatus(newStatus, path)
     $.getJSON("browse/change_folder_status?path=" + path + "&status=" + newStatus, function(data) {
         // Set actions
         var actions = [];
-        actions['submit'] = 'Submit to vault';
+        actions['submit'] = 'Submit';
 
         if (data.status == 'LOCKED') {
             $('.btn-group button.toggle-folder-status').text('Unlock');
@@ -337,7 +337,7 @@ function submitToVault(folder)
     if (typeof folder != 'undefined') {
         // Set spinner & disable button
         var btnText = $('.btn-group button.folder-status').html();
-        $('.btn-group button.folder-status').html('Submit to vault <i class="fa fa-spinner fa-spin fa-fw"></i>');
+        $('.btn-group button.folder-status').html('Submit <i class="fa fa-spinner fa-spin fa-fw"></i>');
         $('.btn-group button.folder-status').prop("disabled", true);
         $('.btn-group button.folder-status').next().prop("disabled", true);
 
@@ -367,7 +367,7 @@ function submitToVault(folder)
 function unsubmitToVault(folder) {
     if (typeof folder != 'undefined') {
         var btnText = $('.btn-group button.folder-status').html();
-        $('.btn-group button.folder-status').html('Unsubmit to vault <i class="fa fa-spinner fa-spin fa-fw"></i>');
+        $('.btn-group button.folder-status').html('Unsubmit <i class="fa fa-spinner fa-spin fa-fw"></i>');
         $('.btn-group button.folder-status').prop("disabled", true);
         $('.btn-group button.folder-status').next().prop("disabled", true);
         $.getJSON("vault/unsubmit?path=" + folder, function (data) {
@@ -380,7 +380,7 @@ function unsubmitToVault(folder) {
 
                 // Set submit action
                 var actions = [];
-                actions['submit'] = 'Submit to vault';
+                actions['submit'] = 'Submit';
                 handleActionsList(actions, folder);
             } else {
                 $('.btn-group button.folder-status').html(btnText);
