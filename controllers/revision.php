@@ -99,6 +99,18 @@ class Revision extends MY_Controller
         $targetDir = $this->input->get('targetdir');
         $newFileName = $this->input->get('newFileName'); // new file name as entered by user when option is 'restore_next_to'
 
+        // Characters / and \ will invoke creation of a new folder.
+        if (strpos($newFileName,'/')!==FALSE OR strpos($newFileName,'\'')!==FALSE) {
+            $output = array(
+                'status' => 'PROMPT_NewFolderNotAllowed',
+                'statusInfo' => ''
+            );
+
+            echo json_encode($output);
+            return;
+        }
+
+
         $path = $pathStart;
         if (!empty($targetDir)) {
             $path .= $targetDir;

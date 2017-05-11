@@ -99,9 +99,15 @@ function restoreRevision(overwriteFlag)
     var restorationObjectId = $('#restoration-objectid').val(),
         newFileName = $('#newFileName').val();
 
-    if(newFileName.length==0 && overwriteFlag == 'restore_next_to') {
-        setAlert('Please enter a name for the file you want to restore');
-        return;
+    if (overwriteFlag == 'restore_next_to') {
+        if (newFileName.length==0) {
+            setAlert('Please enter a name for the file you want to restore');
+            return;
+        }
+        if (!(newFileName.indexOf('/')==-1 && newFileName.indexOf('\\')==-1)) {
+            setAlert('It is not allowed to use "/" or "\\" in a filename.');
+            return;
+        }
     }
 
     $.ajax({
@@ -128,6 +134,10 @@ function restoreRevision(overwriteFlag)
             }
             else if (data.status == 'PROMPT_FileExistsEnteredByUser') {
                 setAlert('This filename already exists. Please enter another.');
+                return false;
+            }
+            else if (data.status == 'PROMPT_NewFolderNotAllowed') {
+                setAlert('It is not allowed to use "/" or "\\" in a filename.');
                 return false;
             }
             else if (data.status == 'PROMPT_PermissionDenied') {
