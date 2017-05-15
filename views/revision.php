@@ -49,27 +49,44 @@
                         </div>
                     </div>
                     <div class="panel-body">
-                        <div class="alert alert-warning">
-                            The file <strong><span id="orgFileName"></span></strong> (location: <span id='path'> </span>) already exists.
-                        </div>
-                        <div class="alert alert-danger hide" id="alertBox">
-                            The file <span id="duplicate"></span> The renamed file already you try to add already exists.
-                        </div>
-
-                        <form class="form-inline pull-left">
-                            <p>Overwrite this file</p>
-                            <button class="btn btn-danger" id="btn-restore-overwrite">Overwrite</button>
-                        </form>
-
-                        <form class="form-inline pull-right">
-                            <p>Enter new name for the revision you want to restore</p>
-                            <div class="form-group">
-                                <label for="newFileName">New filename</label>
-                                <input type="text"  class="form-control" placeholder="Enter new filename" id="newFileName">
+                        <div class="mode-dlg-exists hide">
+                            <div class="alert alert-warning">
+                                The file <strong><span class="orgFileName"></span></strong> (location: <span class='path'> </span>) already exists.
                             </div>
-                            <button  class="btn btn-primary" id="btn-restore-next-to">Restore with a new filename</button>
-                        </form>
+
+                            <div class="alert alert-danger hide" id="alertBox">
+                                The file <span id="duplicate"></span> The renamed file already you try to add already exists.
+                            </div>
+
+                            <form class="form-inline pull-left">
+                                <p>Overwrite this file</p>
+                                <button class="btn btn-danger" id="btn-restore-overwrite">Overwrite</button>
+                            </form>
+
+                            <form class="form-inline pull-right">
+                                <p>Enter new name for the revision you want to restore</p>
+                                <div class="form-group">
+                                    <label for="newFileName">New filename</label>
+                                    <input type="text"  class="form-control" placeholder="Enter new filename" id="newFileName">
+                                </div>
+                                <button  class="btn btn-primary" id="btn-restore-next-to">Restore with a new filename</button>
+                            </form>
+                        </div>
+                        <div class="mode-dlg-locked hide">
+                            <div class="alert alert-danger">
+                                Revision of the file <strong><span class="orgFileName"></span></strong> can not be placed in location: <strong><span class='path'> </span></strong>.
+                                <br>
+                                <br>
+                                <br>This folder is in a locked state and can therefore not be changed.
+                                <br>
+                                <br>Please select another folder for placement of your revision.
+                            </div>
+
+                            <button class="btn btn-default"  id="btn-select-other-folder" >Select other folder...</button>
+                        </div>
+
                     </div>
+
                 </div>
             </div>
 

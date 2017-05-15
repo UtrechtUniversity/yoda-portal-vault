@@ -131,9 +131,12 @@ class Revision extends MY_Controller
                 $statusInfo = '(100) The selected revision was not found could not be found. Please select another.';
                 $frontEndState = 'UNRECOVERABLE';
                 break;
-
             case 'TargetPathDoesNotExist':
+                //$statusInfo = '';
                 $frontEndState = 'PROMPT_SelectPathAgain';
+                break;
+            case 'TargetPathLocked':
+                $frontEndState = 'PROMPT_TargetPathLocked';
                 break;
             case 'FileExistsEnteredByUser':
                 $frontEndState = 'PROMPT_FileExistsEnteredByUser';

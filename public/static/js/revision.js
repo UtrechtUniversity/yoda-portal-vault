@@ -63,6 +63,10 @@ $( document ).ready(function() {
         restoreRevision('restore_next_to');
     });
 
+    $('#btn-select-other-folder').on('click', function(){
+        $('.cover').addClass('hide');
+        $('.revision-restore-dialog').removeClass('hide');
+    });
     $('#btn-cancel-overite-dialog').on('click', function(){
         $('.cover').addClass('hide');
         $('.revision-restore-dialog').removeClass('hide');
@@ -115,17 +119,32 @@ function restoreRevision(overwriteFlag)
         type: 'GET',
         dataType: 'json',
         success: function(data) {
+            $('.path').text(decodeURIComponent(urlEncodedPath).replace(/\+/g, ' '));
 
             if(data.status== 'UNRECOVERABLE') {
                // alertPanelsHide();
                 $('.alert-panel-error').removeClass('hide');
                 $('.alert-panel-error span').html('Error information: ' + data.statusInfo);
             }
+            else if (data.status == 'PROMPT_TargetPathLocked') {
+                //alertPanelsHide();
+                //$('.alert-panel-path-not-exists').removeClass('hide');
+                // This is a different situation
+                $('.alert-panel-overwrite').removeClass('hide');
+                $('.cover').removeClass('hide');
+                $('.revision-restore-dialog').addClass('hide');
+                // set the correct mode of the dialog
+                $('.mode-dlg-locked').removeClass('hide');
+                $('.mode-dlg-exists').addClass('hide');
+            }
             else if (data.status == 'PROMPT_Overwrite') {
                 //alertPanelsHide();
                 $('.alert-panel-overwrite').removeClass('hide');
                 $('.cover').removeClass('hide');
                 $('.revision-restore-dialog').addClass('hide');
+                // set the correct mode of the dialog
+                $('.mode-dlg-locked').addClass('hide');
+                $('.mode-dlg-exists').removeClass('hide');
             }
             else if (data.status == 'PROMPT_SelectPathAgain') {
                 //alertPanelsHide();
@@ -168,9 +187,9 @@ function showFolderSelectDialog(restorationObjectId, path, orgFileName)
     $('#newFileName').val(decodedFileName.replace(/\+/g, ' '));
     //$('#path').html( '<strong>' + path + '</strong>');
 
-    $('#path').text(decodeURIComponent(path).replace(/\+/g, '%20'));
+    $('.path').text(decodeURIComponent(path).replace(/\+/g, '%20'));
 
-    $('#orgFileName').text(decodedFileName.replace(/\+/g, '%20'));
+    $('.orgFileName').text(decodedFileName.replace(/\+/g, '%20'));
 
     startBrowsing(path, browseDlgPageItems);
     $('#select-folder').modal('show');
