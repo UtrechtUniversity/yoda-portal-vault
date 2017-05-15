@@ -192,6 +192,14 @@ function showFolderSelectDialog(restorationObjectId, path, orgFileName)
     $('.orgFileName').text(decodedFileName.replace(/\+/g, '%20'));
 
     startBrowsing(path, browseDlgPageItems);
+    $('.mode-dlg-locked').addClass('hide');
+    $('.mode-dlg-exists').addClass('hide');
+
+    $('.alert-panel-overwrite').addClass('hide');
+    $('.cover').addClass('hide');
+    $('.revision-restore-dialog').removeClass('hide');
+
+
     $('#select-folder').modal('show');
 }
 
