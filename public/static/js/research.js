@@ -219,9 +219,21 @@ function topInformation(dir)
                     $('.btn-group button.toggle-folder-status').text('Unlock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
                     $('.btn-group button.folder-status').next().prop("disabled", true);
+                } else if (status == 'SECURED') {
+                    $('.btn-group button.folder-status').text('Secured');
+                    $('.btn-group button.toggle-folder-status').text('Unlock');
+                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    $('.btn-group button.folder-status').next().prop("disabled", true);
+                } else if (status == 'REJECTED') {
+                    $('.btn-group button.folder-status').text('Rejected');
+                    $('.btn-group button.toggle-folder-status').text('Unlock');
+                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    $('.btn-group button.folder-status').next().prop("disabled", true);
                 }
                 var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
                 $('.btn-group button.toggle-folder-status').attr('data-path', dir);
+
+                $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
 
                 $('.top-info-buttons').show();
             } else {
@@ -345,6 +357,7 @@ function toggleFolderStatus(newStatus, path)
 
         // Remove disable attribute
         $('.btn-group button.toggle-folder-status').removeAttr("disabled");
+        $('.btn-group button.folder-status').next().prop("disabled", false);
     });
 }
 
@@ -375,6 +388,15 @@ function submitToVault(folder)
                 // Set ubsibmit action
                 var actions = [];
                 actions['unsubmit'] = 'Unsubmit';
+
+                // Datamanager actions
+                var isDatamanager = $('.btn-group button.folder-status').attr('data-datamanager');
+                console.log(isDatamanager);
+                if (isDatamanager == 'yes') {
+                    actions['accept'] = 'Accept';
+                    actions['reject'] = 'Reject';
+                }
+
                 handleActionsList(actions, folder);
             } else {
                 $('.btn-group button.folder-status').html(btnText);
@@ -424,6 +446,23 @@ function acceptFolder(folder)
     $.getJSON("vault/accept?path=" + folder, function (data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html('Accepted');
+
+        } else {
+            $('.btn-group button.folder-status').html(btnText);
+            setMessage('error', data.statusInfo);
+        }
+    });
+}
+
+function rejectFolder(folder)
+{
+    var btnText = $('.btn-group button.folder-status').html();
+    $('.btn-group button.folder-status').html('Reject <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').prop("disabled", true);
+    $('.btn-group button.folder-status').next().prop("disabled", true);
+    $.getJSON("vault/reject?path=" + folder, function (data) {
+        if (data.status == 'Success') {
+            $('.btn-group button.folder-status').html('Rejected');
 
         } else {
             $('.btn-group button.folder-status').html(btnText);
