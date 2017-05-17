@@ -78,4 +78,15 @@ class Vault extends MY_Controller
 
         echo json_encode(array('status' => $status, 'statusInfo' => $statusInfo));
     }
+
+    public function accept()
+    {
+        $this->load->model('Folder_Status_model');
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $path = $this->input->get('path');
+        $fullPath =  $pathStart . $path;
+
+        $result = $this->Folder_Status_model->accept($fullPath);
+        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+    }
 }

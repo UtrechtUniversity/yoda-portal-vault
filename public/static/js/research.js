@@ -22,6 +22,14 @@ $( document ).ready(function() {
     $("body").on("click", "a.action-unsubmit", function() {
         unsubmitToVault($(this).attr('data-folder'));
     });
+
+    $("body").on("click", "a.action-accept", function() {
+        acceptFolder($(this).attr('data-folder'));
+    });
+
+    $("body").on("click", "a.action-reject", function() {
+        rejectFolder($(this).attr('data-folder'));
+    });
 });
 
 function browse(dir)
@@ -206,6 +214,11 @@ function topInformation(dir)
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
                     $('.btn-group button.folder-status').text('Submitted');
                     actions['unsubmit'] = 'Unsubmit';
+                } else if (status == 'ACCEPTED') {
+                    $('.btn-group button.folder-status').text('Accepted');
+                    $('.btn-group button.toggle-folder-status').text('Unlock');
+                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    $('.btn-group button.folder-status').next().prop("disabled", true);
                 }
                 var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
                 $('.btn-group button.toggle-folder-status').attr('data-path', dir);
@@ -258,7 +271,7 @@ function topInformation(dir)
             }
 
             if (typeof status != 'undefined') {
-                if (status == 'SUBMITTED') {
+                if (status == 'SUBMITTED' || status == 'ACCEPTED') {
                     showStatusBtn = false;
                 }
             }
@@ -400,4 +413,21 @@ function unsubmitToVault(folder) {
         });
 
     }
+}
+
+function acceptFolder(folder)
+{
+    var btnText = $('.btn-group button.folder-status').html();
+    $('.btn-group button.folder-status').html('Accept <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').prop("disabled", true);
+    $('.btn-group button.folder-status').next().prop("disabled", true);
+    $.getJSON("vault/accept?path=" + folder, function (data) {
+        if (data.status == 'Success') {
+            $('.btn-group button.folder-status').html('Accepted');
+
+        } else {
+            $('.btn-group button.folder-status').html(btnText);
+            setMessage('error', data.statusInfo);
+        }
+    });
 }
