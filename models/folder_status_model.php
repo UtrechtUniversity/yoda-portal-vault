@@ -58,4 +58,27 @@ class Folder_Status_model extends CI_Model
         return $result;
     }
 
+    function accept($folder)
+    {
+        $outputParams = array('*status', '*statusInfo');
+        $inputParams = array('*folder' => $folder);
+
+        $this->CI->load->library('irodsrule');
+        $rule = $this->irodsrule->make('iiFolderAccept', $inputParams, $outputParams);
+
+        $result = $rule->execute();
+        return $result;
+    }
+
+    function reject($folder)
+    {
+        $outputParams = array('*status', '*statusInfo');
+        $inputParams = array('*folder' => $folder);
+
+        $this->CI->load->library('irodsrule');
+        $rule = $this->irodsrule->make('iiFolderReject', $inputParams, $outputParams);
+
+        $result = $rule->execute();
+        return $result;
+    }
 }

@@ -22,6 +22,14 @@ $( document ).ready(function() {
     $("body").on("click", "a.action-unsubmit", function() {
         unsubmitToVault($(this).attr('data-folder'));
     });
+
+    $("body").on("click", "a.action-accept", function() {
+        acceptFolder($(this).attr('data-folder'));
+    });
+
+    $("body").on("click", "a.action-reject", function() {
+        rejectFolder($(this).attr('data-folder'));
+    });
 });
 
 function browse(dir)
@@ -206,12 +214,27 @@ function topInformation(dir)
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
                     $('.btn-group button.folder-status').text('Submitted');
                     actions['unsubmit'] = 'Unsubmit';
+                } else if (status == 'ACCEPTED') {
+                    $('.btn-group button.folder-status').text('Accepted');
+                    $('.btn-group button.toggle-folder-status').text('Unlock');
+                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    $('.btn-group button.folder-status').next().prop("disabled", true);
+                } else if (status == 'SECURED') {
+                    $('.btn-group button.folder-status').text('Secured');
+                    $('.btn-group button.toggle-folder-status').text('Unlock');
+                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    $('.btn-group button.folder-status').next().prop("disabled", true);
+                } else if (status == 'REJECTED') {
+                    $('.btn-group button.folder-status').text('Rejected');
+                    $('.btn-group button.toggle-folder-status').text('Unlock');
+                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    $('.btn-group button.folder-status').next().prop("disabled", true);
                 }
                 var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
                 $('.btn-group button.toggle-folder-status').attr('data-path', dir);
 
-                // Handle actions
-                handleActionsList(actions, dir);
+                $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
+
                 $('.top-info-buttons').show();
             } else {
                 $('.top-info-buttons').hide();
@@ -246,12 +269,21 @@ function topInformation(dir)
                     // Hide folder status button for read permission
                     showStatusBtn = false;
                     // disable status dropdown.
+                    var actions = [];
                     $('.btn-group button.folder-status').next().prop("disabled", true);
+                }
+
+                if (typeof status != 'undefined') {
+                    if (status == 'SUBMITTED') {
+                        actions['accept'] = 'Accept';
+                        actions['reject'] = 'Reject';
+                        $('.btn-group button.folder-status').next().prop("disabled", false);
+                    }
                 }
             }
 
             if (typeof status != 'undefined') {
-                if (status == 'SUBMITTED') {
+                if (status == 'SUBMITTED' || status == 'ACCEPTED') {
                     showStatusBtn = false;
                 }
             }
@@ -263,6 +295,9 @@ function topInformation(dir)
             } else {
                 $('.btn-group button.toggle-folder-status').prop("disabled", true);
             }
+
+            // Handle actions
+            handleActionsList(actions, dir);
 
             // data.basename.replace(/ /g, "&nbsp;")
             folderName = htmlEncode(data.basename).replace(/ /g, "&nbsp;");
@@ -276,7 +311,7 @@ function topInformation(dir)
 function handleActionsList(actions, folder)
 {
     var html = '';
-    var possibleActions = ['submit', 'unsubmit'];
+    var possibleActions = ['submit', 'unsubmit', 'accept', 'reject'];
 
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
@@ -322,6 +357,7 @@ function toggleFolderStatus(newStatus, path)
 
         // Remove disable attribute
         $('.btn-group button.toggle-folder-status').removeAttr("disabled");
+        $('.btn-group button.folder-status').next().prop("disabled", false);
     });
 }
 
@@ -352,6 +388,15 @@ function submitToVault(folder)
                 // Set ubsibmit action
                 var actions = [];
                 actions['unsubmit'] = 'Unsubmit';
+
+                // Datamanager actions
+                var isDatamanager = $('.btn-group button.folder-status').attr('data-datamanager');
+                console.log(isDatamanager);
+                if (isDatamanager == 'yes') {
+                    actions['accept'] = 'Accept';
+                    actions['reject'] = 'Reject';
+                }
+
                 handleActionsList(actions, folder);
             } else {
                 $('.btn-group button.folder-status').html(btnText);
@@ -390,4 +435,38 @@ function unsubmitToVault(folder) {
         });
 
     }
+}
+
+function acceptFolder(folder)
+{
+    var btnText = $('.btn-group button.folder-status').html();
+    $('.btn-group button.folder-status').html('Accept <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').prop("disabled", true);
+    $('.btn-group button.folder-status').next().prop("disabled", true);
+    $.getJSON("vault/accept?path=" + folder, function (data) {
+        if (data.status == 'Success') {
+            $('.btn-group button.folder-status').html('Accepted');
+
+        } else {
+            $('.btn-group button.folder-status').html(btnText);
+            setMessage('error', data.statusInfo);
+        }
+    });
+}
+
+function rejectFolder(folder)
+{
+    var btnText = $('.btn-group button.folder-status').html();
+    $('.btn-group button.folder-status').html('Reject <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').prop("disabled", true);
+    $('.btn-group button.folder-status').next().prop("disabled", true);
+    $.getJSON("vault/reject?path=" + folder, function (data) {
+        if (data.status == 'Success') {
+            $('.btn-group button.folder-status').html('Rejected');
+
+        } else {
+            $('.btn-group button.folder-status').html(btnText);
+            setMessage('error', data.statusInfo);
+        }
+    });
 }
