@@ -127,65 +127,6 @@ RULE;
         }
     }
 
-    static public function submitFolderToVault($iRodsAccount, $path)
-    {
-        $ruleBody = <<<'RULE'
-myRule {
-    iiFolderSubmit(*path);
-}
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*path" => $path
-                ),
-                array()
-            );
-
-            $rule->execute();
-            return true;
-
-        } catch(RODSException $e) {
-            return false;
-        }
-    }
-
-    // Clear the SUBMITTED status of the folder
-    static public function UnsubmitFolderToVault($iRodsAccount, $path, &$status, &$statusInfo)
-    {
-        $status = 'SUCCESS';
-        $statusInfo = '';
-
-        $ruleBody = <<<'RULE'
-myRule {
-    iiFolderUnsubmit(*folder);
-}
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*folder" => $path,
-                ),
-                array()
-            );
-
-            $result = $rule->execute();
-
-            return true;
-
-        } catch(RODSException $e) {
-            $status = 'UNRECOVERABLE';
-            $statusInfo = $e->rodsErrAbbrToCode($e->getCodeAbbr());
-            echo 'error2';exit;
-
-            return false;
-        }
-    }
-
     static public function cloneMetadata($iRodsAccount, $path, $parentPath)
     {
         $output = array();
@@ -538,63 +479,6 @@ RULE;
         }
 
         return array();
-    }
-
-    static public function lockFolder($iRodsAccount, $path)
-    {
-        $ruleBody = <<<'RULE'
-myRule {
-    iiFolderLock(*folder);
-}
-
-
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*folder" => $path
-                ),
-                array('*result')
-            );
-
-            $rule->execute();
-            return true;
-
-        } catch(RODSException $e) {
-            print_r($e);
-            exit;
-
-            return false;
-        }
-    }
-
-    static public function unlockFolder($iRodsAccount, $path)
-    {
-        $ruleBody = <<<'RULE'
-myRule {
-    iiFolderUnlock(*folder);
-}
-
-
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*folder" => $path
-                ),
-                array()
-            );
-
-            $rule->execute();
-            return true;
-
-        } catch(RODSException $e) {
-            return false;
-        }
     }
 }
 

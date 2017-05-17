@@ -166,6 +166,7 @@ class Metadata extends MY_Controller
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
         $this->load->model('Metadata_form_model');
+        $this->load->model('Folder_Status_model');
 
         $path = $this->input->get('path');
         $fullPath = $pathStart . $path;
@@ -182,8 +183,6 @@ class Metadata extends MY_Controller
             return redirect('research/browse?dir=' . urlencode($path), 'refresh');
         }
 
-        $message = '';
-        $messageType = '';
         $status = '';
         $statusInfo = '';
 
@@ -192,8 +191,7 @@ class Metadata extends MY_Controller
             if ($this->input->post('vault_submission')) { // HdR er wordt nog niet gecheckt dat juiste persoon dit mag
 
                 if(!$this->vaultsubmission->checkLock()) {
-                    $message = 'There was a locking error encountered while submitting this folder.';
-                    $messageType = 'danger';
+                    setMessage('error', 'There was a locking error encountered while submitting this folder.');
                 }
                 else {
                     // Do vault submission
@@ -201,32 +199,29 @@ class Metadata extends MY_Controller
                     if ($result === true) {
                         $submitResult = $this->vaultsubmission->setSubmitFlag();
                         if ($submitResult) {
-                            $message = 'The folder is successfully submitted.';
-                            $messageType = 'success';
+                            setMessage('success', 'The folder is successfully submitted.');
                         } else {
-                            $message = 'There was an locking error encountered while submitting this folder.';
-                            $messageType = 'danger';
+                            setMessage('error', 'There was an locking error encountered while submitting this folder.');
                         }
                     } else {
-                        $message = implode('<br>', $result); // result contains all collected messages as an array
-                        $messageType = 'danger';
+                        // result contains all collected messages as an array
+                        setMessage('error', implode('<br>', $result));
+
                     }
                 }
             }
             elseif ($this->input->post('vault_unsubmission')) {
                 if ($folderStatus == 'SUBMITTED') {
-                    $this->vaultsubmission->clearSubmitFlag($status, $message);
-                    if ($status == 'SUCCESS') {
-                        $message = 'This folder was successfully unsubmitted from the vault';
-                        $messageType = 'success';
+                    $result = $this->vaultsubmission->clearSubmitFlag();
+                    if ($result['*status']== 'Success') {
+                        setMessage('success', 'This folder was successfully unsubmitted from the vault.');
                     }
                     else {
-                        $messageType = 'danger';
+                        setMessage('error', $result['*statusInfo']);
                     }
                 }
                 else {
-                    $message = 'This folder is not submitted to the vault and can therefore not be unsubmitted';
-                    $messageType = 'danger';
+                    setMessage('error', 'This folder is not submitted to the vault and can therefore not be unsubmitted.');
                 }
             }
         }
@@ -235,11 +230,6 @@ class Metadata extends MY_Controller
             if ($this->input->server('REQUEST_METHOD') == 'POST') {
                 $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
             }
-        }
-
-        if ($message) {
-            $this->session->set_flashdata('flashMessage', $message);
-            $this->session->set_flashdata('flashMessageType', $messageType);
         }
 
         return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');

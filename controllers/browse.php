@@ -209,8 +209,8 @@ class Browse extends MY_Controller
 
     public function change_folder_status()
     {
-        $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $this->load->model('Folder_Status_model');
         $status = $this->input->get('status');
         $path = $this->input->get('path');
         $output = array();
@@ -219,18 +219,14 @@ class Browse extends MY_Controller
 
         if ($status == 'LOCKED') {
             // Lock Folder
-            $result = $this->filesystem->lockFolder($rodsaccount, $pathStart . $path);
+            $result = $this->Folder_Status_model->lock($pathStart . $path);
             $beforeAction = 'UNLOCKED';
         } else if ($status == 'UNLOCKED') {
             // Unlock folder
-            $result = $this->filesystem->unlockFolder($rodsaccount, $pathStart . $path);
+            $result = $this->Folder_Status_model->unlock($pathStart . $path);
         }
 
-        if ($result) {
-            $output = array('success' => true, 'status' => $status);
-        } else {
-            $output = array('success' => false, 'status' => $beforeAction);
-        }
+        $output = array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']);
 
         echo json_encode($output);
     }
