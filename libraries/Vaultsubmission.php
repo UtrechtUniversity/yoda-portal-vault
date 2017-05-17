@@ -52,16 +52,16 @@ class Vaultsubmission
     {
         $result = false;
         if ($this->validate() === true) {
-            $result = $this->CI->filesystem->submitFolderToVault($this->account, $this->folder);
+            $result = $this->CI->Folder_Status_model->submit($this->folder);
         }
 
         return $result;
     }
 
-    public function clearSubmitFlag(&$status, &$statusInfo)
+    public function clearSubmitFlag()
     {
 
-        return $this->CI->filesystem->UnsubmitFolderToVault($this->account, $this->folder, $status, $statusInfo);
+        return $this->CI->Folder_Status_model->unsubmit($this->folder);
     }
 
     private function validateXsd($xsdFilePath, $metadataFilePath)

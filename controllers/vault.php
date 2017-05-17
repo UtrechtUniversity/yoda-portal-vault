@@ -14,7 +14,7 @@ class Vault extends MY_Controller
         );
 
         $this->data['userIsAllowed'] = TRUE;
-
+        $this->load->model('filesystem');
         $this->load->model('filesystem');
         $this->load->model('rodsuser');
 
@@ -29,6 +29,7 @@ class Vault extends MY_Controller
         $path = $this->input->get('path');
 
         $this->load->model('Metadata_form_model');
+        $this->load->model('Folder_Status_model');
 
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
@@ -44,12 +45,12 @@ class Vault extends MY_Controller
         if ($result === true) {
             $submitResult = $this->vaultsubmission->setSubmitFlag();
             if ($submitResult) {
-                $message = array('status' => 'success', 'text' => 'The folder is successfully submitted.');
+                $message = array('status' => 'Success', 'statusInfo' => 'The folder is successfully submitted.');
             } else {
-                $message = array('status' => 'error', 'text' => 'There was an locking error encountered while submitting this folder.');
+                $message = array('status' => 'error', 'statusInfo' => 'There was an locking error encountered while submitting this folder.');
             }
         } else {
-            $message = array('status' => 'error', 'text' => implode("\n\n", $result));
+            $message = array('status' => 'error', 'statusInfo' => implode("<br><br>", $result));
         }
 
         echo json_encode($message);
@@ -57,6 +58,7 @@ class Vault extends MY_Controller
 
     public function unsubmit()
     {
+        $this->load->model('Folder_Status_model');
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $path = $this->input->get('path');
@@ -66,10 +68,14 @@ class Vault extends MY_Controller
         $folderStatus = $formConfig['folderStatus'];
         $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
 
+        $status = 'Unknown';
+        $statusInfo = '';
         if ($folderStatus == 'SUBMITTED') {
-            $this->vaultsubmission->clearSubmitFlag($status, $statusInfo);
+            $result = $this->vaultsubmission->clearSubmitFlag();
+            $status = $result['*status'];
+            $statusInfo = $result['*statusInfo'];
         }
 
-        echo json_encode(array('status' => $status));
+        echo json_encode(array('status' => $status, 'statusInfo' => $statusInfo));
     }
 }
