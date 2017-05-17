@@ -210,8 +210,6 @@ function topInformation(dir)
                 var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
                 $('.btn-group button.toggle-folder-status').attr('data-path', dir);
 
-                // Handle actions
-                handleActionsList(actions, dir);
                 $('.top-info-buttons').show();
             } else {
                 $('.top-info-buttons').hide();
@@ -246,7 +244,16 @@ function topInformation(dir)
                     // Hide folder status button for read permission
                     showStatusBtn = false;
                     // disable status dropdown.
+                    var actions = [];
                     $('.btn-group button.folder-status').next().prop("disabled", true);
+                }
+
+                if (typeof status != 'undefined') {
+                    if (status == 'SUBMITTED') {
+                        actions['accept'] = 'Accept';
+                        actions['reject'] = 'Reject';
+                        $('.btn-group button.folder-status').next().prop("disabled", false);
+                    }
                 }
             }
 
@@ -264,6 +271,9 @@ function topInformation(dir)
                 $('.btn-group button.toggle-folder-status').prop("disabled", true);
             }
 
+            // Handle actions
+            handleActionsList(actions, dir);
+
             // data.basename.replace(/ /g, "&nbsp;")
             folderName = htmlEncode(data.basename).replace(/ /g, "&nbsp;");
 
@@ -276,7 +286,7 @@ function topInformation(dir)
 function handleActionsList(actions, folder)
 {
     var html = '';
-    var possibleActions = ['submit', 'unsubmit'];
+    var possibleActions = ['submit', 'unsubmit', 'accept', 'reject'];
 
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
