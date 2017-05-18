@@ -68,13 +68,9 @@ class Vault extends MY_Controller
         $folderStatus = $formConfig['folderStatus'];
         $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
 
-        $status = 'Unknown';
-        $statusInfo = '';
-        if ($folderStatus == 'SUBMITTED') {
-            $result = $this->vaultsubmission->clearSubmitFlag();
-            $status = $result['*status'];
-            $statusInfo = $result['*statusInfo'];
-        }
+        $result = $this->vaultsubmission->clearSubmitFlag();
+        $status = $result['*status'];
+        $statusInfo = $result['*statusInfo'];
 
         echo json_encode(array('status' => $status, 'statusInfo' => $statusInfo));
     }
