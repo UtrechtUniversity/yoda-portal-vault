@@ -36,7 +36,7 @@ class Folder_Status_model extends CI_Model
 
     function submit($folder)
     {
-        $outputParams = array('*status', '*statusInfo');
+        $outputParams = array('*folderStatus', '*status', '*statusInfo');
         $inputParams = array('*folder' => $folder);
 
         $this->CI->load->library('irodsrule');

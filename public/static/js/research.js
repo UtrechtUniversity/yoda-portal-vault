@@ -378,32 +378,39 @@ function submitToVault(folder)
 
         $.getJSON("vault/submit?path=" + folder, function (data) {
             if (data.status == 'Success') {
-                $('.btn-group button.folder-status').html('Submitted');
+                if (data.folderStatus == 'SUBMITTED') {
+                    $('.btn-group button.folder-status').html('Submitted');
 
-                // Set folder status -> Locked
-                $('.btn-group button.toggle-folder-status').text('Unlock');
-                $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
-                $('.btn-group button.toggle-folder-status').prop("disabled", true);
+                    // Set folder status -> Locked
+                    $('.btn-group button.toggle-folder-status').text('Unlock');
+                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    $('.btn-group button.toggle-folder-status').prop("disabled", true);
 
-                // Set ubsibmit action
-                var actions = [];
-                actions['unsubmit'] = 'Unsubmit';
+                    // Set ubsibmit action
+                    var actions = [];
+                    actions['unsubmit'] = 'Unsubmit';
 
-                // Datamanager actions
-                var isDatamanager = $('.btn-group button.folder-status').attr('data-datamanager');
-                console.log(isDatamanager);
-                if (isDatamanager == 'yes') {
-                    actions['accept'] = 'Accept';
-                    actions['reject'] = 'Reject';
+                    // Datamanager actions
+                    var isDatamanager = $('.btn-group button.folder-status').attr('data-datamanager');
+                    console.log(isDatamanager);
+                    if (isDatamanager == 'yes') {
+                        actions['accept'] = 'Accept';
+                        actions['reject'] = 'Reject';
+                    }
+
+                    handleActionsList(actions, folder);
+                    $('.btn-group button.folder-status').next().removeAttr("disabled");
+                } else {
+                    $('.btn-group button.folder-status').text('Accepted');
+                    $('.btn-group button.toggle-folder-status').text('Unlock');
+                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    $('.btn-group button.folder-status').next().prop("disabled", true);
+                    $('.btn-group button.toggle-folder-status').prop("disabled", true);
                 }
-
-                handleActionsList(actions, folder);
             } else {
                 $('.btn-group button.folder-status').html(btnText);
                 setMessage('error', data.statusInfo);
             }
-
-            $('.btn-group button.folder-status').next().removeAttr("disabled");
         });
     }
 }
