@@ -94,9 +94,8 @@ function setAlert(message)
 function restoreRevision(overwriteFlag)
 {
     if (typeof urlEncodedPath == 'undefined') {
-        errorMessage = 'The HOME folder cannot be used for restoration purposes';
-        $('.alert-panel-warning').removeClass('hide');
-        $('.alert-panel-warning span').html(errorMessage);
+        errorMessage = 'The HOME folder cannot be used for restoration purposes. Please choose another folder';
+        dlgAlertShow(errorMessage);
         return;
     }
 
@@ -177,6 +176,18 @@ function restoreRevision(overwriteFlag)
     });
 }
 
+function dlgAlertShow(errorMessage)
+{
+    $('#alert-panel-dlg').removeClass('hide');
+    $('#alert-panel-dlg span').html(errorMessage);
+}
+
+function dlgAlertHide(errorMessage)
+{
+    $('#alert-panel-dlg').addClass('hide');
+}
+
+
 // functions for handling of folder selection - easy point of entry for select-folder functionality from the panels within dataTables
 // objectid is the Id of the revision that has to be restored
 function showFolderSelectDialog(restorationObjectId, path, orgFileName)
@@ -198,7 +209,6 @@ function showFolderSelectDialog(restorationObjectId, path, orgFileName)
     $('.alert-panel-overwrite').addClass('hide');
     $('.cover').addClass('hide');
     $('.revision-restore-dialog').removeClass('hide');
-
 
     $('#select-folder').modal('show');
 }
@@ -233,6 +243,9 @@ function startBrowsing(path, items)
 
 function browse(dir)
 {
+    // Hide previous alerts
+    dlgAlertHide();
+
     makeBreadcrumb(dir);
 
     changeBrowserUrl(dir);

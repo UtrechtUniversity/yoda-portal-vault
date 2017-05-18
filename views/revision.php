@@ -10,6 +10,10 @@
 
             <div class="panel-body">
 
+                <div class="alert alert-warning hide" id="alert-panel-dlg">
+                    <span></span>
+                </div>
+
                 <div class="panel panel-default">
                     <div class="panel-heading clearfix">
                         <h3 class="panel-title pull-left">
