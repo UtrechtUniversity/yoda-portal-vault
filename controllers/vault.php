@@ -45,7 +45,7 @@ class Vault extends MY_Controller
         if ($result === true) {
             $submitResult = $this->vaultsubmission->setSubmitFlag();
             if ($submitResult) {
-                $message = array('status' => 'Success', 'statusInfo' => 'The folder is successfully submitted.');
+                $message = array('status' => 'Success', 'statusInfo' => 'The folder is successfully submitted.', 'folderStatus' => $submitResult['*folderStatus']);
             } else {
                 $message = array('status' => 'error', 'statusInfo' => 'There was an locking error encountered while submitting this folder.');
             }
