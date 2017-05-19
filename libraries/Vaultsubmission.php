@@ -29,16 +29,23 @@ class Vaultsubmission
         $invalidFields = $this->validateXsd($xsdFilePath, $metadataFilePath);
         $mandatoryFields = $this->checkMandatoryFields();
 
-        // Field errors
-        $fieldErrors = array_unique(array_merge($invalidFields, $mandatoryFields));
-        if (count($fieldErrors)) {
-            $messages[] = $this->formatFieldErrors($fieldErrors);
-        }
+        // Check folder status
+        $folderStatusResult = $this->checkFolderStatus();
+        if (!$folderStatusResult) {
+            $messages[] = 'Illegal status transition. Current status is '. $this->formConfig['folderStatus'] .'.';
+        } else {
+            // Folder status OK:
+            // Field errors
+            $fieldErrors = array_unique(array_merge($invalidFields, $mandatoryFields));
+            if (count($fieldErrors)) {
+                $messages[] = $this->formatFieldErrors($fieldErrors);
+            }
 
-        // Lock error
-        $lockResult = $this->checkLock();
-        if (!$lockResult) {
-            $messages[] = 'A locking error occurred';
+            // Lock error
+            $lockResult = $this->checkLock();
+            if (!$lockResult) {
+                $messages[] = 'A locking error occurred';
+            }
         }
 
         if (count($messages) > 0) {
@@ -119,7 +126,17 @@ class Vaultsubmission
         $lockStatus = $this->formConfig['lockFound'];
         $folderStatus = $this->formConfig['folderStatus'];
 
-        if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == '')) {
+        if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'LOCKED' || $folderStatus == '')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function checkFolderStatus()
+    {
+        $folderStatus = $this->formConfig['folderStatus'];
+        if ($folderStatus == 'LOCKED' || $folderStatus == '') {
             return true;
         }
 
