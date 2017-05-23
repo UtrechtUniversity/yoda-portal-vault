@@ -201,7 +201,7 @@ class Metadata extends MY_Controller
                         if ($submitResult) {
                             setMessage('success', 'The folder is successfully submitted.');
                         } else {
-                            setMessage('error', 'There was an locking error encountered while submitting this folder.');
+                            setMessage('error', $result['*statusInfo']);
                         }
                     } else {
                         // result contains all collected messages as an array
