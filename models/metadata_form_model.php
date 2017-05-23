@@ -216,6 +216,7 @@ class Metadata_form_model extends CI_Model {
                             case 'xs:date':
                                 $type = 'date';
                                 break;
+                            case 'stringURI':
                             case 'stringNormal':
                                 $type = 'text';
                                 $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
