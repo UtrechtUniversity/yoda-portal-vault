@@ -231,6 +231,8 @@ function topInformation(dir)
 
             // folder status
             if (typeof status != 'undefined') { // Normal folder
+                $('.btn-group button.folder-status').next().prop("disabled", false); // reset action dropdown.
+
                 if (status == '') {
                     $('.btn-group button.toggle-folder-status').text('Lock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
