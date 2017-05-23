@@ -88,3 +88,9 @@ ol.breadcrumb li.active {
     margin-left: -15px;
     margin-right: -15px;
 }
+
+.lock-icon {
+    font-size: 30px;
+    margin-left: 10px;
+    cursor: pointer;
+}
