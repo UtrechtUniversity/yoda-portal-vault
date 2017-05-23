@@ -176,28 +176,23 @@ function toggleLocksList(folder)
     if (isVisible) {
         $('.lock-items').hide();
     } else {
-        //if ($('.lock-items li').length <= 1) {
-            // Get locks
-            $.getJSON("browse/list_locks?folder=" + folder, function (data) {
-                $('.lock-items').hide();
+        // Get locks
+        $.getJSON("browse/list_locks?folder=" + folder, function (data) {
+            $('.lock-items').hide();
 
-                if (data.status == 'Success') {
-                    var html = '<li class="list-group-item disabled">Locks:</li>';
-                    var result = data.result;
-                    var locks = result.locks;
-                    $.each(locks, function (index, value) {
-                        html += '<li class="list-group-item"><span class="browse" data-path="' + value + '">' + value + '</span></li>';
-                    });
-                    $('.lock-items').html(html);
-                    $('.lock-items').show();
-                } else {
-                    setMessage('error', data.statusInfo);
-                }
+            if (data.status == 'Success') {
+                var html = '<li class="list-group-item disabled">Locks:</li>';
+                var locks = data.result;
+                $.each(locks, function (index, value) {
+                    html += '<li class="list-group-item"><span class="browse" data-path="' + value + '">' + value + '</span></li>';
+                });
+                $('.lock-items').html(html);
+                $('.lock-items').show();
+            } else {
+                setMessage('error', data.statusInfo);
+            }
 
-            });
-        //} else {
-            //$('.lock-items').show();
-        //}
+        });
     }
 }
 

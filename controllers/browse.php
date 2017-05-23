@@ -109,7 +109,19 @@ class Browse extends MY_Controller
 
         $result = $this->filesystem->listLocks($rodsaccount, $fullPath);
 
-        echo json_encode(array('result' => $result['*result'], 'status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+        // Strip path
+        $locks = array();
+        if ($result['*status'] == 'Success') {
+            $total = $result['*result']['total'];
+            if ($total > 0) {
+                $locksResult = $result['*result']['locks'];
+                foreach ($locksResult as $path) {
+                    $locks[] = str_replace($pathStart, '', $path);
+                }
+            }
+        }
+
+        echo json_encode(array('result' => $locks, 'status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
     }
 
     /**
