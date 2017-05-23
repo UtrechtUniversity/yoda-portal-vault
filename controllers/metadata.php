@@ -211,17 +211,12 @@ class Metadata extends MY_Controller
                 }
             }
             elseif ($this->input->post('vault_unsubmission')) {
-                if ($folderStatus == 'SUBMITTED') {
-                    $result = $this->vaultsubmission->clearSubmitFlag();
-                    if ($result['*status']== 'Success') {
-                        setMessage('success', 'This folder was successfully unsubmitted from the vault.');
-                    }
-                    else {
-                        setMessage('error', $result['*statusInfo']);
-                    }
+                $result = $this->vaultsubmission->clearSubmitFlag();
+                if ($result['*status']== 'Success') {
+                    setMessage('success', 'This folder was successfully unsubmitted from the vault.');
                 }
                 else {
-                    setMessage('error', 'This folder is not submitted to the vault and can therefore not be unsubmitted.');
+                    setMessage('error', $result['*statusInfo']);
                 }
             }
         }
