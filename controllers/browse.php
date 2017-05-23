@@ -100,6 +100,18 @@ class Browse extends MY_Controller
         echo json_encode($output);
     }
 
+    public function list_locks()
+    {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $folderPath = $this->input->get('folder');
+        $fullPath = $pathStart . $folderPath;
+
+        $result = $this->filesystem->listLocks($rodsaccount, $fullPath);
+
+        echo json_encode(array('result' => $result['*result'], 'status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+    }
+
     /**
      * @param int $restrict
      * @param string $interveneOnMetadataKeys

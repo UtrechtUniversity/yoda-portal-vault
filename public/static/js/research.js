@@ -30,6 +30,14 @@ $( document ).ready(function() {
     $("body").on("click", "a.action-reject", function() {
         rejectFolder($(this).attr('data-folder'));
     });
+
+    $("body").on("click", "i.lock-icon", function() {
+        toggleLocksList($(this).attr('data-folder'));
+    });
+
+    $("body").on("click", ".browse", function() {
+        browse($(this).attr('data-path'));
+    });
 });
 
 function browse(dir)
@@ -148,9 +156,6 @@ function startBrowsing(path, items)
         "iDeferLoading": 0,
         "pageLength": items,
         "drawCallback": function(settings) {
-            $( ".browse" ).on( "click", function() {
-                browse($(this).attr('data-path'));
-            });
         }
     });
 
@@ -161,6 +166,39 @@ function startBrowsing(path, items)
     }
 
 
+}
+
+function toggleLocksList(folder)
+{
+    var isVisible = $('.lock-items').is(":visible");
+
+    // toggle locks list
+    if (isVisible) {
+        $('.lock-items').hide();
+    } else {
+        //if ($('.lock-items li').length <= 1) {
+            // Get locks
+            $.getJSON("browse/list_locks?folder=" + folder, function (data) {
+                $('.lock-items').hide();
+
+                if (data.status == 'Success') {
+                    var html = '<li class="list-group-item disabled">Locks:</li>';
+                    var result = data.result;
+                    var locks = result.locks;
+                    $.each(locks, function (index, value) {
+                        html += '<li class="list-group-item"><span class="browse" data-path="' + value + '">' + value + '</span></li>';
+                    });
+                    $('.lock-items').html(html);
+                    $('.lock-items').show();
+                } else {
+                    setMessage('error', data.statusInfo);
+                }
+
+            });
+        //} else {
+            //$('.lock-items').show();
+        //}
+    }
 }
 
 function changeBrowserUrl(path)
@@ -184,6 +222,7 @@ function topInformation(dir)
             var status = data.folderStatus;
             var userType = data.userType;
             var isDatamanager = data.isDatamanager;
+            var lockCount = data.lockCount;
             var showStatusBtn = false;
             var actions = [];
 
@@ -296,13 +335,20 @@ function topInformation(dir)
                 $('.btn-group button.toggle-folder-status').prop("disabled", true);
             }
 
+            // Lock icon
+            $('.lock-items').hide();
+            var lockIcon = '';
+            if (lockCount != '0' && typeof lockCount != 'undefined') {
+                lockIcon = '<i class="fa fa-exclamation-circle lock-icon" data-folder="' + dir + '" title="' + lockCount + ' lock(s) found" aria-hidden="true"></i>';
+            }
+
             // Handle actions
             handleActionsList(actions, dir);
 
             // data.basename.replace(/ /g, "&nbsp;")
             folderName = htmlEncode(data.basename).replace(/ /g, "&nbsp;");
 
-            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName);
+            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + lockIcon);
             $('.top-information').show();
         });
     }

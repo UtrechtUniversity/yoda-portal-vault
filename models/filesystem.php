@@ -3,9 +3,12 @@
 
 class Filesystem extends CI_Model {
 
+    var $CI = NULL;
+
     public function __construct()
     {
         parent::__construct();
+        $this->CI =& get_instance();
     }
 
     /**
@@ -475,6 +478,45 @@ RULE;
             exit;
 
             echo $e->showStacktrace();
+            return array();
+        }
+
+        return array();
+    }
+
+    function listLocks($iRodsAccount, $folder, $offset = 0, $limit = 10)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    *l = int(*limit);
+    *o = int(*offset);
+
+    iiListLocks(*path, *o, *l, *result, *status, *statusInfo);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $folder,
+                    "*offset" => $offset,
+                    "*limit" => $limit
+
+                ),
+                array("*result", "*status", "*statusInfo")
+            );
+
+            $ruleResult = $rule->execute();
+            $output['*result'] = json_decode($ruleResult['*result'], true);
+            $output['*status'] = $ruleResult['*status'];
+            $output['*statusInfo'] = $ruleResult['*statusInfo'];
+
+            return $output;
+
+        } catch(RODSException $e) {
             return array();
         }
 
