@@ -217,6 +217,7 @@ function topInformation(dir)
             var status = data.folderStatus;
             var userType = data.userType;
             var isDatamanager = data.isDatamanager;
+            var hasWriteRights = 'yes';
             var lockCount = data.lockCount;
             var showStatusBtn = false;
             var actions = [];
@@ -296,6 +297,7 @@ function topInformation(dir)
                 showStatusBtn = false;
                 // disable status dropdown.
                 $('.btn-group button.folder-status').next().prop("disabled", true);
+                hasWriteRights = 'no';
 
             }
 
@@ -307,6 +309,7 @@ function topInformation(dir)
                     // disable status dropdown.
                     var actions = [];
                     $('.btn-group button.folder-status').next().prop("disabled", true);
+                    hasWriteRights = 'no';
                 }
 
                 if (typeof status != 'undefined') {
@@ -338,6 +341,8 @@ function topInformation(dir)
             if (lockCount != '0' && typeof lockCount != 'undefined') {
                 lockIcon = '<i class="fa fa-exclamation-circle lock-icon" data-folder="' + dir + '" title="' + lockCount + ' lock(s) found" aria-hidden="true"></i>';
             }
+
+            $('.btn-group button.folder-status').attr('data-write', hasWriteRights);
 
             // Handle actions
             handleActionsList(actions, dir);
@@ -513,10 +518,15 @@ function rejectFolder(folder)
     $.getJSON("vault/reject?path=" + folder, function (data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html('Rejected');
-
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
+        }
+
+        // Make unlock btn clickable if write rights.
+        var hasWriteRights =  $('.btn-group button.folder-status').attr('data-write');
+        if (hasWriteRights == 'yes') {
+            $('.btn-group button.toggle-folder-status').prop("disabled", false);
         }
     });
 }
