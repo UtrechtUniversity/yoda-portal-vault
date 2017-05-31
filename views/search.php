@@ -37,7 +37,11 @@
         </span>
 
         <div class="search-status<?php echo $showTerm ? ' hide' : ''; ?>">
+            <label class="radio-inline"><input type="radio" name="status" value="LOCKED"<?php echo $searchStatusValue == 'LOCKED' ? ' checked' : ''; ?>>Locked</label>
             <label class="radio-inline"><input type="radio" name="status" value="SUBMITTED"<?php echo $searchStatusValue == 'SUBMITTED' ? ' checked' : ''; ?>>Submitted</label>
+            <label class="radio-inline"><input type="radio" name="status" value="ACCEPTED"<?php echo $searchStatusValue == 'ACCEPTED' ? ' checked' : ''; ?>>Accepted</label>
+            <label class="radio-inline"><input type="radio" name="status" value="REJECTED"<?php echo $searchStatusValue == 'REJECTED' ? ' checked' : ''; ?>>Rejected</label>
+            <label class="radio-inline"><input type="radio" name="status" value="SECURED"<?php echo $searchStatusValue == 'SECURED' ? ' checked' : ''; ?>>Secured</label>
         </div>
     </div>
 
