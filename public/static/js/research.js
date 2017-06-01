@@ -150,7 +150,23 @@ function startBrowsing(path, items)
         "bFilter": false,
         "bInfo": false,
         "bLengthChange": false,
-        "ajax": "browse/data",
+        "ajax": {
+            url: "browse/data",
+            dataSrc: function (json) {
+                jsonString = JSON.stringify(json);
+
+                resp = JSON.parse(jsonString);
+
+                //console.log(resp.draw);
+                if (resp.status == 'Success' ) {
+                    return resp.data;
+                }
+                else {
+                    setMessage('error', resp.statusInfo);
+                    return true;
+                }
+            }
+        },
         "processing": true,
         "serverSide": true,
         "iDeferLoading": 0,
@@ -212,13 +228,19 @@ function topInformation(dir)
     $('.top-information').hide();
     if (typeof dir != 'undefined') {
         $.getJSON("browse/top_data?dir=" + dir, function(data){
+            console.log(data);
+            if (data.status != 'Success') {
+                setMessage('error', data.statusInfo);
+                return;
+            }
+
             var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
-            var metadata = data.userMetadata;
-            var status = data.folderStatus;
-            var userType = data.userType;
-            var isDatamanager = data.isDatamanager;
+            var metadata = data.result.userMetadata;
+            var status = data.result.folderStatus;
+            var userType = data.result.userType;
+            var isDatamanager = data.result.isDatamanager;
             var hasWriteRights = 'yes';
-            var lockCount = data.lockCount;
+            var lockCount = data.result.lockCount;
             var showStatusBtn = false;
             var actions = [];
 
@@ -278,8 +300,8 @@ function topInformation(dir)
             }
 
             // Lock position check
-            var lockFound = data.lockFound;
-            var path = data.path;
+            var lockFound = data.result.lockFound;
+            var path = data.result.path;
             if (lockFound != "no") {
                 if (lockFound == "here") {
                     showStatusBtn = true;
@@ -348,7 +370,7 @@ function topInformation(dir)
             handleActionsList(actions, dir);
 
             // data.basename.replace(/ /g, "&nbsp;")
-            folderName = htmlEncode(data.basename).replace(/ /g, "&nbsp;");
+            folderName = htmlEncode(data.result.basename).replace(/ /g, "&nbsp;");
 
             $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + lockIcon);
             $('.top-information').show();

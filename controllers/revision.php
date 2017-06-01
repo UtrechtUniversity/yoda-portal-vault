@@ -177,28 +177,41 @@ class Revision extends MY_Controller
             0 => 'META_DATA_ATTR_VALUE'
         );
 
+        // Generic error handling intialisation
+        $status = 'Success';
+        $statusInfo = '';
+
         $searchArgument = $this->input->get('searchArgument');
         // $searchArgument is changed as iRods cannot handle '%' and '_' and \
         $searchArgument = str_replace(array('\\', '%', '_'),
             array('\\\\', '\\%','\\_'),
             $searchArgument);
 
+        $totalItems = 0;
         $rows = array();
+
         $result = $this->revisionmodel->searchByString($rodsaccount, $searchArgument, $orderColumns[$orderColumn], $orderDir, $length, $start);
-        $totalItems = $result['summary']['total'];
 
-        if (isset($result['summary']) && $result['summary']['returned'] > 0) {
-            foreach ($result['rows'] as $row) {
-                $filePath = str_replace($pathStart, '', $row['originalPath']);
+        $status = $result['status'];
+        $statusInfo = $result['statusInfo'];
 
-                $rows[] = array(
-                    '<span data-path="' . urlencode($filePath) . '" data-collection-exists="' . $row['collectionExists'] . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>',
-                    $row['numberOfRevisions']
-                );
+        if ($status=='Success') {
+            $totalItems = $result['summary']['total'];
+
+            if (isset($result['summary']) && $result['summary']['returned'] > 0) {
+                foreach ($result['rows'] as $row) {
+                    $filePath = str_replace($pathStart, '', $row['originalPath']);
+
+                    $rows[] = array(
+                        '<span data-path="' . urlencode($filePath) . '" data-collection-exists="' . $row['collectionExists'] . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>',
+                        $row['numberOfRevisions']
+                    );
+                }
             }
         }
 
-        $output = array('draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
+        $output = array('status' => $status, 'statusInfo' => $statusInfo,
+            'draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
 
         echo json_encode($output);
     }

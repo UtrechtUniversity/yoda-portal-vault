@@ -161,6 +161,7 @@ RULE;
     }
 
 
+    // Obsolete
     static public function searchRevisions($iRodsAccount, $path, $type, $orderBy, $orderSort, $limit, $offset = 0) {
         $output = array();
         $ruleBody = <<<'RULE'
@@ -211,7 +212,7 @@ RULE;
 
         $ruleBody = <<<'RULE'
 myRule {
-    iiCollectionDetails(*path, *result);
+    iiCollectionDetails(*path, *result, *status, *statusInfo);
 }
 RULE;
         try {
@@ -221,23 +222,36 @@ RULE;
                 array(
                     "*path" => $path
                 ),
-                array("*result")
+                array("*result",
+                     "*status",
+                     "*statusInfo"
+                    )
             );
 
             $ruleResult = $rule->execute();
-            $output = json_decode($ruleResult['*result'], true);
+
+            //print_r($ruleResult['*result']);exit;
+
+            $status = $ruleResult['*status'];
+            $statusInfo = $ruleResult['*statusInfo'];
+
+            $result = json_decode($ruleResult['*result'], true);
+
+            $output = array(
+                'result' => $result,
+                'status' => $status,
+                'statusInfo' => $statusInfo
+            );
 
             return $output;
 
         } catch(RODSException $e) {
-            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
-            exit;
-
-            echo $e->showStacktrace();
-            return array();
+            $output = array(
+                'status' => 'Error',
+                'statusInfo' => 'Something unexpected went wrong - ' . $e->rodsErrAbbrToCode($e->getCodeAbbr()). '. Please contact a system administrator'
+            );
+            return $output;
         }
-
-        return array();
     }
 
 
@@ -282,7 +296,7 @@ myRule {
     *l = int(*limit);
     *o = int(*offset);
 
-    iiBrowse(*path, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result);
+    iiBrowse(*path, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result, *status, *statusInfo);
 }
 RULE;
         try {
@@ -297,11 +311,17 @@ RULE;
                     "*limit" => $limit,
                     "*offset" => $offset
                 ),
-                array("*result")
+                array("*result",
+                    "*status",
+                    "*statusInfo")
             );
 
             $ruleResult = $rule->execute();
+
             $results = json_decode($ruleResult['*result'], true);
+
+            $status = $ruleResult['*status'];
+            $statusInfo = $ruleResult['*statusInfo'];
 
             $summary = $results[0];
             unset($results[0]);
@@ -309,20 +329,20 @@ RULE;
             $rows = $results;
             $output = array(
                 'summary' => $summary,
-                'rows' => $rows
+                'rows' => $rows,
+                'status' => $status,
+                'statusInfo' => $statusInfo
             );
 
             return $output;
 
         } catch(RODSException $e) {
-            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
-            exit;
-
-            echo $e->showStacktrace();
-            return array();
+            $output = array(
+                'status' => 'Error',
+                'statusInfo' => 'Something unexpected went wrong - ' . $e->rodsErrAbbrToCode($e->getCodeAbbr()). '. Please contact a system administrator'
+            );
+            return $output;
         }
-
-        return array();
     }
 
     static public function searchByName($iRodsAccount, $path, $string, $type, $orderBy, $orderSort, $limit, $offset = 0)
@@ -334,7 +354,7 @@ myRule {
     *l = int(*limit);
     *o = int(*offset);
 
-    iiSearchByName(*path, *searchstring, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result);
+    iiSearchByName(*path, *searchstring, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result, *status, *statusInfo);
 }
 RULE;
         try {
@@ -350,11 +370,16 @@ RULE;
                     "*limit" => $limit,
                     "*offset" => $offset
                 ),
-                array("*result")
+                array("*result",
+                    "*status",
+                    "*statusInfo")
             );
 
             $ruleResult = $rule->execute();
             $results = json_decode($ruleResult['*result'], true);
+
+            $status = $ruleResult['*status'];
+            $statusInfo = $ruleResult['*statusInfo'];
 
             $summary = $results[0];
             unset($results[0]);
@@ -362,20 +387,20 @@ RULE;
             $rows = $results;
             $output = array(
                 'summary' => $summary,
-                'rows' => $rows
+                'rows' => $rows,
+                'status' => $status,
+                'statusInfo' => $statusInfo
             );
 
             return $output;
 
         } catch(RODSException $e) {
-            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
-            exit;
-
-            echo $e->showStacktrace();
-            return array();
+            $output = array(
+                'status' => 'Error',
+                'statusInfo' => 'Something unexpected went wrong - ' . $e->rodsErrAbbrToCode($e->getCodeAbbr()) . '. Please contact a system administrator'
+            );
+            return $output;
         }
-
-        return array();
     }
 
     static public function searchByUserMetadata($iRodsAccount, $path, $string, $type, $orderBy, $orderSort, $limit, $offset = 0)
@@ -387,7 +412,7 @@ myRule {
     *l = int(*limit);
     *o = int(*offset);
 
-    iiSearchByMetadata(*path, *searchstring, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result);
+    iiSearchByMetadata(*path, *searchstring, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result, *status, *statusInfo);
 }
 RULE;
         try {
@@ -403,11 +428,16 @@ RULE;
                     "*limit" => $limit,
                     "*offset" => $offset
                 ),
-                array("*result")
+                array("*result",
+                    "*status",
+                    "*statusInfo")
             );
 
             $ruleResult = $rule->execute();
             $results = json_decode($ruleResult['*result'], true);
+
+            $status = $ruleResult['*status'];
+            $statusInfo = $ruleResult['*statusInfo'];
 
             $summary = $results[0];
             unset($results[0]);
@@ -415,20 +445,20 @@ RULE;
             $rows = $results;
             $output = array(
                 'summary' => $summary,
-                'rows' => $rows
+                'rows' => $rows,
+                'status' => $status,
+                'statusInfo' => $statusInfo
             );
 
             return $output;
 
         } catch(RODSException $e) {
-            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
-            exit;
-
-            echo $e->showStacktrace();
-            return array();
+            $output = array(
+                'status' => 'Error',
+                'statusInfo' => 'Something unexpected went wrong - ' . $e->rodsErrAbbrToCode($e->getCodeAbbr()) . '. Please contact a system administrator'
+            );
+            return $output;
         }
-
-        return array();
     }
 
     static public function searchByOrgMetadata($iRodsAccount, $path, $string, $type, $orderBy, $orderSort, $limit, $offset = 0)
@@ -440,7 +470,7 @@ myRule {
     *l = int(*limit);
     *o = int(*offset);
 
-    iiSearchByOrgMetadata(*path, *searchstring, *attrname, *orderby, *ascdesc, *l, *o, *result);
+    iiSearchByOrgMetadata(*path, *searchstring, *attrname, *orderby, *ascdesc, *l, *o, *result, *status, *statusInfo);
 }
 RULE;
         try {
@@ -456,11 +486,16 @@ RULE;
                     "*limit" => $limit,
                     "*offset" => $offset
                 ),
-                array("*result")
+                array("*result",
+                    "*status",
+                    "*statusInfo")
             );
 
             $ruleResult = $rule->execute();
             $results = json_decode($ruleResult['*result'], true);
+
+            $status = $ruleResult['*status'];
+            $statusInfo = $ruleResult['*statusInfo'];
 
             $summary = $results[0];
             unset($results[0]);
@@ -468,20 +503,20 @@ RULE;
             $rows = $results;
             $output = array(
                 'summary' => $summary,
-                'rows' => $rows
+                'rows' => $rows,
+                'status' => $status,
+                'statusInfo' => $statusInfo
             );
 
             return $output;
 
         } catch(RODSException $e) {
-            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
-            exit;
-
-            echo $e->showStacktrace();
-            return array();
+            $output = array(
+                'status' => 'Error',
+                'statusInfo' => 'Something unexpected went wrong - ' . $e->rodsErrAbbrToCode($e->getCodeAbbr()) . '. Please contact a system administrator'
+            );
+            return $output;
         }
-
-        return array();
     }
 
     function listLocks($iRodsAccount, $folder, $offset = 0, $limit = 10)

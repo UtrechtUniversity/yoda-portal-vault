@@ -56,7 +56,7 @@ myRule {
     *l = int(*limit);
     *o = int(*offset);
 
-    iiRevisionSearchByOriginalFilename(*searchstring, *orderby, *ascdesc, *l, *o, *result);
+    iiRevisionSearchByOriginalFilename(*searchstring, *orderby, *ascdesc, *l, *o, *result, *status, *statusInfo);
 }
 RULE;
         try {
@@ -70,11 +70,16 @@ RULE;
                     "*limit" => $limit,
                     "*offset" => $offset
                 ),
-                array("*result")
+                array("*result",
+                    "*status",
+                    "*statusInfo")
             );
 
             $ruleResult = $rule->execute();
             $results = json_decode($ruleResult['*result'], true);
+
+            $status = $ruleResult['*status'];
+            $statusInfo = $ruleResult['*statusInfo'];
 
             $summary = $results[0];
             unset($results[0]);
@@ -82,20 +87,20 @@ RULE;
             $rows = $results;
             $output = array(
                 'summary' => $summary,
-                'rows' => $rows
+                'rows' => $rows,
+                'status' => $status,
+                'statusInfo' => $statusInfo
             );
 
             return $output;
 
         } catch(RODSException $e) {
-            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
-            exit;
-
-            echo $e->showStacktrace();
-            return array();
+            $output = array(
+                'status' => 'Error',
+                'statusInfo' => 'Something unexpected went wrong - ' . $e->rodsErrAbbrToCode($e->getCodeAbbr()). '. Please contact a system administrator'
+            );
+            return $output;
         }
-
-        return array();
     }
 
     /**
