@@ -77,7 +77,21 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             "bLengthChange": false,
             "ajax": {
                 "url": url,
-                "jsonp": false
+                "jsonp": false,
+                dataSrc: function (json) {
+                    jsonString = JSON.stringify(json);
+
+                    resp = JSON.parse(jsonString);
+
+                    //console.log(resp.draw);
+                    if (resp.status == 'Success' ) {
+                        return resp.data;
+                    }
+                    else {
+                        setMessage('error', resp.statusInfo);
+                        return true;
+                    }
+                }
             },
             "processing": true,
             "serverSide": true,

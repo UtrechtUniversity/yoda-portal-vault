@@ -135,6 +135,8 @@ class Browse extends MY_Controller
      */
     public function data( $restrict = 0, $interveneOnMetadataKeys = '')
     {
+        //return -1; exit;
+
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
 
@@ -160,43 +162,65 @@ class Browse extends MY_Controller
 
         $interveningKeys = explode(',', $interveneOnMetadataKeys);
 
+        // Generic error handling intialisation
+        $status = 'Success';
+        $statusInformation = '';
+
         // Collections
         if ($restrict=='collections' OR !$restrict) {
             $icon = 'fa-folder-o';
             $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
 
-            $totalItems += $collections['summary']['total'];
-            if ($collections['summary']['returned'] > 0) {
-                foreach ($collections['rows'] as $row) {
-                    if ($this->_allowRowWhenBrowsing($row, $interveningKeys)) {
-                        $filePath = str_replace($pathStart, '', $row['path']);
-                        $rows[] = array(
-                            '<span class="browse" data-path="' . urlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                            date('Y-m-d H:i:s', $row['modify_time'])
-                        );
+            $status = $collections['status'];
+            $statusInfo = $collections['statusInfo'];
+
+            if ($status=='Success') {
+                $totalItems += $collections['summary']['total'];
+                if ($collections['summary']['returned'] > 0) {
+                    foreach ($collections['rows'] as $row) {
+                        if ($this->_allowRowWhenBrowsing($row, $interveningKeys)) {
+                            $filePath = str_replace($pathStart, '', $row['path']);
+                            $rows[] = array(
+                                '<span class="browse" data-path="' . urlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                date('Y-m-d H:i:s', $row['modify_time'])
+                            );
+                        }
                     }
                 }
             }
         }
 
         // Objects
-        if($restrict=='objects' OR !$restrict) {
+        if( $status=='Success' AND ($restrict=='objects' OR !$restrict)) {
             $objects = $this->filesystem->browse($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
-            $totalItems += $objects['summary']['total'];
-            if ($objects['summary']['returned'] > 0) {
-                foreach ($objects['rows'] as $row) {
-                    if ($this->_allowRowWhenBrowsing($row, $interveningKeys)) {
-                        $filePath = str_replace($pathStart, '', $row['path']);
-                        $rows[] = array(
-                            '<span data-path="' . urlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                            date('Y-m-d H:i:s', $row['modify_time'])
-                        );
+
+            $status = $objects['status'];
+            $statusInfo = $objects['statusInfo'];
+
+            if ($status=='Success') {
+                $totalItems += $objects['summary']['total'];
+                if ($objects['summary']['returned'] > 0) {
+                    foreach ($objects['rows'] as $row) {
+                        if ($this->_allowRowWhenBrowsing($row, $interveningKeys)) {
+                            $filePath = str_replace($pathStart, '', $row['path']);
+                            $rows[] = array(
+                                '<span data-path="' . urlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                date('Y-m-d H:i:s', $row['modify_time'])
+                            );
+                        }
                     }
                 }
             }
         }
 
-        $output = array('draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
+        // Situational error handling within generic context
+        if ($status != 'Success') {
+            $totalItems = 0;
+            $rows = array();
+        }
+
+        $output = array('status' => $status, 'statusInfo' => $statusInfo,
+            'draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
 
         echo json_encode($output);
     }

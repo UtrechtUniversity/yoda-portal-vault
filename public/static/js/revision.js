@@ -12,7 +12,22 @@ $( document ).ready(function() {
         "bFilter": false,
         "bInfo": false,
         "bLengthChange": false,
-        "ajax": url,
+        "ajax": { url: url,
+            dataSrc: function (json) {
+                jsonString = JSON.stringify(json);
+
+                resp = JSON.parse(jsonString);
+
+                //console.log(resp.draw);
+                if (resp.status == 'Success' ) {
+                    return resp.data;
+                }
+                else {
+                    setMessage('error', resp.statusInfo);
+                    return true;
+                }
+            }
+        },
         "processing": true,
         "serverSide": true,
         "pageLength": revisionItemsPerPage,

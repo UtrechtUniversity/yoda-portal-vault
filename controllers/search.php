@@ -73,6 +73,10 @@ class Search extends MY_Controller
             array('\\\\', '\\%','\\_'),
             $filter);
 
+        // Generic error handling intialisation
+        $status = 'Success';
+        $statusInfo = '';
+
         // Search / filename
         if ($type == 'filename') {
             $orderColumns = array(
@@ -80,15 +84,21 @@ class Search extends MY_Controller
                 1 => 'COLL_NAME'
             );
             $result = $this->filesystem->searchByName($rodsaccount, $path, $filter, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
-            $totalItems += $result['summary']['total'];
 
-            if (isset($result['summary']) && $result['summary']['returned'] > 0) {
-                foreach ($result['rows'] as $row) {
-                    $filePath = str_replace($pathStart, '', $row['parent']);
-                    $rows[] = array(
-                        '<i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities( trim( $row['basename']))),
-                        '<span class="browse-search" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>'
-                    );
+            $status = $result['status'];
+            $statusInfo = $result['statusInfo'];
+
+            if ($status == 'Success') {
+                $totalItems += $result['summary']['total'];
+
+                if (isset($result['summary']) && $result['summary']['returned'] > 0) {
+                    foreach ($result['rows'] as $row) {
+                        $filePath = str_replace($pathStart, '', $row['parent']);
+                        $rows[] = array(
+                            '<i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename']))),
+                            '<span class="browse-search" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>'
+                        );
+                    }
                 }
             }
         }
@@ -99,16 +109,22 @@ class Search extends MY_Controller
                 0 => 'COLL_NAME'
             );
             $result = $this->filesystem->searchByName($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
-            $totalItems += $result['summary']['total'];
 
-            if (isset($result['summary']) && $result['summary']['returned'] > 0) {
-                foreach ($result['rows'] as $row) {
-                    $filePath = str_replace($pathStart, '', $row['path']);
+            $status = $result['status'];
+            $statusInfo = $result['statusInfo'];
 
-                    //str_replace(' ', '&nbsp;', htmlentities( trim( $row['basename'], '/')))
-                    $rows[] = array(
-                        '<span class="browse-search" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>'
-                    );
+            if ($status == 'Success') {
+                $totalItems += $result['summary']['total'];
+
+                if (isset($result['summary']) && $result['summary']['returned'] > 0) {
+                    foreach ($result['rows'] as $row) {
+                        $filePath = str_replace($pathStart, '', $row['path']);
+
+                        //str_replace(' ', '&nbsp;', htmlentities( trim( $row['basename'], '/')))
+                        $rows[] = array(
+                            '<span class="browse-search" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>'
+                        );
+                    }
                 }
             }
         }
@@ -119,27 +135,33 @@ class Search extends MY_Controller
                 0 => 'COLL_NAME'
             );
             $result = $this->filesystem->searchByUserMetadata($rodsaccount, $path, $filter, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
-            $totalItems += $result['summary']['total'];
 
-            if (isset($result['summary']) && $result['summary']['returned'] > 0) {
-                foreach ($result['rows'] as $row) {
-                    $filePath = str_replace($pathStart, '', $row['path']);
-                    $matchParts = array();
-                    $i = 1;
-                    foreach ($row['matches'] as $match) {
-                        foreach ($match as $k => $value) {
-                            $matchParts[] = $k . ': ' . $value;
-                            if ($i == 5) {
-                                break 2;
+            $status = $result['status'];
+            $statusInfo = $result['statusInfo'];
+
+            if ($status == 'Success') {
+                $totalItems += $result['summary']['total'];
+
+                if (isset($result['summary']) && $result['summary']['returned'] > 0) {
+                    foreach ($result['rows'] as $row) {
+                        $filePath = str_replace($pathStart, '', $row['path']);
+                        $matchParts = array();
+                        $i = 1;
+                        foreach ($row['matches'] as $match) {
+                            foreach ($match as $k => $value) {
+                                $matchParts[] = $k . ': ' . $value;
+                                if ($i == 5) {
+                                    break 2;
+                                }
+                                $i++;
                             }
-                            $i++;
                         }
-                    }
 
-                    $rows[] = array(
-                        '<span class="browse-search" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>',
-                        '<span class="matches" data-toggle="tooltip" title="'. htmlentities( implode(', ', $matchParts)) . ($i == 5 ? '...' : '') .'">' .  count($row['matches']) .' field(s)</span>'
-                    );
+                        $rows[] = array(
+                            '<span class="browse-search" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>',
+                            '<span class="matches" data-toggle="tooltip" title="' . htmlentities(implode(', ', $matchParts)) . ($i == 5 ? '...' : '') . '">' . count($row['matches']) . ' field(s)</span>'
+                        );
+                    }
                 }
             }
         }
@@ -150,20 +172,32 @@ class Search extends MY_Controller
                 0 => 'COLL_NAME'
             );
             $result = $this->filesystem->searchByOrgMetadata($rodsaccount, $path, $filter, "status", $orderColumns[$orderColumn], $orderDir, $length, $start);
-            $totalItems += $result['summary']['total'];
 
-            if (isset($result['summary']) && $result['summary']['returned'] > 0) {
-                foreach ($result['rows'] as $row) {
-                    $filePath = str_replace($pathStart, '', $row['path']);
-                    $rows[] = array(
-                        '<span class="browse-search" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities( trim( $filePath, '/'))) . '</span>'
-                    );
+            $status = $result['status'];
+            $statusInfo = $result['statusInfo'];
+
+            if ($status=='Success') {
+                $totalItems += $result['summary']['total'];
+
+                if (isset($result['summary']) && $result['summary']['returned'] > 0) {
+                    foreach ($result['rows'] as $row) {
+                        $filePath = str_replace($pathStart, '', $row['path']);
+                        $rows[] = array(
+                            '<span class="browse-search" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>'
+                        );
+                    }
                 }
             }
         }
 
-        $output = array('draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
+        // Situational error handling within generic context
+        if ($status != 'Success') {
+            $totalItems = 0;
+            $rows = array();
+        }
 
+        $output = array('status' => $status, 'statusInfo' => $statusInfo,
+            'draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
 
         echo json_encode($output);
 
