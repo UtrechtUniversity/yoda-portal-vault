@@ -43,6 +43,7 @@ class Folder_Status_model extends CI_Model
         $rule = $this->irodsrule->make('iiFolderSubmit', $inputParams, $outputParams);
 
         $result = $rule->execute();
+
         return $result;
     }
 

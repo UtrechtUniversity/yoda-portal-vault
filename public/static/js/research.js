@@ -228,9 +228,10 @@ function topInformation(dir)
     $('.top-information').hide();
     if (typeof dir != 'undefined') {
         $.getJSON("browse/top_data?dir=" + dir, function(data){
-            console.log(data);
+
             if (data.status != 'Success') {
-                setMessage('error', data.statusInfo);
+                //setMessage('error', data.statusInfo);
+                alert(data.statusInfo);
                 return;
             }
 
@@ -413,16 +414,23 @@ function toggleFolderStatus(newStatus, path)
                 $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
 
                 $('.btn-group button.folder-status').text('Locked');
+                setMessage('success', 'Successfully locked this folder');
             } else {
                 $('.btn-group button.toggle-folder-status').text('Lock');
                 $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
 
                 $('.btn-group button.folder-status').text('Actions');
+                setMessage('success', 'Successfully unlocked this folder');
             }
             handleActionsList(actions, path);
         } else {
             setMessage('error', data.statusInfo);
             $('.btn-group button.toggle-folder-status').html(btnText);
+
+            // inefficient, but for now sets the button statuses correctly in case of failure on request.
+            // requires refactoring!
+            topInformation(path);
+            return;
         }
 
         // Remove disable attribute
@@ -480,6 +488,10 @@ function submitToVault(folder)
             } else {
                 $('.btn-group button.folder-status').html(btnText);
                 setMessage('error', data.statusInfo);
+
+                // inefficient, but for now sets the button statuses correctly in case of failure on request.
+                // requires refactoring!
+                topInformation(folder);
             }
         });
     }
@@ -506,6 +518,11 @@ function unsubmitToVault(folder) {
             } else {
                 $('.btn-group button.folder-status').html(btnText);
                 setMessage('error', data.statusInfo);
+
+                // Inefficient, but for now sets the button statuses correctly in case of failure on request.
+                // requires refactoring!
+                topInformation(folder);
+                return;
             }
 
             $('.btn-group button.folder-status').next().removeAttr("disabled");
@@ -525,8 +542,14 @@ function acceptFolder(folder)
             $('.btn-group button.folder-status').html('Accepted');
 
         } else {
+            alert(data.status);
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
+
+
+            // Inefficient, but for now sets the button statuses correctly in case of failure on request.
+            // requires refactoring!
+            topInformation(folder);
         }
     });
 }
@@ -543,6 +566,11 @@ function rejectFolder(folder)
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
+
+            // Inefficient, but for now sets the button statuses correctly in case of failure on request.
+            // requires refactoring!
+            topInformation(folder);
+            return;
         }
 
         // Make unlock btn clickable if write rights.

@@ -34,25 +34,32 @@ class Vault extends MY_Controller
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
 
-        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-        $userType = $formConfig['userType'];
         $message = array();
 
-        // Do vault submission
-        $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
-        $result = $this->vaultsubmission->validate();
-
-        if ($result === true) {
-            $submitResult = $this->vaultsubmission->setSubmitFlag();
-            if ($submitResult) {
-                $message = array('status' => 'Success', 'statusInfo' => 'The folder is successfully submitted.', 'folderStatus' => $submitResult['*folderStatus']);
-            } else {
-                $message = array('status' => 'error', 'statusInfo' => 'There was an locking error encountered while submitting this folder.');
-            }
-        } else {
-            $message = array('status' => 'error', 'statusInfo' => implode("<br><br>", $result));
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
+        if ($formConfig===false) {
+            $message = array('status' => 'error', 'statusInfo' => 'Permission denied for current user.');
         }
+        else {
 
+            $userType = $formConfig['userType'];
+
+            // Do vault submission
+            $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
+            $result = $this->vaultsubmission->validate();
+
+            if ($result === true) {
+                $submitResult = $this->vaultsubmission->setSubmitFlag();
+
+                if ($submitResult['*status'] == 'Success') {
+                    $message = array('status' => 'Success', 'statusInfo' => 'The folder is successfully submitted.', 'folderStatus' => $submitResult['*folderStatus']);
+                } else {
+                    $message = array('status' => $submitResult['*status'], 'statusInfo' => $submitResult['*statusInfo']);
+                }
+            } else {
+                $message = array('status' => 'error', 'statusInfo' => implode("<br><br>", $result));
+            }
+        }
         echo json_encode($message);
     }
 
