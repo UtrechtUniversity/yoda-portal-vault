@@ -231,7 +231,6 @@ function topInformation(dir)
 
             if (data.status != 'Success') {
                 //setMessage('error', data.statusInfo);
-                alert(data.statusInfo);
                 return;
             }
 
