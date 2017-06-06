@@ -58,7 +58,7 @@ class Vaultsubmission
     public function setSubmitFlag()
     {
         $result = false;
-        if ($this->validate() === true) {
+        if ($this->validate() === true) { // Hdr: dit gebeurt in vault-controller ook al
             $result = $this->CI->Folder_Status_model->submit($this->folder);
         }
 
