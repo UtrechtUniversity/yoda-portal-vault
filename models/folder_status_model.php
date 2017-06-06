@@ -81,4 +81,28 @@ class Folder_Status_model extends CI_Model
         $result = $rule->execute();
         return $result;
     }
+
+    function grant($folder)
+    {
+        $outputParams = array('*status', '*statusInfo');
+        $inputParams = array('*path' => $folder);
+
+        $this->CI->load->library('irodsrule');
+        $rule = $this->irodsrule->make('iiGrantReadAccessToResearchGroup', $inputParams, $outputParams);
+
+        $result = $rule->execute();
+        return $result;
+    }
+
+    function revoke($folder)
+    {
+        $outputParams = array('*status', '*statusInfo');
+        $inputParams = array('*path' => $folder);
+
+        $this->CI->load->library('irodsrule');
+        $rule = $this->irodsrule->make('iiRevokeReadAccessToResearchGroup', $inputParams, $outputParams);
+
+        $result = $rule->execute();
+        return $result;
+    }
 }

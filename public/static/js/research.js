@@ -38,6 +38,10 @@ $( document ).ready(function() {
     $("body").on("click", ".browse", function() {
         browse($(this).attr('data-path'));
     });
+
+    $("body").on("click", "button.vault-access", function() {
+        vaultAccess($(this).attr('data-access'), $(this).attr('data-path'));
+    });
 });
 
 function browse(dir)
@@ -238,8 +242,10 @@ function topInformation(dir)
             var metadata = data.result.userMetadata;
             var status = data.result.folderStatus;
             var userType = data.result.userType;
+            var hasWriteRights = "no";
             var isDatamanager = data.result.isDatamanager;
-            var hasWriteRights = 'yes';
+            var isVaultPackage = data.result.isVaultPackage;
+            var researchGroupAccess = data.result.researchGroupAccess;
             var lockCount = data.result.lockCount;
             var showStatusBtn = false;
             var actions = [];
@@ -295,6 +301,8 @@ function topInformation(dir)
                 $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
 
                 $('.top-info-buttons').show();
+                $('.top-info-buttons .research').show();
+                $('.top-info-buttons .vault').hide();
             } else {
                 $('.top-info-buttons').hide();
             }
@@ -331,7 +339,6 @@ function topInformation(dir)
                     // disable status dropdown.
                     var actions = [];
                     $('.btn-group button.folder-status').next().prop("disabled", true);
-                    hasWriteRights = 'no';
                 }
 
                 if (typeof status != 'undefined') {
@@ -340,6 +347,24 @@ function topInformation(dir)
                         actions['reject'] = 'Reject';
                         $('.btn-group button.folder-status').next().prop("disabled", false);
                     }
+                }
+
+                // is vault package
+                if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
+                    $('button.vault-access').attr('data-path', dir);
+                    if (researchGroupAccess == 'no') {
+                        $('button.vault-access').text('Grant read access');
+                        $('button.vault-access').attr('data-access', 'grant');
+                    } else {
+                        $('button.vault-access').text('Revoke read access');
+                        $('button.vault-access').attr('data-access', 'revoke');
+                    }
+
+                    //
+                    $('.top-info-buttons').show();
+                    $('.top-info-buttons .research').hide();
+                    $('.top-info-buttons .vault').show();
+
                 }
             }
 
@@ -550,5 +575,28 @@ function rejectFolder(folder)
         if (hasWriteRights == 'yes') {
             $('.btn-group button.toggle-folder-status').prop("disabled", false);
         }
+    });
+}
+
+function vaultAccess(action, folder)
+{
+    var btnText = $('button.vault-access').html();
+    $('button.vault-access').html(btnText + '<i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('button.vault-access').prop("disabled", true);
+    $.getJSON("vault/access?path=" + folder + "&action=" + action, function (data) {
+        if (data.status == 'Success') {
+            if (action == 'grant') {
+                $('button.vault-access').text('Revoke read access');
+                $('button.vault-access').attr('data-access', 'revoke');
+            } else {
+                $('button.vault-access').text('Grant read access');
+                $('button.vault-access').attr('data-access', 'grant');
+            }
+        } else {
+            $('button.vault-access').html(btnText);
+            setMessage('error', data.statusInfo);
+        }
+
+        $('button.vault-access').prop("disabled", false);
     });
 }
