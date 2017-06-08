@@ -600,7 +600,6 @@ function rejectFolder(folder)
 
         // Make unlock btn clickable if write rights.
         var hasWriteRights =  $('.btn-group button.folder-status').attr('data-write');
-        console.log(hasWriteRights);
         if (hasWriteRights == 'yes') {
             $('.btn-group button.toggle-folder-status').prop("disabled", false);
         }
