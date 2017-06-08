@@ -49,7 +49,7 @@ function browse(dir)
     makeBreadcrumb(dir);
 
     changeBrowserUrl(dir);
-    topInformation(dir);
+    topInformation(dir, true); //only here topInformation should show its alertMessage
     buildFileBrowser(dir);
 }
 
@@ -227,14 +227,14 @@ function changeBrowserUrl(path)
     history.replaceState({} , {}, url);
 }
 
-function topInformation(dir)
+function topInformation(dir, showAlert)
 {
     $('.top-information').hide();
     if (typeof dir != 'undefined') {
         $.getJSON("browse/top_data?dir=" + dir, function(data){
 
-            if (data.status != 'Success') {
-                //setMessage('error', data.statusInfo);
+            if (data.status != 'Success' && showAlert) {
+                setMessage('error', data.statusInfo);
                 return;
             }
 
@@ -454,7 +454,7 @@ function toggleFolderStatus(newStatus, path)
 
             // inefficient, but for now sets the button statuses correctly in case of failure on request.
             // requires refactoring!
-            topInformation(path);
+            topInformation(path, false);
             return;
         }
 
@@ -516,7 +516,7 @@ function submitToVault(folder)
 
                 // inefficient, but for now sets the button statuses correctly in case of failure on request.
                 // requires refactoring!
-                topInformation(folder);
+                topInformation(folder,false);
             }
         });
     }
@@ -546,7 +546,7 @@ function unsubmitToVault(folder) {
 
                 // Inefficient, but for now sets the button statuses correctly in case of failure on request.
                 // requires refactoring!
-                topInformation(folder);
+                topInformation(folder, false);
                 return;
             }
 
@@ -567,14 +567,13 @@ function acceptFolder(folder)
             $('.btn-group button.folder-status').html('Accepted');
 
         } else {
-            alert(data.status);
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
 
 
             // Inefficient, but for now sets the button statuses correctly in case of failure on request.
             // requires refactoring!
-            topInformation(folder);
+            topInformation(folder, false);
         }
     });
 }
@@ -594,7 +593,7 @@ function rejectFolder(folder)
 
             // Inefficient, but for now sets the button statuses correctly in case of failure on request.
             // requires refactoring!
-            topInformation(folder);
+            topInformation(folder, false);
             return;
         }
 
