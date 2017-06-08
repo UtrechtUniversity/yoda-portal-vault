@@ -354,10 +354,10 @@ function topInformation(dir, showAlert)
                 if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
                     $('button.vault-access').attr('data-path', dir);
                     if (researchGroupAccess == 'no') {
-                        $('button.vault-access').text('Grant read access');
+                        $('button.vault-access').text('Grant read access to research group');
                         $('button.vault-access').attr('data-access', 'grant');
                     } else {
-                        $('button.vault-access').text('Revoke read access');
+                        $('button.vault-access').text('Revoke read access to research group');
                         $('button.vault-access').attr('data-access', 'revoke');
                     }
 
@@ -613,10 +613,10 @@ function vaultAccess(action, folder)
     $.getJSON("vault/access?path=" + folder + "&action=" + action, function (data) {
         if (data.status == 'Success') {
             if (action == 'grant') {
-                $('button.vault-access').text('Revoke read access');
+                $('button.vault-access').text('Revoke read access to research group');
                 $('button.vault-access').attr('data-access', 'revoke');
             } else {
-                $('button.vault-access').text('Grant read access');
+                $('button.vault-access').text('Grant read access to research group');
                 $('button.vault-access').attr('data-access', 'grant');
             }
         } else {
