@@ -242,7 +242,7 @@ function topInformation(dir)
             var metadata = data.result.userMetadata;
             var status = data.result.folderStatus;
             var userType = data.result.userType;
-            var hasWriteRights = "no";
+            var hasWriteRights = "yes";
             var isDatamanager = data.result.isDatamanager;
             var isVaultPackage = data.result.isVaultPackage;
             var researchGroupAccess = data.result.researchGroupAccess;
@@ -339,6 +339,7 @@ function topInformation(dir)
                     // disable status dropdown.
                     var actions = [];
                     $('.btn-group button.folder-status').next().prop("disabled", true);
+                    hasWriteRights = 'no';
                 }
 
                 if (typeof status != 'undefined') {
@@ -599,6 +600,7 @@ function rejectFolder(folder)
 
         // Make unlock btn clickable if write rights.
         var hasWriteRights =  $('.btn-group button.folder-status').attr('data-write');
+        console.log(hasWriteRights);
         if (hasWriteRights == 'yes') {
             $('.btn-group button.toggle-folder-status').prop("disabled", false);
         }
