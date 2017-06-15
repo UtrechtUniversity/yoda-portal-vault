@@ -387,7 +387,9 @@ function topInformation(dir, showAlert)
             $('.lock-items').hide();
             var lockIcon = '';
             if (lockCount != '0' && typeof lockCount != 'undefined') {
-                lockIcon = '<i class="fa fa-exclamation-circle lock-icon" data-folder="' + dir + '" title="' + lockCount + ' lock(s) found" aria-hidden="true"></i>';
+                lockIcon = '<i class="fa fa-exclamation-circle lock-icon" data-folder="' + dir + '" data-locks="' + lockCount + '" title="' + lockCount + ' lock(s) found" aria-hidden="true"></i>';
+            } else {
+                lockIcon = '<i class="fa fa-exclamation-circle lock-icon hide" data-folder="' + dir + '" data-locks="0" title="0 lock(s) found" aria-hidden="true"></i>';
             }
 
             $('.btn-group button.folder-status').attr('data-write', hasWriteRights);
@@ -439,11 +441,23 @@ function toggleFolderStatus(newStatus, path)
                 $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
 
                 $('.btn-group button.folder-status').text('Locked');
+
+                var totalLocks = $('.lock-icon').attr('data-locks');
+                if (totalLocks == '0') {
+                    var newLockCount = parseInt(totalLocks + 1);
+                    $('.lock-icon').removeClass('hide');
+                    $('.lock-icon').attr('data-locks', newLockCount);
+                    $('.lock-icon').attr('title', newLockCount + ' lock(s) found');
+                }
                 setMessage('success', 'Successfully locked this folder');
             } else {
                 $('.btn-group button.toggle-folder-status').text('Lock');
                 $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
 
+                var totalLocks = $('.lock-icon').attr('data-locks');
+                if (totalLocks == '1') {
+                    $('.lock-icon').addClass('hide');
+                }
                 $('.btn-group button.folder-status').text('Actions');
                 setMessage('success', 'Successfully unlocked this folder');
             }
@@ -509,6 +523,15 @@ function submitToVault(folder)
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
                     $('.btn-group button.folder-status').next().prop("disabled", true);
                     $('.btn-group button.toggle-folder-status').prop("disabled", true);
+                }
+
+                // lock icon
+                var totalLocks = $('.lock-icon').attr('data-locks');
+                if (totalLocks == '0') {
+                    var newLockCount = parseInt(totalLocks + 1);
+                    $('.lock-icon').removeClass('hide');
+                    $('.lock-icon').attr('data-locks', newLockCount);
+                    $('.lock-icon').attr('title', newLockCount + ' lock(s) found');
                 }
             } else {
                 $('.btn-group button.folder-status').html(btnText);
