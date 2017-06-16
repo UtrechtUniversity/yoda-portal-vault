@@ -444,10 +444,9 @@ function toggleFolderStatus(newStatus, path)
 
                 var totalLocks = $('.lock-icon').attr('data-locks');
                 if (totalLocks == '0') {
-                    var newLockCount = parseInt(totalLocks + 1);
                     $('.lock-icon').removeClass('hide');
-                    $('.lock-icon').attr('data-locks', newLockCount);
-                    $('.lock-icon').attr('title', newLockCount + ' lock(s) found');
+                    $('.lock-icon').attr('data-locks', 1);
+                    $('.lock-icon').attr('title','1 lock(s) found');
                 }
                 setMessage('success', 'Successfully locked this folder');
             } else {
@@ -457,6 +456,7 @@ function toggleFolderStatus(newStatus, path)
                 var totalLocks = $('.lock-icon').attr('data-locks');
                 if (totalLocks == '1') {
                     $('.lock-icon').addClass('hide');
+                    $('.lock-icon').attr('data-locks', 0);
                 }
                 $('.btn-group button.folder-status').text('Actions');
                 setMessage('success', 'Successfully unlocked this folder');
@@ -528,10 +528,9 @@ function submitToVault(folder)
                 // lock icon
                 var totalLocks = $('.lock-icon').attr('data-locks');
                 if (totalLocks == '0') {
-                    var newLockCount = parseInt(totalLocks + 1);
                     $('.lock-icon').removeClass('hide');
-                    $('.lock-icon').attr('data-locks', newLockCount);
-                    $('.lock-icon').attr('title', newLockCount + ' lock(s) found');
+                    $('.lock-icon').attr('data-locks', 1);
+                    $('.lock-icon').attr('title', '1 lock(s) found');
                 }
             } else {
                 $('.btn-group button.folder-status').html(btnText);
