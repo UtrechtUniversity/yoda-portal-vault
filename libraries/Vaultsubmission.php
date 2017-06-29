@@ -20,6 +20,15 @@ class Vaultsubmission
         $this->folder = $params['folder'];
     }
 
+    /* When metadata form is loaded first check validity against xsd. No other checks are required */
+    public function validateMetaAgainstXsdOnly()
+    {
+        $xsdFilePath = $this->formConfig['xsdPath'];
+        $metadataFilePath = $this->formConfig['metadataXmlPath'];
+
+        return $this->validateXsd($xsdFilePath, $metadataFilePath);
+    }
+
     public function validate()
     {
         $messages = array();

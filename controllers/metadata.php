@@ -34,6 +34,7 @@ class Metadata extends MY_Controller
         $metadataCompleteness = 0; // mandatory completeness for the metadata
         $mandatoryTotal = 0;
         $mandatoryFilled = 0;
+        $validationResult = true;
 
         $userType = $formConfig['userType'];
 
@@ -50,17 +51,28 @@ class Metadata extends MY_Controller
                 $form->setPermission('read');
             }
 
-            // figure out the number of mandatory fields and how many actually hold data
-            $form->calculateMandatoryCompleteness($elements);
+            // First perform validation if yoda-metadata is present
+            if ($formConfig['hasMetadataXml'] == 'true') {
+                $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath)); // folder is not relevant for the application here
 
-            // calculate metadataCompleteness with
-            $mandatoryTotal = $form->getCountMandatoryTotal();
-            $mandatoryFilled = $form->getCountMandatoryFilled();
-            if($mandatoryTotal==0) {
-                $metadataCompleteness = 100;
+                $validationErrors = $this->vaultsubmission->validateMetaAgainstXsdOnly();
+                if (count($validationErrors )) {
+                    $validationResult = $validationErrors;
+                }
             }
-            else {
-                $metadataCompleteness =  ceil(100 * $mandatoryFilled / $mandatoryTotal);
+
+            if( $validationResult===true) { // skip calculation if info is not required in frontend.
+                // figure out the number of mandatory fields and how many actually hold data
+                $form->calculateMandatoryCompleteness($elements);
+
+                // calculate metadataCompleteness with
+                $mandatoryTotal = $form->getCountMandatoryTotal();
+                $mandatoryFilled = $form->getCountMandatoryFilled();
+                if ($mandatoryTotal == 0) {
+                    $metadataCompleteness = 100;
+                } else {
+                    $metadataCompleteness = ceil(100 * $mandatoryFilled / $mandatoryTotal);
+                }
             }
 
             $metadataExists = false;
@@ -143,6 +155,7 @@ class Metadata extends MY_Controller
         $this->data['showUnsubmitBtn']  = $showUnsubmitBtn;
         $this->data['flashMessage'] = $flashMessage;
         $this->data['flashMessageType'] = $flashMessageType;
+        $this->data['validationResult'] = $validationResult;
 
         $this->data['realMetadataExists'] = $realMetadataExists; // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
 

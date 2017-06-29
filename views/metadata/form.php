@@ -38,9 +38,19 @@
                     </div>
                 </div>
                 <div class="panel-body">
-                    <?php if ($form === false) { ?>
-                        <p>It is not possible to load this form due to the formatting of the metadata xml file.<br>
-                            Please check the structure of this file. <br>
+                    <?php if ($form === false OR $validationResult !== true) { ?>
+                        <p>
+                            <?php if (is_array($validationResult)){ ?>
+                                It is not possible to load this form as the metadata xml file is not in accordance with the form definition.<br>
+                                <br>Check the following in your xml file:
+                                <?php foreach ($validationResult as $error): ?>
+                                    <?php echo '<br>-' . $error; ?>
+                                <?php endforeach; ?>
+                                <br>
+                             <?php } else { ?>
+                                It is not possible to load this form due to the formatting of the metadata xml file.<br>
+                                Please check the structure of this file. <br>
+                            <?php } ?>
                             <br>
                             When using the 'Delete all metadata' button beware that you will lose all data!
 
