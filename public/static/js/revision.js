@@ -173,6 +173,10 @@ function restoreRevision(overwriteFlag)
                 setAlert('It is not allowed to use "/" or "\\" in a filename.');
                 return false;
             }
+            else if (data.status == 'PROMPT_VaultNotAllowed') {
+                dlgAlertShow('It is not allowed to restore a revision in the vault.');
+                return false;
+            }
             else if (data.status == 'PROMPT_PermissionDenied') {
                 //alertPanelsHide();
                 //$('.alert-panel-path-permission-denied').removeClass('hide')

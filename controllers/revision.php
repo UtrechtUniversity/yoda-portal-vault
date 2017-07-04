@@ -141,6 +141,9 @@ class Revision extends MY_Controller
             case 'FileExistsEnteredByUser':
                 $frontEndState = 'PROMPT_FileExistsEnteredByUser';
                 break;
+            case 'VaultNotAllowed':
+                $frontEndState = 'PROMPT_VaultNotAllowed';
+                break;
             case 'FileExists':
                 $frontEndState = 'PROMPT_Overwrite';
                 break;
