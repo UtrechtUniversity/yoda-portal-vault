@@ -124,7 +124,7 @@ RULE;
             return true;
 
         } catch(RODSException $e) {
-            print_r($e);
+            #print_r($e);
             exit;
             return false;
         }
@@ -154,7 +154,7 @@ RULE;
             return true;
 
         } catch(RODSException $e) {
-            print_r($e);
+            #print_r($e);
             exit;
             return false;
         }
@@ -196,7 +196,7 @@ RULE;
             );
             return $output;
         } catch(RODSException $e) {
-            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
+            #print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
             exit;
             echo $e->showStacktrace();
             return array();
@@ -276,7 +276,7 @@ RULE;
 
             $result = $rule->execute();
 
-            print_r(json_decode($result, true));
+            #print_r(json_decode($result, true));
             exit;
 
         } catch(RODSException $e) {
