@@ -6,19 +6,12 @@ class Search extends MY_Controller
     {
         parent::__construct();
 
-        // initially no rights for any study
-        $this->permissions = array(
-            $this->config->item('role:contributor') => FALSE,
-            $this->config->item('role:manager') => FALSE,
-            $this->config->item('role:reader') => FALSE
-        );
-
         $this->data['userIsAllowed'] = TRUE;
 
         $this->load->model('filesystem');
         $this->load->model('rodsuser');
-
-        $this->load->library('module', array(__DIR__));
+        $this->config->load('config');
+        
         $this->load->library('pathlibrary');
     }
 

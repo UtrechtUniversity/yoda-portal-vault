@@ -6,45 +6,19 @@ class Browse extends MY_Controller
     {
         parent::__construct();
 
-        // initially no rights for any study
-        $this->permissions = array(
-            $this->config->item('role:contributor') => FALSE,
-            $this->config->item('role:manager') => FALSE,
-            $this->config->item('role:reader') => FALSE
-        );
-
         $this->data['userIsAllowed'] = TRUE;
 
         $this->load->model('filesystem');
         $this->load->model('rodsuser');
+        $this->config->load('config');
 
-        $this->load->library('module', array(__DIR__));
         $this->load->library('pathlibrary');
     }
 
     public function index()
     {
-
-        $this->load->view('common-start', array(
-            'styleIncludes' => array(
-                'css/research.css',
-                'lib/datatables/css/dataTables.bootstrap.min.css',
-                'lib/font-awesome/css/font-awesome.css'
-            ),
-            'scriptIncludes' => array(
-                'lib/datatables/js/jquery.dataTables.min.js',
-                'lib/datatables/js/dataTables.bootstrap.min.js',
-                'js/research.js',
-                'js/search.js',
-            ),
-            'activeModule'   => $this->module->name(),
-            'user' => array(
-                'username' => $this->rodsuser->getUsername(),
-            )
-        ));
-
-        $this->data['items'] = $this->config->item('browser-items-per-page');
-        $this->data['dir'] = $this->input->get('dir');
+        $items = $this->config->item('browser-items-per-page');
+        $dir = $this->input->get('dir');
 
         /// Hdr test purposes
         $pathStart = $this->pathlibrary->getPathStart($this->config);
@@ -83,10 +57,26 @@ class Browse extends MY_Controller
             $showTerm = true;
         }
         $searchData = compact('searchTerm', 'searchStatusValue', 'searchType', 'searchStart', 'searchOrderDir', 'searchOrderColumn', 'showStatus', 'showTerm', 'searchItemsPerPage');
-        $this->data['searchHtml'] = $this->load->view('search', $searchData, true);
+        $searchHtml = $this->load->view('search', $searchData, true);
 
-        $this->load->view('browse', $this->data);
-        $this->load->view('common-end');
+        $viewParams = array(
+            'styleIncludes' => array(
+                'css/research.css',
+                'lib/datatables/css/dataTables.bootstrap.min.css',
+                'lib/font-awesome/css/font-awesome.css'
+            ),
+            'scriptIncludes' => array(
+                'lib/datatables/js/jquery.dataTables.min.js',
+                'lib/datatables/js/dataTables.bootstrap.min.js',
+                'js/research.js',
+                'js/search.js',
+            ),
+            'activeModule'   => 'research',
+            'searchHtml' => $searchHtml,
+            'items' => $items,
+            'dir' => $dir,
+        );
+        loadView('browse', $viewParams);
     }
 
     public function top_data()

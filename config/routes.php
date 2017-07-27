@@ -37,10 +37,11 @@
 | in the URL cannot be matched to a valid route.
 |
 */
-$route['default_controller'] 		= $module;
+$module = 'research';
 
-$route[$module] 					= $module . "/browse";
-$route[$module . '/revision']       = $module . "/revision";
+$route[$module]                        = 'browse';
+$route[$module. '/revision']           = 'revision';
+
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */

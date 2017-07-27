@@ -6,20 +6,13 @@ class Revision extends MY_Controller
     {
         parent::__construct();
 
-        // initially no rights for any study
-        $this->permissions = array(
-            $this->config->item('role:contributor') => FALSE,
-            $this->config->item('role:manager') => FALSE,
-            $this->config->item('role:reader') => FALSE
-        );
-
         $this->data['userIsAllowed'] = TRUE;
 
         $this->load->model('filesystem'); //@todo: komt te vervallen!!
         $this->load->model('rodsuser');
         $this->load->model('revisionmodel');
+        $this->config->load('config');
 
-        $this->load->library('module', array(__DIR__));
         $this->load->library('pathlibrary');
     }
 
@@ -28,28 +21,10 @@ class Revision extends MY_Controller
      */
     public function index()
     {
-        $this->load->view('common-start', array(
-            'styleIncludes' => array(
-                'css/research.css',
-                'lib/datatables/css/dataTables.bootstrap.min.css',
-                'lib/font-awesome/css/font-awesome.css'
-            ),
-            'scriptIncludes' => array(
-                'lib/datatables/js/jquery.dataTables.min.js',
-                'lib/datatables/js/dataTables.bootstrap.min.js',
-                'js/revision.js',
-                'js/search.js',
-            ),
-            'activeModule'   => $this->module->name(),
-            'user' => array(
-                'username' => $this->rodsuser->getUsername(),
-            ),
-        ));
+        $items= $this->config->item('revision-items-per-page');
+        $dlgPageItems = $this->config->item('revision-dialog-items-per-page');
 
-        $this->data['items'] = $this->config->item('revision-items-per-page');
-        $this->data['dlgPageItems'] = $this->config->item('revision-dialog-items-per-page');
-
-        $this->data['filter'] = $this->input->get('filter');
+        $filter = $this->input->get('filter');
 
         // Set basic search params
         $this->session->set_userdata(
@@ -68,10 +43,27 @@ class Revision extends MY_Controller
         $searchStart = 0;
         $searchItemsPerPage = $this->config->item('search-items-per-page');
         $searchData = compact('searchTerm', 'searchType', 'searchStart', 'showStatus', 'showTerm', 'searchItemsPerPage');
-        $this->data['searchHtml'] = $this->load->view('search', $searchData, true);
+        $searchHtml = $this->load->view('search', $searchData, true);
 
-        $this->load->view('revision', $this->data);
-        $this->load->view('common-end');
+        $viewParams = array(
+            'styleIncludes' => array(
+                'css/research.css',
+                'lib/datatables/css/dataTables.bootstrap.min.css',
+                'lib/font-awesome/css/font-awesome.css'
+            ),
+            'scriptIncludes' => array(
+                'lib/datatables/js/jquery.dataTables.min.js',
+                'lib/datatables/js/dataTables.bootstrap.min.js',
+                'js/revision.js',
+                'js/search.js',
+            ),
+            'activeModule'   => 'research',
+            'searchHtml' => $searchHtml,
+            'items' => $items,
+            'dlgPageItems' => $dlgPageItems,
+            'filter' => $filter,
+        );
+        loadView('revision', $viewParams);
     }
 
     /**
