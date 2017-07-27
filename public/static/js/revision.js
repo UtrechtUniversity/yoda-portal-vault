@@ -133,7 +133,7 @@ function restoreRevision(overwriteFlag)
         type: 'GET',
         dataType: 'json',
         success: function(data) {
-            $('.path').text(decodeURIComponent(urlEncodedPath).replace(/\+/g, ' '));
+            $('.path').text(decodeURIComponent(urlEncodedPath));
 
             if(data.status== 'UNRECOVERABLE') {
                // alertPanelsHide();
@@ -214,12 +214,12 @@ function showFolderSelectDialog(restorationObjectId, path, orgFileName)
     var decodedFileName = decodeURIComponent(orgFileName);
 
     $('#restoration-objectid').val(restorationObjectId);
-    $('#newFileName').val(decodedFileName.replace(/\+/g, ' '));
+    $('#newFileName').val(decodedFileName);
     //$('#path').html( '<strong>' + path + '</strong>');
 
-    $('.path').text(decodeURIComponent(path).replace(/\+/g, '%20'));
+    $('.path').text(decodeURIComponent(path));
 
-    $('.orgFileName').text(decodedFileName.replace(/\+/g, '%20'));
+    $('.orgFileName').text(decodedFileName);
 
     startBrowsing(path, browseDlgPageItems);
     $('.mode-dlg-locked').addClass('hide');

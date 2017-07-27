@@ -28,9 +28,9 @@
                                 <td>
                                     <div class="btn-group" role="group" aria-label="...">
                                         <button type="button" class="btn btn-default btn-revision-select-dialog"
-                                                data-orgfilename="<?php echo urlencode($orgFileName); ?>"
+                                                data-orgfilename="<?php echo rawurlencode($orgFileName); ?>"
                                                 data-objectid="<?php echo $row['id']; ?>"
-                                                data-path="<?php echo urlencode($revisionStartPath); ?>"><i class="fa fa-magic" aria-hidden="true"></i> Restore</button>
+                                                data-path="<?php echo rawurlencode($revisionStartPath); ?>"><i class="fa fa-magic" aria-hidden="true"></i> Restore</button>
                                     </div>
                                 </td>
                             </tr>
