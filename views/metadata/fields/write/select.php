@@ -1,4 +1,4 @@
-<div class="form-group">
+<div class="form-group select2">
     <label class="col-sm-2 control-label">
         <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>"><?php echo $e->label; ?></span>
     </label>

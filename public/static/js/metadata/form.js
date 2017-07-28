@@ -82,6 +82,12 @@ function validateNumber(event) {
 
 function duplicateField(field)
 {
+    if (field.hasClass('select2')) {
+        // Destroy select2 before cloning
+        // https://stackoverflow.com/questions/17175534/cloned-select2-is-not-responding
+        $(field).find('select').select2('destroy');
+    }
+
     var newFieldGroup = field.clone();
     var newField = newFieldGroup.find('.form-control');
     newField.val('');
@@ -103,7 +109,12 @@ function duplicateField(field)
         });
     }
 
+    if (newFieldGroup.hasClass('select2')) {
+        // Init select2 for the 2 fields.
+        newFieldGroup.find('select').select2();
+        $(field).find('select').select2();
+    }
+
     $(field).after(newFieldGroup);
 
 }
-

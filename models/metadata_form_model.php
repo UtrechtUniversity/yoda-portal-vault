@@ -234,10 +234,13 @@ class Metadata_form_model extends CI_Model {
                                 $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
                                 break;
                             case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
+                            /*
                             case 'optionsDatasetType':
                             case 'optionsDatasetAccess':
                             case 'optionsYesNo':
                             case 'optionsOther':
+                            */
+                            case (substr($xsdElements[$key]['type'], 0, 7) == 'options'):
                                 $elementOptions = $xsdElements[$key]['simpleTypeData']['options'];
                                 $type = 'select';
                                 break;
