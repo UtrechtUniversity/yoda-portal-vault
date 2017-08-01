@@ -87,7 +87,6 @@ function duplicateField(field)
         // https://stackoverflow.com/questions/17175534/cloned-select2-is-not-responding
         $(field).find('select').select2('destroy');
     }
-
     var newFieldGroup = field.clone();
     var newField = newFieldGroup.find('.form-control');
     newField.val('');
