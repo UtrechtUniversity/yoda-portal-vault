@@ -115,6 +115,15 @@ class Vaultsubmission
         $this->CI->load->model('Metadata_form_model');
         $formElements = $this->CI->Metadata_form_model->getFormElements($this->account, $this->formConfig);
 
+        //Iinvalid yodametadat.xml file caused getFormElements to return false instead of full representation of all elements.
+        // There can therefore be no conclusion on all mandatory data being present or not.
+        // The cause for this is always invalid structured xml OR entry of multiple data where this is not allowed.
+        // This is trapped when an xsd check is executed
+        // That is why this check always has to be combined with an XSD check as that will tell where the problem lies
+        if ($formElements===false) {
+            return array();
+        }
+
         foreach ($formElements as $group => $elements) {
             foreach ($elements as $name => $properties) {
                 if ($properties['mandatory']) {
@@ -170,7 +179,7 @@ class Vaultsubmission
     private function findLabelByKey($key)
     {
         $this->CI->load->model('Metadata_form_model');
-        $formElements = $this->CI->Metadata_form_model->getFormElements($this->account, $this->formConfig);
+        $formElements = $this->CI->Metadata_form_model->getFormElementsExcludeYodaMetaData($this->account, $this->formConfig);
 
         foreach ($formElements as $group => $elements) {
             foreach ($elements as $name => $properties) {
