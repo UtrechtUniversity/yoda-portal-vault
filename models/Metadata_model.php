@@ -30,5 +30,15 @@ class Metadata_model extends CI_Model {
 
         return $fileContent;
     }
+
+    public function prepareVaultMetadataForEditing($metadataFile)
+    {
+        $outputParams = array('*tempMetadataXmlPath', '*status', '*statusInfo');
+        $inputParams = array('*metadataXmlPath' => $metadataFile);
+
+        $rule = $this->irodsrule->make('iiPrepareVaultMetadataForEditing', $inputParams, $outputParams);
+        $result = $rule->execute();
+        return $result;
+    }
 }
 

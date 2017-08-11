@@ -34,9 +34,24 @@ class Vaultsubmission
         $messages = array();
         $xsdFilePath = $this->formConfig['xsdPath'];
         $metadataFilePath = $this->formConfig['metadataXmlPath'];
+        $isVaultPackage = $this->formConfig['isVaultPackage'];
 
         $invalidFields = $this->validateXsd($xsdFilePath, $metadataFilePath);
         $mandatoryFields = $this->checkMandatoryFields();
+
+        // Validate update Vault Package
+        if ($isVaultPackage == 'yes') {
+            $fieldErrors = array_unique(array_merge($invalidFields, $mandatoryFields));
+            if (count($fieldErrors)) {
+                $messages[] = $this->formatFieldErrors($fieldErrors);
+            }
+
+            if (count($messages) > 0) {
+                return $messages;
+            }
+
+            return true;
+        }
 
         // Check folder status
         $folderStatusResult = $this->checkFolderStatus();

@@ -138,7 +138,7 @@ class Metadata_form_model extends CI_Model {
         $metadataPresent = false;
 
         $formData = array();
-        if ($config['hasMetadataXml'] == 'true') {
+        if ($config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') {
             $metadataPresent = true;
             $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
 
@@ -178,7 +178,6 @@ class Metadata_form_model extends CI_Model {
                 }
                 else {
                     $value = isset($formData[$key]) ? $formData[$key] : '';
-
                     // The number of values determine the number of elements to be created
                     if(!is_array($value) ) {
                         $valueArray = array();
@@ -263,7 +262,7 @@ class Metadata_form_model extends CI_Model {
                         // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
                         $frontendValue = (isset($element['default']) AND $writeMode) ? $element['default'] : null;
 
-                        if($config['hasMetadataXml'] == 'true') { // the value in the file supersedes default
+                        if($config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') { // the value in the file supersedes default
                             $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');
                             $frontendValue = $keyValue;
                         }
@@ -325,6 +324,7 @@ class Metadata_form_model extends CI_Model {
                 }
             }
         }
+
         return $presentationElements;
     }
 
@@ -417,7 +417,6 @@ class Metadata_form_model extends CI_Model {
     public function loadFormData($rodsaccount, $path)
     {
         $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-
         libxml_use_internal_errors(true);
         $xmlData = simplexml_load_string($fileContent);
         $errors = libxml_get_errors();

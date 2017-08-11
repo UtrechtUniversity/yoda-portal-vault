@@ -73,6 +73,10 @@
                                     <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit</button>
                                 <?php } ?>
 
+                                <?php if ($showEditBtn) { ?>
+                                    <a href="<?php echo base_url('research/metadata/form?path=' . urlencode($path) . '&mode=edit_in_vault'); ?>" class="btn btn-primary">Update metadata</a>
+                                <?php } ?>
+
                                 <?php if ($form->getPermission() == 'write') { ?>
                                     <button type="submit" class="btn btn-primary">Save</button>
                                 <?php } ?>
@@ -90,7 +94,7 @@
                                     </span>
                                 <?php } ?>
 
-                                <?php if ($form->getPermission() == 'write' && $metadataExists) { ?>
+                                <?php if ($form->getPermission() == 'write' && $metadataExists && $isVaultPackage != 'yes') { ?>
                                     <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Delete all metadata</button>
                                 <?php } ?>
 
@@ -129,11 +133,11 @@
                                 <?php if ($metadataCompleteness == 100 && $submitToVaultBtn) { ?>
                                     <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit</button>
                                 <?php } ?>
-                                <?php if ($form->getPermission() == 'write' && $metadataExists) { ?>
+                                <?php if ($form->getPermission() == 'write' && $metadataExists && $isVaultPackage != 'yes') { ?>
                                     <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
                                 <?php } ?>
 
-                                <?php if (($form->getPermission() == 'write' && $metadataExists === false) && $cloneMetadata) { ?>
+                                <?php if (($form->getPermission() == 'write' && $metadataExists === false) && $cloneMetadata && $isVaultPackage != 'yes') { ?>
                                     <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo $path; ?>">Clone from parent folder</button>
                                 <?php } ?>
                             </div>
