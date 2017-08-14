@@ -13,10 +13,11 @@
             <div class="panel-body">
                 <p>It is not possible to load this form due to the formatting of the metadata xml file.<br>
                     Please check the structure of this file. <br>
-                    <br>
-                    When using the 'Delete all metadata' button beware that you will lose all data!
 
                     <?php if ($userType == 'normal' || $userType == 'manager') { ?>
+                        <br>
+                        When using the 'Delete all metadata' button beware that you will lose all data!
+
                         <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo $path; ?>">Delete all metadata</button>
                     <?php } ?>
                 </p>
@@ -51,11 +52,11 @@
                                 It is not possible to load this form due to the formatting of the metadata xml file.<br>
                                 Please check the structure of this file. <br>
                             <?php } ?>
-                            <br>
-                            When using the 'Delete all metadata' button beware that you will lose all data!
-
 
                             <?php if ($form->getPermission() == 'write' && $metadataExists) { ?>
+                                <br>
+                                When using the 'Delete all metadata' button beware that you will lose all data!
+
                                 <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Delete all metadata</button>
                             <?php } ?>
                         </p>
