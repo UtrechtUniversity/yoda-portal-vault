@@ -1093,7 +1093,6 @@ class Metadata_form_model extends CI_Model {
     public function loadFormData($rodsaccount, $path)
     {
         $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-
         libxml_use_internal_errors(true);
         $xmlData = simplexml_load_string($fileContent);
         $errors = libxml_get_errors();
