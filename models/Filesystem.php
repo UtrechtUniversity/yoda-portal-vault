@@ -71,6 +71,26 @@ class Filesystem extends CI_Model {
         }
     }
 
+    function write($rodsaccount, $path, $content)
+    {
+        $file = new ProdsFile($rodsaccount, $path);
+
+        $file->open("w+", $rodsaccount->default_resc); //$this->config->item('rodsDefaultResource')
+
+        $file->write($content);
+
+        $file->close();
+
+        return true;
+    }
+
+    function delete($rodsaccount, $path, $force = false)
+    {
+        $file = new ProdsFile($rodsaccount, $path);
+        $file->unlink($rodsaccount->default_resc, $force);
+        return true;
+    }
+
     static public function metadataFormPaths($iRodsAccount, $path) {
         $ruleBody = <<<'RULE'
 myRule {
@@ -91,10 +111,13 @@ RULE;
 
             $ruleResult = $rule->execute();
             $output = json_decode($ruleResult['*result'], true);
+            //var_dump($ruleResult);
+            //exit;
 
             return $output;
 
         } catch(RODSException $e) {
+
             return false;
         }
 

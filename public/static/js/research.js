@@ -361,6 +361,9 @@ function topInformation(dir, showAlert)
                         $('button.vault-access').attr('data-access', 'revoke');
                     }
 
+                    $('.btn-group button.metadata-form').attr('data-path', dir);
+                    $('.btn-group button.metadata-form').show();
+
                     //
                     $('.top-info-buttons').show();
                     $('.top-info-buttons .research').hide();

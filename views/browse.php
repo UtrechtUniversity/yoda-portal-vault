@@ -35,7 +35,13 @@
                     </div>
 
                     <div class="vault">
-                        <button type="button" class="btn btn-default vault-access" data-access="" data-path="">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
+                        </div>
+
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-default vault-access" data-access="" data-path="">
+                        </div>
                     </div>
 
                 </div>
