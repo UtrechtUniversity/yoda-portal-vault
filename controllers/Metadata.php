@@ -8,10 +8,9 @@ class Metadata extends MY_Controller
 
         $this->data['userIsAllowed'] = TRUE;
 
-        //$this->load->model('filesystem');
         $this->load->model('rodsuser');
+        $this->config->load('config');
 
-        $this->load->library('module', array(__DIR__));
         $this->load->library('pathlibrary');
     }
 
@@ -117,7 +116,10 @@ class Metadata extends MY_Controller
             }
         }
 
-        $this->load->view('common-start', array(
+        $flashMessage = $this->session->flashdata('flashMessage');
+        $flashMessageType = $this->session->flashdata('flashMessageType');
+
+        $viewParams = array(
             'styleIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
                 'lib/font-awesome/css/font-awesome.css',
@@ -131,36 +133,27 @@ class Metadata extends MY_Controller
                 'lib/select2/js/select2.min.js',
                 'js/metadata/form.js',
             ),
-            'activeModule'   => $this->module->name(),
-            'user' => array(
-                'username' => $this->rodsuser->getUsername(),
-            ),
-        ));
+            'activeModule'   => 'research',
+            'form' => $form,
+            'path' => $path,
+            'fullPath' => $fullPath,
+            'userType' => $userType,
+            'metadataExists' => $metadataExists, // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
+            'cloneMetadata' => $cloneMetadata,
 
-        $flashMessage = $this->session->flashdata('flashMessage');
-        $flashMessageType = $this->session->flashdata('flashMessageType');
+            'mandatoryTotal' => $mandatoryTotal,
+            'mandatoryFilled' => $mandatoryFilled,
+            'metadataCompleteness' => $metadataCompleteness,
 
-        $this->data['form'] = $form;
-        $this->data['path'] = $path;
-        $this->data['fullPath'] = $fullPath;
-        $this->data['userType'] = $userType;
-        $this->data['metadataExists'] = $metadataExists;
-        $this->data['cloneMetadata'] = $cloneMetadata;
+            'submitToVaultBtn' => $submitToVaultBtn,
+            'showUnsubmitBtn' => $showUnsubmitBtn,
+            'flashMessage' => $flashMessage,
+            'flashMessageType' => $flashMessageType,
+            'validationResult' => $validationResult,
 
-        $this->data['mandatoryTotal'] = $mandatoryTotal;
-        $this->data['mandatoryFilled'] = $mandatoryFilled;
-        $this->data['metadataCompleteness'] = $metadataCompleteness;
-
-        $this->data['submitToVaultBtn'] = $submitToVaultBtn;
-        $this->data['showUnsubmitBtn']  = $showUnsubmitBtn;
-        $this->data['flashMessage'] = $flashMessage;
-        $this->data['flashMessageType'] = $flashMessageType;
-        $this->data['validationResult'] = $validationResult;
-
-        $this->data['realMetadataExists'] = $realMetadataExists; // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
-
-        $this->load->view('metadata/form', $this->data);
-        $this->load->view('common-end');
+            'realMetadataExists' => $realMetadataExists, // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
+        );
+        loadView('metadata/form', $viewParams);
     }
 
     /**
