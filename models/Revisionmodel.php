@@ -161,7 +161,7 @@ RULE;
     {
         $ruleBody = <<<'RULE'
 myRule {
-        iiRevisionRestore(*revisionId, *target, *overwrite, *status, *statusInfo);
+        iiRevisionRestore(*revisionId, *target, *overwrite, *newFileName, *status, *statusInfo);
 }
 RULE;
         try {
