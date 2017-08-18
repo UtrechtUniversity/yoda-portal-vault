@@ -300,7 +300,7 @@ function topInformation(dir, showAlert)
             }
 
             // folder status
-            if (typeof status != 'undefined') { // Normal folder
+            if (typeof status != 'undefined' && typeof isVaultPackage == 'undefined') { // Normal folder
                 $('.btn-group button.folder-status').next().prop("disabled", false); // reset action dropdown.
 
                 if (status == '') {
