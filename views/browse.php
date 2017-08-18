@@ -42,8 +42,11 @@
                         <div class="btn-group" role="group">
                             <button type="button" class="btn btn-default vault-access" data-access="" data-path="">
                         </div>
-                    </div>
 
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-default vault-approve" data-path="">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
