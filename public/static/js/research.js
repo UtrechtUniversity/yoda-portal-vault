@@ -405,7 +405,7 @@ function topInformation(dir, showAlert)
                     if (typeof status != 'undefined') {
                         if (status == 'APPROVED') {
                             $('.btn-group button.folder-status').text('Approved');
-                            $('.btn-group button.folder-status').attr('data-status', 'SECURED');
+                            $('.btn-group button.folder-status').attr('data-status', 'APPROVED');
                             $('.btn-group button.folder-status').next().prop("disabled", false);
                         } else {
 			    actions['approve'] = 'Approve for publication';
@@ -425,7 +425,7 @@ function topInformation(dir, showAlert)
             }
 
             if (typeof status != 'undefined') {
-                if (status == 'SUBMITTED' || status == 'ACCEPTED' || status == 'APPROVED') {
+                if (status == 'SUBMITTED' || status == 'ACCEPTED') {
                     showStatusBtn = false;
                 }
             }
@@ -727,22 +727,5 @@ function vaultAccess(action, folder)
         }
 
         $('button.vault-access').prop("disabled", false);
-    });
-}
-
-function vaultApprove(folder)
-{
-    var btnText = $('button.vault-approve').html();
-    $('button.vault-approve').html(btnText + '<i class="fa fa-spinner fa-spin fa-fw"></i>');
-    $('button.vault-approve').prop("disabled", true);
-    $.getJSON("vault/approve?path=" + folder, function (data) {
-        if (data.status == 'Success') {
-            $('button.vault-approve').text('Approved for publication');
-            $('button.vault-approve').attr('disabled', 'true');
-        } else {
-            $('button.vault-approve').html(btnText);
-            setMessage('error', data.statusInfo);
-            $('button.vault-approve').prop("disabled", false);
-        }
     });
 }
