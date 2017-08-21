@@ -42,7 +42,7 @@
             <label class="radio-inline"><input type="radio" name="status" value="ACCEPTED"<?php echo $searchStatusValue == 'ACCEPTED' ? ' checked' : ''; ?>>Accepted</label>
             <label class="radio-inline"><input type="radio" name="status" value="REJECTED"<?php echo $searchStatusValue == 'REJECTED' ? ' checked' : ''; ?>>Rejected</label>
             <label class="radio-inline"><input type="radio" name="status" value="SECURED"<?php echo $searchStatusValue == 'SECURED' ? ' checked' : ''; ?>>Secured</label>
-            <label class="radio-inline"><input type="radio" name="status" value="APPROVED"<?php echo $searchStatusValue == 'APPROVED' ? ' checked' : ''; ?>>Approved</label>	    
+            <label class="radio-inline"><input type="radio" name="status" value="APPROVED"<?php echo $searchStatusValue == 'APPROVED' ? ' checked' : ''; ?>>Approved</label>
         </div>
     </div>
 
