@@ -43,8 +43,14 @@
                             <button type="button" class="btn btn-default vault-access" data-access="" data-path="">
                         </div>
 
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-default vault-approve" data-path="">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default folder-status" disabled="disabled">
+                                Actions</button>
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span><span class="sr-only">Actions</span>
+                            </button>
+                            <ul class="dropdown-menu action-list" role="menu">
+                            </ul>
                         </div>
                     </div>
                 </div>

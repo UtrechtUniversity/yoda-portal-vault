@@ -31,6 +31,10 @@ $( document ).ready(function() {
         rejectFolder($(this).attr('data-folder'));
     });
 
+    $("body").on("click", "a.action-approve", function() {
+        approveFolder($(this).attr('data-folder'));
+    });
+
     $("body").on("click", "i.lock-icon", function() {
         toggleLocksList($(this).attr('data-folder'));
     });
@@ -45,10 +49,6 @@ $( document ).ready(function() {
 
     $("body").on("click", "button.vault-access", function() {
         vaultAccess($(this).attr('data-access'), $(this).attr('data-path'));
-    });
-
-    $("body").on("click", "button.vault-approve", function() {
-        vaultApprove($(this).attr('data-path'));
     });
 });
 
@@ -403,14 +403,15 @@ function topInformation(dir, showAlert)
                     }
 
                     if (typeof status != 'undefined') {
-			$('button.vault-approve').attr('data-path', dir);
-			if (status != 'APPROVED') {
-                            $('button.vault-approve').text('Approve for publication');
-                            $('button.vault-approve').prop("disabled", false);
+                        if (status == 'APPROVED') {
+                            $('.btn-group button.folder-status').text('Approved');
+                            $('.btn-group button.folder-status').attr('data-status', 'SECURED');
+                            $('.btn-group button.folder-status').next().prop("disabled", false);
                         } else {
-                            $('button.vault-approve').text('Approved for publication');
-                            $('button.vault-approve').prop("disabled", true);
-			}
+			    actions['approve'] = 'Approve for publication';
+                            $('.btn-group button.folder-status').text('Secured');
+                            $('.btn-group button.folder-status').attr('data-status', 'SECURED');
+                        }
                     }
 
                     $('.btn-group button.metadata-form').attr('data-path', dir);
@@ -420,12 +421,11 @@ function topInformation(dir, showAlert)
                     $('.top-info-buttons').show();
                     $('.top-info-buttons .research').hide();
                     $('.top-info-buttons .vault').show();
-
                 }
             }
 
             if (typeof status != 'undefined') {
-                if (status == 'SUBMITTED' || status == 'ACCEPTED') {
+                if (status == 'SUBMITTED' || status == 'ACCEPTED' || status == 'APPROVED') {
                     showStatusBtn = false;
                 }
             }
@@ -468,7 +468,7 @@ function topInformation(dir, showAlert)
 function handleActionsList(actions, folder)
 {
     var html = '';
-    var possibleActions = ['submit', 'unsubmit', 'accept', 'reject'];
+    var possibleActions = ['submit', 'unsubmit', 'accept', 'reject', 'approve'];
 
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
@@ -682,6 +682,27 @@ function rejectFolder(folder)
         var hasWriteRights =  $('.btn-group button.folder-status').attr('data-write');
         if (hasWriteRights == 'yes') {
             $('.btn-group button.toggle-folder-status').prop("disabled", false);
+        }
+    });
+}
+
+function approveFolder(folder)
+{
+    var btnText = $('.btn-group button.folder-status').html();
+    $('.btn-group button.folder-status').html('Approve <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').prop("disabled", true);
+    $('.btn-group button.folder-status').next().prop("disabled", true);
+    $.getJSON("vault/approve?path=" + folder, function (data) {
+        if (data.status == 'Success') {
+            $('.btn-group button.folder-status').html('Approved');
+        } else {
+            $('.btn-group button.folder-status').html(btnText);
+            setMessage('error', data.statusInfo);
+
+            // Inefficient, but for now sets the button statuses correctly in case of failure on request.
+            // requires refactoring!
+            topInformation(folder, false);
+            return;
         }
     });
 }
