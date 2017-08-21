@@ -299,9 +299,10 @@ function topInformation(dir, showAlert)
                 $('.btn-group button.metadata-form').hide();
             }
 
-            // folder status
-            if (typeof status != 'undefined' && typeof isVaultPackage == 'undefined') { // Normal folder
-                $('.btn-group button.folder-status').next().prop("disabled", false); // reset action dropdown.
+            // folder status (normal folder)
+            if (typeof status != 'undefined' && typeof isVaultPackage == 'undefined') {
+		// reset action dropdown.
+                $('.btn-group button.folder-status').next().prop("disabled", false);
 
                 if (status == '') {
                     $('.btn-group button.toggle-folder-status').text('Lock');
@@ -309,7 +310,7 @@ function topInformation(dir, showAlert)
 
                     actions['submit'] = 'Submit';
                     $('.btn-group button.folder-status').text('Actions');
-                } else if (status == 'LOCKED') { // Locked folder
+                } else if (status == 'LOCKED') {
                     $('.btn-group button.toggle-folder-status').text('Unlock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
 
@@ -402,11 +403,13 @@ function topInformation(dir, showAlert)
                         $('button.vault-access').attr('data-access', 'revoke');
                     }
 
+		    // folder status (vault folder)
                     if (typeof status != 'undefined') {
+			$('.btn-group button.folder-status').next().prop("disabled", false);
                         if (status == 'APPROVED') {
                             $('.btn-group button.folder-status').text('Approved');
                             $('.btn-group button.folder-status').attr('data-status', 'APPROVED');
-                            $('.btn-group button.folder-status').next().prop("disabled", false);
+                            $('.btn-group button.folder-status').next().prop("disabled", true);
                         } else {
 			    actions['approve'] = 'Approve for publication';
                             $('.btn-group button.folder-status').text('Secured');
