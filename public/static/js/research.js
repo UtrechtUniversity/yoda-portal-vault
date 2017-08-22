@@ -406,6 +406,7 @@ function topInformation(dir, showAlert)
 		    // folder status (vault folder)
                     if (typeof status != 'undefined') {
 			$('.btn-group button.folder-status').next().prop("disabled", false);
+			$('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
                         if (status == 'APPROVED') {
                             $('.btn-group button.folder-status').text('Approved for publication');
                             $('.btn-group button.folder-status').attr('data-status', 'APPROVED');
