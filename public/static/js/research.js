@@ -692,12 +692,12 @@ function rejectFolder(folder)
 function approveFolder(folder)
 {
     var btnText = $('.btn-group button.folder-status').html();
-    $('.btn-group button.folder-status').html('Approve <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').html('Approve for publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true);
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/approve?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status').html('Approved');
+            $('.btn-group button.folder-status').html('Approved for publication');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
