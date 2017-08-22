@@ -409,12 +409,10 @@ function topInformation(dir, showAlert)
 			$('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
                         if (status == 'APPROVED') {
                             $('.btn-group button.folder-status').text('Approved for publication');
-                            $('.btn-group button.folder-status').attr('data-status', 'APPROVED');
                             $('.btn-group button.folder-status').next().prop("disabled", true);
                         } else {
 			    actions['approve'] = 'Approve for publication';
                             $('.btn-group button.folder-status').text('Stored in vault');
-                            $('.btn-group button.folder-status').attr('data-status', 'STORED');
                         }
                     }
 
