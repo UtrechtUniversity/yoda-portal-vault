@@ -355,6 +355,7 @@ if (false) {
                                 'key' => $fqElementID . '_' . $id,
                                 'subPropertiesRole' => 'subPropertyStartStructure',
                                 'subPropertiesBase' => $fqElementID,
+                                'subPropertiesStructID' => $multipleAllowed ? '0' : '',//$fqElementID . '-0', // volgnummer -> moet nog dyndamisch worden
                                 'value' => $frontendValue,
                                 'label' => $em['label'],
                                 'helpText' => $em['help'],
@@ -377,6 +378,7 @@ if (false) {
                                     'key' => $fqElementID . '_' . $id . '_' . $propertyKey,
                                     'subPropertiesRole' => 'subProperty',
                                     'subPropertiesBase' => $fqElementID,
+                                    'subPropertiesStructID' => $multipleAllowed ? '0' : '',//$fqElementID . '-0', //volgnummer -> moet nog dynamisch worden
                                     'value' => $frontendValue,
                                     'label' => $propertyElement['label'],
                                     'helpText' => $propertyElement['help'],
@@ -384,21 +386,6 @@ if (false) {
                                     'mandatory' => $mandatory,
                                     'multipleAllowed' => false, // never multipleAllowed for a supproperty at this moment
                                     'elementSpecifics' => $elementSpecifics,
-                                );
-                            }
-                            // HIER NOG AFSLUITER VAN HUIDIG PROPS +
-                            if(false) {
-                                $presentationElements[$groupName][] = array(
-                                    'key' => $fqElementID,
-                                    'subPropertiesRole' => 'subPropertyEndStructure',
-                                    'subPropertiesBase' => $fqElementID,
-                                    //'value' => $frontendValue,
-                                    //'label' => $em['label'],
-                                    //'helpText' => $em['help'],
-                                    'type' => 'HIDDEN',
-                                    //'mandatory' => $mandatory,
-                                    //'multipleAllowed' => $multipleAllowed,
-                                    //'elementSpecifics' => $elementSpecifics,
                                 );
                             }
                             $fqElementID = '';

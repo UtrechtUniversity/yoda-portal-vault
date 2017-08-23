@@ -14,7 +14,14 @@
             <div class="col-sm-9">
                 <input type="text"
                     <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
-                       class="form-control" name="<?php echo $e->key; ?>" value="<?php echo htmlentities($e->value); ?>">
+                       class="form-control"
+                       <?php if ($e->subPropertiesStructID==''): ?>
+                           name="<?php echo $e->key; ?>"
+                        <?php else: ?>
+                           data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
+                           name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
+                        <?php endif; ?>
+                       value="<?php echo htmlentities($e->value); ?>">
             </div>
         </div>
     </div>

@@ -170,7 +170,7 @@ class Element {
     // 3) Subproperty itself
     public $subPropertiesRole = ''; //{startSubPropertyStructure, subProperty, endSubPropertyStructure}
     public $subPropertiesBase = '';
-
+    public $subPropertiesStructID = '';
     /**
      * Constructor
      */
@@ -215,11 +215,14 @@ class Element {
         if (isset($data['subPropertiesRole'])) {
             $this->subPropertiesRole = $data['subPropertiesRole']; //{startSubPropertyStructure, subProperty, endSubPropertyStructure}
             $this->subPropertiesBase = $data['subPropertiesBase']; //what does it belong to (each structure has its own identifier)
+            $this->subPropertiesStructID = $data['subPropertiesStructID'];
         }
 
         if ($this->subPropertiesRole == 'subProperty') { //differentiate view for actual subproperty (i.e. not the controlling element of a subproperty structure)
             $this->type .= '_subproperty';
         }
+
+
 
 /* Possible functure mesage handling
         // preparation for info to user
