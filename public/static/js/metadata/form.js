@@ -67,6 +67,22 @@ $(function () {
 
     // numeric validation
     $('.numeric-field').keypress(validateNumber);
+
+    // Supproperty handling
+    $(".subproperties-toggle").on("click", function() {
+        subPropertiesBase = $(this).attr('data-subpropertyBase');
+        if ($(this).hasClass('glyphicon-chevron-down')) {
+            $(this).removeClass('glyphicon-chevron-down');
+            $(this).addClass('glyphicon-chevron-right');
+            $('.rowSubPropertyBase-' + subPropertiesBase).addClass('hide');
+        }
+        else {
+            $(this).removeClass('glyphicon-chevron-right');
+            $(this).addClass('glyphicon-chevron-down');
+            $(this).parent().parent().removeClass('hide');
+            $('.rowSubPropertyBase-'+ subPropertiesBase).removeClass('hide');
+        }
+    });
 });
 
 function validateNumber(event) {
@@ -87,6 +103,7 @@ function duplicateField(field)
         // https://stackoverflow.com/questions/17175534/cloned-select2-is-not-responding
         $(field).find('select').select2('destroy');
     }
+
     var newFieldGroup = field.clone();
     var newField = newFieldGroup.find('.form-control');
     newField.val('');

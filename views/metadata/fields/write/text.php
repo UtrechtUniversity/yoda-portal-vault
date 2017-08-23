@@ -1,11 +1,16 @@
 <div class="form-group" xmlns="http://www.w3.org/1999/html">
     <label class="col-sm-2 control-label">
-        <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>"><?php echo $e->label; ?></span>
+        <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
+            <i class="glyphicon glyphicon-chevron-down subproperties-toggle" data-subpropertyBase="<?php echo $e->subPropertiesBase; ?>"  data-toggle="tooltip" title="Click to open or close view on subproperties" data-html="true"></i>&nbsp;
+        <?php endif; ?>
+
+        <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>">
+            <?php echo $e->label; ?>
+        </span>
     </label>
 
     <div class="col-sm-7">
         <div class="row">
-
             <div class="col-sm-1">
                 <?php if ($e->mandatory) { ?>
                     <?php if($metadataExists) { ?>
@@ -51,6 +56,7 @@
 
                 <?php } ?>
             </div>
-         </div>
+
+        </div>
     </div>
 </div>

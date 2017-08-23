@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+    <Project_ID>100</Project_ID>
+    <Author>
+        <Name>Author 1</Name>
+        <Properties>
+            <Orcid>ORC-1111</Orcid>
+        </Properties>
+    </Author>
+    <Project_Name>YODA DEVELOPMENT</Project_Name>
+    <Funder>
+        <Name>Naam1</Name>
+        <Properties>
+            <Important>Yes</Important>
+            <Department>Nice department</Department>
+            <Role>President</Role>
+        </Properties>
+    </Funder>
+    <Project_URL>blabla</Project_URL>
+</metadata>

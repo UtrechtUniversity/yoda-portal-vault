@@ -125,10 +125,24 @@ class Metadata_form_model extends CI_Model {
     }
 
 
+
+
+// Nieuwe met inachtneming van subproperties structuur
     public function getFormElements($rodsaccount, $config)
     {
         // load xsd and get all the info regarding restrictions
         $xsdElements = $this->loadXsd($rodsaccount, $config['xsdPath']); // based on element names
+
+//        echo '<H1>XSD content</H1>';
+//        foreach ($xsdElements as $key=>$val) {
+//            echo '<br>';
+//            echo "<b>" . $key . '</b>';
+//            echo '<br>VAL: <br>';
+//            print_r($val);
+//
+//            echo '<hr>';
+//        }
+
 
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
@@ -138,19 +152,26 @@ class Metadata_form_model extends CI_Model {
         $metadataPresent = false;
 
         $formData = array();
-        if ($config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') {
-            $metadataPresent = true;
-            $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
+if (false) {
+    if ($config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') {
+        $metadataPresent = true;
+        $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
 
-            if ($formData === false) {
-                return false;
-            }
+        if ($formData === false) {
+            return false;
         }
+    }
+}
+
+        $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
 
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
         if ($formGroupedElements === false) {
             return false;
         }
+
+
+//-----------------------------------------------------------------------------------------
 
         $presentationElements = array();
 
@@ -171,12 +192,30 @@ class Metadata_form_model extends CI_Model {
             break;
         }
 
+
+
+        // Form elements is hierarchical too.
+        // Bring it back to one level with
+        // 1) parent indication
+        // 2) fully qualified name (unique!)
+
+        // For easy testing - must be corrected!
+        $type = 'text';
+        $elementSpecifics = array('maxLength' => 1024);
+        $multipleAllowed = false;
+
         foreach($formAllGroupedElements as $formElements) {
+            $fqElementID = '';
             foreach ($formElements as $key => $element) {
-                if($key == '@attributes') {
+                // Find group definition
+                // Find hierarchies of elements regarding subproperties.
+
+                if($key == '@attributes') { // GROUP handling
+
                     $groupName = $element['name'];
+//                    echo '<br><br><br>GROUP: ' . $groupName;
                 }
-                else {
+                elseif(false) {
                     $value = isset($formData[$key]) ? $formData[$key] : '';
                     // The number of values determine the number of elements to be created
                     if(!is_array($value) ) {
@@ -233,13 +272,13 @@ class Metadata_form_model extends CI_Model {
                                 $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
                                 break;
                             case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
-                            /*
-                            case 'optionsDatasetType':
-                            case 'optionsDatasetAccess':
-                            case 'optionsYesNo':
-                            case 'optionsOther':
-                            case 'optionsPersonalPersistentIdentifierType':
-                            */
+                                /*
+                                case 'optionsDatasetType':
+                                case 'optionsDatasetAccess':
+                                case 'optionsYesNo':
+                                case 'optionsOther':
+                                case 'optionsPersonalPersistentIdentifierType':
+                                */
                             case (substr($xsdElements[$key]['type'], 0, 7) == 'options'):
                                 $elementOptions = $xsdElements[$key]['simpleTypeData']['options'];
                                 $type = 'select';
@@ -267,48 +306,6 @@ class Metadata_form_model extends CI_Model {
                             $frontendValue = $keyValue;
                         }
 
-/* Possibly for future use
-                        $messagesForUser = array();
-
-                        if (($type == 'text' OR $type == 'textarea')
-                            AND strlen($frontendValue)>$elementMaxLength) {
-
-                            $messagesForUser[] = array('messageNumber' => -200,
-                                'messageText' => 'Value in file is too long, truncated at position ' . $elementMaxLength . '<br>Original value: \'<i>' . $frontendValue . '</i>\'');
-
-                            $frontendValue = substr($frontendValue, 0, $elementMaxLength);
-                        }
-
-                        if (($type == 'select' AND $frontendValue)) {
-                            if(!in_array($frontendValue, $elementOptions)) {
-
-                                $messagesForUser[] = array('messageNumber' => -300,
-                                    'messageText' => 'Value in file is not a valid option: \'<i>' .$frontendValue . '</i>\'');
-
-                                $frontendValue = '';
-                            }
-                        }
-
-                        if (($type == 'date' AND $frontendValue)) {
-                            $date = DateTime::createFromFormat('Y-m-d', $frontendValue);
-                            $date_errors = DateTime::getLastErrors();
-
-                            if ($date_errors['warning_count'] + $date_errors['error_count'] > 0) {
-                                $messagesForUser[] = array('messageNumber' => -400,
-                                    'messageText' => 'Value in file is not a valid date: \'<i>' .$frontendValue . '</i>\'');
-
-                                $frontendValue = '';
-                            }
-
-                        }
-
-                        // mandatory signaling at the last as values could be erroneous and taken out
-                        if($mandatory AND !$frontendValue) {
-                            $messagesForUser[] = array('messageNumber' => -100,
-                                'messageText' => 'Mandatory value missing');
-                        }
-*/
-
                         $presentationElements[$groupName][] = array(
                             'key' => $key,
                             'value' => $frontendValue,
@@ -322,11 +319,150 @@ class Metadata_form_model extends CI_Model {
                         );
                     }
                 }
+                elseif (!isset($element['label'])) { // FULLY QUALIFICATION HANDLING for element as we step into a hierarchy => SUPPROPERTIES
+                    $fqElementID .=  $key ;
+//                    echo '<br>FQ prefix: ' . $fqElementID;
+
+                    foreach($element as $id=>$em) {
+                        // $elements now holds an array of formelements - these are subproperties
+//                        echo '<br>KeySUB: ';
+//                        print_r($id);
+//
+//                        echo '<br>';
+//                        print_r($em);
+
+                        if (isset($em['label'])) {
+                            $frontendValue = $formData[$fqElementID . '_' . $id];
+
+                            $mandatory = false;
+                            if(isset($em['mandatory']) AND strtolower($em['mandatory'])=='true') {
+                                $mandatory = true;
+                            }
+
+                            $multipleAllowed = false;
+                            if($xsdElements[$key]['maxOccurs']!='1') {
+                                $multipleAllowed = true;
+                            }
+
+                            if(!$multipleAllowed) {
+// @todo - to be addressed                                if(count($valueArray)>1) {
+//                                    return false;
+//                                }
+                            }
+
+
+                            $presentationElements[$groupName][] = array(
+                                'key' => $fqElementID . '_' . $id,
+                                'subPropertiesRole' => 'subPropertyStartStructure',
+                                'subPropertiesBase' => $fqElementID,
+                                'value' => $frontendValue,
+                                'label' => $em['label'],
+                                'helpText' => $em['help'],
+                                'type' => $type,
+                                'mandatory' => $mandatory,
+                                'multipleAllowed' => $multipleAllowed,
+                                'elementSpecifics' => $elementSpecifics,
+                            );
+                        }
+                        else {
+                            foreach ($em as $propertyKey=>$propertyElement ) {
+                                $frontendValue = $formData[$fqElementID . '_' . $id . '_' . $propertyKey];
+
+                                $mandatory = false;
+                                if(isset($propertyElement['mandatory']) AND strtolower($propertyElement['mandatory'])=='true') {
+                                    $mandatory = true;
+                                }
+
+                                $presentationElements[$groupName][] = array(
+                                    'key' => $fqElementID . '_' . $id . '_' . $propertyKey,
+                                    'subPropertiesRole' => 'subProperty',
+                                    'subPropertiesBase' => $fqElementID,
+                                    'value' => $frontendValue,
+                                    'label' => $propertyElement['label'],
+                                    'helpText' => $propertyElement['help'],
+                                    'type' => $type,
+                                    'mandatory' => $mandatory,
+                                    'multipleAllowed' => false, // never multipleAllowed for a supproperty at this moment
+                                    'elementSpecifics' => $elementSpecifics,
+                                );
+                            }
+                            // HIER NOG AFSLUITER VAN HUIDIG PROPS +
+                            if(false) {
+                                $presentationElements[$groupName][] = array(
+                                    'key' => $fqElementID,
+                                    'subPropertiesRole' => 'subPropertyEndStructure',
+                                    'subPropertiesBase' => $fqElementID,
+                                    //'value' => $frontendValue,
+                                    //'label' => $em['label'],
+                                    //'helpText' => $em['help'],
+                                    'type' => 'HIDDEN',
+                                    //'mandatory' => $mandatory,
+                                    //'multipleAllowed' => $multipleAllowed,
+                                    //'elementSpecifics' => $elementSpecifics,
+                                );
+                            }
+                            $fqElementID = '';
+                        }
+                    }
+                }
+                else // Dit is het normale level
+                {
+                    $frontendValue = $formData[$key];
+                    // Mandatory no longer based on XSD but taken from formelements.xml
+                    $mandatory = false;
+                    if(isset($element['mandatory']) AND strtolower($element['mandatory'])=='true') {
+                        $mandatory = true;
+                    }
+
+                    $multipleAllowed = false;
+                    if($xsdElements[$key]['maxOccurs']!='1') {
+                        $multipleAllowed = true;
+                    }
+
+                    if(!$multipleAllowed) {
+//                        if(count($valueArray)>1) {
+//                            return false;
+//                        }
+                    }
+
+//                    echo "<br>KEY:  ". $key;
+
+                    $presentationElements[$groupName][] = array(
+                        'key' => $key,
+                        'value' => $frontendValue,
+                        'label' => $element['label'],
+                        'helpText' => $element['help'],
+                        'type' => $type,
+                        'mandatory' => $mandatory,
+                        'multipleAllowed' => $multipleAllowed,
+                        'elementSpecifics' => $elementSpecifics,
+                    );
+                }
             }
         }
 
+//        echo '<hr>';
+//        echo '<h1>Overview FORM ELEMENTS</h1>';
+//        foreach($presentationElements as $group=>$elements) {
+//            echo '<hr>';
+//            echo 'Group: ' . $group;
+//
+//            foreach($elements as $elem) {
+//                echo '<br><br>';
+//
+//                foreach ($elem as $key=>$val) {
+//                    echo '<br>';
+//                    echo $key . ': ' . $val;
+//                }
+//            }
+//        }
+
+
         return $presentationElements;
     }
+
+
+// @TODO: to be refactored conform subproperties
 
     /**
      * @param $rodsaccount
@@ -459,10 +595,11 @@ class Metadata_form_model extends CI_Model {
     }
 
 
-
     public function loadXsd($rodsaccount, $path)
     {
-        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+        //$fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/yoda-properties.xsd');
+
         $xml = simplexml_load_string($fileContent, "SimpleXMLElement", 0,'xs',true);
 
         if (empty($xml)) {
@@ -496,15 +633,28 @@ class Metadata_form_model extends CI_Model {
             }
         }
 
-        $xsdElements = array();
-
-        $elements = $xml->element->complexType->sequence->element;
-
         $supportedSimpleTypes = array_keys($simpleTypeData);
         $supportedSimpleTypes[] = 'xs:date'; // add some standard xsd simpleTypes that should be working as well
         $supportedSimpleTypes[] = 'xs:anyURI';
         $supportedSimpleTypes[] = 'xs:integer';
 
+        // Basic information is complete
+
+        // NOW collect stuff regarding fields
+
+        $xsdElements = array();
+
+        // Hier moet eigenlijk op getest worden of dit info bevat. Dit is de kern van informatie die je bij alle zaken brengt.
+        // DIt is zelfs hierarchisch dus zou
+        $elements = $xml->element->complexType->sequence->element;
+
+        $this->addElements($xsdElements, $elements, $supportedSimpleTypes, $simpleTypeData);
+
+        return $xsdElements;
+    }
+
+    public function addElements(&$xsdElements, $elements, $supportedSimpleTypes, $simpleTypeData, $prefixHigherLevel='')
+    {
         foreach($elements as $element) {
             $attributes = $element->attributes();
 
@@ -532,23 +682,55 @@ class Metadata_form_model extends CI_Model {
                 }
             }
 
+            $isDeeperLevel = false;
+            if (@property_exists($element->complexType->sequence, 'element')) {  // Starting tag Deeper level
+                $isDeeperLevel = true;
+            }
+
             // each relevant attribute has been processed.
-            if(in_array($elementType,$supportedSimpleTypes)) {
-                $xsdElements[$elementName] = array(
-                    'type' => $elementType,
+            if(in_array($elementType,$supportedSimpleTypes) OR $isDeeperLevel) {
+                $xsdElements[ $prefixHigherLevel . $elementName] = array(
+                    'type' => ($isDeeperLevel ? 'openTag' : $elementType),
+                    'minOccurs' => $minOccurs,
+                    'maxOccurs' => $maxOccurs,
+                    'simpleTypeData' => isset($simpleTypeData[$elementType]) ? $simpleTypeData[$elementType] : array()
+                );
+            }
+
+            if ($isDeeperLevel) { // Dit brengt een niveau dieper
+
+                $elementSubLevel = $element->complexType->sequence->element;
+
+                //$prefixHigherLevel = $elementName . '_'; // to be used to identify elements
+                if (!$prefixHigherLevel) {
+                    $prefixHigherLevel = $elementName . '_';
+                }
+                else {
+                    $prefixHigherLevel = $prefixHigherLevel . $elementName . '_';
+                }
+
+                // dieper niveau uitvoeren op basis an de gestelde prefix.
+                $this->addElements($xsdElements, $elementSubLevel, $supportedSimpleTypes, $simpleTypeData, $prefixHigherLevel);
+
+				$prefixHigherLevel = ''; //reset it again
+
+                // Closing tag - Deeper level
+                $xsdElements[$elementName . '_close'] = array(
+                    'type' => 'closeTag',
                     'minOccurs' => $minOccurs,
                     'maxOccurs' => $maxOccurs,
                     'simpleTypeData' => isset($simpleTypeData[$elementType]) ? $simpleTypeData[$elementType] : array()
                 );
             }
         }
-
-        return $xsdElements;
     }
+
 
     public function loadFormData($rodsaccount, $path)
     {
-        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+        //$fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/yoda-metatadata-properties.xml');
+
         libxml_use_internal_errors(true);
         $xmlData = simplexml_load_string($fileContent);
         $errors = libxml_get_errors();
@@ -560,12 +742,45 @@ class Metadata_form_model extends CI_Model {
 
         $json = json_encode($xmlData);
 
-        return json_decode($json,TRUE);
+        $formData = json_decode($json,TRUE);
+
+
+        //@todo: to be refactored
+        $newFormData = array();
+        foreach($formData as $key=>$data) {
+            if(!is_array($data)) {
+                $newFormData[$key] = $data;
+            }
+            else {
+                foreach($data as $key2=>$data2) {
+                    if(!is_array($data2)) {
+                        $newFormData[$key . '_' . $key2] = $data2;
+                    }
+                    else {
+                        foreach($data2 as $key3=>$data3) {
+                            if(!is_array($data3)) {
+                                $newFormData[$key . '_' . $key2 . '_' . $key3] = $data3;
+                            }
+                            else {
+                                foreach($data3 as $key4=>$data4) {
+                                    $newFormData[$key . '_' . $key2 . '_' . $key3 . '_' . $key4] = $data4;
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $newFormData;
     }
 
     public function loadFormElements($rodsaccount, $path)
     {
-        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+//        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/formelements-properties.xml');
+
 
         if (empty($fileContent)) {
             return false;
