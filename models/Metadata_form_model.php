@@ -133,15 +133,14 @@ class Metadata_form_model extends CI_Model {
         // load xsd and get all the info regarding restrictions
         $xsdElements = $this->loadXsd($rodsaccount, $config['xsdPath']); // based on element names
 
+//        echo '<hr>';
 //        echo '<H1>XSD content</H1>';
-//        foreach ($xsdElements as $key=>$val) {
-//            echo '<br>';
-//            echo "<b>" . $key . '</b>';
-//            echo '<br>VAL: <br>';
-//            print_r($val);
 //
-//            echo '<hr>';
-//        }
+//        echo '<pre>';
+//        print_r($xsdElements);
+//        echo '</pre>';
+//
+//        echo '<hr><hr>';
 
 
         $writeMode = true;
@@ -163,6 +162,7 @@ if (false) {
     }
 }
 
+        $metadataPresent = true;
         $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
 
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
@@ -200,11 +200,14 @@ if (false) {
         // 2) fully qualified name (unique!)
 
         // For easy testing - must be corrected!
-        $type = 'text';
-        $elementSpecifics = array('maxLength' => 1024);
-        $multipleAllowed = false;
+//        $type = 'text';
+//        $elementSpecifics = array('maxLength' => 1024);
+//        $multipleAllowed = false;
 
         foreach($formAllGroupedElements as $formElements) {
+
+//            print_r($formElements); exit;
+
             $fqElementID = '';
             foreach ($formElements as $key => $element) {
                 // Find group definition
@@ -213,7 +216,6 @@ if (false) {
                 if($key == '@attributes') { // GROUP handling
 
                     $groupName = $element['name'];
-//                    echo '<br><br><br>GROUP: ' . $groupName;
                 }
                 elseif(false) {
                     $value = isset($formData[$key]) ? $formData[$key] : '';
@@ -319,111 +321,358 @@ if (false) {
                         );
                     }
                 }
-                elseif (!isset($element['label'])) { // FULLY QUALIFICATION HANDLING for element as we step into a hierarchy => SUPPROPERTIES
-                    $fqElementID .=  $key ;
-//                    echo '<br>FQ prefix: ' . $fqElementID;
+                elseif (!isset($element['label'])) { // STEPPING INTO DEEPER LEVELS -- we step into a hierarchy => SUPPROPERTIES
+//                    echo '<HR>';
+//                    echo 'CENTRAL KEY FOR SUBLEVEL: ' . $key;
 
-                    foreach($element as $id=>$em) {
-                        // $elements now holds an array of formelements - these are subproperties
-//                        echo '<br>KeySUB: ';
-//                        print_r($id);
-//
-//                        echo '<br>';
-//                        print_r($em);
+                    $structureValues = $formData[$key];
 
-                        if (isset($em['label'])) {
-                            $frontendValue = $formData[$fqElementID . '_' . $id];
-
-                            $mandatory = false;
-                            if(isset($em['mandatory']) AND strtolower($em['mandatory'])=='true') {
-                                $mandatory = true;
-                            }
-
-                            $multipleAllowed = false;
-                            if($xsdElements[$key]['maxOccurs']!='1') {
-                                $multipleAllowed = true;
-                            }
-
-                            if(!$multipleAllowed) {
-// @todo - to be addressed                                if(count($valueArray)>1) {
-//                                    return false;
-//                                }
-                            }
-
-
-                            $presentationElements[$groupName][] = array(
-                                'key' => $fqElementID . '_' . $id,
-                                'subPropertiesRole' => 'subPropertyStartStructure',
-                                'subPropertiesBase' => $fqElementID,
-                                'subPropertiesStructID' => $multipleAllowed ? '0' : '',//$fqElementID . '-0', // volgnummer -> moet nog dyndamisch worden
-                                'value' => $frontendValue,
-                                'label' => $em['label'],
-                                'helpText' => $em['help'],
-                                'type' => $type,
-                                'mandatory' => $mandatory,
-                                'multipleAllowed' => $multipleAllowed,
-                                'elementSpecifics' => $elementSpecifics,
-                            );
+                    if (!is_array($structureValues)) {
+                        $structValueArray = array();
+                        $structValueArray[] = $formData; //$structureValues;
+                    } else {
+                        $structValueArray = $structureValues;
+                        if (count($structValueArray) == 0) {
+                            $structValueArray = array('');
                         }
-                        else {
-                            foreach ($em as $propertyKey=>$propertyElement ) {
-                                $frontendValue = $formData[$fqElementID . '_' . $id . '_' . $propertyKey];
+                    }
+
+//                    if ($key == 'Funder' ) {
+//                        print_r($structureValues);
+//                        //exit;
+//                    }
+
+                    foreach ($structValueArray as $structValues) {
+                        $fqElementID .= $key;
+
+                        // MAIN LOOP TO SETUP A COMPLETE SUBPROPERTY STRUCTURE
+                        foreach ($element as $id => $em) {
+                            // $elements now holds an array of formelements - these are subproperties
+                            //echo '<br>KeySUB: ';
+
+                            $subKey = $key . '_' . $id;
+                            //echo '<br>subKey: ' . $subKey;
+
+                            if (isset($em['label'])) {   // TOP ELEMENT OF A STRUCT
+                                $subKeyValue = $structValues[$subKey];
+
+//                                echo '<br>Value: ' . $subKeyValue;
 
                                 $mandatory = false;
-                                if(isset($propertyElement['mandatory']) AND strtolower($propertyElement['mandatory'])=='true') {
+                                if (isset($em['mandatory']) AND strtolower($em['mandatory']) == 'true') {
                                     $mandatory = true;
                                 }
 
+                                $multipleAllowed = false;
+                                if ($xsdElements[$subKey]['maxOccurs'] != '1') {
+                                    $multipleAllowed = true;
+                                }
+
+                                if (!$multipleAllowed) {
+//                                    if(count($structValueArray)>1) {
+//                                        return false;
+//                                    }
+                                }
+
+                                $elementOptions = array(); // holds the options
+                                $elementMaxLength = 0;
+                                // Determine restricitions/requirements for this
+                                switch ($xsdElements[$subKey]['type']){
+                                    case 'xs:date':
+                                        $type = 'date';
+                                        break;
+                                    case 'stringURI':
+                                    case 'stringNormal':
+                                        $type = 'text';
+                                        $elementMaxLength = $xsdElements[$subKey]['simpleTypeData']['maxLength'];
+                                        break;
+                                    case 'xs:integer':
+                                        $type = 'numeric';
+                                        $elementMaxLength = 10;  // arbitrary length for this moment
+                                        break;
+                                    case 'xs:anyURI':
+                                        $type = 'text';
+                                        $elementMaxLength = 1024;
+                                        break;
+                                    case 'stringLong':
+                                        $type = 'textarea';
+                                        $elementMaxLength = $xsdElements[$subKey]['simpleTypeData']['maxLength'];
+                                        break;
+                                    case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
+                                        /*
+                                        case 'optionsDatasetType':
+                                        case 'optionsDatasetAccess':
+                                        case 'optionsYesNo':
+                                        case 'optionsOther':
+                                        case 'optionsPersonalPersistentIdentifierType':
+                                        */
+                                    case (substr($xsdElements[$subKey]['type'], 0, 7) == 'options'):
+                                        $elementOptions = $xsdElements[$subKey]['simpleTypeData']['options'];
+                                        $type = 'select';
+                                        break;
+                                }
+
+
+                                //'select' has options
+                                // 'edit/multiline' has length
+                                // 'date' has nothing extra
+                                // Handled separately as these specifics might grow.
+                                $elementSpecifics = array(); // holds all element specific info
+                                if ($type == 'text' OR $type == 'textarea' OR $type=='numeric') {
+                                    $elementSpecifics = array('maxLength' => $elementMaxLength);
+                                } elseif ($type == 'select') {
+                                    $elementSpecifics = array('options' => $elementOptions);
+                                }
+
+                                // frontend value is the value that will be presented in the data field
+                                // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
+                                $frontendValue = (isset($em['default']) AND $writeMode) ? $em['default'] : null;
+
+                                // @todo - hoe zit dit precies met die $config
+                                if(true) { //$config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') { // the value in the file supersedes default @todo!!!????????? hoe zit dit??
+//                            $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');  // no purpose as it is superseded by next line
+                                    $frontendValue = $subKeyValue;
+                                }
+
                                 $presentationElements[$groupName][] = array(
-                                    'key' => $fqElementID . '_' . $id . '_' . $propertyKey,
-                                    'subPropertiesRole' => 'subProperty',
+                                    'key' => $key . '[' . $id . ']',
+                                    'subPropertiesRole' => 'subPropertyStartStructure',
                                     'subPropertiesBase' => $fqElementID,
-                                    'subPropertiesStructID' => $multipleAllowed ? '0' : '',//$fqElementID . '-0', //volgnummer -> moet nog dynamisch worden
+                                    'subPropertiesStructID' => $multipleAllowed ? '0' : '',//$fqElementID . '-0', // volgnummer -> moet nog dyndamisch worden
                                     'value' => $frontendValue,
-                                    'label' => $propertyElement['label'],
-                                    'helpText' => $propertyElement['help'],
+                                    'label' => $em['label'],
+                                    'helpText' => $em['help'],
                                     'type' => $type,
                                     'mandatory' => $mandatory,
-                                    'multipleAllowed' => false, // never multipleAllowed for a supproperty at this moment
+                                    'multipleAllowed' => $multipleAllowed,
                                     'elementSpecifics' => $elementSpecifics,
                                 );
+
+                            } else { // STEP THROUGH EACH SUB PROPERTY
+                                foreach ($em as $propertyKey => $propertyElement) {
+
+                                    //$frontendValue = $formData[$fqElementID . '_' . $id . '_' . $propertyKey];
+                                    $subKey = $key . '_' . $id . '_' . $propertyKey;
+
+//                                    $mandatory = false;
+//                                    if (isset($propertyElement['mandatory']) AND strtolower($propertyElement['mandatory']) == 'true') {
+//                                        $mandatory = true;
+//                                    }
+
+                                    ///////////////////////////
+                                    $subKeyValue = $structValues[$subKey];
+
+//                                    echo '<br>SUBPROPERTY KEY: ' . $subKeyValue;
+//                                    echo '<br>Value: ' . $subKeyValue;
+
+                                    $mandatory = false;
+                                    if (isset($propertyElement['mandatory']) AND strtolower($propertyElement['mandatory']) == 'true') {
+                                        $mandatory = true;
+                                    }
+
+                                    $multipleAllowed = false;
+                                    if ($xsdElements[$subKey]['maxOccurs'] != '1') {
+                                        $multipleAllowed = true;
+                                    }
+//
+//                                    if (!$multipleAllowed) {
+//                                        if(count($structValueArray)>1) {
+//                                            return false;
+//                                        }
+//                                    }
+
+
+                                    //////////////////////////////
+
+                                    $elementOptions = array(); // holds the options
+                                    $elementMaxLength = 0;
+                                    // Determine restricitions/requirements for this
+                                    switch ($xsdElements[$subKey]['type']){
+                                        case 'xs:date':
+                                            $type = 'date';
+                                            break;
+                                        case 'stringURI':
+                                        case 'stringNormal':
+                                            $type = 'text';
+                                            $elementMaxLength = $xsdElements[$subKey]['simpleTypeData']['maxLength'];
+                                            break;
+                                        case 'xs:integer':
+                                            $type = 'numeric';
+                                            $elementMaxLength = 10;  // arbitrary length for this moment
+                                            break;
+                                        case 'xs:anyURI':
+                                            $type = 'text';
+                                            $elementMaxLength = 1024;
+                                            break;
+                                        case 'stringLong':
+                                            $type = 'textarea';
+                                            $elementMaxLength = $xsdElements[$subKey]['simpleTypeData']['maxLength'];
+                                            break;
+                                        case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
+                                            /*
+                                            case 'optionsDatasetType':
+                                            case 'optionsDatasetAccess':
+                                            case 'optionsYesNo':
+                                            case 'optionsOther':
+                                            case 'optionsPersonalPersistentIdentifierType':
+                                            */
+                                        case (substr($xsdElements[$subKey]['type'], 0, 7) == 'options'):
+                                            $elementOptions = $xsdElements[$subKey]['simpleTypeData']['options'];
+                                            $type = 'select';
+                                            break;
+                                    }
+
+
+                                    //'select' has options
+                                    // 'edit/multiline' has length
+                                    // 'date' has nothing extra
+                                    // Handled separately as these specifics might grow.
+                                    $elementSpecifics = array(); // holds all element specific info
+                                    if ($type == 'text' OR $type == 'textarea' OR $type=='numeric') {
+                                        $elementSpecifics = array('maxLength' => $elementMaxLength);
+                                    } elseif ($type == 'select') {
+                                        $elementSpecifics = array('options' => $elementOptions);
+                                    }
+
+                                    // frontend value is the value that will be presented in the data field
+                                    // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
+                                    $frontendValue = (isset($propertyElement['default']) AND $writeMode) ? $propertyElement['default'] : null;
+
+                                    // @todo - hoe zit dit precies met die $config
+                                    if(true) { //$config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') { // the value in the file supersedes default @todo!!!????????? hoe zit dit??
+//                            $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');  // no purpose as it is superseded by next line
+                                        $frontendValue = $subKeyValue;
+                                    }
+
+
+
+
+                                    $presentationElements[$groupName][] = array(
+                                        'key' => $key . '[' . $id . '][' . $propertyKey . ']',
+                                        'subPropertiesRole' => 'subProperty',
+                                        'subPropertiesBase' => $key,
+                                        'subPropertiesStructID' => $multipleAllowed ? '0' : '',//$fqElementID . '-0', //volgnummer -> moet nog dynamisch worden
+                                        'value' => $frontendValue,
+                                        'label' => $propertyElement['label'],
+                                        'helpText' => $propertyElement['help'],
+                                        'type' => $type,
+                                        'mandatory' => $mandatory,
+                                        'multipleAllowed' => false, // never multipleAllowed for a supproperty at this moment
+                                        'elementSpecifics' => $elementSpecifics,
+                                    );
+                                }
+                                $fqElementID = '';
                             }
-                            $fqElementID = '';
                         }
                     }
                 }
-                else // Dit is het normale level
+                else // This is the first level only!
                 {
-                    $frontendValue = $formData[$key];
+                    $value = isset($formData[$key]) ? $formData[$key] : '';
+
+                    // The number of values determine the number of elements to be created
+                    if(!is_array($value) ) {
+                        $valueArray = array();
+                        $valueArray[] = $value;
+                    }
+                    else {
+                        $valueArray = $value;
+                        if(count($valueArray)==0 ) {
+                            $valueArray = array('');
+                        }
+                    }
+
                     // Mandatory no longer based on XSD but taken from formelements.xml
                     $mandatory = false;
-                    if(isset($element['mandatory']) AND strtolower($element['mandatory'])=='true') {
+                    if (isset($element['mandatory']) AND strtolower($element['mandatory']) == 'true') {
                         $mandatory = true;
                     }
 
                     $multipleAllowed = false;
-                    if($xsdElements[$key]['maxOccurs']!='1') {
+                    if ($xsdElements[$key]['maxOccurs'] != '1') {
                         $multipleAllowed = true;
                     }
 
-                    if(!$multipleAllowed) {
-//                        if(count($valueArray)>1) {
-//                            return false;
-//                        }
+                    if (!$multipleAllowed) {
+                        if (count($valueArray) > 1) {
+                            return false; // break it off as this does not comply with xml
+                        }
                     }
 
-//                    echo "<br>KEY:  ". $key;
+                    $elementOptions = array(); // holds the options
+                    $elementMaxLength = 0;
+                    // Determine restricitions/requirements for this
+                    switch ($xsdElements[$key]['type']){
+                        case 'xs:date':
+                            $type = 'date';
+                            break;
+                        case 'stringURI':
+                        case 'stringNormal':
+                            $type = 'text';
+                            $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
+                            break;
+                        case 'xs:integer':
+                            $type = 'numeric';
+                            $elementMaxLength = 10;  // arbitrary length for this moment
+                            break;
+                        case 'xs:anyURI':
+                            $type = 'text';
+                            $elementMaxLength = 1024;
+                            break;
+                        case 'stringLong':
+                            $type = 'textarea';
+                            $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
+                            break;
+                        case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
+                            /*
+                            case 'optionsDatasetType':
+                            case 'optionsDatasetAccess':
+                            case 'optionsYesNo':
+                            case 'optionsOther':
+                            case 'optionsPersonalPersistentIdentifierType':
+                            */
+                        case (substr($xsdElements[$key]['type'], 0, 7) == 'options'):
+                            $elementOptions = $xsdElements[$key]['simpleTypeData']['options'];
+                            $type = 'select';
+                            break;
+                    }
 
-                    $presentationElements[$groupName][] = array(
-                        'key' => $key,
-                        'value' => $frontendValue,
-                        'label' => $element['label'],
-                        'helpText' => $element['help'],
-                        'type' => $type,
-                        'mandatory' => $mandatory,
-                        'multipleAllowed' => $multipleAllowed,
-                        'elementSpecifics' => $elementSpecifics,
-                    );
+
+                    //'select' has options
+                    // 'edit/multiline' has length
+                    // 'date' has nothing extra
+                    // Handled separately as these specifics might grow.
+                    $elementSpecifics = array(); // holds all element specific info
+                    if ($type == 'text' OR $type == 'textarea' OR $type=='numeric') {
+                        $elementSpecifics = array('maxLength' => $elementMaxLength);
+                    } elseif ($type == 'select') {
+                        $elementSpecifics = array('options' => $elementOptions);
+                    }
+
+                    /// Step through all present values (if multiple and create element for each of them)
+                    foreach ($valueArray as $keyValue)
+                    {
+                        // frontend value is the value that will be presented in the data field
+                        // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
+                        $frontendValue = (isset($element['default']) AND $writeMode) ? $element['default'] : null;
+
+                        // @todo - hoe zit dit precies met die $config
+                        if(true) { //$config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') { // the value in the file supersedes default @todo!!!????????? hoe zit dit??
+//                            $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');  // no purpose as it is superseded by next line
+                            $frontendValue = $keyValue;
+                        }
+
+                        $presentationElements[$groupName][] = array(
+                            'key' => $key,
+                            'value' => $frontendValue,
+                            'label' => $element['label'],
+                            'helpText' => $element['help'],
+                            'type' => $type,
+                            'mandatory' => $mandatory,
+                            'multipleAllowed' => $multipleAllowed,
+                            'elementSpecifics' => $elementSpecifics,
+                        );
+                    }
                 }
             }
         }
@@ -443,8 +692,8 @@ if (false) {
 //                }
 //            }
 //        }
-
-
+//
+//        exit;
         return $presentationElements;
     }
 
@@ -731,28 +980,70 @@ if (false) {
 
         $formData = json_decode($json,TRUE);
 
+//        print_r($formData);
 
         //@todo: to be refactored
         $newFormData = array();
+
+//        echo '<hr>';
+//        echo 'LOAD FORM DATA: <br><br>';
         foreach($formData as $key=>$data) {
             if(!is_array($data)) {
                 $newFormData[$key] = $data;
             }
             else {
+                // eerste subniveau.
+                // Hier kan een opsomming staan van verschillende
+//                echo  '<br>Key: ' . $key;
+//                if ($key=='Funder') {
+//                    echo '<pre>';
+//                    print_r($data);
+//                    echo '</pre>';
+//                }
+
                 foreach($data as $key2=>$data2) {
-                    if(!is_array($data2)) {
-                        $newFormData[$key . '_' . $key2] = $data2;
+
+//                    echo '<br>';
+//                    echo 'Subkeys: ' . $key2;
+//                    echo '<br>';
+//                    print_r($data2);
+
+                    if(!is_array($data2)) {  // normal multisituation handling
+                        //echo 'Keys - ' . $key2;
+                        //$newFormData[$key . '_' . $key2] = $data2;
+                        if(is_numeric($key2)) {
+                            $newFormData[$key][$key2] = $data2;
+                        }
+                        else {
+                            $newFormData[$key . '_' . $key2] = $data2;
+                        }
                     }
                     else {
-                        foreach($data2 as $key3=>$data3) {
-                            if(!is_array($data3)) {
-                                $newFormData[$key . '_' . $key2 . '_' . $key3] = $data3;
-                            }
-                            else {
-                                foreach($data3 as $key4=>$data4) {
-                                    $newFormData[$key . '_' . $key2 . '_' . $key3 . '_' . $key4] = $data4;
-                                }
+                        if (is_numeric($key2)) { // SUBPROPERTIES: enumeration and therefore a complete set
+                            $subPropertiesArray = array();
 
+                            foreach($data2 as $key3=>$data3) {
+                                if (!is_array($data3)) {
+                                    $subPropertiesArray[$key . '_' . $key3] = $data3;
+                                } else {
+                                    foreach ($data3 as $key4 => $data4) {
+                                        $subPropertiesArray[$key . '_' . $key3 . '_' . $key4] = $data4;
+                                    }
+                                }
+                            }
+                            // Put array of subproperties under common key for later purposes
+
+                            $newFormData[$key][] = $subPropertiesArray;
+                        }
+                        else {
+                            foreach($data2 as $key3=>$data3) {
+                                if (!is_array($data3)) {
+                                    $newFormData[$key . '_' . $key2 . '_' . $key3] = $data3;
+                                } else {
+                                    foreach ($data3 as $key4 => $data4) {
+                                        $newFormData[$key . '_' . $key2 . '_' . $key3 . '_' . $key4] = $data4;
+                                    }
+                                }
                             }
                         }
                     }
@@ -760,6 +1051,14 @@ if (false) {
             }
         }
 
+//        echo '<hr>';
+//        echo '<h1>Formdata: </h1>';
+//        echo '<pre>';
+//            print_r($newFormData);
+//        echo '</pre>';
+//        echo '<hr>';
+
+        //exit;
         return $newFormData;
     }
 

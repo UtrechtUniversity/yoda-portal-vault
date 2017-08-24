@@ -52,5 +52,9 @@
             <label>URL of project</label>
             <help>Url of project description</help>
         </Project_URL>
+        <Project_Type>
+            <label>Type of project</label>
+            <help>Description of type of project</help>
+        </Project_Type>
     </Group>
 </formelements>

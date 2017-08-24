@@ -27,9 +27,9 @@
                             <xs:element name="Properties"  minOccurs="0" maxOccurs="2">
                                 <xs:complexType>
                                     <xs:sequence>
-                                        <xs:element name="Important" type="optionsYesNo" minOccurs="0" maxOccurs="1"/>
+                                        <xs:element name="Important" type="stringNormal" minOccurs="0" maxOccurs="1"/>
                                         <xs:element name="Department" type="stringNormal" minOccurs="0" maxOccurs="1" />
-                                        <xs:element name="Role" type="optionsRoles" minOccurs="0" maxOccurs="2"/>
+                                        <xs:element name="Role" type="stringNormal" minOccurs="0" maxOccurs="2"/>
                                     </xs:sequence>
                                 </xs:complexType>
                             </xs:element>
@@ -37,6 +37,7 @@
                     </xs:complexType>
                 </xs:element>
                 <xs:element name="Project_URL" type="stringNormal" minOccurs="0" maxOccurs="1" />
+                <xs:element name="Project_Type" type="stringNormal" minOccurs="0" maxOccurs="5" />
             </xs:sequence>
         </xs:complexType>
     </xs:element>

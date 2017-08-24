@@ -7,6 +7,12 @@
             <Orcid>ORC-1111</Orcid>
         </Properties>
     </Author>
+    <Author>
+        <Name>Author 2</Name>
+        <Properties>
+            <Orcid>ORC-222</Orcid>
+        </Properties>
+    </Author>
     <Project_Name>YODA DEVELOPMENT</Project_Name>
     <Funder>
         <Name>Naam1</Name>
@@ -17,4 +23,6 @@
         </Properties>
     </Funder>
     <Project_URL>blabla</Project_URL>
+    <Project_Type>Type 1</Project_Type>
+    <Project_Type>Type 2</Project_Type>
 </metadata>
