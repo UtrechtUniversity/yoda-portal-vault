@@ -47,7 +47,6 @@
                 </Role>
             </Properties>
         </Funder>
-
         <Project_URL>
             <label>URL of project</label>
             <help>Url of project description</help>

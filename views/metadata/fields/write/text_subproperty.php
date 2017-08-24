@@ -15,12 +15,12 @@
                 <input type="text"
                     <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
                        class="form-control"
-                       <?php if ($e->subPropertiesStructID==''): ?>
-                           name="<?php echo $e->key; ?>"
-                        <?php else: ?>
+                       <?php  if ($e->subPropertiesStructID>-1) { ?>
                            data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
                            name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
-                        <?php endif; ?>
+                        <?php } else { ?>
+                           name="<?php echo $e->key; ?>"
+                        <?php } ?>
                        value="<?php echo htmlentities($e->value); ?>">
             </div>
         </div>

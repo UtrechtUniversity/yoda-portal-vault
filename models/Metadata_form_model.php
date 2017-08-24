@@ -84,6 +84,79 @@ class Metadata_form_model extends CI_Model {
     public function processPost($rodsaccount, $config) {
         $metadata = array();
 
+
+        $arrayPost = $this->CI->input->post();
+
+        // First reorganise in such a way that data coming back from front end
+        foreach($arrayPost as $key=>$value) {
+//            echo $key;
+//            echo '<br>';
+//            print_r( $value );
+            $structType = '';
+
+            if (is_array($value)) { // multiplicity && subproperty handling
+                echo '<br>';
+                echo 'ComplexType: ' . $key;
+
+                $sublevelCounter = 0;
+
+                foreach($value as $subKey=>$subValue) {
+                    echo '<br>';
+                    if(is_numeric($subKey)) {
+                        // simple enumeration
+                        echo '<br>-->Multiple entries: ';
+                        echo "$key -  $subValue";
+                    }
+                    else { // subproperty handling - can either be a single struct or n-structs
+                        // A struct typically has 1 element as a hierarchical top element.
+                        // The other element holds properties
+                        echo '---Subkey: ' .$subKey . '---   ';
+
+                        if ($sublevelCounter==0) {
+                            if (count($subValue)==1) { // single instance of a struct
+                                $structType = 'SINGLE';
+
+                                // $key $subKey => $subValue  // 1 maal
+                            }
+                            else { // multiple instances of struct
+                                $structType = 'MULTIPLE';
+                            }
+                        }
+
+                        if($key=='Funder') { // single struct
+                            print_r($subValue);
+                            echo ' ' . count($subValue);
+                        }
+                        elseif($key=='Author') {
+                            print_r($subValue);
+                            echo ' ' . count($subValue);
+                        }
+                    }
+                    $sublevelCounter++;
+                }
+                // after looping through an entire struct it becomes
+
+                echo '<br>------ ' . $structType;
+            }
+            else {
+                echo '<br>';
+                echo 'SimpleType: ' . $key . ' - ' . $value;
+            }
+
+            echo '<hr>';
+        }
+
+
+        echo '<hr>';
+
+        echo '<pre>';
+        print_r($this->CI->input->post());
+        echo '</pre>';
+
+        echo '<hr>';
+
+        exit;
+
         $allElements = $this->getFormElementsAsArray($rodsaccount, $config);
 
         // Step through all elements of the form
@@ -342,6 +415,7 @@ if (false) {
 //                        //exit;
 //                    }
 
+                    $counterForFrontEnd = 0; // to be able to distinghuis structures and add to
                     foreach ($structValueArray as $structValues) {
                         $fqElementID .= $key;
 
@@ -364,7 +438,7 @@ if (false) {
                                 }
 
                                 $multipleAllowed = false;
-                                if ($xsdElements[$subKey]['maxOccurs'] != '1') {
+                                if ($xsdElements[$key]['maxOccurs'] != '1') {  // Use toplevel here as that defines multiplicity for a structure (is in fact not an element)
                                     $multipleAllowed = true;
                                 }
 
@@ -438,7 +512,7 @@ if (false) {
                                     'key' => $key . '[' . $id . ']',
                                     'subPropertiesRole' => 'subPropertyStartStructure',
                                     'subPropertiesBase' => $fqElementID,
-                                    'subPropertiesStructID' => $multipleAllowed ? '0' : '',//$fqElementID . '-0', // volgnummer -> moet nog dyndamisch worden
+                                    'subPropertiesStructID' => $multipleAllowed ? $counterForFrontEnd : -1,//$fqElementID . '-0', // volgnummer -> moet nog dyndamisch worden
                                     'value' => $frontendValue,
                                     'label' => $em['label'],
                                     'helpText' => $em['help'],
@@ -471,7 +545,7 @@ if (false) {
                                     }
 
                                     $multipleAllowed = false;
-                                    if ($xsdElements[$subKey]['maxOccurs'] != '1') {
+                                    if ($xsdElements[$key]['maxOccurs'] != '1') {  //look at top of structure
                                         $multipleAllowed = true;
                                     }
 //
@@ -544,14 +618,11 @@ if (false) {
                                         $frontendValue = $subKeyValue;
                                     }
 
-
-
-
                                     $presentationElements[$groupName][] = array(
                                         'key' => $key . '[' . $id . '][' . $propertyKey . ']',
                                         'subPropertiesRole' => 'subProperty',
                                         'subPropertiesBase' => $key,
-                                        'subPropertiesStructID' => $multipleAllowed ? '0' : '',//$fqElementID . '-0', //volgnummer -> moet nog dynamisch worden
+                                        'subPropertiesStructID' => $multipleAllowed ? $counterForFrontEnd : -1,//$fqElementID . '-0', //volgnummer -> moet nog dynamisch worden
                                         'value' => $frontendValue,
                                         'label' => $propertyElement['label'],
                                         'helpText' => $propertyElement['help'],
@@ -564,6 +635,7 @@ if (false) {
                                 $fqElementID = '';
                             }
                         }
+                        $counterForFrontEnd++;
                     }
                 }
                 else // This is the first level only!
