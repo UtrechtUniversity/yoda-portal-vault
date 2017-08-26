@@ -5,12 +5,14 @@
         <Name>Author 1</Name>
         <Properties>
             <Orcid>ORC-1111</Orcid>
+            <Country>Holland</Country>
         </Properties>
     </Author>
     <Author>
         <Name>Author 2</Name>
         <Properties>
-            <Orcid>ORC-2222</Orcid>
+            <Orcid>ORC-22</Orcid>
+            <Country>Belgium</Country>
         </Properties>
     </Author>
     <Project_Name>YODA DEVELOPMENT</Project_Name>

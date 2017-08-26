@@ -35,6 +35,7 @@ class Metadata_form_model extends CI_Model {
     }
 
 
+// @todo: Obsolete nu met subroperties
     /**
      * @param $rodsaccount
      * @param $config
@@ -73,44 +74,35 @@ class Metadata_form_model extends CI_Model {
     }
 
     /**
-     * @param $rodsaccount
-     * @param $config
+     * Posted data is not coming in in the correct structure due to the way the frontend had to be prepared to be able to clone elements with subproperties
      *
-     * Handles the posted information of a yoda form and puts the values, after escaping, in .yoda-metadata.xml
-     * The config holds the correct paths to form definitions and .yoda-metadata.xml
+     * Therefore, reorganisation must take place
      *
-     * NO VALIDATION OF DATA IS PERFORMED IN ANY WAY
+     * Step through each element and given the type create the correct output so it can be converted to XML later on
      */
-    public function processPost($rodsaccount, $config) {
-        $metadata = array();
-
+    public function reorganisePostedData()
+    {
+        $metadataElements = array();
+        $elementCounter = 0;
 
         $arrayPost = $this->CI->input->post();
 
         // First reorganise in such a way that data coming back from front end
         foreach($arrayPost as $key=>$value) {
-//            echo $key;
-//            echo '<br>';
-//            print_r( $value );
-            $structType = '';
-
             if (is_array($value)) { // multiplicity && subproperty handling
-                echo '<br>';
-                echo 'ComplexType: ' . $key;
-
                 $sublevelCounter = 0;
+                $keepArray = array();
+                $structType = '';
 
                 foreach($value as $subKey=>$subValue) {
-                    echo '<br>';
                     if(is_numeric($subKey)) {
                         // simple enumeration
-                        echo '<br>-->Multiple entries: ';
-                        echo "$key -  $subValue";
+                        $metadataElements[$elementCounter] = array($key => $value);
                     }
                     else { // subproperty handling - can either be a single struct or n-structs
                         // A struct typically has 1 element as a hierarchical top element.
                         // The other element holds properties
-                        echo '---Subkey: ' .$subKey . '---   ';
+//                        echo '---Subkey: ' .$subKey . '---   ';
 
                         if ($sublevelCounter==0) {
                             if (count($subValue)==1) { // single instance of a struct
@@ -121,66 +113,217 @@ class Metadata_form_model extends CI_Model {
                             else { // multiple instances of struct
                                 $structType = 'MULTIPLE';
                             }
+                            $keepArray[$sublevelCounter] = array($subKey=>$subValue);
+//                            echo '<br>keepArray - level=: ' . $sublevelCounter;
+//                            echo '<br>';
+//                            print_r($keepArray[$sublevelCounter]);
                         }
-
-                        if($key=='Funder') { // single struct
-                            print_r($subValue);
-                            echo ' ' . count($subValue);
-                        }
-                        elseif($key=='Author') {
-                            print_r($subValue);
-                            echo ' ' . count($subValue);
+                        else {
+                            $keepArray[$sublevelCounter] = array($subKey=>$subValue);
+//                            echo '<br>keepArray - level=: ' . $sublevelCounter;
+//                            echo '<br>';
+//                            print_r($keepArray[$sublevelCounter]);
                         }
                     }
                     $sublevelCounter++;
                 }
                 // after looping through an entire struct it becomes
+                if ($structType == 'SINGLE') {
+                    $metadataElements[$elementCounter] = array($key => $value);
+                }
+                elseif ($structType == 'MULTIPLE') { // Multi situation
+                    $enumeratedData = array();
+                    foreach($keepArray[0] as $keyData=>$valData) { // step through the lead properties => then find corresponding subproperties
+                        foreach($valData as $referenceID=>$leadPropertyVal ) { // referenceID is actually the counter in the array that coincides for lead and subproperties
 
-                echo '<br>------ ' . $structType;
+                            // Within keepArray[1] handle the corresponding subproperties
+                            $subpropArray = array();
+                            foreach($keepArray[1] as $subpropKey=>$propValue) {
+                                foreach($propValue as $subPropertyName=>$subData){
+                                    $subpropArray[$subPropertyName] = $subData[$referenceID];
+                                }
+                            }
+                            $enumeratedData[] = array($keyData => $leadPropertyVal,
+                                $subpropKey => $subpropArray
+                            );
+                        }
+                    }
+//  Example:
+//                    $enumeratedData[0] =  array('Name' => 'Author 1',
+//                                   'Properties' => array('Orcid' => '2222',
+//                                                         'Countryid' => 'NL2'
+//                                       ),
+//                    );
+//                    $enumeratedData[1] =  array('Name' => 'Author 2',
+//                                            'Properties' => array('Orcid' => '1111',
+//                                                                'Countryid' => 'NL1'
+//                        ),
+//                    );
+
+                    $metadataElements[$elementCounter] = array($key => $enumeratedData);
+                }
             }
             else {
-                echo '<br>';
-                echo 'SimpleType: ' . $key . ' - ' . $value;
+                $metadataElements[$elementCounter] = array($key => $value );
             }
 
-            echo '<hr>';
+            $elementCounter++;
         }
 
+        return $metadataElements;
+    }
 
-        echo '<hr>';
+    /**
+     * @param $allFormMetadata
+     * @return string
+     *
+     * Per form element create xml structure
+     */
+    public function metadataToXmlString($allFormMetadata)
+    {
 
-        echo '<pre>';
-        print_r($this->CI->input->post());
-        echo '</pre>';
+        $xml = new DOMDocument( "1.0", "UTF-8" );
+        $xml->formatOutput = true;
 
-        echo '<hr>';
+        $xml_metadata = $xml->createElement( "metadata" );
 
-        exit;
+        foreach ($allFormMetadata as $elements) {
 
-        $allElements = $this->getFormElementsAsArray($rodsaccount, $config);
+            foreach ($elements as $elementName=>$elementData) {
+                $xml_item = $xml->createElement($elementName);  //@todo - moet deze hier
 
-        // Step through all elements of the form
-        foreach($allElements as $element) {
-            $valueArray = array();
+                if(is_array($elementData)) { // Mutiple situation
 
-            $postValue = $this->CI->input->post($element);
+                    foreach ($elementData as $key => $value) {
 
-            if(!is_array($postValue)) {
-                $valueArray[] = $postValue;
-            }
-            else {
-                $valueArray = $postValue;
-            }
+                        if (is_numeric($key)) { // enumeration - multiple
 
-            //work through all the values for the perticular element
-            foreach($valueArray as $value) {
+                            if (!is_array($value)) { // multiple - no structure
+                                $xml_item = $xml->createElement($elementName); // Per round add 1 new item with same node name to toplevel
+                                $xml_item->appendChild($xml->createTextNode($value));
+                                $xml_metadata->appendChild($xml_item);
+                            }
+                            else { // enumerated subproperty structure
+                                echo "<br><strong>$elementName</strong>";  // Author
 
-                // no empty lines are allowed
-                if(!(empty($value) OR $value=='')) {
-                    $metadata[] = array($element => $value);
+                                // entire structure comes by n times
+
+                                foreach($value as $key2=>$value2) {
+                                    if(!is_array($value2)) {  // $key2 = Name/ Property
+                                        $xml_item = $xml->createElement($elementName);
+                                        $xml_sub1 = $xml->createElement($key2);
+                                        $xml_sub1->appendChild($xml->createTextNode($value2));
+                                        $xml_item->appendChild($xml_sub1);
+                                        $xml_metadata->appendChild($xml_item);
+                                    }
+                                    else {
+                                        $xml_sub1 = $xml->createElement($key2);
+                                        foreach ($value2 as $key3 => $value3) {
+                                            $xml_sub2 = $xml->createElement($key3);
+                                            $xml_sub2->appendChild($xml->createTextNode($value3));
+                                            $xml_sub1->appendChild($xml_sub2);
+
+                                        }
+                                        $xml_item->appendChild($xml_sub1);
+                                        $xml_metadata->appendChild($xml_item);
+                                    }
+                                }
+
+                            }
+                        }
+                        else { // 1-off property structure
+                            $xml_sub1 = $xml->createElement($key); //Name of Property
+
+                            if (!is_array($value)) { // eerste niveau - main property level
+                                $xml_sub1->appendChild($xml->createTextNode($value));
+                                $xml_item->appendChild($xml_sub1);
+                            }
+                            else { // tweede niveau - subproperties
+                                foreach ($value as $key2 => $value2) {
+                                    $xml_sub2 = $xml->createElement($key2);
+                                    $xml_sub2->appendChild($xml->createTextNode($value2));
+                                    $xml_sub1->appendChild($xml_sub2);
+
+                                }
+                                $xml_item->appendChild($xml_sub1);
+                            }
+                            $xml_metadata->appendChild($xml_item);
+                        }
+                    }
+                }
+                else { // 1 topnode - 1 value
+                    $xml_item = $xml->createElement($elementName);
+                    $xml_item->appendChild($xml->createTextNode($elementData));
+                    $xml_metadata->appendChild($xml_item);
                 }
             }
         }
+
+        $xml->appendChild($xml_metadata);
+
+        $xmlString = $xml->saveXML();
+
+
+        echo '<pre>';
+        print_r($xmlString);
+        echo '</pre>';
+        exit;
+
+        return $xmlString;
+    }
+
+    /**
+     * @param $rodsaccount
+     * @param $config
+     *
+     * Handles the posted information of a yoda form and puts the values, after escaping, in .yoda-metadata.xml
+     * The config holds the correct paths to form definitions and .yoda-metadata.xml
+     *
+     * NO VALIDATION OF DATA IS PERFORMED IN ANY WAY
+     */
+    public function processPost($rodsaccount, $config) {
+        $allFormMetadata = $this->reorganisePostedData();
+
+        $xmlString = $this->metadataToXmlString($allFormMetadata);
+
+//        echo '<pre>';
+//        print_r($allFormMetadata);
+//        echo '</pre>';
+
+
+//        echo '<hr>';
+//        echo '<pre>';
+//        print_r($xmlString);
+//        echo '</pre>';
+
+
+        exit;
+
+
+        //$allElements = $this->getFormElementsAsArray($rodsaccount, $config);
+
+        // Step through all elements of the form
+//        foreach($allElements as $element) {
+//            $valueArray = array();
+//
+//            $postValue = $this->CI->input->post($element);
+//
+//            if(!is_array($postValue)) {
+//                $valueArray[] = $postValue;
+//            }
+//            else {
+//                $valueArray = $postValue;
+//            }
+//
+//            //work through all the values for the perticular element
+//            foreach($valueArray as $value) {
+//
+//                // no empty lines are allowed
+//                if(!(empty($value) OR $value=='')) {
+//                    $metadata[] = array($element => $value);
+//                }
+//            }
+//        }
 
         $this->writeMetaDataAsXml($rodsaccount, $config['metadataXmlPath'], $metadata);
     }

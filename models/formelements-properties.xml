@@ -17,6 +17,10 @@
                     <label>ORC ID</label>
                     <help>ORC ID of corresponding author</help>
                 </Orcid>
+                <Country>
+                    <label>Country</label>
+                    <help>Name of country of author</help>
+                </Country>
             </Properties>
         </Author>
         <Project_Name>
