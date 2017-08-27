@@ -630,10 +630,10 @@ if (false) {
 //                                    echo '<br>SUBPROPERTY KEY: ' . $subKeyValue;
 //                                    echo '<br>Value: ' . $subKeyValue;
 
-                                    $mandatory = false;
-                                    if (isset($propertyElement['mandatory']) AND strtolower($propertyElement['mandatory']) == 'true') {
-                                        $mandatory = true;
-                                    }
+//                                    $mandatory = false;
+//                                    if (isset($propertyElement['mandatory']) AND strtolower($propertyElement['mandatory']) == 'true') {
+//                                        $mandatory = true;
+//                                    }
 
                                     $multipleAllowed = false;
                                     if ($xsdElements[$key]['maxOccurs'] != '1') {  //look at top of structure
@@ -646,7 +646,7 @@ if (false) {
 //                                        }
 //                                    }
 
-
+/*
                                     //////////////////////////////
 
                                     $elementOptions = array(); // holds the options
@@ -674,13 +674,11 @@ if (false) {
                                             $elementMaxLength = $xsdElements[$subKey]['simpleTypeData']['maxLength'];
                                             break;
                                         case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
-                                            /*
-                                            case 'optionsDatasetType':
-                                            case 'optionsDatasetAccess':
-                                            case 'optionsYesNo':
-                                            case 'optionsOther':
-                                            case 'optionsPersonalPersistentIdentifierType':
-                                            */
+//                                            case 'optionsDatasetType':
+//                                            case 'optionsDatasetAccess':
+//                                            case 'optionsYesNo':
+//                                            case 'optionsOther':
+//                                            case 'optionsPersonalPersistentIdentifierType':
                                         case (substr($xsdElements[$subKey]['type'], 0, 7) == 'options'):
                                             $elementOptions = $xsdElements[$subKey]['simpleTypeData']['options'];
                                             $type = 'select';
@@ -698,7 +696,7 @@ if (false) {
                                     } elseif ($type == 'select') {
                                         $elementSpecifics = array('options' => $elementOptions);
                                     }
-
+*/
                                     // frontend value is the value that will be presented in the data field
                                     // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
                                     $frontendValue = (isset($propertyElement['default']) AND $writeMode) ? $propertyElement['default'] : null;
@@ -709,6 +707,17 @@ if (false) {
                                         $frontendValue = $subKeyValue;
                                     }
 
+
+                                    $subPropArray = array(
+                                        'subPropertiesRole' => 'subProperty',
+                                        'subPropertiesBase' => $key,
+                                        'subPropertiesStructID' => $multipleAllowed ? $counterForFrontEnd : -1,//$fqElementID . '-0', //volgnummer -> moet nog dynamisch worden
+                                    );
+                                    $presentationElements[$groupName][] =
+                                        $this->newPresentationElement($xsdElements, $propertyElement, $subKey,
+                                            $key . '[' . $id . '][' . $propertyKey . ']', $frontendValue, $multipleAllowed, $subPropArray);
+
+/*
                                     $presentationElements[$groupName][] = array(
                                         'key' => $key . '[' . $id . '][' . $propertyKey . ']',
                                         'subPropertiesRole' => 'subProperty',
@@ -722,6 +731,7 @@ if (false) {
                                         'multipleAllowed' => false, // never multipleAllowed for a supproperty at this moment
                                         'elementSpecifics' => $elementSpecifics,
                                     );
+*/
                                 }
                                 $fqElementID = '';
                             }
@@ -769,12 +779,15 @@ if (false) {
     /**
      * @param $xsdElements
      * @param $element
-     * @param $key
+     * @param $xsdKey
+     * @param $keyId
      * @param $frontendValue
      * @param $multipleAllowed
+     * @param array $subpropertyInfo
      * @return array
-     *
+
      * construct an array with all required data for frontend presentation in the metadataform
+
      */
     public function newPresentationElement($xsdElements, $element, $xsdKey, $keyId, $frontendValue, $multipleAllowed, $subpropertyInfo=array())
     {
@@ -849,7 +862,6 @@ if (false) {
                 $elementData[$key] = $value;
             }
         }
-
         return $elementData;
     }
 
