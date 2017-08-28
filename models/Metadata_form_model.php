@@ -698,6 +698,7 @@ if (false) {
                                         $elementSpecifics = array('options' => $elementOptions);
                                     }
 */
+
                                     // frontend value is the value that will be presented in the data field
                                     // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
                                     $frontendValue = (isset($propertyElement['default']) AND $writeMode) ? $propertyElement['default'] : null;
@@ -1046,8 +1047,8 @@ if (false) {
      */
     public function loadXsd($rodsaccount, $path)
     {
-        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-        //$fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xsd');
+//        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xsd');
 
         $xml = simplexml_load_string($fileContent, "SimpleXMLElement", 0,'xs',true);
 
@@ -1193,7 +1194,9 @@ if (false) {
      */
     public function loadFormData($rodsaccount, $path)
     {
-        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+//        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/yoda-metatadata-properties.xml');
+//        print_r($fileContent); exit;
 
         libxml_use_internal_errors(true);
         $xmlData = simplexml_load_string($fileContent);
@@ -1277,9 +1280,11 @@ if (false) {
      */
     public function loadFormElements($rodsaccount, $path)
     {
-        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+//        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
 
-//        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xml');
+        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xml');
+
+//        print_r($fileContent); exit;
 
         if (empty($fileContent)) {
             return false;
