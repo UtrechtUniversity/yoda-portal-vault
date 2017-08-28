@@ -70,17 +70,16 @@ $(function () {
 
     // Supproperty handling
     $(".subproperties-toggle").on("click", function() {
-        subPropertiesBase = $(this).attr('data-subpropertyBase');
+        var subPropertiesBase = $(this).attr('data-subpropertyBase');
+        var structureId = $(this).data('structure-id');
         if ($(this).hasClass('glyphicon-chevron-down')) {
-            $(this).removeClass('glyphicon-chevron-down');
-            $(this).addClass('glyphicon-chevron-right');
-            $('.rowSubPropertyBase-' + subPropertiesBase).addClass('hide');
+            $(this).removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-right');
+            $('.rowSubPropertyBase-' + subPropertiesBase + '-' + structureId).addClass('hide');
         }
         else {
-            $(this).removeClass('glyphicon-chevron-right');
-            $(this).addClass('glyphicon-chevron-down');
+            $(this).removeClass('glyphicon-chevron-right').addClass('glyphicon-chevron-down');
             $(this).parent().parent().removeClass('hide');
-            $('.rowSubPropertyBase-'+ subPropertiesBase).removeClass('hide');
+            $('.rowSubPropertyBase-'+ subPropertiesBase + '-' + structureId).removeClass('hide');
         }
     });
 });
