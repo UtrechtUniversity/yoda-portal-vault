@@ -1196,7 +1196,6 @@ if (false) {
     {
 //        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
         $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/yoda-metatadata-properties.xml');
-//        print_r($fileContent); exit;
 
         libxml_use_internal_errors(true);
         $xmlData = simplexml_load_string($fileContent);
