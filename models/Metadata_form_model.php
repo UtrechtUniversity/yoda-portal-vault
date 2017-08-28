@@ -277,9 +277,10 @@ class Metadata_form_model extends CI_Model {
         $xmlString = $this->metadataToXmlString($allFormMetadata);
 
 
-        exit;
+//        exit;
 
-        $this->writeMetaDataAsXml($rodsaccount, $config['metadataXmlPath'], $metadata);
+//        $this->writeMetaDataAsXml($rodsaccount, $config['metadataXmlPath'], $metadata);
+        $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
 
     /**
@@ -290,9 +291,9 @@ class Metadata_form_model extends CI_Model {
      * Function that writes a key value pair to an xml file
      *
      */
-    public function writeMetaDataAsXml($rodsaccount, $path, $metadata) {
-        $this->CI->filesystem->writeXml($rodsaccount, $path, $metadata);
-    }
+//    public function writeMetaDataAsXml($rodsaccount, $path, $metadata) {
+//        $this->CI->filesystem->writeXml($rodsaccount, $path, $metadata);
+//    }
 
 
 
@@ -1045,8 +1046,12 @@ if (false) {
      */
     public function loadXsd($rodsaccount, $path)
     {
+        //echo $path;
         //$fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/yoda-properties.xsd');
+        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xsd');
+
+//        print_r($fileContent);exit;
+
 
         $xml = simplexml_load_string($fileContent, "SimpleXMLElement", 0,'xs',true);
 
@@ -1278,8 +1283,7 @@ if (false) {
     public function loadFormElements($rodsaccount, $path)
     {
 //        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/formelements-properties.xml');
-
+        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xml');
 
         if (empty($fileContent)) {
             return false;

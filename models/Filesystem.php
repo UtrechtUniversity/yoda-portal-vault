@@ -14,39 +14,39 @@ class Filesystem extends CI_Model {
     /**
      * @param $rodsaccount
      * @param $path
-     * @param $metadata
+     * @param $xmlString
      *
      * key value pairs to be written to .yoda-metadata.xml
      *
      */
-    function writeXml($rodsaccount, $path, $metadata)
+    function writeXml($rodsaccount, $path, $xmlString)
     {
         $metedataFile = new ProdsFile($rodsaccount, $path);
 
         $metedataFile->open("w+", $rodsaccount->default_resc); //$this->config->item('rodsDefaultResource')
 
-        $xml = new DOMDocument( "1.0", "UTF-8" );
-	    $xml->formatOutput = true;
-
-        $xml_metadata = $xml->createElement( "metadata" );
-
-        foreach($metadata as $fields) {
-            foreach ($fields as $key => $value) {
-                $xml_item = $xml->createElement( $key);
-                $xml_item->appendChild($xml->createTextNode($value));
-                $xml_metadata->appendChild( $xml_item );
-            }
-        }
-
-        $xml->appendChild($xml_metadata);
-
-        $xmlString = $xml->saveXML();
+//        $xml = new DOMDocument( "1.0", "UTF-8" );
+//	    $xml->formatOutput = true;
+//
+//        $xml_metadata = $xml->createElement( "metadata" );
+//
+//        foreach($metadata as $fields) {
+//            foreach ($fields as $key => $value) {
+//                $xml_item = $xml->createElement( $key);
+//                $xml_item->appendChild($xml->createTextNode($value));
+//                $xml_metadata->appendChild( $xml_item );
+//            }
+//        }
+//
+//        $xml->appendChild($xml_metadata);
+//
+//        $xmlString = $xml->saveXML();
 
         $metedataFile->write($xmlString);
 
         $metedataFile->close();
 
-        return $metadata;
+//        return $metadata;
     }
 
     function read($rodsaccount, $file)
@@ -71,26 +71,6 @@ class Filesystem extends CI_Model {
         }
     }
 
-    function write($rodsaccount, $path, $content)
-    {
-        $file = new ProdsFile($rodsaccount, $path);
-
-        $file->open("w+", $rodsaccount->default_resc); //$this->config->item('rodsDefaultResource')
-
-        $file->write($content);
-
-        $file->close();
-
-        return true;
-    }
-
-    function delete($rodsaccount, $path, $force = false)
-    {
-        $file = new ProdsFile($rodsaccount, $path);
-        $file->unlink($rodsaccount->default_resc, $force);
-        return true;
-    }
-
     static public function metadataFormPaths($iRodsAccount, $path) {
         $ruleBody = <<<'RULE'
 myRule {
@@ -111,13 +91,10 @@ RULE;
 
             $ruleResult = $rule->execute();
             $output = json_decode($ruleResult['*result'], true);
-            //var_dump($ruleResult);
-            //exit;
 
             return $output;
 
         } catch(RODSException $e) {
-
             return false;
         }
 
@@ -147,7 +124,7 @@ RULE;
             return true;
 
         } catch(RODSException $e) {
-            #print_r($e);
+            print_r($e);
             exit;
             return false;
         }
@@ -177,7 +154,7 @@ RULE;
             return true;
 
         } catch(RODSException $e) {
-            #print_r($e);
+            print_r($e);
             exit;
             return false;
         }
@@ -219,7 +196,7 @@ RULE;
             );
             return $output;
         } catch(RODSException $e) {
-            #print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
+            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
             exit;
             echo $e->showStacktrace();
             return array();
@@ -299,7 +276,7 @@ RULE;
 
             $result = $rule->execute();
 
-            #print_r(json_decode($result, true));
+            print_r(json_decode($result, true));
             exit;
 
         } catch(RODSException $e) {
@@ -578,39 +555,6 @@ RULE;
             return array();
         }
 
-        return array();
-    }
-
-    function listActionLog($iRodsAccount, $folder, $offset = 0, $limit = 10)
-    {
-        $output = array();
-
-        $ruleBody = <<<'RULE'
-myRule {
-    iiFrontEndActionLog(*folder, *result, *status, *statusInfo);    
-}
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*folder" => $folder
-                ),
-                array("*result", "*status", "*statusInfo")
-            );
-
-            $ruleResult = $rule->execute();
-
-            $output['*result'] = json_decode($ruleResult['*result'], true);
-            $output['*status'] = $ruleResult['*status'];
-            $output['*statusInfo'] = $ruleResult['*statusInfo'];
-
-            return $output;
-
-        } catch(RODSException $e) {
-            return array();
-        }
         return array();
     }
 }

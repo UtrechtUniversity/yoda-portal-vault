@@ -18,39 +18,27 @@ class Metadata extends MY_Controller
     {
         $this->load->model('Metadata_model');
         $this->load->model('Metadata_form_model');
-        $this->load->model('Filesystem');
+        $this->load->model('filesystem');
 
 
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
         $path = $this->input->get('path');
+
         $fullPath =  $pathStart . $path;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-
-        $isDatamanager = $formConfig['isDatamanager'];
-        $isVaultPackage = $formConfig['isVaultPackage'];
 
         $metadataCompleteness = 0; // mandatory completeness for the metadata
         $mandatoryTotal = 0;
         $mandatoryFilled = 0;
         $validationResult = true;
+
         $userType = $formConfig['userType'];
 
-        $mode = $this->input->get('mode'); // ?mode=edit_for_vault
-        if ($isDatamanager == 'yes' && $isVaultPackage == 'yes' && $mode == 'edit_in_vault') {
-            // .tmp file for XSD validation
-            $result = $this->Metadata_model->prepareVaultMetadataForEditing($formConfig['metadataXmlPath']);
-            $tmpSavePath = $result['*tempMetadataXmlPath'] . '.tmp';
-            $tmpFileExists = $this->Filesystem->read($rodsaccount, $tmpSavePath);
-            if ($tmpFileExists !== false) {
-                $formConfig['metadataXmlPath'] = $tmpSavePath;
-            }
-        }
-
-
         $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
+
         if ($elements) {
             $this->load->library('metadataform');
 
@@ -63,7 +51,7 @@ class Metadata extends MY_Controller
             }
 
             // First perform validation if yoda-metadata is present
-            if ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
+            if ($formConfig['hasMetadataXml'] == 'true') {
                 $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath)); // folder is not relevant for the application here
 
                 $validationErrors = $this->vaultsubmission->validateMetaAgainstXsdOnly();
@@ -88,11 +76,11 @@ class Metadata extends MY_Controller
 
             $metadataExists = false;
             $cloneMetadata = false;
-            if ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
+            if ($formConfig['hasMetadataXml'] == 'true') {
                 $metadataExists = true;
             }
 
-            if ($formConfig['parentHasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
+            if ($formConfig['parentHasMetadataXml'] == 'true') {
                 $cloneMetadata = true;
             }
         } else {
@@ -128,16 +116,6 @@ class Metadata extends MY_Controller
             }
         }
 
-        // Datamanager Edit metadata in vault btn & write permissions
-        $showEditBtn = false;
-        if ($isDatamanager == 'yes' && $isVaultPackage == 'yes') {
-            if ($mode == 'edit_in_vault') {
-                $form->setPermission('write'); // Set write permissions for editing metadata in the vault.
-            } else {
-                $showEditBtn = true; // show edit button
-            }
-        }
-
         $flashMessage = $this->session->flashdata('flashMessage');
         $flashMessageType = $this->session->flashdata('flashMessageType');
 
@@ -162,8 +140,6 @@ class Metadata extends MY_Controller
             'userType' => $userType,
             'metadataExists' => $metadataExists, // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
             'cloneMetadata' => $cloneMetadata,
-            'isVaultPackage' => $isVaultPackage,
-            'showEditBtn' => $showEditBtn,
 
             'mandatoryTotal' => $mandatoryTotal,
             'mandatoryFilled' => $mandatoryFilled,
@@ -196,9 +172,7 @@ class Metadata extends MY_Controller
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
         $this->load->model('Metadata_form_model');
-        $this->load->model('Metadata_model');
         $this->load->model('Folder_Status_model');
-        $this->load->model('Filesystem');
 
         $path = $this->input->get('path');
         $fullPath = $pathStart . $path;
@@ -208,35 +182,6 @@ class Metadata extends MY_Controller
         $userType = $formConfig['userType'];
         $lockStatus = $formConfig['lockFound'];
         $folderStatus = $formConfig['folderStatus'];
-        $isDatamanager = $formConfig['isDatamanager'];
-        $isVaultPackage = $formConfig['isVaultPackage'];
-
-        // Datamanager save metadata in vault package
-        if ($isDatamanager == 'yes' && $isVaultPackage == 'yes') {
-            $result = $this->Metadata_model->prepareVaultMetadataForEditing($formConfig['metadataXmlPath']);
-            $tempPath = $result['*tempMetadataXmlPath'];
-            $tmpSavePath = $tempPath . '.tmp';
-            $formConfig['metadataXmlPath'] = $tmpSavePath;
-            $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
-            $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
-
-            $result = $this->vaultsubmission->validate();
-            if ($result === true) {
-                $tmpFileContent = $this->Filesystem->read($rodsaccount, $tmpSavePath);
-                $writeResult = $this->Filesystem->write($rodsaccount, $tempPath, $tmpFileContent);
-                if ($writeResult) {
-                    setMessage('success', 'The metadata is successfully updated.');
-                    $this->Filesystem->delete($rodsaccount, $tmpSavePath);
-                } else {
-                    setMessage('error', 'Unexpected metadata xml write error.');
-                }
-            } else {
-                // result contains all collected messages as an array
-                setMessage('error', implode('<br>', $result));
-            }
-
-            return redirect('research/metadata/form?path=' . urlencode($path) . '&mode=edit_in_vault', 'refresh');
-        }
 
         if (!($userType=='normal' || $userType=='manager')) { // superseeds userType!= reader - which comes too late for permissions for vault submission
             $this->session->set_flashdata('flashMessage', 'Insufficient rights to perform this action.'); // wat is een locking error?
