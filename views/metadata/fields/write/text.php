@@ -1,7 +1,7 @@
 <div class="form-group" xmlns="http://www.w3.org/1999/html">
     <label class="col-sm-2 control-label">
         <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
-            <i class="glyphicon glyphicon-chevron-down subproperties-toggle" data-subpropertyBase="<?php echo $e->subPropertiesBase; ?>"  data-toggle="tooltip" title="Click to open or close view on subproperties" data-html="true"></i>&nbsp;
+            <i data-structure-id="<?php echo $e->subPropertiesStructID; ?>" class="glyphicon glyphicon-chevron-down subproperties-toggle" data-subpropertyBase="<?php echo $e->subPropertiesBase; ?>"  data-toggle="tooltip" title="Click to open or close view on subproperties" data-html="true"></i>&nbsp;
         <?php endif; ?>
 
         <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>">
