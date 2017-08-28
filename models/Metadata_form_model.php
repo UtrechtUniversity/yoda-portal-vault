@@ -1046,12 +1046,8 @@ if (false) {
      */
     public function loadXsd($rodsaccount, $path)
     {
-        //echo $path;
-        //$fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xsd');
-
-//        print_r($fileContent);exit;
-
+        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+        //$fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xsd');
 
         $xml = simplexml_load_string($fileContent, "SimpleXMLElement", 0,'xs',true);
 
@@ -1197,8 +1193,7 @@ if (false) {
      */
     public function loadFormData($rodsaccount, $path)
     {
-        //$fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/yoda-metatadata-properties.xml');
+        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
 
         libxml_use_internal_errors(true);
         $xmlData = simplexml_load_string($fileContent);
@@ -1282,8 +1277,9 @@ if (false) {
      */
     public function loadFormElements($rodsaccount, $path)
     {
-//        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xml');
+        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+
+//        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xml');
 
         if (empty($fileContent)) {
             return false;
