@@ -113,27 +113,18 @@ class Metadata_form_model extends CI_Model {
                     else { // subproperty handling - can either be a single struct or n-structs
                         // A struct typically has 1 element as a hierarchical top element.
                         // The other element holds properties
-//                        echo '---Subkey: ' .$subKey . '---   ';
 
                         if ($sublevelCounter==0) {
                             if (count($subValue)==1) { // single instance of a struct
                                 $structType = 'SINGLE';
-
-                                // $key $subKey => $subValue  // 1 maal
                             }
                             else { // multiple instances of struct
                                 $structType = 'MULTIPLE';
                             }
                             $keepArray[$sublevelCounter] = array($subKey=>$subValue);
-//                            echo '<br>keepArray - level=: ' . $sublevelCounter;
-//                            echo '<br>';
-//                            print_r($keepArray[$sublevelCounter]);
                         }
                         else {
                             $keepArray[$sublevelCounter] = array($subKey=>$subValue);
-//                            echo '<br>keepArray - level=: ' . $sublevelCounter;
-//                            echo '<br>';
-//                            print_r($keepArray[$sublevelCounter]);
                         }
                     }
                     $sublevelCounter++;
@@ -289,19 +280,6 @@ class Metadata_form_model extends CI_Model {
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
 
-    /**
-     * @param $rodsaccount
-     * @param $path
-     * @param $metadata
-     *
-     * Function that writes a key value pair to an xml file
-     *
-     */
-//    public function writeMetaDataAsXml($rodsaccount, $path, $metadata) {
-//        $this->CI->filesystem->writeXml($rodsaccount, $path, $metadata);
-//    }
-
-
 
 
 // Nieuwe met inachtneming van subproperties structuur
@@ -309,16 +287,6 @@ class Metadata_form_model extends CI_Model {
     {
         // load xsd and get all the info regarding restrictions
         $xsdElements = $this->loadXsd($rodsaccount, $config['xsdPath']); // based on element names
-
-//        echo '<hr>';
-//        echo '<H1>XSD content</H1>';
-//
-//        echo '<pre>';
-//        print_r($xsdElements);
-//        echo '</pre>';
-//
-//        echo '<hr><hr>';
-
 
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
@@ -328,27 +296,21 @@ class Metadata_form_model extends CI_Model {
         $metadataPresent = false;
 
         $formData = array();
-if (false) {
-    if ($config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') {
-        $metadataPresent = true;
-        $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
+        if ($config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') {
+            $metadataPresent = true;
+            $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
 
-        if ($formData === false) {
-            return false;
+            if ($formData === false) {
+                return false;
+            }
         }
-    }
-}
 
-        $metadataPresent = true;
         $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
 
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
         if ($formGroupedElements === false) {
             return false;
         }
-
-
-//-----------------------------------------------------------------------------------------
 
         $presentationElements = array();
 
@@ -515,18 +477,6 @@ if (false) {
                             if (isset($em['label'])) {   // TOP ELEMENT OF A STRUCT
                                 $subKeyValue = $structValues[$subKey];
 
-//                                echo '<br>Value: ' . $subKeyValue;
-
-//                                $mandatory = false;
-//                                if (isset($em['mandatory']) AND strtolower($em['mandatory']) == 'true') {
-//                                    $mandatory = true;
-//                                }
-
-//                                $multipleAllowed = false;
-//                                if ($xsdElements[$key]['maxOccurs'] != '1') {  // Use toplevel here as that defines multiplicity for a structure (is in fact not an element)
-//                                    $multipleAllowed = true;
-//                                }
-
                                 // Use toplevel here as that defines multiplicity for a structure (is in fact not an element
                                 $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
 
@@ -536,63 +486,11 @@ if (false) {
 //                                    }
                                 }
 
-                                /*
-                                $elementOptions = array(); // holds the options
-                                $elementMaxLength = 0;
-                                // Determine restricitions/requirements for this
-                                switch ($xsdElements[$subKey]['type']){
-                                    case 'xs:date':
-                                        $type = 'date';
-                                        break;
-                                    case 'stringURI':
-                                    case 'stringNormal':
-                                        $type = 'text';
-                                        $elementMaxLength = $xsdElements[$subKey]['simpleTypeData']['maxLength'];
-                                        break;
-                                    case 'xs:integer':
-                                        $type = 'numeric';
-                                        $elementMaxLength = 10;  // arbitrary length for this moment
-                                        break;
-                                    case 'xs:anyURI':
-                                        $type = 'text';
-                                        $elementMaxLength = 1024;
-                                        break;
-                                    case 'stringLong':
-                                        $type = 'textarea';
-                                        $elementMaxLength = $xsdElements[$subKey]['simpleTypeData']['maxLength'];
-                                        break;
-                                    case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
-
-//                                        case 'optionsDatasetType':
-//                                        case 'optionsDatasetAccess':
-//                                        case 'optionsYesNo':
-//                                        case 'optionsOther':
-//                                        case 'optionsPersonalPersistentIdentifierType':
-
-                                    case (substr($xsdElements[$subKey]['type'], 0, 7) == 'options'):
-                                        $elementOptions = $xsdElements[$subKey]['simpleTypeData']['options'];
-                                        $type = 'select';
-                                        break;
-                                }
-
-
-                                //'select' has options
-                                // 'edit/multiline' has length
-                                // 'date' has nothing extra
-                                // Handled separately as these specifics might grow.
-                                $elementSpecifics = array(); // holds all element specific info
-                                if ($type == 'text' OR $type == 'textarea' OR $type=='numeric') {
-                                    $elementSpecifics = array('maxLength' => $elementMaxLength);
-                                } elseif ($type == 'select') {
-                                    $elementSpecifics = array('options' => $elementOptions);
-                                }
-*/
                                 // frontend value is the value that will be presented in the data field
                                 // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
                                 $frontendValue = (isset($em['default']) AND $writeMode) ? $em['default'] : null;
 
-                                // @todo - hoe zit dit precies met die $config
-                                if(true) { //$config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') { // the value in the file supersedes default @todo!!!????????? hoe zit dit??
+                                if($config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') { // the value in the file supersedes default @todo!!!????????? hoe zit dit??
 //                            $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');  // no purpose as it is superseded by next line
                                     $frontendValue = $subKeyValue;
                                 }
@@ -625,85 +523,13 @@ if (false) {
 
                                     //$frontendValue = $formData[$fqElementID . '_' . $id . '_' . $propertyKey];
                                     $subKey = $key . '_' . $id . '_' . $propertyKey;
-
-//                                    $mandatory = false;
-//                                    if (isset($propertyElement['mandatory']) AND strtolower($propertyElement['mandatory']) == 'true') {
-//                                        $mandatory = true;
-//                                    }
-
-                                    ///////////////////////////
                                     $subKeyValue = $structValues[$subKey];
 
-//                                    echo '<br>SUBPROPERTY KEY: ' . $subKeyValue;
-//                                    echo '<br>Value: ' . $subKeyValue;
-
-//                                    $mandatory = false;
-//                                    if (isset($propertyElement['mandatory']) AND strtolower($propertyElement['mandatory']) == 'true') {
-//                                        $mandatory = true;
-//                                    }
 
                                     $multipleAllowed = false;
                                     if ($xsdElements[$key]['maxOccurs'] != '1') {  //look at top of structure
                                         $multipleAllowed = true;
                                     }
-//
-//                                    if (!$multipleAllowed) {
-//                                        if(count($structValueArray)>1) {
-//                                            return false;
-//                                        }
-//                                    }
-
-/*
-                                    //////////////////////////////
-
-                                    $elementOptions = array(); // holds the options
-                                    $elementMaxLength = 0;
-                                    // Determine restricitions/requirements for this
-                                    switch ($xsdElements[$subKey]['type']){
-                                        case 'xs:date':
-                                            $type = 'date';
-                                            break;
-                                        case 'stringURI':
-                                        case 'stringNormal':
-                                            $type = 'text';
-                                            $elementMaxLength = $xsdElements[$subKey]['simpleTypeData']['maxLength'];
-                                            break;
-                                        case 'xs:integer':
-                                            $type = 'numeric';
-                                            $elementMaxLength = 10;  // arbitrary length for this moment
-                                            break;
-                                        case 'xs:anyURI':
-                                            $type = 'text';
-                                            $elementMaxLength = 1024;
-                                            break;
-                                        case 'stringLong':
-                                            $type = 'textarea';
-                                            $elementMaxLength = $xsdElements[$subKey]['simpleTypeData']['maxLength'];
-                                            break;
-                                        case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
-//                                            case 'optionsDatasetType':
-//                                            case 'optionsDatasetAccess':
-//                                            case 'optionsYesNo':
-//                                            case 'optionsOther':
-//                                            case 'optionsPersonalPersistentIdentifierType':
-                                        case (substr($xsdElements[$subKey]['type'], 0, 7) == 'options'):
-                                            $elementOptions = $xsdElements[$subKey]['simpleTypeData']['options'];
-                                            $type = 'select';
-                                            break;
-                                    }
-
-
-                                    //'select' has options
-                                    // 'edit/multiline' has length
-                                    // 'date' has nothing extra
-                                    // Handled separately as these specifics might grow.
-                                    $elementSpecifics = array(); // holds all element specific info
-                                    if ($type == 'text' OR $type == 'textarea' OR $type=='numeric') {
-                                        $elementSpecifics = array('maxLength' => $elementMaxLength);
-                                    } elseif ($type == 'select') {
-                                        $elementSpecifics = array('options' => $elementOptions);
-                                    }
-*/
 
                                     // frontend value is the value that will be presented in the data field
                                     // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
@@ -1054,7 +880,6 @@ if (false) {
     public function loadXsd($rodsaccount, $path)
     {
         $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-//        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xsd');
 
         $xml = simplexml_load_string($fileContent, "SimpleXMLElement", 0,'xs',true);
 
@@ -1202,10 +1027,6 @@ if (false) {
     {
         $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
 
-        //print_r($fileContent);
-
-        //        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/yoda-metatadata-properties.xml');
-
         libxml_use_internal_errors(true);
         $xmlData = simplexml_load_string($fileContent);
         $errors = libxml_get_errors();
@@ -1289,10 +1110,6 @@ if (false) {
     public function loadFormElements($rodsaccount, $path)
     {
         $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-
-//        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xml');
-
-//        print_r($fileContent); exit;
 
         if (empty($fileContent)) {
             return false;
