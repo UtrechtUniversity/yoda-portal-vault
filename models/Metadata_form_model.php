@@ -95,8 +95,6 @@ class Metadata_form_model extends CI_Model {
             }
             else {
                 foreach ($value as $key1 => $value1) {
-                    echo '<br>' . $key1;
-                    echo '<br>' . $value1;
                     if (!is_array($value1)) {
                         if ($value1) {
                             return true;
@@ -240,7 +238,7 @@ class Metadata_form_model extends CI_Model {
             }
             $elementCounter++;
         }
-        
+
         return $metadataElements;
     }
 
@@ -297,7 +295,6 @@ class Metadata_form_model extends CI_Model {
                                         $xml_metadata->appendChild($xml_item);
                                     }
                                 }
-
                             }
                         }
                         else { // 1-off property structure
