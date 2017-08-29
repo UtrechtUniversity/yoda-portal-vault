@@ -46,7 +46,6 @@ class Metadata_form_model extends CI_Model {
     public function getFormElementsAsArray($rodsaccount, $config) {
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
 
-
         // If there are multiple groups, the first should contain the number '0' as array-index .
         // Otherwise, this is the direct descriptive information (i.e. not an array form.
         // The software expects an array, so in the latter case should be an array)
@@ -80,12 +79,23 @@ class Metadata_form_model extends CI_Model {
      *
      * Step through each element and given the type create the correct output so it can be converted to XML later on
      */
-    public function reorganisePostedData()
+    public function reorganisePostedData($rodsaccount, $xsdPath)
     {
         $metadataElements = array();
         $elementCounter = 0;
 
+        $xsdElements = $this->loadXsd($rodsaccount, $xsdPath);
+
+//        echo '<pre>';
+//        print_r($xsdElements);
+//        echo '</pre>';
+
         $arrayPost = $this->CI->input->post();
+
+//        echo '<pre>';
+//        echo 'PRE POST<br>';
+//           print_r($arrayPost);
+//        echo '</pre>';
 
         // First reorganise in such a way that data coming back from front end
         foreach($arrayPost as $key=>$value) {
@@ -96,8 +106,9 @@ class Metadata_form_model extends CI_Model {
 
                 foreach($value as $subKey=>$subValue) {
                     if(is_numeric($subKey)) {
-                        // simple enumeration
-                        $metadataElements[$elementCounter] = array($key => $value);
+                        if($subValue) {
+                            $metadataElements[$elementCounter] = array($key => $value);
+                        }
                     }
                     else { // subproperty handling - can either be a single struct or n-structs
                         // A struct typically has 1 element as a hierarchical top element.
@@ -127,11 +138,21 @@ class Metadata_form_model extends CI_Model {
                     }
                     $sublevelCounter++;
                 }
+
+                $multipleAllowed = false;
+                if($xsdElements[$key]['maxOccurs']!='1') {
+                    $multipleAllowed = true;
+                }
+                $isStruct = false;
+                if ($xsdElements[$key]['type']=='openTag') {
+                    $isStruct = true;
+                }
+
                 // after looping through an entire struct it becomes
-                if ($structType == 'SINGLE') {
+                if ($structType == 'SINGLE' AND !$multipleAllowed) {
                     $metadataElements[$elementCounter] = array($key => $value);
                 }
-                elseif ($structType == 'MULTIPLE') { // Multi situation
+                elseif ($structType == 'MULTIPLE' OR ($multipleAllowed AND $isStruct)) { // Multi situation
                     $enumeratedData = array();
                     foreach($keepArray[0] as $keyData=>$valData) { // step through the lead properties => then find corresponding subproperties
                         foreach($valData as $referenceID=>$leadPropertyVal ) { // referenceID is actually the counter in the array that coincides for lead and subproperties
@@ -148,28 +169,17 @@ class Metadata_form_model extends CI_Model {
                             );
                         }
                     }
-//  Example:
-//                    $enumeratedData[0] =  array('Name' => 'Author 1',
-//                                   'Properties' => array('Orcid' => '2222',
-//                                                         'Countryid' => 'NL2'
-//                                       ),
-//                    );
-//                    $enumeratedData[1] =  array('Name' => 'Author 2',
-//                                            'Properties' => array('Orcid' => '1111',
-//                                                                'Countryid' => 'NL1'
-//                        ),
-//                    );
-
                     $metadataElements[$elementCounter] = array($key => $enumeratedData);
                 }
             }
             else {
-                $metadataElements[$elementCounter] = array($key => $value );
+                // only add if actually containing a value
+                if ($value) {
+                    $metadataElements[$elementCounter] = array($key => $value);
+                }
             }
-
             $elementCounter++;
         }
-
         return $metadataElements;
     }
 
@@ -272,14 +282,10 @@ class Metadata_form_model extends CI_Model {
      * NO VALIDATION OF DATA IS PERFORMED IN ANY WAY
      */
     public function processPost($rodsaccount, $config) {
-        $allFormMetadata = $this->reorganisePostedData();
+        $allFormMetadata = $this->reorganisePostedData($rodsaccount, $config['xsdPath']);
 
         $xmlString = $this->metadataToXmlString($allFormMetadata);
 
-
-//        exit;
-
-//        $this->writeMetaDataAsXml($rodsaccount, $config['metadataXmlPath'], $metadata);
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
 
@@ -1047,8 +1053,8 @@ if (false) {
      */
     public function loadXsd($rodsaccount, $path)
     {
-//        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xsd');
+        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+//        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xsd');
 
         $xml = simplexml_load_string($fileContent, "SimpleXMLElement", 0,'xs',true);
 
@@ -1194,8 +1200,11 @@ if (false) {
      */
     public function loadFormData($rodsaccount, $path)
     {
-//        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/yoda-metatadata-properties.xml');
+        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+
+        //print_r($fileContent);
+
+        //        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/yoda-metatadata-properties.xml');
 
         libxml_use_internal_errors(true);
         $xmlData = simplexml_load_string($fileContent);
@@ -1279,9 +1288,9 @@ if (false) {
      */
     public function loadFormElements($rodsaccount, $path)
     {
-//        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
 
-        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xml');
+//        $fileContent = file_get_contents('/var/www/yoda/yoda-portal/modules/research/models/subproperties.xml');
 
 //        print_r($fileContent); exit;
 
