@@ -73,6 +73,48 @@ class Metadata_form_model extends CI_Model {
     }
 
     /**
+     * @param $array
+     * @return bool
+
+     * structure like this:
+    [Name] =>
+    [Properties] => Array
+    (
+        [PI] =>
+        [PI_Type] =>
+        [Affiliation] =>
+    )
+     */
+    public function arrayHoldsAnyData($array)
+    {
+        foreach ($array as $key=>$value ) {
+            if (!is_array($value)) {
+                if ($value) {
+                    return true;
+                }
+            }
+            else {
+                foreach ($value as $key1 => $value1) {
+                    echo '<br>' . $key1;
+                    echo '<br>' . $value1;
+                    if (!is_array($value1)) {
+                        if ($value1) {
+                            return true;
+                        }
+                    } else {
+                        foreach ($value1 as $key2 => $value2) {
+                            if ($value2) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Posted data is not coming in in the correct structure due to the way the frontend had to be prepared to be able to clone elements with subproperties
      *
      * Therefore, reorganisation must take place
@@ -96,7 +138,7 @@ class Metadata_form_model extends CI_Model {
 //        echo 'PRE POST<br>';
 //           print_r($arrayPost);
 //        echo '</pre>';
-
+        //exit;
         // First reorganise in such a way that data coming back from front end
         foreach($arrayPost as $key=>$value) {
             if (is_array($value)) { // multiplicity && subproperty handling
@@ -107,7 +149,15 @@ class Metadata_form_model extends CI_Model {
                 foreach($value as $subKey=>$subValue) {
                     if(is_numeric($subKey)) {
                         if($subValue) {
-                            $metadataElements[$elementCounter] = array($key => $value);
+                            if (!isset($metadataElements[$elementCounter])) {
+                                $newValueCollection = array();
+                                foreach ($value as $index=>$localVal) { // rebuild the array only holding values
+                                    if ($localVal) {
+                                        $newValueCollection[] = $localVal;
+                                    }
+                                }
+                                $metadataElements[$elementCounter] = array($key => $newValueCollection);
+                            }
                         }
                     }
                     else { // subproperty handling - can either be a single struct or n-structs
@@ -141,7 +191,15 @@ class Metadata_form_model extends CI_Model {
 
                 // after looping through an entire struct it becomes
                 if ($structType == 'SINGLE' AND !$multipleAllowed) {
-                    $metadataElements[$elementCounter] = array($key => $value);
+//                    echo '<br>KEY1: ' . $key;
+//                    echo '<pre>';
+//                        print_r($value);
+//                    echo '</pre>';
+                    // check values within entire structure to prevent from adding fully empty structure
+
+                    if ($this->arrayHoldsAnyData($value)) { // only add if actually holds any data
+                        $metadataElements[$elementCounter] = array($key => $value);
+                    }
                 }
                 elseif ($structType == 'MULTIPLE' OR ($multipleAllowed AND $isStruct)) { // Multi situation
                     $enumeratedData = array();
@@ -150,17 +208,28 @@ class Metadata_form_model extends CI_Model {
 
                             // Within keepArray[1] handle the corresponding subproperties
                             $subpropArray = array();
-                            foreach($keepArray[1] as $subpropKey=>$propValue) {
-                                foreach($propValue as $subPropertyName=>$subData){
+                            $structHoldsData = strlen($leadPropertyVal)>0 ? true : false;
+                            foreach ($keepArray[1] as $subpropKey => $propValue) {
+                                foreach ($propValue as $subPropertyName => $subData) {
+                                    //echo '<br>' . $subPropertyName . ' - ' .$subData[$referenceID];
                                     $subpropArray[$subPropertyName] = $subData[$referenceID];
+                                    if ($subData[$referenceID] AND !$structHoldsData) {
+                                        $structHoldsData = true;
+                                    }
                                 }
                             }
-                            $enumeratedData[] = array($keyData => $leadPropertyVal,
-                                $subpropKey => $subpropArray
-                            );
+
+                            if ($structHoldsData) {
+                                $enumeratedData[] = array($keyData => $leadPropertyVal,
+                                    $subpropKey => $subpropArray
+                                );
+                            }
+
                         }
                     }
-                    $metadataElements[$elementCounter] = array($key => $enumeratedData);
+                    if (count($enumeratedData)) {
+                        $metadataElements[$elementCounter] = array($key => $enumeratedData); // can contain multiple items - is an enumerated list
+                    }
                 }
             }
             else {
@@ -171,6 +240,7 @@ class Metadata_form_model extends CI_Model {
             }
             $elementCounter++;
         }
+        
         return $metadataElements;
     }
 
