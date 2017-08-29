@@ -52,7 +52,11 @@
                                 <?php endif; ?>
                                value="<?php echo htmlentities($e->value); ?>">
                         <span class="input-group-btn">
-                            <button class="btn btn-default duplicate-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                            <?php if ($e->subPropertiesRole=='subPropertyStartStructure') { ?>
+                                <button class="btn btn-default duplicate-subproperty-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                            <?php } else { ?>
+                                <button class="btn btn-default duplicate-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                            <?php } ?>
                         </span>
                     </div>
                 <?php } else { ?>

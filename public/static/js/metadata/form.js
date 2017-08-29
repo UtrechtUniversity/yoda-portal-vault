@@ -56,6 +56,11 @@ $(function () {
         duplicateField(field);
     });
 
+    $("button.duplicate-subproperty-field").on( "click", function() {
+        var field = $(this).closest('.form-group');
+        duplicateSubpropertyField(field);
+    });
+
     // Disable enter key
     $('.metadata-form input').on('keyup keypress', function(e) {
         var keyCode = e.keyCode || e.which;
@@ -134,3 +139,70 @@ function duplicateField(field)
 
 }
 
+function duplicateSubpropertyField(field)
+{
+    var structureBase = field.find('label i').data('subpropertybase');
+    var structureId = field.find('label i').data('structure-id');
+    var newStructureId = null;
+    var groups = [];
+
+    // Find new structure id
+    for (i = 1; i < 1000; i++) {
+        if ($('.rowSubPropertyBase-' + structureBase + '-' + i).length == 0) {
+            newStructureId = i;
+            break;
+        }
+    }
+
+    // Clone main field
+    var newMainField = field.clone();
+
+    // Change the structure id
+    newMainField.find('label i').attr('data-structure-id', newStructureId);
+
+    // Change the field name
+    var newField = newMainField.find('.form-control');
+    var name = newField.attr('name');
+    name = name.replace('['+structureId+']', '['+newStructureId+']');
+    newField.attr('name', name);
+
+    // Add the new field handlers
+    newMainField = applySubpropertyFieldHandlers(newMainField);
+    groups.push(newMainField);
+
+    var subpropertyFieldGroups = $('.rowSubPropertyBase-' + structureBase + '-' + structureId);
+
+    subpropertyFieldGroups.each(function(){
+        var newMainFieldGroup = $(this).clone();
+
+        // remove property base selector
+        newMainFieldGroup.removeClass('rowSubPropertyBase-' + structureBase + '-' + structureId);
+        newMainFieldGroup.addClass('rowSubPropertyBase-' + structureBase + '-' + newStructureId);
+
+        // Change the field name
+        var newField = newMainFieldGroup.find('.form-control');
+        var name = newField.attr('name');
+        name = name.replace('['+structureId+']', '['+newStructureId+']');
+        newField.attr('name', name);
+
+        // Add the new field handlers
+        newMainFieldGroup = applySubpropertyFieldHandlers(newMainFieldGroup);
+        groups.push(newMainFieldGroup);
+    });
+
+    var last = subpropertyFieldGroups.last();
+
+    $(last).after(groups);
+}
+
+function applySubpropertyFieldHandlers(fieldGroup)
+{
+    var newField = fieldGroup.find('.form-control');
+    newField.val('');
+    fieldGroup.find('button').bind( "click", function() {
+        duplicateSubpropertyField(fieldGroup);
+    });
+    fieldGroup.find('[data-toggle="tooltip"]').tooltip();
+
+    return fieldGroup;
+}
