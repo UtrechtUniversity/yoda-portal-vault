@@ -54,10 +54,10 @@ class Metadata extends MY_Controller
             if ($formConfig['hasMetadataXml'] == 'true') {
                 $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath)); // folder is not relevant for the application here
 
-//                $validationErrors = $this->vaultsubmission->validateMetaAgainstXsdOnly();
-//                if (count($validationErrors )) {
-//                    $validationResult = $validationErrors;
-//                }
+                $validationErrors = $this->vaultsubmission->validateMetaAgainstXsdOnly();
+                if (count($validationErrors )) {
+                    $validationResult = $validationErrors;
+                }
             }
 
             if( $validationResult===true) { // skip calculation if info is not required in frontend.
