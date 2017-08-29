@@ -39,10 +39,6 @@ $( document ).ready(function() {
         toggleLocksList($(this).attr('data-folder'));
     });
 
-    $("body").on("click", "i.actionlog-icon", function() {
-        toggleActionLogList($(this).attr('data-folder'));
-    });
-
     $("body").on("click", ".browse", function() {
         browse($(this).attr('data-path'));
     });
@@ -50,6 +46,7 @@ $( document ).ready(function() {
     $("body").on("click", "button.vault-access", function() {
         vaultAccess($(this).attr('data-access'), $(this).attr('data-path'));
     });
+
 });
 
 function browse(dir)
@@ -224,39 +221,6 @@ function toggleLocksList(folder)
     }
 }
 
-function toggleActionLogList(folder)
-{
-    var actionList = $('.actionlog-items'),
-        isVisible = actionList.is(":visible");
-
-    // toggle locks list
-    if (isVisible) {
-        actionList.hide();
-    } else {
-        // Get locks
-        $.getJSON("browse/list_actionlog?folder=" + folder, function (data) {
-            actionList.hide();
-
-            if (data.status == 'Success') {
-                var html = '<li class="list-group-item disabled">Provenance information:</li>';
-                var logItems = data.result;
-                if (logItems.length) {
-                    $.each(logItems, function (index, value) {
-                        html += '<li class="list-group-item"><span>' + value[2] + ' - <strong>' + value[1] + '</strong> - ' + value[0] + '</span></li>';
-                    });
-                }
-                else {
-                    html += '<li class="list-group-item">No provenance information present</li>';
-                }
-                actionList.html(html).show();
-            } else {
-                setMessage('error', data.statusInfo);
-            }
-        });
-    }
-}
-
-
 function changeBrowserUrl(path)
 {
 
@@ -403,15 +367,15 @@ function topInformation(dir, showAlert)
                         $('button.vault-access').attr('data-access', 'revoke');
                     }
 
-		    // folder status (vault folder)
+    		    // folder status (vault folder)
                     if (typeof status != 'undefined') {
-			$('.btn-group button.folder-status').next().prop("disabled", false);
-			$('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
+            			$('.btn-group button.folder-status').next().prop("disabled", false);
+			            $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
                         if (status == 'APPROVED') {
                             $('.btn-group button.folder-status').text('Approved for publication');
                             $('.btn-group button.folder-status').next().prop("disabled", true);
                         } else {
-			    actions['approve'] = 'Approve for publication';
+			                actions['approve'] = 'Approve for publication';
                             $('.btn-group button.folder-status').text('Unpublished');
                         }
                     }
@@ -449,10 +413,6 @@ function topInformation(dir, showAlert)
                 lockIcon = '<i class="fa fa-exclamation-circle lock-icon hide" data-folder="' + dir + '" data-locks="0" title="0 lock(s) found" aria-hidden="true"></i>';
             }
 
-            // Provenance action log
-            $('.actionlog-items').hide();
-            actionLogIcon = ' <i class="fa fa-book actionlog-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="Provenance action log"></i>';
-
             $('.btn-group button.folder-status').attr('data-write', hasWriteRights);
 
             // Handle actions
@@ -461,7 +421,7 @@ function topInformation(dir, showAlert)
             // data.basename.replace(/ /g, "&nbsp;")
             folderName = htmlEncode(data.result.basename).replace(/ /g, "&nbsp;");
 
-            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + lockIcon + actionLogIcon);
+            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + lockIcon);
             $('.top-information').show();
         });
     }

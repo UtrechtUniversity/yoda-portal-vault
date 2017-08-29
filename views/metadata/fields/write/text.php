@@ -1,11 +1,16 @@
 <div class="form-group" xmlns="http://www.w3.org/1999/html">
     <label class="col-sm-2 control-label">
-        <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>"><?php echo $e->label; ?></span>
+        <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
+            <i data-structure-id="<?php echo $e->subPropertiesStructID; ?>" class="glyphicon glyphicon-chevron-down subproperties-toggle" data-subpropertyBase="<?php echo $e->subPropertiesBase; ?>"  data-toggle="tooltip" title="Click to open or close view on subproperties" data-html="true"></i>&nbsp;
+        <?php endif; ?>
+
+        <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>">
+            <?php echo $e->label; ?>
+        </span>
     </label>
 
     <div class="col-sm-7">
         <div class="row">
-
             <div class="col-sm-1">
                 <?php if ($e->mandatory) { ?>
                     <?php if($metadataExists) { ?>
@@ -38,19 +43,33 @@
                     <div class="input-group">
                         <input type="text"
                             <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
-                               class="form-control" name="<?php echo $e->key; ?>[]" value="<?php echo htmlentities($e->value); ?>">
+                               class="form-control"
+                                <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
+                                    data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
+                                    name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
+                                <?php else: ?>
+                                    name="<?php echo $e->key; ?>[]"
+                                <?php endif; ?>
+                               value="<?php echo htmlentities($e->value); ?>">
                         <span class="input-group-btn">
-                            <button class="btn btn-default duplicate-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                            <?php if ($e->subPropertiesRole=='subPropertyStartStructure') { ?>
+                                <button class="btn btn-default duplicate-subproperty-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                            <?php } else { ?>
+                                <button class="btn btn-default duplicate-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                            <?php } ?>
                         </span>
                     </div>
                 <?php } else { ?>
 
                     <input type="text"
                         <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
-                           class="form-control" name="<?php echo $e->key; ?>" value="<?php echo htmlentities($e->value); ?>">
+                           class="form-control"
+                           name="<?php echo $e->key; ?>"
+                           value="<?php echo htmlentities($e->value); ?>">
 
                 <?php } ?>
             </div>
-         </div>
+
+        </div>
     </div>
 </div>

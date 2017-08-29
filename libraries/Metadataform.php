@@ -164,7 +164,13 @@ class Element {
     public $group = null;
     private $dir = 'metadata/fields/';
     private $multipleAllowed = false;
-
+    // Subproperty handling for current element
+    // 1) Start of structure with subproperties (taken in the first item of the total structure)
+    // 2) End of structure with subproperties
+    // 3) Subproperty itself
+    public $subPropertiesRole = ''; //{startSubPropertyStructure, subProperty, endSubPropertyStructure}
+    public $subPropertiesBase = '';
+    public $subPropertiesStructID = '';
     /**
      * Constructor
      */
@@ -201,6 +207,22 @@ class Element {
                 $this->maxLength = $data['elementSpecifics']['maxLength'];
             }
         }
+
+        // Subproperty handling for current element
+        // 1) Start of structure with subproperties (taken in the first item of the total structure)
+        // 2) End of structure with subproperties
+        // 3) Subproperty itself
+        if (isset($data['subPropertiesRole'])) {
+            $this->subPropertiesRole = $data['subPropertiesRole']; //{startSubPropertyStructure, subProperty, endSubPropertyStructure}
+            $this->subPropertiesBase = $data['subPropertiesBase']; //what does it belong to (each structure has its own identifier)
+            $this->subPropertiesStructID = $data['subPropertiesStructID'];
+        }
+
+        if ($this->subPropertiesRole == 'subProperty') { //differentiate view for actual subproperty (i.e. not the controlling element of a subproperty structure)
+            $this->type .= '_subproperty';
+        }
+
+
 
 /* Possible functure mesage handling
         // preparation for info to user
