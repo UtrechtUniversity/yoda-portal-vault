@@ -50,6 +50,7 @@ $( document ).ready(function() {
     $("body").on("click", "button.vault-access", function() {
         vaultAccess($(this).attr('data-access'), $(this).attr('data-path'));
     });
+
 });
 
 function browse(dir)
@@ -403,9 +404,9 @@ function topInformation(dir, showAlert)
                         $('button.vault-access').attr('data-access', 'revoke');
                     }
 
-		            // folder status (vault folder)
+    		        // folder status (vault folder)
                     if (typeof status != 'undefined') {
-			            $('.btn-group button.folder-status').next().prop("disabled", false);
+            			$('.btn-group button.folder-status').next().prop("disabled", false);
 			            $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
                         if (status == 'APPROVED') {
                             $('.btn-group button.folder-status').text('Approved for publication');
