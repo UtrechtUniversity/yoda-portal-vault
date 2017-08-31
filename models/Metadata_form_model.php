@@ -20,7 +20,8 @@ class Metadata_form_model extends CI_Model {
      *
      * returns all groupnames in an array for the requested for form (in $config['elements']
      */
-    public function getFormGroupNamesAsArray($rodsaccount, $config) {
+    public function getFormGroupNamesAsArray($rodsaccount, $config)
+    {
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
 
         $groupNames = array();
@@ -34,6 +35,50 @@ class Metadata_form_model extends CI_Model {
         return $groupNames;
     }
 
+    /**
+     * @param $rodsaccount
+     * @param $config
+     * @return array
+     *
+     * creates an array to be indexed by fully qualified element name.  eg 'creation_date'
+     * This especially for subproperties eg 'creator_properties_pi' which is in fact a construct
+     */
+    public function getFormElementLabels($rodsaccount, $config)
+    {
+        $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
+
+        $groupNames = array();
+        $elementLabels = array();
+        foreach($formGroupedElements['Group'] as $formElements) {
+            foreach ($formElements as $key => $element) {
+                if ($key == '@attributes') {
+                    $groupNames[] = $element['name'];
+                }
+                else {
+                    $this->iterateElements($element, $key, $elementLabels);
+                }
+            }
+        }
+        return $elementLabels;
+    }
+
+    /**
+     * @param $element
+     * @param $key
+     * @param $elementLabels
+     *
+     * supporiting function for getFormElementLabels
+     */
+    public function iterateElements($element, $key, &$elementLabels) {
+        if (isset($element['label'])) {
+            $elementLabels[$key] = $element['label'];
+        }
+        else {
+            foreach ($element as $key2 => $element2) {
+                $this->iterateElements($element2, $key . '_' . $key2, $elementLabels);
+            }
+        }
+    }
 
 // @todo: Obsolete nu met subroperties
     /**
@@ -348,7 +393,6 @@ class Metadata_form_model extends CI_Model {
     }
 
 
-
 // Nieuwe met inachtneming van subproperties structuur
     public function getFormElements($rodsaccount, $config)
     {
@@ -378,6 +422,12 @@ class Metadata_form_model extends CI_Model {
         if ($formGroupedElements === false) {
             return false;
         }
+
+        echo '<pre>';
+        print_r($formGroupedElements);
+        echo '</pre>';
+        exit;
+
 
         $presentationElements = array();
 
