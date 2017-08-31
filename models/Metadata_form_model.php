@@ -422,13 +422,7 @@ class Metadata_form_model extends CI_Model {
         if ($formGroupedElements === false) {
             return false;
         }
-
-        echo '<pre>';
-        print_r($formGroupedElements);
-        echo '</pre>';
-        exit;
-
-
+        
         $presentationElements = array();
 
         $groupName = 'undefined';
