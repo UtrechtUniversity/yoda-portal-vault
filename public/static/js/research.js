@@ -283,6 +283,7 @@ function topInformation(dir, showAlert)
             var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
             var metadata = data.result.userMetadata;
             var status = data.result.folderStatus;
+            var vaultStatus = data.result.vaultStatus;
             var userType = data.result.userType;
             var hasWriteRights = "yes";
             var isDatamanager = data.result.isDatamanager;
@@ -404,15 +405,15 @@ function topInformation(dir, showAlert)
                         $('button.vault-access').attr('data-access', 'revoke');
                     }
 
-    		        // folder status (vault folder)
-                    if (typeof status != 'undefined') {
-            			$('.btn-group button.folder-status').next().prop("disabled", false);
-			            $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
-                        if (status == 'APPROVED') {
+    		    // folder status (vault folder)
+                    if (typeof vaultStatus != 'undefined') {
+            		$('.btn-group button.folder-status').next().prop("disabled", false);
+			$('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
+                        if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
                             $('.btn-group button.folder-status').text('Approved for publication');
                             $('.btn-group button.folder-status').next().prop("disabled", true);
                         } else {
-			                actions['approve'] = 'Approve for publication';
+			    actions['approve'] = 'Approve for publication';
                             $('.btn-group button.folder-status').text('Unpublished');
                         }
                     }
