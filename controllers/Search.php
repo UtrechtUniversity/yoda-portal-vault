@@ -134,15 +134,33 @@ class Search extends MY_Controller
 
             if ($status == 'Success') {
                 $totalItems += $result['summary']['total'];
-
+                $this->load->model('Metadata_form_model');
                 if (isset($result['summary']) && $result['summary']['returned'] > 0) {
+                    $categoryFormLabels = array();
                     foreach ($result['rows'] as $row) {
                         $filePath = str_replace($pathStart, '', $row['path']);
                         $matchParts = array();
                         $i = 1;
+
+                        // Addition to get the correct labels from formelements.xml
+                        // And do this in an efficient way for each category only once!
+                        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $row['path']);
+
+                        $pathCategory = $formConfig['category'];
+
+                        if (!isset($categoryFormLabels[$pathCategory])) { // forms (and its labels) are category dependant. Fetch it only once for efficiency purposes
+                            $formLabels = $this->Metadata_form_model->getFormElementLabels($rodsaccount, $formConfig);
+                            $categoryFormLabels[$pathCategory] = $formLabels;
+                        }
+
                         foreach ($row['matches'] as $match) {
                             foreach ($match as $k => $value) {
-                                $matchParts[] = $k . ': ' . $value;
+
+                                // convert $k to an index as known within formelements.xml
+                                $labelIndex = str_replace( array(' 0 ', ' '), '_', $k);
+                                $label = isset($categoryFormLabels[$pathCategory][$labelIndex]) ? $categoryFormLabels[$pathCategory][$labelIndex] : $k;
+
+                                $matchParts[] = $label . ': ' . $value;
                                 if ($i == 5) {
                                     break 2;
                                 }
