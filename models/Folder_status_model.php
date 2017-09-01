@@ -107,13 +107,35 @@ class Folder_Status_model extends CI_Model
         return $result;
     }
 
-    function approve($folder)
+    function submit_for_publication($folder)
+    {
+        $outputParams = array('*status', '*statusInfo');
+        $inputParams = array('*folder' => $folder);
+
+        $this->CI->load->library('irodsrule');
+       $rule = $this->irodsrule->make('iiVaultSubmit', $inputParams, $outputParams);
+        $result = $rule->execute();
+        return $result;
+    }
+
+    function approve_for_publication($folder)
     {
         $outputParams = array('*status', '*statusInfo');
         $inputParams = array('*folder' => $folder);
 
         $this->CI->load->library('irodsrule');
         $rule = $this->irodsrule->make('iiVaultApprove', $inputParams, $outputParams);
+        $result = $rule->execute();
+        return $result;
+    }
+
+    function reject_for_publication($folder)
+    {
+        $outputParams = array('*status', '*statusInfo');
+        $inputParams = array('*folder' => $folder);
+
+        $this->CI->load->library('irodsrule');
+        $rule = $this->irodsrule->make('iiVaultReject', $inputParams, $outputParams);
         $result = $rule->execute();
         return $result;
     }

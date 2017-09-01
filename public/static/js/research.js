@@ -31,8 +31,16 @@ $( document ).ready(function() {
         rejectFolder($(this).attr('data-folder'));
     });
 
-    $("body").on("click", "a.action-approve", function() {
-        approveFolder($(this).attr('data-folder'));
+    $("body").on("click", "a.action-submit-for-publication", function() {
+       vaultSubmitForPublication($(this).attr('data-folder'));
+    });
+
+    $("body").on("click", "a.action-approve-for-publication", function() {
+        vaultApproveForPublication($(this).attr('data-folder'));
+    });
+
+    $("body").on("click", "a.action-reject-for-publication", function() {
+        vaultRejectForPublication($(this).attr('data-folder'));
     });
 
     $("body").on("click", "i.lock-icon", function() {
@@ -472,7 +480,9 @@ function topInformation(dir, showAlert)
 function handleActionsList(actions, folder)
 {
     var html = '';
-    var possibleActions = ['submit', 'unsubmit', 'accept', 'reject', 'approve'];
+    var possibleActions = ['submit', 'unsubmit', 'accept', 'reject',
+                          'submit-for-publication', 'reject-for-publication',
+                           'approve-for-publication'];
 
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
@@ -690,27 +700,63 @@ function rejectFolder(folder)
     });
 }
 
-function approveFolder(folder)
+function vaultSubmitForPublication(folder)
 {
     var btnText = $('.btn-group button.folder-status').html();
-    $('.btn-group button.folder-status').html('Approve for publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').html('Submit for publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true);
     $('.btn-group button.folder-status').next().prop("disabled", true);
-    $.getJSON("vault/approve?path=" + folder, function (data) {
+    $.getJSON("vault/submit_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status').html('Approved for publication');
+            $('.btn-group button.folder-status').html('Submit for publication');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
 
-            // Inefficient, but for now sets the button statuses correctly in case of failure on request.
-            // requires refactoring!
             topInformation(folder, false);
             return;
         }
     });
 }
 
+function vaultApproveForPublication(folder)
+{
+    var btnText = $('.btn-group button.folder-status').html();
+    $('.btn-group button.folder-status').html('Approve for publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').prop("disabled", true);
+    $('.btn-group button.folder-status').next().prop("disabled", true);
+    $.getJSON("vault/approve_for_publication?path=" + folder, function (data) {
+        if (data.status == 'Success') {
+            $('.btn-group button.folder-status').html('Approved for publication');
+        } else {
+            $('.btn-group button.folder-status').html(btnText);
+            setMessage('error', data.statusInfo);
+
+            topInformation(folder, false);
+            return;
+        }
+    });
+}
+
+function vaultRejectForPublication(folder)
+{
+    var btnText = $('.btn-group button.folder-status').html();
+    $('.btn-group button.folder-status').html('Reject for publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').prop("disabled", true);
+    $('.btn-group button.folder-status').next().prop("disabled", true);
+    $.getJSON("vault/reject_for_publication?path=" + folder, function (data) {
+        if (data.status == 'Success') {
+            $('.btn-group button.folder-status').html('Rejected for publication');
+        } else {
+            $('.btn-group button.folder-status').html(btnText);
+            setMessage('error', data.statusInfo);
+
+            topInformation(folder, false);
+            return;
+        }
+    });
+}
+    
 function vaultAccess(action, folder)
 {
     var btnText = $('button.vault-access').html();
