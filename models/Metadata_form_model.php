@@ -171,17 +171,12 @@ class Metadata_form_model extends CI_Model {
 
         $xsdElements = $this->loadXsd($rodsaccount, $xsdPath);
 
-//        echo '<pre>';
-//        print_r($xsdElements);
-//        echo '</pre>';
-
         $arrayPost = $this->CI->input->post();
 
-//        echo '<pre>';
-//        echo 'PRE POST<br>';
-//           print_r($arrayPost);
-//        echo '</pre>';
-        //exit;
+        if (isset($arrayPost['vault_submission'])) { // clean up: this is extra input in the posted data that should not be handled as being metadata
+            unset($arrayPost['vault_submission']) ;
+        }
+
         // First reorganise in such a way that data coming back from front end
         foreach($arrayPost as $key=>$value) {
             if (is_array($value)) { // multiplicity && subproperty handling
