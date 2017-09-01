@@ -428,6 +428,9 @@ function topInformation(dir, showAlert)
 			} else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
                             $('.btn-group button.folder-status').text('Approved for publication');
                             $('.btn-group button.folder-status').next().prop("disabled", true);
+			} else if (vaultStatus == 'WAITING') {
+                            $('.btn-group button.folder-status').text('Processing...');
+                            $('.btn-group button.folder-status').next().prop("disabled", true);
                         } else {
                             actions['submit-for-publication'] = 'Submit for publication';
                             $('.btn-group button.folder-status').text('Unpublished');
@@ -716,7 +719,7 @@ function vaultSubmitForPublication(folder)
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/submit_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status').html('Submit for publication');
+            $('.btn-group button.folder-status').html('Processing...');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
@@ -735,7 +738,7 @@ function vaultApproveForPublication(folder)
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/approve_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status').html('Approved for publication');
+            $('.btn-group button.folder-status').html('Processing...');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
@@ -754,7 +757,7 @@ function vaultRejectForPublication(folder)
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/reject_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status').html('Rejected for publication');
+            $('.btn-group button.folder-status').html('Processing...');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
