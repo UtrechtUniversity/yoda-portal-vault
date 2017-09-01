@@ -417,11 +417,19 @@ function topInformation(dir, showAlert)
                     if (typeof vaultStatus != 'undefined') {
             		$('.btn-group button.folder-status').next().prop("disabled", false);
 			$('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
-                        if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
+
+                        if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
+                            actions['approve-for-publication'] = 'Approve for publication';
+                            actions['reject-for-publication'] = 'Reject for publication';
+                            $('.btn-group button.folder-status').text('Submitted for publication');
+			} else if (vaultStatus == 'REJECTED_FOR_PUBLICATION') {
+                            $('.btn-group button.folder-status').text('Rejected for publication');
+                            $('.btn-group button.folder-status').next().prop("disabled", true);
+			} else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
                             $('.btn-group button.folder-status').text('Approved for publication');
                             $('.btn-group button.folder-status').next().prop("disabled", true);
                         } else {
-			    actions['approve'] = 'Approve for publication';
+                            actions['submit-for-publication'] = 'Submit for publication';
                             $('.btn-group button.folder-status').text('Unpublished');
                         }
                     }
