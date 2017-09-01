@@ -423,8 +423,8 @@ function topInformation(dir, showAlert)
                             actions['reject-for-publication'] = 'Reject for publication';
                             $('.btn-group button.folder-status').text('Submitted for publication');
 			} else if (vaultStatus == 'REJECTED_FOR_PUBLICATION') {
+                            actions['submit-for-publication'] = 'Submit for publication';
                             $('.btn-group button.folder-status').text('Rejected for publication');
-                            $('.btn-group button.folder-status').next().prop("disabled", true);
 			} else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
                             $('.btn-group button.folder-status').text('Approved for publication');
                             $('.btn-group button.folder-status').next().prop("disabled", true);
