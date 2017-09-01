@@ -255,6 +255,10 @@ class Metadata extends MY_Controller
                     setMessage('error', 'There was a locking error encountered while submitting this folder.');
                 }
                 else {
+                    // first perform a save action of the latest posted data - only if there is no lock!
+                    if ($formConfig['folderStatus']!='LOCKED') {
+                        $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+                    }
                     // Do vault submission
                     $result = $this->vaultsubmission->validate();
                     if ($result === true) {
