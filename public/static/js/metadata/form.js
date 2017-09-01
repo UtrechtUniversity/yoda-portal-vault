@@ -7,6 +7,20 @@ $(function () {
     });
     $('select').select2();
 
+    $('button[type="submit"]').on('click', function() {
+        var html = $(this).html();
+
+        // Handling of submit buttons -> show as disabled and add spinner.
+        // Original button must be hidden as otherwise the submit itself does not work correctly anymore
+        // 1) Clone this button, add spinner and disable
+        var disBtn = $("<button class='" + $(this).attr('class') + "'>").html(html + ' <i class="fa fa-spinner fa-spin fa-fw"></i>').attr("disabled", "disabled");
+
+        // 2) Hide this button and show the cloned disabled.
+        $(this).hide().after(disBtn);
+
+        return true;
+    });
+
     // Delete all metadata btn
     $( ".delete-all-metadata-btn" ).on('click', function(e){
         e.preventDefault();
