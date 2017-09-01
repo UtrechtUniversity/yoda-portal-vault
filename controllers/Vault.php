@@ -120,7 +120,7 @@ class Vault extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->submit_for_publication($fullPath);
-        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*stat
+        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
     }
 
     public function approve_for_publication()
@@ -131,7 +131,7 @@ class Vault extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->approve_for_publication($fullPath);
-        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*stat
+        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
     }
 
     public function reject_for_publication()
@@ -142,6 +142,6 @@ class Vault extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->reject_for_publication($fullPath);
-         echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*stat
+        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
      }
 }
