@@ -428,6 +428,12 @@ function topInformation(dir, showAlert)
 			} else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
                             $('.btn-group button.folder-status').text('Approved for publication');
                             $('.btn-group button.folder-status').next().prop("disabled", true);
+			} else if (vaultStatus == 'PUBLISHED') {
+                            $('.btn-group button.folder-status').text('Published');
+                            $('.btn-group button.folder-status').next().prop("disabled", true);
+			} else if (vaultStatus == 'DEPUBLISHED') {
+                            $('.btn-group button.folder-status').text('Depublished');
+                            $('.btn-group button.folder-status').next().prop("disabled", true);
 			} else if (vaultStatus == 'WAITING') {
                             $('.btn-group button.folder-status').text('Processing...');
                             $('.btn-group button.folder-status').next().prop("disabled", true);
