@@ -55,7 +55,7 @@ class Metadata_form_model extends CI_Model {
                     $groupNames[] = $element['name'];
                 }
                 else {
-                    $this->iterateElements($element, $key, $elementLabels);
+                    $this->iterateElements($element, $key, $elementLabels, $key);
                 }
             }
         }
@@ -67,15 +67,24 @@ class Metadata_form_model extends CI_Model {
      * @param $key
      * @param $elementLabels
      *
-     * supporiting function for getFormElementLabels
+     * supporting function for getFormElementLabels
+     * Adjusted so the leadproperty label is taken into account ($leadPropertyBase is passed throughout all iteration levels)
      */
-    public function iterateElements($element, $key, &$elementLabels) {
+    public function iterateElements($element, $key, &$elementLabels, $leadPropertyBase, $level=0) {
         if (isset($element['label'])) {
             $elementLabels[$key] = $element['label'];
+            if ($level == 1) {
+                $elementLabels[$leadPropertyBase] =  $element['label'];
+            }
+            elseif ($level>1) {
+                $elementLabels[$key] = $elementLabels[$leadPropertyBase] . '-'. $element['label'];
+
+            }
         }
         else {
+            $level++;
             foreach ($element as $key2 => $element2) {
-                $this->iterateElements($element2, $key . '_' . $key2, $elementLabels);
+                $this->iterateElements($element2, $key . '_' . $key2, $elementLabels, $leadPropertyBase, $level);
             }
         }
     }
