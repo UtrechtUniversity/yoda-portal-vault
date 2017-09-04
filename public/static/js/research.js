@@ -440,11 +440,11 @@ function topInformation(dir, showAlert)
                         $('.btn-group button.folder-status').text('Approved for publication');
 		    } else if (vaultStatus == 'PUBLISHED') {
                         $('.btn-group button.folder-status').text('Published');
-=		    } else if (vaultStatus == 'DEPUBLISHED') {
+		    } else if (vaultStatus == 'DEPUBLISHED') {
                         $('.btn-group button.folder-status').text('Depublished');
-=		    } else if (vaultStatus == 'PENDING') {
+		    } else if (vaultStatus == 'PENDING') {
                         $('.btn-group button.folder-status').text('Processing...');
-=                    } else {
+                    } else {
                         $('.btn-group button.folder-status').text('Unpublished');
                     }
 
