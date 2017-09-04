@@ -428,7 +428,7 @@ function topInformation(dir, showAlert)
 
                 // folder status (vault folder)
                 if (typeof vaultStatus != 'undefined') {
-		    $('.btn-group button.folder-status').next().prop("disabled", false);
+		    $('.btn-group button.folder-status').next().prop("disabled", true);
 		    $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
 
                     if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
@@ -438,17 +438,13 @@ function topInformation(dir, showAlert)
                         $('.btn-group button.folder-status').text('Rejected for publication');
 		    } else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
                         $('.btn-group button.folder-status').text('Approved for publication');
-                        $('.btn-group button.folder-status').next().prop("disabled", true);
 		    } else if (vaultStatus == 'PUBLISHED') {
                         $('.btn-group button.folder-status').text('Published');
-                        $('.btn-group button.folder-status').next().prop("disabled", true);
-		    } else if (vaultStatus == 'DEPUBLISHED') {
+=		    } else if (vaultStatus == 'DEPUBLISHED') {
                         $('.btn-group button.folder-status').text('Depublished');
-                        $('.btn-group button.folder-status').next().prop("disabled", true);
-		    } else if (vaultStatus == 'PENDING') {
+=		    } else if (vaultStatus == 'PENDING') {
                         $('.btn-group button.folder-status').text('Processing...');
-                        $('.btn-group button.folder-status').next().prop("disabled", true);
-                    } else {
+=                    } else {
                         $('.btn-group button.folder-status').text('Unpublished');
                     }
 
@@ -457,12 +453,15 @@ function topInformation(dir, showAlert)
 			if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
                             actions['approve-for-publication'] = 'Approve for publication';
                             actions['reject-for-publication'] = 'Reject for publication';
+                            $('.btn-group button.folder-status').next().prop("disabled", false);
 			}
 		    } else {
 			if (vaultStatus == 'UNPUBLISHED') {
                             actions['submit-for-publication'] = 'Submit for publication';
+                            $('.btn-group button.folder-status').next().prop("disabled", false);
 			} else if (vaultStatus == 'REJECTED_FOR_PUBLICATION') {
                             actions['submit-for-publication'] = 'Submit for publication';
+                            $('.btn-group button.folder-status').next().prop("disabled", false);
 			}
 		    }
                 }
