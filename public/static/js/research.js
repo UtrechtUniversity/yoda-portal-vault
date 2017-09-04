@@ -434,7 +434,7 @@ function topInformation(dir, showAlert)
 			} else if (vaultStatus == 'DEPUBLISHED') {
                             $('.btn-group button.folder-status').text('Depublished');
                             $('.btn-group button.folder-status').next().prop("disabled", true);
-			} else if (vaultStatus == 'WAITING') {
+			} else if (vaultStatus == 'PENDING') {
                             $('.btn-group button.folder-status').text('Processing...');
                             $('.btn-group button.folder-status').next().prop("disabled", true);
                         } else {
