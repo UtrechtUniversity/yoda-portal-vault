@@ -432,8 +432,6 @@ function topInformation(dir, showAlert)
 		    $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
 
                     if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
-                        actions['approve-for-publication'] = 'Approve for publication';
-                        actions['reject-for-publication'] = 'Reject for publication';
                         $('.btn-group button.folder-status').text('Submitted for publication');
 		    } else if (vaultStatus == 'REJECTED_FOR_PUBLICATION') {
                         actions['submit-for-publication'] = 'Submit for publication';
@@ -451,7 +449,6 @@ function topInformation(dir, showAlert)
                         $('.btn-group button.folder-status').text('Processing...');
                         $('.btn-group button.folder-status').next().prop("disabled", true);
                     } else {
-                        actions['submit-for-publication'] = 'Submit for publication';
                         $('.btn-group button.folder-status').text('Unpublished');
                     }
 
