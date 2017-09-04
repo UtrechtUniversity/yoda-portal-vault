@@ -55,6 +55,7 @@ class Vaultsubmission
 
         // Check folder status
         $folderStatusResult = $this->checkFolderStatus();
+
         if (!$folderStatusResult) {
             $messages[] = 'Illegal status transition. Current status is '. $this->formConfig['folderStatus'] .'.';
         } else {
@@ -150,7 +151,6 @@ class Vaultsubmission
                 }
             }
         }
-
         return $invalidFields;
     }
 
@@ -178,32 +178,22 @@ class Vaultsubmission
 
     private function formatFieldErrors($fields)
     {
+        $this->CI->load->model('Metadata_form_model');
+        $formElementLabels = $this->CI->Metadata_form_model->getFormElementLabels($this->account, $this->formConfig);
+
         $fieldLabels = array();
         foreach ($fields as $field) {
-            $label = $this->findLabelByKey($field);
-            if ($label) {
-                $fieldLabels[] = $label;
+            // Convert fields as Creator[Name] or Contributor[Name] to Creator_Name or Contributor_Name
+            $fieldID = str_replace(array(']', '['), array('', '_'), $field);
+
+            if (isset($formElementLabels[$fieldID])) {
+                $fieldLabels[] = $formElementLabels[$fieldID];
             } else {
                 $fieldLabels[] = $field;
             }
+
         }
 
         return 'The following fields are invalid for vault submission: ' . implode(', ', $fieldLabels);
-    }
-
-    private function findLabelByKey($key)
-    {
-        $this->CI->load->model('Metadata_form_model');
-        $formElements = $this->CI->Metadata_form_model->getFormElementsExcludeYodaMetaData($this->account, $this->formConfig);
-
-        foreach ($formElements as $group => $elements) {
-            foreach ($elements as $name => $properties) {
-                if ($properties['key'] == $key) {
-                    return $properties['label'];
-                }
-            }
-        }
-
-        return false;
     }
 }

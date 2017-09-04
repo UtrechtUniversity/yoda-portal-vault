@@ -55,7 +55,7 @@ class Metadata_form_model extends CI_Model {
                     $groupNames[] = $element['name'];
                 }
                 else {
-                    $this->iterateElements($element, $key, $elementLabels);
+                    $this->iterateElements($element, $key, $elementLabels, $key);
                 }
             }
         }
@@ -67,15 +67,24 @@ class Metadata_form_model extends CI_Model {
      * @param $key
      * @param $elementLabels
      *
-     * supporiting function for getFormElementLabels
+     * supporting function for getFormElementLabels
+     * Adjusted so the leadproperty label is taken into account ($leadPropertyBase is passed throughout all iteration levels)
      */
-    public function iterateElements($element, $key, &$elementLabels) {
+    public function iterateElements($element, $key, &$elementLabels, $leadPropertyBase, $level=0) {
         if (isset($element['label'])) {
             $elementLabels[$key] = $element['label'];
+            if ($level == 1) {
+                $elementLabels[$leadPropertyBase] =  $element['label'];
+            }
+            elseif ($level>1) {
+                $elementLabels[$key] = $elementLabels[$leadPropertyBase] . '-'. $element['label'];
+
+            }
         }
         else {
+            $level++;
             foreach ($element as $key2 => $element2) {
-                $this->iterateElements($element2, $key . '_' . $key2, $elementLabels);
+                $this->iterateElements($element2, $key . '_' . $key2, $elementLabels, $leadPropertyBase, $level);
             }
         }
     }
@@ -844,135 +853,6 @@ class Metadata_form_model extends CI_Model {
         }
         return $valueArray;
     }
-
-
-// @TODO: to be refactored conform subproperties - obsolete???
-
-    /**
-     * @param $rodsaccount
-     * @param $config
-     * @return array|bool
-     *
-     * Same as getFormElements.
-     * However, do not involve yoda-metatadata.xml as this can contain user introduced errors
-     * resulting in not delivering xsd/formelements.xml information that should however always be possible to gather
-     */
-/*
-    public function getFormElementsExcludeYodaMetaData($rodsaccount, $config)
-    {
-        // load xsd and get all the info regarding restrictions
-        $xsdElements = $this->loadXsd($rodsaccount, $config['xsdPath']); // based on element names
-
-        $writeMode = true;
-        if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
-            $writeMode = false; // Distinnction made as readers, in case of no xml-file being present, should  NOT get default values
-        }
-
-        $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
-        if ($formGroupedElements === false) {
-            return false;
-        }
-
-        $presentationElements = array();
-
-        $groupName = 'undefined';
-
-        // If there are multiple groups, the first should contain the number '0' as array-index .
-        // Otherwise, this is the direct descriptive information (i.e. not an array form.
-        // The software expects an array, so in the latter case should be an array)
-        $formAllGroupedElements = array();
-        foreach($formGroupedElements['Group'] as $index => $array) {
-            if($index=='0') {
-                // is the index of an array. So we have multiple groups.
-                $formAllGroupedElements = $formGroupedElements['Group'];
-            }
-            else {
-                $formAllGroupedElements[] = $formGroupedElements['Group']; // rewrite it as an indexable array as input for coming foreach
-            }
-            break;
-        }
-
-        foreach($formAllGroupedElements as $formElements) {
-            foreach ($formElements as $key => $element) {
-                if($key == '@attributes') {
-                    $groupName = $element['name'];
-                }
-                else {
-
-                    // Mandatory no longer based on XSD but taken from formelements.xml
-                    $mandatory = false;
-                    if(isset($element['mandatory']) AND strtolower($element['mandatory'])=='true') {
-                        $mandatory = true;
-                    }
-
-                    $multipleAllowed = false;
-                    if($xsdElements[$key]['maxOccurs']!='1') {
-                        $multipleAllowed = true;
-                    }
-
-                    if (true) {
-                        $elementOptions = array(); // holds the options
-                        $elementMaxLength = 0;
-                        // Determine restricitions/requirements for this
-                        switch ($xsdElements[$key]['type']){
-                            case 'xs:date':
-                                $type = 'date';
-                                break;
-                            case 'stringURI':
-                            case 'stringNormal':
-                                $type = 'text';
-                                $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
-                                break;
-                            case 'xs:integer':
-                                $type = 'numeric';
-                                $elementMaxLength = 10;  // arbitrary length for this moment
-                                break;
-                            case 'xs:anyURI':
-                                $type = 'text';
-                                $elementMaxLength = 1024;
-                                break;
-                            case 'stringLong':
-                                $type = 'textarea';
-                                $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
-                                break;
-                            case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
-                            case (substr($xsdElements[$key]['type'], 0, 7) == 'options'):
-                                $elementOptions = $xsdElements[$key]['simpleTypeData']['options'];
-                                $type = 'select';
-                                break;
-                        }
-
-
-                        //'select' has options
-                        // 'edit/multiline' has length
-                        // 'date' has nothing extra
-                        // Handled separately as these specifics might grow.
-                        $elementSpecifics = array(); // holds all element specific info
-                        if ($type == 'text' OR $type == 'textarea' OR $type=='numeric') {
-                            $elementSpecifics = array('maxLength' => $elementMaxLength);
-                        } elseif ($type == 'select') {
-                            $elementSpecifics = array('options' => $elementOptions);
-                        }
-
-                        $presentationElements[$groupName][] = array(
-                            'key' => $key,
-                            'value' => '', // irrelevant in this case
-                            'label' => $element['label'],
-                            'helpText' => $element['help'],
-                            'type' => $type,
-                            'mandatory' => $mandatory,
-                            'multipleAllowed' => $multipleAllowed,
-                            'elementSpecifics' => $elementSpecifics,
-                            //'messagesForUser' => $messagesForUser  //possibly for future use
-                        );
-                    }
-                }
-            }
-        }
-        return $presentationElements;
-    }
-
-*/
 
     /**
      * @param $rodsaccount

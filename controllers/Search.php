@@ -157,7 +157,8 @@ class Search extends MY_Controller
                             foreach ($match as $k => $value) {
 
                                 // convert $k to an index as known within formelements.xml
-                                $labelIndex = str_replace( array(' 0 ', ' '), '_', $k);
+                                $labelIndex = str_replace( array(' '), '_', $k);
+                                $labelIndex = preg_replace('/_.*_/', '_', $labelIndex);
                                 $label = isset($categoryFormLabels[$pathCategory][$labelIndex]) ? $categoryFormLabels[$pathCategory][$labelIndex] : $k;
 
                                 $matchParts[] = $label . ': ' . $value;
