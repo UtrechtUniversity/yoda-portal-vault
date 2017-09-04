@@ -474,6 +474,7 @@ function topInformation(dir, showAlert)
 		if (isDatamanager == 'yes') {
                     $('.top-info-buttons .vault').show();
 		} else {
+                    $('.top-info-buttons .vault').show();
                     $('.top-info-buttons .vault .vault-access').hide();
                     $('.top-info-buttons .vault .metadata-form').hide();
 		}
