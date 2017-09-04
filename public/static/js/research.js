@@ -413,36 +413,6 @@ function topInformation(dir, showAlert)
                         $('button.vault-access').attr('data-access', 'revoke');
                     }
 
-    		    // folder status (vault folder)
-                    if (typeof vaultStatus != 'undefined') {
-            		$('.btn-group button.folder-status').next().prop("disabled", false);
-			$('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
-
-                        if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
-                            actions['approve-for-publication'] = 'Approve for publication';
-                            actions['reject-for-publication'] = 'Reject for publication';
-                            $('.btn-group button.folder-status').text('Submitted for publication');
-			} else if (vaultStatus == 'REJECTED_FOR_PUBLICATION') {
-                            actions['submit-for-publication'] = 'Submit for publication';
-                            $('.btn-group button.folder-status').text('Rejected for publication');
-			} else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
-                            $('.btn-group button.folder-status').text('Approved for publication');
-                            $('.btn-group button.folder-status').next().prop("disabled", true);
-			} else if (vaultStatus == 'PUBLISHED') {
-                            $('.btn-group button.folder-status').text('Published');
-                            $('.btn-group button.folder-status').next().prop("disabled", true);
-			} else if (vaultStatus == 'DEPUBLISHED') {
-                            $('.btn-group button.folder-status').text('Depublished');
-                            $('.btn-group button.folder-status').next().prop("disabled", true);
-			} else if (vaultStatus == 'PENDING') {
-                            $('.btn-group button.folder-status').text('Processing...');
-                            $('.btn-group button.folder-status').next().prop("disabled", true);
-                        } else {
-                            actions['submit-for-publication'] = 'Submit for publication';
-                            $('.btn-group button.folder-status').text('Unpublished');
-                        }
-                    }
-
                     $('.btn-group button.metadata-form').attr('data-path', dir);
                     $('.btn-group button.metadata-form').show();
 
@@ -451,6 +421,62 @@ function topInformation(dir, showAlert)
                     $('.top-info-buttons .research').hide();
                     $('.top-info-buttons .vault').show();
                 }
+            }
+
+	    // is vault package
+            if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
+
+                // folder status (vault folder)
+                if (typeof vaultStatus != 'undefined') {
+		    $('.btn-group button.folder-status').next().prop("disabled", false);
+		    $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
+
+                    if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
+                        actions['approve-for-publication'] = 'Approve for publication';
+                        actions['reject-for-publication'] = 'Reject for publication';
+                        $('.btn-group button.folder-status').text('Submitted for publication');
+		    } else if (vaultStatus == 'REJECTED_FOR_PUBLICATION') {
+                        actions['submit-for-publication'] = 'Submit for publication';
+                        $('.btn-group button.folder-status').text('Rejected for publication');
+		    } else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
+                        $('.btn-group button.folder-status').text('Approved for publication');
+                        $('.btn-group button.folder-status').next().prop("disabled", true);
+		    } else if (vaultStatus == 'PUBLISHED') {
+                        $('.btn-group button.folder-status').text('Published');
+                        $('.btn-group button.folder-status').next().prop("disabled", true);
+		    } else if (vaultStatus == 'DEPUBLISHED') {
+                        $('.btn-group button.folder-status').text('Depublished');
+                        $('.btn-group button.folder-status').next().prop("disabled", true);
+		    } else if (vaultStatus == 'PENDING') {
+                        $('.btn-group button.folder-status').text('Processing...');
+                        $('.btn-group button.folder-status').next().prop("disabled", true);
+                    } else {
+                        actions['submit-for-publication'] = 'Submit for publication';
+                        $('.btn-group button.folder-status').text('Unpublished');
+                    }
+
+		    // Set action for datamanager and researcher.
+		    if (isDatamanager == 'yes') {
+			if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
+                            actions['approve-for-publication'] = 'Approve for publication';
+                            actions['reject-for-publication'] = 'Reject for publication';
+			}
+		    } else {
+			if (vaultStatus == 'UNPUBLISHED') {
+                            actions['submit-for-publication'] = 'Submit for publication';
+			} else if (vaultStatus == 'REJECTED_FOR_PUBLICATION') {
+                            actions['submit-for-publication'] = 'Submit for publication';
+			}
+		    }
+                }
+
+		// Datamanager sees all buttons in vault, researcher only folder status.
+		if (isDatamanager == 'yes') {
+                    $('.top-info-buttons .vault').show();
+		} else {
+                    $('.top-info-buttons .vault .vault-access').hide();
+                    $('.top-info-buttons .vault .metadata-form').hide();
+		}
             }
 
             if (typeof status != 'undefined') {
@@ -681,7 +707,6 @@ function acceptFolder(folder)
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
-
 
             // Inefficient, but for now sets the button statuses correctly in case of failure on request.
             // requires refactoring!
