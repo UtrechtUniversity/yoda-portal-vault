@@ -139,7 +139,7 @@ class Browse extends MY_Controller
                     $parts[1] != $rodsaccount->zone ) { // ONly present zone when user mentioned in log is not from current zone
                         $userName = $item[2];
                 }
-                $logItems[] = array($userName, ucwords($item[1]), $timestamp);
+                $logItems[] = array($userName, ucfirst($item[1]), $timestamp);
             }
         }
 
