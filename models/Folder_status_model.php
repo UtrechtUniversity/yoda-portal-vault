@@ -118,10 +118,12 @@ class Folder_Status_model extends CI_Model
         return $result;
     }
 
-    function approve_for_publication($folder)
+    // including version of conditions&terms
+    function approve_for_publication($folder, $confirmationVersion)
     {
         $outputParams = array('*status', '*statusInfo');
-        $inputParams = array('*folder' => $folder);
+        $inputParams = array('*folder' => $folder,
+            '*confirmationVersion' => $confirmationVersion);
 
         $this->CI->load->library('irodsrule');
         $rule = $this->irodsrule->make('iiVaultApprove', $inputParams, $outputParams);
