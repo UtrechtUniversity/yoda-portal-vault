@@ -8,7 +8,7 @@ $( document ).ready(function() {
         }
     }
 
-    $(".dropdown-menu li a").click(function(){
+    $(".search-panel .dropdown-menu li a").click(function(){
         searchSelectChanged($(this));
     });
 
@@ -22,7 +22,7 @@ $( document ).ready(function() {
         }
     });
 
-    $( ".search-status input:radio" ).change(function() {
+    $( ".search-status select:option" ).change(function() {
         search($(this).val(), 'status', $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     });
 

@@ -36,15 +36,18 @@
             <button class="btn btn-default search-btn" data-items-per-page="<?php echo $searchItemsPerPage; ?>" type="button"><span class="glyphicon glyphicon-search"></span></button>
         </span>
 
-        <div class="search-status<?php echo $showTerm ? ' hide' : ''; ?>">
-            <label class="radio-inline"><input type="radio" name="status" value="LOCKED"<?php echo $searchStatusValue == 'LOCKED' ? ' checked' : ''; ?>>Locked</label>
-            <label class="radio-inline"><input type="radio" name="status" value="SUBMITTED"<?php echo $searchStatusValue == 'SUBMITTED' ? ' checked' : ''; ?>>Submitted</label>
-            <label class="radio-inline"><input type="radio" name="status" value="ACCEPTED"<?php echo $searchStatusValue == 'ACCEPTED' ? ' checked' : ''; ?>>Accepted</label>
-            <label class="radio-inline"><input type="radio" name="status" value="REJECTED"<?php echo $searchStatusValue == 'REJECTED' ? ' checked' : ''; ?>>Rejected</label>
-            <label class="radio-inline"><input type="radio" name="status" value="SECURED"<?php echo $searchStatusValue == 'SECURED' ? ' checked' : ''; ?>>Secured</label>
-            <label class="radio-inline"><input type="radio" name="status" value="UNPUBLISHED"<?php echo $searchStatusValue == 'UNPUBLISHED' ? ' checked' : ''; ?>>Unpublished</label>
-            <label class="radio-inline"><input type="radio" name="status" value="APPROVED"<?php echo $searchStatusValue == 'APPROVED' ? ' checked' : ''; ?>>Approved</label>
-        </div>
+        <select class="form-control search-status<?php echo $showTerm ? ' hide' : ''; ?>">
+          <option name="status" value="LOCKED"<?php echo $searchStatusValue == 'LOCKED' ? ' checked' : ''; ?>>Locked</option>
+          <option name="status" value="SUBMITTED"<?php echo $searchStatusValue == 'SUBMITTED' ? ' checked' : ''; ?>>Submitted</option>
+          <option name="status" value="ACCEPTED"<?php echo $searchStatusValue == 'ACCEPTED' ? ' checked' : ''; ?>>Accepted</option>
+          <option name="status" value="REJECTED"<?php echo $searchStatusValue == 'REJECTED' ? ' checked' : ''; ?>>Rejected</option>
+          <option name="status" value="SECURED"<?php echo $searchStatusValue == 'SECURED' ? ' checked' : ''; ?>>Secured</option>
+          <option name="status" value="UNPUBLISHED"<?php echo $searchStatusValue == 'UNPUBLISHED' ? ' checked' : ''; ?>>Unpublished</option>
+          <option name="status" value="SUBMITTED_FOR_PUBLICATION"<?php echo $searchStatusValue == 'SUBMITTED_FOR_PUBLICATION' ? ' checked' : ''; ?>>Submitted for publication</option>
+          <option name="status" value="APPROVED_FOR_PUBLICATION"<?php echo $searchStatusValue == 'APPROVED_FOR_PUBLICATION' ? ' checked' : ''; ?>>Approved for publication</option>
+          <option name="status" value="PUBLISHED"<?php echo $searchStatusValue == 'PUBLISHED' ? ' checked' : ''; ?>>Published</option>
+          <option name="status" value="DEPUBLISHED"<?php echo $searchStatusValue == 'DEPUBLISHED' ? ' checked' : ''; ?>>Depublished</option>
+        </select>
     </div>
 
     <div class="panel panel-default search-results">
