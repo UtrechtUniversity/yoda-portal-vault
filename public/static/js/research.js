@@ -40,17 +40,14 @@ $( document ).ready(function() {
 
     $("#confirmAgreementConditions").on("click", '.confirm-conditions', function() {
         if ($(this).prop('checked')) {
-            //$("#confirmAgreementConditions .action-confirm-submit-for-publication").prop('disabled',false).removeClass('disabled');
             $("#confirmAgreementConditions .action-confirm-submit-for-publication").prop('disabled', false);;
         }
         else {
-            //$("#confirmAgreementConditions .action-confirm-submit-for-publication").prop('disabled',true);
             $("#confirmAgreementConditions .action-confirm-submit-for-publication").prop('disabled', true);
         }
     });
 
     $("#confirmAgreementConditions").on("click", ".action-confirm-submit-for-publication", function() {
-        return ;
         $('#confirmAgreementConditions').modal('hide');
         vaultSubmitForPublication($(this).attr('data-folder'));
     });
