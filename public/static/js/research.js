@@ -463,7 +463,7 @@ function topInformation(dir, showAlert)
 		    if (isDatamanager == 'yes') {
 			       if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
                             actions['approve-for-publication'] = 'Approve for publication';
-                            actions['cancel_publication'] = 'Cancel publication';
+                            actions['cancel-publication'] = 'Cancel publication';
                             $('.btn-group button.folder-status').next().prop("disabled", false);
 			        }
 		    } else {
