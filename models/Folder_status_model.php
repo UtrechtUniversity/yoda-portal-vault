@@ -131,13 +131,13 @@ class Folder_Status_model extends CI_Model
         return $result;
     }
 
-    function reject_for_publication($folder)
+    function cancel_publication($folder)
     {
         $outputParams = array('*status', '*statusInfo');
         $inputParams = array('*folder' => $folder);
 
         $this->CI->load->library('irodsrule');
-        $rule = $this->irodsrule->make('iiVaultReject', $inputParams, $outputParams);
+        $rule = $this->irodsrule->make('iiVaultCancel', $inputParams, $outputParams);
         $result = $rule->execute();
         return $result;
     }
