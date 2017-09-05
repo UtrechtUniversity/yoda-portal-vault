@@ -39,10 +39,10 @@
         <select class="form-control search-status<?php echo $showTerm ? ' hide' : ''; ?>">
             <optgroup label="Research">
                 <option name="status" value="status:LOCKED"<?php echo $searchStatusValue == 'LOCKED' ? ' checked' : ''; ?>>Locked</option>
-                <option name="status" value="status:SUBMITTED"<?php echo $searchStatusValue == 'SUBMITTED' ? ' checked' : ''; ?>>Submitted</option>
-                <option name="status" value="status:ACCEPTED"<?php echo $searchStatusValue == 'ACCEPTED' ? ' checked' : ''; ?>>Accepted</option>
-                <option name="status" value="status:REJECTED"<?php echo $searchStatusValue == 'REJECTED' ? ' checked' : ''; ?>>Rejected</option>
-                <option name="status" value="status:SECURED"<?php echo $searchStatusValue == 'SECURED' ? ' checked' : ''; ?>>Secured</option>
+                <option name="status" value="status:SUBMITTED"<?php echo $searchStatusValue == 'SUBMITTED' ? ' checked' : ''; ?>>Submitted for vault</option>
+                <option name="status" value="status:ACCEPTED"<?php echo $searchStatusValue == 'ACCEPTED' ? ' checked' : ''; ?>>Accepted for vault</option>
+                <option name="status" value="status:REJECTED"<?php echo $searchStatusValue == 'REJECTED' ? ' checked' : ''; ?>>Rejected for vault</option>
+                <option name="status" value="status:SECURED"<?php echo $searchStatusValue == 'SECURED' ? ' checked' : ''; ?>>Secured in vault</option>
             </optgroup>
             <optgroup label="Vault">
                 <option name="status" value="vault_status:UNPUBLISHED"<?php echo $searchStatusValue == 'UNPUBLISHED' ? ' checked' : ''; ?>>Unpublished</option>
