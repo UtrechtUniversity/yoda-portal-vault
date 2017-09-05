@@ -20,6 +20,8 @@ $config['search-items-per-page'] = 10;
 $config['revision-items-per-page'] = 25;
 $config['revision-dialog-items-per-page'] = 5;
 
+// Version of confirmation text to be signed off by researcher
+$config['confirmation-version'] = '1';
 
 if (file_exists(dirname(__FILE__) . '/config_local.php'))
     include(    dirname(__FILE__) . '/config_local.php');

@@ -130,7 +130,12 @@ class Vault extends MY_Controller
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
 
-        $result = $this->Folder_Status_model->approve_for_publication($fullPath);
+        $confirmationVersion = $this->config->item('confirmation-version');
+        if (!$confirmationVersion) {
+            $confirmationVersion = '0';
+        }
+
+        $result = $this->Folder_Status_model->approve_for_publication($fullPath, $confirmationVersion);
         echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
     }
 

@@ -32,7 +32,22 @@ $( document ).ready(function() {
     });
 
     $("body").on("click", "a.action-submit-for-publication", function() {
-       vaultSubmitForPublication($(this).attr('data-folder'));
+        $('.action-confirm-submit-for-publication').attr( 'data-folder', $(this).attr('data-folder') );
+        $('#confirmAgreementConditions').modal('show');
+    });
+
+    $("#confirmAgreementConditions").on("click", '.confirm-conditions', function() {
+        if ($(this).prop('checked')) {
+            $("#confirmAgreementConditions .action-confirm-submit-for-publication").prop('disabled',false).removeClass('disabled');
+        }
+        else {
+            $("#confirmAgreementConditions .action-confirm-submit-for-publication").prop('disabled',true);
+        }
+    });
+
+    $("#confirmAgreementConditions").on("click", ".action-confirm-submit-for-publication", function() {
+        $('#confirmAgreementConditions').modal('hide');
+        vaultSubmitForPublication($(this).attr('data-folder'));
     });
 
     $("body").on("click", "a.action-approve-for-publication", function() {
@@ -58,7 +73,6 @@ $( document ).ready(function() {
     $("body").on("click", "button.vault-access", function() {
         vaultAccess($(this).attr('data-access'), $(this).attr('data-path'));
     });
-
 });
 
 function browse(dir)

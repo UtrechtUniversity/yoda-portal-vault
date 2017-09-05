@@ -6,6 +6,30 @@
 
 <?php echo $searchHtml; ?>
 
+
+<div class="modal" id="confirmAgreementConditions">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <br>Version: <?php echo $confirmationVersion; ?>
+                <br><i>Please scroll down to read the entire text and confirm to the conditions</i>
+                <h3>Please confirm that you agree with following terms and conditions</h3>
+
+                <?php $this->load->view('/publication_confirmation_versions/' . $confirmationVersion ); ?>
+
+            </div>
+
+            <div class="modal-footer">
+                <input type="checkbox" class="confirm-conditions"> Please confirm that you agree with the above
+                <hr>
+                <button class='action-confirm-submit-for-publication btn btn-default disabled'>Confirm agreement</button>
+                <button class="btn btn-default grey cancel" data-dismiss="modal">Annuleren</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="row">
 
     <ol class="breadcrumb">
