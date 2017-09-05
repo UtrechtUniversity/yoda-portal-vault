@@ -73,11 +73,6 @@ ol.breadcrumb li.active {
     display: none;
 }
 
-.search-status {
-    margin-top: 5px;
-    margin-left: 5px;
-}
-
 .restore-exists.cover {
     background-color: #ffffff;
     border-radius: 5px;
