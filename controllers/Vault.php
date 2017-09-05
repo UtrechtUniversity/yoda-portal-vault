@@ -10,7 +10,7 @@ class Vault extends MY_Controller
         $this->load->model('filesystem');
         $this->load->model('filesystem');
         $this->load->model('rodsuser');
-        
+
         $this->load->library('pathlibrary');
     }
 
@@ -139,14 +139,13 @@ class Vault extends MY_Controller
         echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
     }
 
-    public function reject_for_publication()
+    public function cancel_publication()
     {
         $this->load->model('Folder_Status_model');
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
 
-        $result = $this->Folder_Status_model->reject_for_publication($fullPath);
         echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
      }
 }
