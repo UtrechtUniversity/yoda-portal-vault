@@ -22,7 +22,7 @@ $( document ).ready(function() {
         }
     });
 
-    $( ".search-status select:option" ).change(function() {
+    $( ".search-status select" ).change(function() {
         search($(this).val(), 'status', $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     });
 
