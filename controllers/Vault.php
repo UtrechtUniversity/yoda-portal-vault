@@ -146,6 +146,7 @@ class Vault extends MY_Controller
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
 
+        $result = $this->Folder_Status_model->cancel_publication($fullPath);
         echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
      }
 }
