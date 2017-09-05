@@ -11,7 +11,7 @@ class Search extends MY_Controller
         $this->load->model('filesystem');
         $this->load->model('rodsuser');
         $this->config->load('config');
-        
+
         $this->load->library('pathlibrary');
     }
 
@@ -183,7 +183,11 @@ class Search extends MY_Controller
             $orderColumns = array(
                 0 => 'COLL_NAME'
             );
-            $result = $this->filesystem->searchByOrgMetadata($rodsaccount, $path, $filter, "status", $orderColumns[$orderColumn], $orderDir, $length, $start);
+
+            $filter = explode(":", $filter);
+            $status_type = $filter[0];
+            $status_name = $filter[1];
+            $result = $this->filesystem->searchByOrgMetadata($rodsaccount, $path, $status_name, $status_type, $orderColumns[$orderColumn], $orderDir, $length, $start);
 
             $status = $result['status'];
             $statusInfo = $result['statusInfo'];

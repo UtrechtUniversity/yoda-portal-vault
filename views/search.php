@@ -38,18 +38,18 @@
 
         <select class="form-control search-status<?php echo $showTerm ? ' hide' : ''; ?>">
             <optgroup label="Research">
-                <option name="status" value="LOCKED"<?php echo $searchStatusValue == 'LOCKED' ? ' checked' : ''; ?>>Locked</option>
-                <option name="status" value="SUBMITTED"<?php echo $searchStatusValue == 'SUBMITTED' ? ' checked' : ''; ?>>Submitted</option>
-                <option name="status" value="ACCEPTED"<?php echo $searchStatusValue == 'ACCEPTED' ? ' checked' : ''; ?>>Accepted</option>
-                <option name="status" value="REJECTED"<?php echo $searchStatusValue == 'REJECTED' ? ' checked' : ''; ?>>Rejected</option>
-                <option name="status" value="SECURED"<?php echo $searchStatusValue == 'SECURED' ? ' checked' : ''; ?>>Secured</option>
+                <option name="status" value="status:LOCKED"<?php echo $searchStatusValue == 'LOCKED' ? ' checked' : ''; ?>>Locked</option>
+                <option name="status" value="status:SUBMITTED"<?php echo $searchStatusValue == 'SUBMITTED' ? ' checked' : ''; ?>>Submitted</option>
+                <option name="status" value="status:ACCEPTED"<?php echo $searchStatusValue == 'ACCEPTED' ? ' checked' : ''; ?>>Accepted</option>
+                <option name="status" value="status:REJECTED"<?php echo $searchStatusValue == 'REJECTED' ? ' checked' : ''; ?>>Rejected</option>
+                <option name="status" value="status:SECURED"<?php echo $searchStatusValue == 'SECURED' ? ' checked' : ''; ?>>Secured</option>
             </optgroup>
-            <optgroup label="Research">
-                <option name="status" value="UNPUBLISHED"<?php echo $searchStatusValue == 'UNPUBLISHED' ? ' checked' : ''; ?>>Unpublished</option>
-                <option name="status" value="SUBMITTED_FOR_PUBLICATION"<?php echo $searchStatusValue == 'SUBMITTED_FOR_PUBLICATION' ? ' checked' : ''; ?>>Submitted for publication</option>
-                <option name="status" value="APPROVED_FOR_PUBLICATION"<?php echo $searchStatusValue == 'APPROVED_FOR_PUBLICATION' ? ' checked' : ''; ?>>Approved for publication</option>
-                <option name="status" value="PUBLISHED"<?php echo $searchStatusValue == 'PUBLISHED' ? ' checked' : ''; ?>>Published</option>
-                <option name="status" value="DEPUBLISHED"<?php echo $searchStatusValue == 'DEPUBLISHED' ? ' checked' : ''; ?>>Depublished</option>
+            <optgroup label="Vault">
+                <option name="status" value="vault_status:UNPUBLISHED"<?php echo $searchStatusValue == 'UNPUBLISHED' ? ' checked' : ''; ?>>Unpublished</option>
+                <option name="status" value="vault_status:SUBMITTED_FOR_PUBLICATION"<?php echo $searchStatusValue == 'SUBMITTED_FOR_PUBLICATION' ? ' checked' : ''; ?>>Submitted for publication</option>
+                <option name="status" value="vault_status:APPROVED_FOR_PUBLICATION"<?php echo $searchStatusValue == 'APPROVED_FOR_PUBLICATION' ? ' checked' : ''; ?>>Approved for publication</option>
+                <option name="status" value="vault_status:PUBLISHED"<?php echo $searchStatusValue == 'PUBLISHED' ? ' checked' : ''; ?>>Published</option>
+                <option name="status" value="vault_status:DEPUBLISHED"<?php echo $searchStatusValue == 'DEPUBLISHED' ? ' checked' : ''; ?>>Depublished</option>
             </optgroup>
         </select>
     </div>
