@@ -23,6 +23,7 @@ $( document ).ready(function() {
     });
 
     $(".search-status").change(function() {
+        searchStatus = $(".search-status option:selected").text();
         search($(this).val(), 'status', $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     });
 
@@ -113,10 +114,7 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
 
 
         if (type == 'status') {
-            value = value.toLowerCase();
-            splitArr = value.split(":");
-            value = splitArr[1];
-            $('.search-string').text(value.substr(0,1).toUpperCase() + value.substr(1));
+            $('.search-string').text(searchStatus);
         } else {
             $('.search-string').html( htmlEncode(value).replace(/ /g, "&nbsp;") );
         }
