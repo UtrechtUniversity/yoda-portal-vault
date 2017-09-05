@@ -187,8 +187,12 @@ class Search extends MY_Controller
             $filter = explode(":", $filter);
             $statusType = $filter[0];
             $statusName = $filter[1];
-            $result = $this->filesystem->searchByOrgMetadata($rodsaccount, $path, $statusName, $statusType, $orderColumns[$orderColumn], $orderDir, $length, $start);
 
+            if ($statusType == "vault") {
+                $result = $this->filesystem->searchByOrgMetadata($rodsaccount, $path, $statusName, "vault_status", $orderColumns[$orderColumn], $orderDir, $length, $start);
+            } else {
+              $result = $this->filesystem->searchByOrgMetadata($rodsaccount, $path, $statusName, "status, $orderColumns[$orderColumn], $orderDir, $length, $start);
+            }
             $status = $result['status'];
             $statusInfo = $result['statusInfo'];
 
