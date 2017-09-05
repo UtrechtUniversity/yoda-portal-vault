@@ -29,7 +29,7 @@ if (substr($dir, 0, 7)=='/vault-') {
                     <input type="checkbox" class="confirm-conditions"> Please confirm that you agree with the above
                     <hr>
                     <button class='action-confirm-submit-for-publication btn btn-default'>Confirm agreement</button>
-                    <button class="btn btn-default grey cancel" data-dismiss="modal">Annuleren</button>
+                    <button class="btn btn-default grey cancel" data-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
