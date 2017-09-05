@@ -185,9 +185,9 @@ class Search extends MY_Controller
             );
 
             $filter = explode(":", $filter);
-            $status_type = $filter[0];
-            $status_name = $filter[1];
-            $result = $this->filesystem->searchByOrgMetadata($rodsaccount, $path, $status_name, $status_type, $orderColumns[$orderColumn], $orderDir, $length, $start);
+            $statusType = $filter[0];
+            $statusName = $filter[1];
+            $result = $this->filesystem->searchByOrgMetadata($rodsaccount, $path, $statusName, $statusType, $orderColumns[$orderColumn], $orderDir, $length, $start);
 
             $status = $result['status'];
             $statusInfo = $result['statusInfo'];
