@@ -6,7 +6,11 @@
 
 <?php echo $searchHtml; ?>
 
-
+<?php /**
+ *
+ *  @todo: Following dialog only to be taken in source when is vault and datapackage status is UNPUBLISHED
+ */
+?>
 <div class="modal" id="confirmAgreementConditions">
     <div class="modal-dialog">
         <div class="modal-content">
