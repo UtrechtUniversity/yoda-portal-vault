@@ -191,7 +191,7 @@ class Search extends MY_Controller
             if ($statusType == "vault") {
                 $result = $this->filesystem->searchByOrgMetadata($rodsaccount, $path, $statusName, "vault_status", $orderColumns[$orderColumn], $orderDir, $length, $start);
             } else {
-              $result = $this->filesystem->searchByOrgMetadata($rodsaccount, $path, $statusName, "status, $orderColumns[$orderColumn], $orderDir, $length, $start);
+                $result = $this->filesystem->searchByOrgMetadata($rodsaccount, $path, $statusName, "status", $orderColumns[$orderColumn], $orderDir, $length, $start);
             }
             $status = $result['status'];
             $statusInfo = $result['statusInfo'];
