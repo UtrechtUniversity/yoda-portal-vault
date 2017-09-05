@@ -48,6 +48,9 @@
           <option name="status" value="PUBLISHED"<?php echo $searchStatusValue == 'PUBLISHED' ? ' checked' : ''; ?>>Published</option>
           <option name="status" value="DEPUBLISHED"<?php echo $searchStatusValue == 'DEPUBLISHED' ? ' checked' : ''; ?>>Depublished</option>
         </select>
+        <span class="input-group-btn search-status<?php echo $showStatus ? ' hide' : ''; ?>">
+            <button class="btn btn-default search-btn" data-items-per-page="<?php echo $searchItemsPerPage; ?>" type="button"><span class="glyphicon glyphicon-search"></span></button>
+        </span>
     </div>
 
     <div class="panel panel-default search-results">
