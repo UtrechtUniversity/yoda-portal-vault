@@ -114,12 +114,10 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
 
         if (type == 'status') {
             value = value.toLowerCase();
-            $('.search-string').text(value.substr(0,1).toUpperCase() + value.substr(1));
+            status = value.split(":");
+            $('.search-string').text(status[1].substr(0,1).toUpperCase() + status[1].substr(1));
         } else {
             $('.search-string').html( htmlEncode(value).replace(/ /g, "&nbsp;") );
-
-            // uncheck all status values
-            $( ".search-status input:radio" ).prop('checked', false);
         }
     }
 
