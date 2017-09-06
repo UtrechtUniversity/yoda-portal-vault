@@ -470,7 +470,10 @@ function topInformation(dir, showAlert)
                             actions['approve-for-publication'] = 'Approve for publication';
                             actions['cancel-publication'] = 'Cancel publication';
                             $('.btn-group button.folder-status').next().prop("disabled", false);
-                        }
+                        } else if (vaultStatus == 'UNPUBLISHED' && researchGroupAccess === "yes") {
+                            actions['submit-for-publication'] = 'Submit for publication';
+                            $('.btn-group button.folder-status').next().prop("disabled", false);
+			}
                     } else {
                         if (vaultStatus == 'UNPUBLISHED') {
                             actions['submit-for-publication'] = 'Submit for publication';
