@@ -536,6 +536,9 @@ function topInformation(dir, showAlert)
             // Provenance action log
             $('.actionlog-items').hide();
             actionLogIcon = ' <i class="fa fa-book actionlog-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="Provenance action log"></i>';
+            if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'no') {
+		actionLogIcon = '';
+	    }
 
             $('.btn-group button.folder-status').attr('data-write', hasWriteRights);
 
