@@ -141,6 +141,12 @@ function duplicateField(field)
 
 function duplicateSubpropertyField(field)
 {
+    if (field.hasClass('select2')) {
+        // Destroy select2 before cloning
+        // https://stackoverflow.com/questions/17175534/cloned-select2-is-not-responding
+        $(field).find('select').select2('destroy');
+    }
+
     var structureBase = field.find('label i').data('subpropertybase');
     var structureId = field.find('label i').data('structure-id');
     var newStructureId = null;
@@ -179,8 +185,14 @@ function duplicateSubpropertyField(field)
         newMainFieldGroup.removeClass('rowSubPropertyBase-' + structureBase + '-' + structureId);
         newMainFieldGroup.addClass('rowSubPropertyBase-' + structureBase + '-' + newStructureId);
 
+        console.log(newMainFieldGroup.html());
+
         // Change the field name
         var newField = newMainFieldGroup.find('.form-control');
+        // Select2
+        if (newMainFieldGroup.hasClass('select2')) {
+            newField = $(newMainFieldGroup).find('select');
+        }
         var name = newField.attr('name');
         name = name.replace('['+structureId+']', '['+newStructureId+']');
         newField.attr('name', name);
@@ -203,6 +215,26 @@ function applySubpropertyFieldHandlers(fieldGroup)
         duplicateSubpropertyField(fieldGroup);
     });
     fieldGroup.find('[data-toggle="tooltip"]').tooltip();
+
+    if (newField.hasClass('numeric-field')) {
+        newField.keypress(validateNumber);
+    }
+
+    if (newField.hasClass('datepicker')) {
+        newField.removeClass('hasDatepicker');
+        newField.datepicker({
+            dateFormat: "yy-mm-dd",
+            changeMonth: true,
+            changeYear: true
+        });
+    }
+
+    if (fieldGroup.hasClass('select2')) {
+        console.log('select2');
+        // Init select2 for the 2 fields.
+        fieldGroup.find('select').select2();
+        $(newField).find('select').select2();
+    }
 
     return fieldGroup;
 }
