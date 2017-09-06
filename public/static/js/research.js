@@ -33,10 +33,12 @@ $( document ).ready(function() {
 
     $("body").on("click", "a.action-submit-for-publication", function() {
         $('.action-confirm-submit-for-publication').attr( 'data-folder', $(this).attr('data-folder') );
+
+        // set default status and show dialog
+        $(".action-confirm-submit-for-publication").prop('disabled', true);
+        $("#confirmAgreementConditions .confirm-conditions").prop('checked', false);
         $('#confirmAgreementConditions').modal('show');
     });
-
-    $(".action-confirm-submit-for-publication").prop('disabled', true);
 
     $("#confirmAgreementConditions").on("click", '.confirm-conditions', function() {
         if ($(this).prop('checked')) {
