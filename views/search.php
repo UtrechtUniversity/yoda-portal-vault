@@ -37,7 +37,7 @@
         </span>
 
         <select class="form-control search-status<?php echo $showTerm ? ' hide' : ''; ?>">
-            <option style="display:none" disabled selected value>Select status</option>
+            <option style="display:none" disabled selected value>Select status...</option>
             <optgroup label="Research">
                 <option name="status" value="research:LOCKED">Locked</option>
                 <option name="status" value="research:SUBMITTED">Submitted for vault</option>
