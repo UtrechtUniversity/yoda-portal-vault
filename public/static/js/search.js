@@ -1,9 +1,10 @@
 $( document ).ready(function() {
     if ($('#file-browser').length && (view == 'browse' && searchType != 'revision')) {
         // Rememeber search results
-        if (searchStatusValue.length > 0 && $( ".search-status input:radio" ).is(":checked")) {
+        if (searchStatusValue.length > 0) {
+            $('[name=status]').val(searchStatusValue);
             search(searchStatusValue, 'status', browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
-        } else if (searchTerm.length > 0) {
+         } else if (searchTerm.length > 0) {
             search(decodeURIComponent(searchTerm), searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
         }
     }
@@ -23,7 +24,6 @@ $( document ).ready(function() {
     });
 
     $(".search-status").change(function() {
-        searchStatus = $(".search-status option:selected").text();
         search($(this).val(), 'status', $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     });
 
@@ -114,6 +114,7 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
 
 
         if (type == 'status') {
+            searchStatus = $(".search-status option:selected").text();
             $('.search-string').text(searchStatus);
         } else {
             $('.search-string').html( htmlEncode(value).replace(/ /g, "&nbsp;") );
