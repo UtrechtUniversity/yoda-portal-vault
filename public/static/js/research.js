@@ -447,7 +447,6 @@ function topInformation(dir, showAlert)
                 $('.top-info-buttons .research').hide();
                 // folder status (vault folder)
                 if (typeof vaultStatus != 'undefined') {
-//<<<<<<< HEAD
                     $('.btn-group button.folder-status').next().prop("disabled", true);
                     $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
 
@@ -496,10 +495,6 @@ function topInformation(dir, showAlert)
                         $('.btn-group button.folder-status').next().prop("disabled", false);
                     }
                 }
-            //}
-
-//=======
-//>>>>>>> fix/double-buttons-browse-area
 
                 // Datamanager sees all buttons in vault, researcher only folder status.
                 if (isDatamanager == 'yes') {
