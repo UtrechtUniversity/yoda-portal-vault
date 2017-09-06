@@ -36,21 +36,21 @@
             <button class="btn btn-default search-btn" data-items-per-page="<?php echo $searchItemsPerPage; ?>" type="button"><span class="glyphicon glyphicon-search"></span></button>
         </span>
 
-        <select class="form-control search-status<?php echo $showTerm ? ' hide' : ''; ?>">
+        <select name="status" class="form-control search-status<?php echo $showTerm ? ' hide' : ''; ?>">
             <option style="display:none" disabled selected value>Select status...</option>
             <optgroup label="Research">
-                <option name="status" value="research:LOCKED">Locked</option>
-                <option name="status" value="research:SUBMITTED">Submitted for vault</option>
-                <option name="status" value="research:ACCEPTED">Accepted for vault</option>
-                <option name="status" value="research:REJECTED">Rejected for vault</option>
-                <option name="status" value="research:SECURED">Secured in vault</option>
+                <option value="research:LOCKED">Locked</option>
+                <option value="research:SUBMITTED">Submitted for vault</option>
+                <option value="research:ACCEPTED">Accepted for vault</option>
+                <option value="research:REJECTED">Rejected for vault</option>
+                <option value="research:SECURED">Secured in vault</option>
             </optgroup>
             <optgroup label="Vault">
-                <option name="status" value="vault:UNPUBLISHED">Unpublished</option>
-                <option name="status" value="vault:SUBMITTED_FOR_PUBLICATION">Submitted for publication</option>
-                <option name="status" value="vault:APPROVED_FOR_PUBLICATION">Approved for publication</option>
-                <option name="status" value="vault:PUBLISHED">Published</option>
-                <option name="status" value="vault:DEPUBLISHED">Depublished</option>
+                <option value="vault:UNPUBLISHED">Unpublished</option>
+                <option value="vault:SUBMITTED_FOR_PUBLICATION">Submitted for publication</option>
+                <option value="vault:APPROVED_FOR_PUBLICATION">Approved for publication</option>
+                <option value="vault:PUBLISHED">Published</option>
+                <option value="vault:DEPUBLISHED">Depublished</option>
             </optgroup>
         </select>
     </div>
