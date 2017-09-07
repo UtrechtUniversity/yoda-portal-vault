@@ -277,19 +277,22 @@ class Metadata_form_model extends CI_Model {
 
                                 foreach($value as $key2=>$value2) {
                                     if(!is_array($value2)) {  // $key2 = Name/ Property
-                                        $xml_item = $xml->createElement($elementName);
-                                        $xml_sub1 = $xml->createElement($key2);
-                                        $xml_sub1->appendChild($xml->createTextNode($value2));
-                                        $xml_item->appendChild($xml_sub1);
-                                        $xml_metadata->appendChild($xml_item);
+                                        if ($value2) {
+                                            $xml_item = $xml->createElement($elementName);
+                                            $xml_sub1 = $xml->createElement($key2);
+                                            $xml_sub1->appendChild($xml->createTextNode($value2));
+                                            $xml_item->appendChild($xml_sub1);
+                                            $xml_metadata->appendChild($xml_item);
+                                        }
                                     }
                                     else {
                                         $xml_sub1 = $xml->createElement($key2);
                                         foreach ($value2 as $key3 => $value3) {
-                                            $xml_sub2 = $xml->createElement($key3);
-                                            $xml_sub2->appendChild($xml->createTextNode($value3));
-                                            $xml_sub1->appendChild($xml_sub2);
-
+                                            if ($value3) {
+                                                $xml_sub2 = $xml->createElement($key3);
+                                                $xml_sub2->appendChild($xml->createTextNode($value3));
+                                                $xml_sub1->appendChild($xml_sub2);
+                                            }
                                         }
                                         $xml_item->appendChild($xml_sub1);
                                         $xml_metadata->appendChild($xml_item);
