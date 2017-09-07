@@ -168,6 +168,12 @@ function duplicateSubpropertyField(field)
         }
     }
 
+    // Destroy select2 before cloning. (https://stackoverflow.com/questions/17175534/cloned-select2-is-not-responding)
+    var isSelect2Field = $(field).hasClass('select2');
+    if (isSelect2Field) {
+        $(field).find('select').select2('destroy');
+    }
+
     // Clone main field
     var newMainField = field.clone();
 
@@ -176,17 +182,57 @@ function duplicateSubpropertyField(field)
 
     // Change the field name
     var newField = newMainField.find('.form-control');
+    // Get the native select from the select2 plugin.
+    if (isSelect2Field) {
+        newField = $(newMainField).find('select');
+    }
+    newField.val('');
+
     var name = newField.attr('name');
+
     name = name.replace('['+structureId+']', '['+newStructureId+']');
     newField.attr('name', name);
 
     // Add the new field handlers
-    newMainField = applySubpropertyFieldHandlers(newMainField);
+    newMainField.find('button').bind( "click", function() {
+        duplicateSubpropertyField(newMainField);
+    });
+    newMainField.find('[data-toggle="tooltip"]').tooltip();
+
+    if (newField.hasClass('numeric-field')) {
+        newField.keypress(validateNumber);
+    }
+
+    if (newField.hasClass('datepicker')) {
+        newField.removeAttr('id');
+        newField.removeClass('hasDatepicker');
+        newField.datepicker({
+            dateFormat: "yy-mm-dd",
+            changeMonth: true,
+            changeYear: true
+        });
+    }
+
+    // Init all select2 select fields.
+    if (isSelect2Field) {
+        // Init select2 for the 2 fields.
+        $(this).find('select').select2();
+        $(field).find('select').select2();
+        $(newMainField).find('select').select2();
+    }
+
     groups.push(newMainField);
 
+    // Find all sub property fields by the current field structure.
     var subpropertyFieldGroups = $('.rowSubPropertyBase-' + structureBase + '-' + structureId);
-
     subpropertyFieldGroups.each(function(){
+        // Destroy select2 before cloning.
+        var isSelect2 = $(this).hasClass('select2');
+        if (isSelect2) {
+            $(this).find('select').select2('destroy');
+        }
+
+        // Clone field
         var newMainFieldGroup = $(this).clone();
 
         // remove property base selector
@@ -195,28 +241,48 @@ function duplicateSubpropertyField(field)
 
         // Change the field name
         var newField = newMainFieldGroup.find('.form-control');
+
+        // Get the native select field from the select2 plugin.
+        if (isSelect2) {
+            newField = $(newMainFieldGroup).find('select');
+        }
         var name = newField.attr('name');
         name = name.replace('['+structureId+']', '['+newStructureId+']');
         newField.attr('name', name);
 
         // Add the new field handlers
-        newMainFieldGroup = applySubpropertyFieldHandlers(newMainFieldGroup);
+        newField.val('');
+        newMainFieldGroup.find('button').bind( "click", function() {
+            duplicateSubpropertyField(newMainFieldGroup);
+        });
+        newMainFieldGroup.find('[data-toggle="tooltip"]').tooltip();
+
+        if (newField.hasClass('numeric-field')) {
+            newField.keypress(validateNumber);
+        }
+
+        if (newField.hasClass('datepicker')) {
+            newField.removeAttr('id');
+            newField.removeClass('hasDatepicker');
+            newField.datepicker({
+                dateFormat: "yy-mm-dd",
+                changeMonth: true,
+                changeYear: true
+            });
+        }
+
+        if (isSelect2) {
+            // Init select2 for the 2 fields.
+            $(this).find('select').select2();
+            newMainFieldGroup.find('select').select2();
+            $(newField).find('select').select2();
+        }
+
         groups.push(newMainFieldGroup);
     });
 
+    // Get the position at new insert.
     var last = subpropertyFieldGroups.last();
 
     $(last).after(groups);
-}
-
-function applySubpropertyFieldHandlers(fieldGroup)
-{
-    var newField = fieldGroup.find('.form-control');
-    newField.val('');
-    fieldGroup.find('button').bind( "click", function() {
-        duplicateSubpropertyField(fieldGroup);
-    });
-    fieldGroup.find('[data-toggle="tooltip"]').tooltip();
-
-    return fieldGroup;
 }

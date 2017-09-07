@@ -1,5 +1,8 @@
 <div class="form-group" xmlns="http://www.w3.org/1999/html">
     <label class="col-sm-2 control-label">
+        <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
+            <i data-structure-id="<?php echo $e->subPropertiesStructID; ?>" class="glyphicon glyphicon-chevron-down subproperties-toggle" data-subpropertyBase="<?php echo $e->subPropertiesBase; ?>"  data-toggle="tooltip" title="Click to open or close view on subproperties" data-html="true"></i>&nbsp;
+        <?php endif; ?>
         <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>"><?php echo $e->label; ?></span>
     </label>
 
@@ -39,10 +42,22 @@
                         <input type="text"
                                placeholder="Enter a valid number..."
                             <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
-                               class="form-control numeric-field" name="<?php echo $e->key; ?>[]" value="<?php echo htmlentities($e->value); ?>">
+                               class="form-control numeric-field"
+                            <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
+                                data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
+                                name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
+                            <?php else: ?>
+                                name="<?php echo $e->key; ?>[]"
+                            <?php endif; ?>
+                               value="<?php echo htmlentities($e->value); ?>">
                         <span class="input-group-btn">
-                            <button class="btn btn-default duplicate-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                            <?php if ($e->subPropertiesRole=='subPropertyStartStructure') { ?>
+                                <button class="btn btn-default duplicate-subproperty-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                            <?php } else { ?>
+                                <button class="btn btn-default duplicate-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                            <?php } ?>
                         </span>
+
                     </div>
                 <?php } else { ?>
 
