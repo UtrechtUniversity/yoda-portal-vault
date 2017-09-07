@@ -6,40 +6,30 @@
 
 <?php echo $searchHtml; ?>
 
-<?php /**
- *
- *  @todo: Following dialog only to be taken in source when is vault and datapackage status is UNPUBLISHED
- */
+<div class="modal" id="confirmAgreementConditions">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <br>Version: <?php echo $confirmationVersion; ?>
+                <br><i>Please scroll down to read the entire text and confirm to the conditions</i>
+                <h3>Please confirm that you agree with following terms and conditions</h3>
 
-if (substr($dir, 0, 7)=='/vault-') {
-?>
-    <div class="modal" id="confirmAgreementConditions">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <br>Version: <?php echo $confirmationVersion; ?>
-                    <br><i>Please scroll down to read the entire text and confirm to the conditions</i>
-                    <h3>Please confirm that you agree with following terms and conditions</h3>
+                <?php $this->load->view('/publication_confirmation_versions/' . $confirmationVersion ); ?>
 
-                    <?php $this->load->view('/publication_confirmation_versions/' . $confirmationVersion ); ?>
+            </div>
 
-                </div>
-
-                <div class="modal-footer">
-                    <fieldset>
-                        <input type="checkbox" class="confirm-conditions" id="checkbox-confirm-conditions">
-                        <label for="checkbox-confirm-conditions">Please confirm that you agree with the above</label>
-                    </fieldset>
-                    <hr>
-                    <button class='action-confirm-submit-for-publication btn btn-default'>Confirm agreement</button>
-                    <button class="btn btn-default grey cancel" data-dismiss="modal">Cancel</button>
-                </div>
+            <div class="modal-footer">
+                <fieldset>
+                    <input type="checkbox" class="confirm-conditions" id="checkbox-confirm-conditions">
+                    <label for="checkbox-confirm-conditions">Please confirm that you agree with the above</label>
+                </fieldset>
+                <hr>
+                <button class='action-confirm-submit-for-publication btn btn-default'>Confirm agreement</button>
+                <button class="btn btn-default grey cancel" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
-<?php
-}
-?>
+</div>
 
 <div class="row">
 
