@@ -75,8 +75,6 @@ $(function () {
 
     // Supproperty handling
     $(document).on('click', ".subproperties-toggle", function () {
-        console.log('klikkerdeklik');
-
         var subPropertiesBase = $(this).attr('data-subpropertyBase');
         var structureId = $(this).data('structure-id');
         if ($(this).hasClass('glyphicon-chevron-down')) {
