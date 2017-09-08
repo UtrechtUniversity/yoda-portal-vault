@@ -315,6 +315,7 @@ function topInformation(dir, showAlert)
             var isDatamanager = data.result.isDatamanager;
             var isVaultPackage = data.result.isVaultPackage;
             var researchGroupAccess = data.result.researchGroupAccess;
+	    var inResearchGroup = data.result.inResearchGroup;
             var lockCount = data.result.lockCount;
             var showStatusBtn = false;
             var actions = [];
@@ -467,10 +468,10 @@ function topInformation(dir, showAlert)
                     // Set action for datamanager and researcher.
                     if (isDatamanager == 'yes') {
                         if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
-                            actions['approve-for-publication'] = 'Approve for publication';
                             actions['cancel-publication'] = 'Cancel publication';
+                            actions['approve-for-publication'] = 'Approve for publication';
                             $('.btn-group button.folder-status').next().prop("disabled", false);
-                        } else if (vaultStatus == 'UNPUBLISHED' && researchGroupAccess === "yes") {
+                        } else if (vaultStatus == 'UNPUBLISHED' && inResearchGroup  == 'yes') {
                             actions['submit-for-publication'] = 'Submit for publication';
                             $('.btn-group button.folder-status').next().prop("disabled", false);
 			}
