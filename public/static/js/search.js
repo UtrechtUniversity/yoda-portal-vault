@@ -128,7 +128,7 @@ function closeSearchResults()
 {
     $('.search-results').hide();
     $('#search-filter').val('');
-    $(".search-status input:radio").prop('checked', false);
+    $('[name=status]').val('');
     $.get("search/unset_session");
 }
 
