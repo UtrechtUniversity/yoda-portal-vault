@@ -299,7 +299,11 @@ class Metadata_form_model extends CI_Model {
      */
     public function metadataToXmlString($allFormMetadata)
     {
-
+//
+//        echo '<pre>';
+//        print_r($allFormMetadata);
+//        echo '</pre>';
+//
         $xml = new DOMDocument( "1.0", "UTF-8" );
         $xml->formatOutput = true;
 
@@ -326,13 +330,13 @@ class Metadata_form_model extends CI_Model {
 
                                 foreach($value as $key2=>$value2) {
                                     if(!is_array($value2)) {  // $key2 = Name/ Property
-                                        if ($value2) {
-                                            $xml_item = $xml->createElement($elementName);
-                                            $xml_sub1 = $xml->createElement($key2);
-                                            $xml_sub1->appendChild($xml->createTextNode($value2));
-                                            $xml_item->appendChild($xml_sub1);
-                                            $xml_metadata->appendChild($xml_item);
-                                        }
+                                        // strucure is existant - checked by reorganisePostedData. The leadproperty must be added eventhough it could hold no actual data at this moment
+                                        // Aanvankelijk werd de leadprop niet opgeslagen ... dit leidde tot een foute xml structuur en werd laden afgebroken hierdoor
+                                        $xml_item = $xml->createElement($elementName);
+                                        $xml_sub1 = $xml->createElement($key2);
+                                        $xml_sub1->appendChild($xml->createTextNode($value2));
+                                        $xml_item->appendChild($xml_sub1);
+                                        $xml_metadata->appendChild($xml_item);
                                     }
                                     else {
                                         $xml_sub1 = $xml->createElement($key2);
@@ -392,6 +396,7 @@ class Metadata_form_model extends CI_Model {
      * NO VALIDATION OF DATA IS PERFORMED IN ANY WAY
      */
     public function processPost($rodsaccount, $config) {
+
         $allFormMetadata = $this->reorganisePostedData($rodsaccount, $config['xsdPath']);
 
         $xmlString = $this->metadataToXmlString($allFormMetadata);
