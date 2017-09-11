@@ -130,7 +130,7 @@ class Browse extends MY_Controller
         if ($result['*status'] == 'Success') {
 
             foreach($result['*result'] as $item){
-                $timestamp = gmdate("Y/m/d H:i:s", 1 * $item[0]);
+                $timestamp = date("Y/m/d H:i:s", 1 * $item[0]);
 
                 #user zone handling - users can originate from different zones
                 $parts = explode('#',$item[2]);
