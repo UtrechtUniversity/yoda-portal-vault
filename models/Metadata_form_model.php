@@ -70,7 +70,7 @@ class Metadata_form_model extends CI_Model {
      * supporting function for getFormElementLabels
      * Adjusted so the leadproperty label is taken into account ($leadPropertyBase is passed throughout all iteration levels)
      */
-    public function iterateElements($element, $key, &$elementLabels, $leadPropertyBase, $level=0) {
+     public function iterateElements($element, $key, &$elementLabels, $leadPropertyBase, $level=0) {
         if (isset($element['label'])) {
             $elementLabels[$key] = $element['label'];
             if ($level == 1) {
@@ -1111,6 +1111,32 @@ class Metadata_form_model extends CI_Model {
 
         $json = json_encode($xmlFormElements);
 
-        return json_decode($json,TRUE);
+        $data =  json_decode($json,TRUE);
+
+        // Single presence of a group requires extra handling
+        if (!isset($data['Group'][0])) {
+            $keepGroupData = $data['Group'];
+            unset($data['Group']);
+            $data['Group'][0] = $keepGroupData;
+        }
+
+        return $data;
+//
+//        echo 'Multiple groups?: ' . (isset($data['Group'][0]) ? 'YES' : 'NO');
+//
+//        echo '<pre>';
+//
+//        print_r($data);
+//
+//        echo '<hr>';
+//
+//        print_r($data['Group']);
+//
+//
+//        echo '</pre>';
+//
+//        exit;
+//
+//        return json_decode($json,TRUE);
     }
 }
