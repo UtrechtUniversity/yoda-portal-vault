@@ -1033,10 +1033,6 @@ class Metadata_form_model extends CI_Model {
 
         $formData = json_decode($json,TRUE);
 
-//        echo '<pre>';
-//        print_r($formData);
-//        echo '</pre>';
-
         $newFormData = array();
         foreach ($formData as $key=>$data) {
             if (!is_array($data)) {
@@ -1085,11 +1081,6 @@ class Metadata_form_model extends CI_Model {
                 }
             }
         }
-
-//        echo '<pre>';
-//        print_r($newFormData);
-//        echo '</pre>';
-//        exit;
         return $newFormData;
     }
 
@@ -1121,22 +1112,5 @@ class Metadata_form_model extends CI_Model {
         }
 
         return $data;
-//
-//        echo 'Multiple groups?: ' . (isset($data['Group'][0]) ? 'YES' : 'NO');
-//
-//        echo '<pre>';
-//
-//        print_r($data);
-//
-//        echo '<hr>';
-//
-//        print_r($data['Group']);
-//
-//
-//        echo '</pre>';
-//
-//        exit;
-//
-//        return json_decode($json,TRUE);
     }
 }
