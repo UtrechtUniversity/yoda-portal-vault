@@ -368,7 +368,7 @@ RULE;
         }
     }
 
-    static public function searchByName($iRodsAccount, $path, $string, $type, $orderBy, $orderSort, $limit, $offset = 0)
+    static public function searchByName($iRodsAccount, $path, $searchString, $type, $orderBy, $orderSort, $limit, $offset = 0)
     {
         $output = array();
 
@@ -377,7 +377,7 @@ myRule {
     *l = int(*limit);
     *o = int(*offset);
 
-    iiSearchByName(*path, *searchstring, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result, *status, *statusInfo);
+    iiSearchByName(*path, *searchString, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result, *status, *statusInfo);
 }
 RULE;
         try {
@@ -385,13 +385,13 @@ RULE;
                 $iRodsAccount,
                 $ruleBody,
                 array(
-                    "*path" => $path,
-                    "*searchstring" => $string,
+                    "*path"                   => $path,
+                    "*searchString"           => $searchString,
                     "*collectionOrDataObject" => $type,
-                    "*orderby" => $orderBy,
-                    "*ascdesc" => $orderSort,
-                    "*limit" => $limit,
-                    "*offset" => $offset
+                    "*orderby"                => $orderBy,
+                    "*ascdesc"                => $orderSort,
+                    "*limit"                  => $limit,
+                    "*offset"                 => $offset
                 ),
                 array("*result",
                     "*status",
@@ -426,7 +426,7 @@ RULE;
         }
     }
 
-    static public function searchByUserMetadata($iRodsAccount, $path, $string, $type, $orderBy, $orderSort, $limit, $offset = 0)
+    static public function searchByUserMetadata($iRodsAccount, $path, $searchString, $searchStringEscaped, $type, $orderBy, $orderSort, $limit, $offset = 0)
     {
         $output = array();
 
@@ -435,7 +435,7 @@ myRule {
     *l = int(*limit);
     *o = int(*offset);
 
-    iiSearchByMetadata(*path, *searchstring, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result, *status, *statusInfo);
+    iiSearchByMetadata(*path, *searchString, *searchStringEscaped, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result, *status, *statusInfo);
 }
 RULE;
         try {
@@ -443,13 +443,14 @@ RULE;
                 $iRodsAccount,
                 $ruleBody,
                 array(
-                    "*path" => $path,
-                    "*searchstring" => $string,
+                    "*path"                   => $path,
+                    "*searchString"           => $searchString,
+                    "*searchStringEscaped"    => searchStringEscaped,
                     "*collectionOrDataObject" => $type,
-                    "*orderby" => $orderBy,
-                    "*ascdesc" => $orderSort,
-                    "*limit" => $limit,
-                    "*offset" => $offset
+                    "*orderby"                => $orderBy,
+                    "*ascdesc"                => $orderSort,
+                    "*limit"                  => $limit,
+                    "*offset"                 => $offset
                 ),
                 array("*result",
                     "*status",
