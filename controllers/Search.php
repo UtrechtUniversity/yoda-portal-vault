@@ -78,7 +78,7 @@ class Search extends MY_Controller
                 0 => 'DATA_NAME',
                 1 => 'COLL_NAME'
             );
-            $result = $this->filesystem->searchByName($rodsaccount, $path, $searchString, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
+            $result = $this->filesystem->searchByName($rodsaccount, $path, $searchStringEscaped, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
 
             $status = $result['status'];
             $statusInfo = $result['statusInfo'];
@@ -103,7 +103,7 @@ class Search extends MY_Controller
             $orderColumns = array(
                 0 => 'COLL_NAME'
             );
-            $result = $this->filesystem->searchByName($rodsaccount, $path, $searchString, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+            $result = $this->filesystem->searchByName($rodsaccount, $path, $searchStringEscaped, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
 
             $status = $result['status'];
             $statusInfo = $result['statusInfo'];
