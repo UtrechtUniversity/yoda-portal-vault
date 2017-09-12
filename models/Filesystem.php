@@ -445,7 +445,7 @@ RULE;
                 array(
                     "*path"                   => $path,
                     "*searchString"           => $searchString,
-                    "*searchStringEscaped"    => searchStringEscaped,
+                    "*searchStringEscaped"    => $searchStringEscaped,
                     "*collectionOrDataObject" => $type,
                     "*orderby"                => $orderBy,
                     "*ascdesc"                => $orderSort,
