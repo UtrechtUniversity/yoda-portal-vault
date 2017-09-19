@@ -575,10 +575,6 @@ class Metadata_form_model extends CI_Model {
                         'subPropertiesStructID' => $multipleAllowed ? $counterForFrontEnd : -1
                     );
 
-                    //  Add start tag
-                    $this->presentationElements[$groupName][] =
-                        $this->newWayPresentationElement(
-                            $config, array('type'=>'structSubPropertiesOpen'), $em, $key . '[' . $id . ']','', $multipleAllowed, $subPropArray);
 
                     // The actual element
 //                    $this->presentationElements[$groupName][] =
@@ -587,6 +583,12 @@ class Metadata_form_model extends CI_Model {
                     $this->presentationElements[$groupName][] =
                         $this->newWayPresentationElement(
                                 $config, $xsdElements[$subKey], $em, $key . '[' . $id . ']',$frontendValue, $multipleAllowed, $subPropArray);
+
+                    //  Add start tag
+                    $this->presentationElements[$groupName][] =
+                        $this->newWayPresentationElement(
+                            $config, array('type'=>'structSubPropertiesOpen'), $em, $key . '[' . $id . ']','', $multipleAllowed, $subPropArray);
+
                 }
                 else { // STEP THROUGH EACH SUB PROPERTY
                     foreach ($em as $propertyKey => $propertyElement) {
