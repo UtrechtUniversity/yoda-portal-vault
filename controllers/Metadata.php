@@ -195,6 +195,13 @@ class Metadata extends MY_Controller
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
+        $arrayPost = $this->input->post();
+
+        echo '<pre>';
+            print_r($arrayPost);
+        echo '</pre>';
+        exit;
+
         $this->load->model('Metadata_form_model');
         $this->load->model('Metadata_model');
         $this->load->model('Folder_Status_model');

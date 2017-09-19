@@ -218,10 +218,9 @@ class Element {
             $this->subPropertiesStructID = $data['subPropertiesStructID'];
         }
 
-        if ($this->subPropertiesRole == 'subProperty') { //differentiate view for actual subproperty (i.e. not the controlling element of a subproperty structure)
-            $this->type .= '_subproperty';
-        }
-
+//        if ($this->subPropertiesRole == 'subProperty') { //differentiate view for actual subproperty (i.e. not the controlling element of a subproperty structure)
+//            $this->type .= '_subproperty';
+//        }
 
 
 /* Possible functure mesage handling

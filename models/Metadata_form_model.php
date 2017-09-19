@@ -4,6 +4,7 @@
 class Metadata_form_model extends CI_Model {
 
     var $CI = NULL;
+    var $presentationElements = array();
 
     function __construct()
     {
@@ -406,6 +407,12 @@ class Metadata_form_model extends CI_Model {
 
 
 // Nieuwe met inachtneming van subproperties structuur
+/*
+     Differentiation Combined, subproperty and normal
+    1) isset($element['combined']) => Combined element
+    2) !isset($element['label']) => Subproperty (weak distinction! to be refactored???)
+    3) rest is  normal item
+*/
     public function getFormElements($rodsaccount, $config)
     {
         // load xsd and get all the info regarding restrictions
@@ -428,14 +435,12 @@ class Metadata_form_model extends CI_Model {
             }
         }
 
-        $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
-
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
         if ($formGroupedElements === false) {
             return false;
         }
 
-        $presentationElements = array();
+        //$presentationElements = array();
 
         $groupName = 'undefined';
 
@@ -458,10 +463,11 @@ class Metadata_form_model extends CI_Model {
         // Bring it back to one level with
         // 1) parent indication
         // 2) fully qualified name (unique!)
+        // 3) Add start end tags for combination fields
 
+        // HIER ALLEEN DE HOOFD ELEMENTEN
         foreach($formAllGroupedElements as $formElements) {
 
-            $fqElementID = '';
             foreach ($formElements as $key => $element) {
                 // Find group definition
                 // Find hierarchies of elements regarding subproperties.
@@ -470,111 +476,14 @@ class Metadata_form_model extends CI_Model {
 
                     $groupName = $element['name'];
                 }
-                elseif(false) {
-                    $value = isset($formData[$key]) ? $formData[$key] : '';
-                    // The number of values determine the number of elements to be created
-                    if(!is_array($value) ) {
-                        $valueArray = array();
-                        $valueArray[] = $value;
-                    }
-                    else {
-                        $valueArray = $value;
-                        if(count($valueArray)==0 ) {
-                            $valueArray = array('');
-                        }
-                    }
+                elseif (isset($element['combined'])) { // STARTING combination of
+                    // Start of a row that combines multiple fields
 
-                    // Mandatory no longer based on XSD but taken from formelements.xml
-                    $mandatory = false;
-                    if(isset($element['mandatory']) AND strtolower($element['mandatory'])=='true') {
-                        $mandatory = true;
-                    }
+                    $this->addCombinedElement($config, $groupName, $key, $element, $formData, $xsdElements);
 
-                    $multipleAllowed = false;
-                    if($xsdElements[$key]['maxOccurs']!='1') {
-                        $multipleAllowed = true;
-                    }
-
-                    if(!$multipleAllowed) {
-                        if(count($valueArray)>1) {
-                            return false;
-                        }
-                    }
-
-                    foreach($valueArray as $keyValue) { // create an element for each of the values
-                        $elementOptions = array(); // holds the options
-                        $elementMaxLength = 0;
-                        // Determine restricitions/requirements for this
-                        switch ($xsdElements[$key]['type']){
-                            case 'xs:date':
-                                $type = 'date';
-                                break;
-                            case 'stringURI':
-                            case 'stringNormal':
-                                $type = 'text';
-                                $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
-                                break;
-                            case 'xs:integer':
-                                $type = 'numeric';
-                                $elementMaxLength = 10;  // arbitrary length for this moment
-                                break;
-                            case 'xs:anyURI':
-                                $type = 'text';
-                                $elementMaxLength = 1024;
-                                break;
-                            case 'stringLong':
-                                $type = 'textarea';
-                                $elementMaxLength = $xsdElements[$key]['simpleTypeData']['maxLength'];
-                                break;
-                            case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
-                                /*
-                                case 'optionsDatasetType':
-                                case 'optionsDatasetAccess':
-                                case 'optionsYesNo':
-                                case 'optionsOther':
-                                case 'optionsPersonalPersistentIdentifierType':
-                                */
-                            case (substr($xsdElements[$key]['type'], 0, 7) == 'options'):
-                                $elementOptions = $xsdElements[$key]['simpleTypeData']['options'];
-                                $type = 'select';
-                                break;
-                        }
-
-
-                        //'select' has options
-                        // 'edit/multiline' has length
-                        // 'date' has nothing extra
-                        // Handled separately as these specifics might grow.
-                        $elementSpecifics = array(); // holds all element specific info
-                        if ($type == 'text' OR $type == 'textarea' OR $type=='numeric') {
-                            $elementSpecifics = array('maxLength' => $elementMaxLength);
-                        } elseif ($type == 'select') {
-                            $elementSpecifics = array('options' => $elementOptions);
-                        }
-
-                        // frontend value is the value that will be presented in the data field
-                        // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
-                        $frontendValue = (isset($element['default']) AND $writeMode) ? $element['default'] : null;
-
-                        if($config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') { // the value in the file supersedes default
-                            $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');
-                            $frontendValue = $keyValue;
-                        }
-
-                        $presentationElements[$groupName][] = array(
-                            'key' => $key,
-                            'value' => $frontendValue,
-                            'label' => $element['label'],
-                            'helpText' => $element['help'],
-                            'type' => $type,
-                            'mandatory' => $mandatory,
-                            'multipleAllowed' => $multipleAllowed,
-                            'elementSpecifics' => $elementSpecifics,
-                            //'messagesForUser' => $messagesForUser  //possibly for future use
-                        );
-                    }
                 }
                 elseif (!isset($element['label'])) { // STEPPING INTO DEEPER LEVELS -- we step into a hierarchy => SUPPROPERTIES
+
                     $structureValues = $formData[$key];
 
                     if (!is_array($structureValues)) {
@@ -586,120 +495,14 @@ class Metadata_form_model extends CI_Model {
                             $structValueArray = array('');
                         }
                     }
-
-                    $counterForFrontEnd = 0; // to be able to distinghuis structures and add to
-                    foreach ($structValueArray as $structValues) {
-                        $fqElementID .= $key;
-
-                        // MAIN LOOP TO SETUP A COMPLETE SUBPROPERTY STRUCTURE
-                        foreach ($element as $id => $em) {
-                            // $elements now holds an array of formelements - these are subproperties
-
-                            $subKey = $key . '_' . $id;
-
-                            if (isset($em['label'])) {   // TOP ELEMENT OF A STRUCT
-                                $subKeyValue = $structValues[$subKey];
-
-                                // Use toplevel here as that defines multiplicity for a structure (is in fact not an element
-                                $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
-
-                                if (!$multipleAllowed) {
-//                                    if(count($structValueArray)>1) {
-//                                        return false;
-//                                    }
-                                }
-
-                                // frontend value is the value that will be presented in the data field
-                                // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
-                                $frontendValue = (isset($em['default']) AND $writeMode) ? $em['default'] : null;
-
-                                if($config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') { // the value in the file supersedes default @todo!!!????????? hoe zit dit??
-//                            $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');  // no purpose as it is superseded by next line
-                                    $frontendValue = $subKeyValue;
-                                }
-
-                                $subPropArray = array(
-                                    'subPropertiesRole' => 'subPropertyStartStructure',
-                                    'subPropertiesBase' => $fqElementID,
-                                    'subPropertiesStructID' => $multipleAllowed ? $counterForFrontEnd : -1,//$fqElementID . '-0', // volgnummer -> moet nog dyndamisch worden
-                                );
-                                $presentationElements[$groupName][] =
-                                    $this->newPresentationElement($xsdElements, $em, $subKey, $key . '[' . $id . ']',$frontendValue, $multipleAllowed, $subPropArray);
-
-/*
-                                $presentationElements[$groupName][] = array(
-                                    'key' => $key . '[' . $id . ']',
-                                    'subPropertiesRole' => 'subPropertyStartStructure',
-                                    'subPropertiesBase' => $fqElementID,
-                                    'subPropertiesStructID' => $multipleAllowed ? $counterForFrontEnd : -1,//$fqElementID . '-0', // volgnummer -> moet nog dyndamisch worden
-                                    'value' => $frontendValue,
-                                    'label' => $em['label'],
-                                    'helpText' => $em['help'],
-                                    'type' => $type,
-                                    'mandatory' => $mandatory,
-                                    'multipleAllowed' => $multipleAllowed,
-                                    'elementSpecifics' => $elementSpecifics,
-                                );
-*/
-                            } else { // STEP THROUGH EACH SUB PROPERTY
-                                foreach ($em as $propertyKey => $propertyElement) {
-
-                                    //$frontendValue = $formData[$fqElementID . '_' . $id . '_' . $propertyKey];
-                                    $subKey = $key . '_' . $id . '_' . $propertyKey;
-                                    $subKeyValue = $structValues[$subKey];
-
-
-                                    $multipleAllowed = false;
-                                    if ($xsdElements[$key]['maxOccurs'] != '1') {  //look at top of structure
-                                        $multipleAllowed = true;
-                                    }
-
-                                    // frontend value is the value that will be presented in the data field
-                                    // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
-                                    $frontendValue = (isset($propertyElement['default']) AND $writeMode) ? $propertyElement['default'] : null;
-
-                                    // @todo - hoe zit dit precies met die $config
-                                    if(true) { //$config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') { // the value in the file supersedes default @todo!!!????????? hoe zit dit??
-//                            $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');  // no purpose as it is superseded by next line
-                                        $frontendValue = $subKeyValue;
-                                    }
-
-
-                                    $subPropArray = array(
-                                        'subPropertiesRole' => 'subProperty',
-                                        'subPropertiesBase' => $key,
-                                        'subPropertiesStructID' => $multipleAllowed ? $counterForFrontEnd : -1,//$fqElementID . '-0', //volgnummer -> moet nog dynamisch worden
-                                    );
-                                    $presentationElements[$groupName][] =
-                                        $this->newPresentationElement($xsdElements, $propertyElement, $subKey,
-                                            $key . '[' . $id . '][' . $propertyKey . ']', $frontendValue, $multipleAllowed, $subPropArray);
-
-/*
-                                    $presentationElements[$groupName][] = array(
-                                        'key' => $key . '[' . $id . '][' . $propertyKey . ']',
-                                        'subPropertiesRole' => 'subProperty',
-                                        'subPropertiesBase' => $key,
-                                        'subPropertiesStructID' => $multipleAllowed ? $counterForFrontEnd : -1,//$fqElementID . '-0', //volgnummer -> moet nog dynamisch worden
-                                        'value' => $frontendValue,
-                                        'label' => $propertyElement['label'],
-                                        'helpText' => $propertyElement['help'],
-                                        'type' => $type,
-                                        'mandatory' => $mandatory,
-                                        'multipleAllowed' => false, // never multipleAllowed for a supproperty at this moment
-                                        'elementSpecifics' => $elementSpecifics,
-                                    );
-*/
-                                }
-                                $fqElementID = '';
-                            }
-                        }
-                        $counterForFrontEnd++;
-                    }
+                    $this->addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements);
                 }
+
                 else // This is the first level only!
                 {
                     $value = isset($formData[$key]) ? $formData[$key] : '';
 
+                    // turn it into an array as multiple entries must be presented n times with same element properties but different value
                     $valueArray = $this->getElementValueAsArray($value);
 
                     $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
@@ -713,25 +516,304 @@ class Metadata_form_model extends CI_Model {
                     /// Step through all present values (if multiple and create element for each of them)
                     foreach ($valueArray as $keyValue)
                     {
-                        // frontend value is the value that will be presented in the data field
-                        // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
-                        $frontendValue = (isset($element['default']) AND $writeMode) ? $element['default'] : null;
-
-                        // @todo - hoe zit dit precies met die $config
-                        if(true) { //$config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') { // the value in the file supersedes default @todo!!!????????? hoe zit dit??
-//                            $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');  // no purpose as it is superseded by next line
-                            $frontendValue = $keyValue;
-                        }
-
-                        $presentationElements[$groupName][] =
-                            $this->newPresentationElement($xsdElements, $element, $key, $key, $frontendValue, $multipleAllowed);
+                        $this->presentationElements[$groupName][] =
+                            $this->newWayPresentationElement($config, $xsdElements[$key], $element, $key, $keyValue);
                     }
                 }
             }
         }
 
-        return $presentationElements;
+        echo '<pre>';
+        print_r($this->presentationElements);
+        echo '</pre>';
+        //exit;
+
+        return $this->presentationElements;
     }
+
+
+    // Combination of Lead & subproperties => a combined field can also be a subproperty
+    public function addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements)
+    {
+        $writeMode = true;
+        if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
+            $writeMode = false; // Distinnction made as readers, in case of no xml-file being present, should  NOT get default values
+        }
+
+        $counterForFrontEnd = 0; // to be able to distinghuis structures and add to
+        foreach ($structValueArray as $structValues) {
+
+            // MAIN LOOP TO SETUP A COMPLETE SUBPROPERTY STRUCTURE
+            foreach ($element as $id => $em) {
+                // $elements now holds an array of formelements - these are subproperties
+
+                $subKey = $key . '_' . $id;
+
+                if (isset($em['label'])) {   // TOP ELEMENT OF A STRUCT
+                    $subKeyValue = $structValues[$subKey];
+
+                    // Use toplevel here as that defines multiplicity for a structure (is in fact not an element
+                    $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
+
+                    if (!$multipleAllowed) {
+//                                    if(count($structValueArray)>1) {
+//                                        return false;
+//                                    }
+                    }
+
+                    // frontend value is the value that will be presented in the data field
+                    // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
+                    $frontendValue = (isset($em['default']) AND $writeMode) ? $em['default'] : null;
+
+                    if($config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') { // the value in the file supersedes default @todo!!!????????? hoe zit dit??
+                        $frontendValue = $subKeyValue;
+                    }
+
+                    $subPropArray = array(
+                        'subPropertiesRole' => 'subPropertyStartStructure',
+                        'subPropertiesBase' => $key,
+                        'subPropertiesStructID' => $multipleAllowed ? $counterForFrontEnd : -1
+                    );
+
+                    //  Add start tag
+                    $this->presentationElements[$groupName][] =
+                        $this->newWayPresentationElement(
+                            $config, array('type'=>'structSubPropertiesOpen'), $em, $key . '[' . $id . ']','', $multipleAllowed, $subPropArray);
+
+                    // The actual element
+//                    $this->presentationElements[$groupName][] =
+//                        $this->newPresentationElement($xsdElements, $em, $subKey, $key . '[' . $id . ']',$frontendValue, $multipleAllowed, $subPropArray);
+
+                    $this->presentationElements[$groupName][] =
+                        $this->newWayPresentationElement(
+                                $config, $xsdElements[$subKey], $em, $key . '[' . $id . ']',$frontendValue, $multipleAllowed, $subPropArray);
+                }
+                else { // STEP THROUGH EACH SUB PROPERTY
+                    foreach ($em as $propertyKey => $propertyElement) {
+
+                        $subKey = $key . '_' . $id . '_' . $propertyKey;
+                        $subPropArray = array(
+                            'subPropertiesRole' => 'subProperty',
+                            'subPropertiesBase' => $key,
+                            'subPropertiesStructID' => $multipleAllowed ? $counterForFrontEnd : -1
+                        );
+
+                        if (isset($propertyElement['combined'])) {
+
+                            //$this->addCombinedElement($config, $groupName, $key, $element, $formData, $xsdElements);
+                            // todo:: check value array -> is this what is required here???
+                            $this->addCombinedElement($config, $groupName, $subKey, $propertyElement, $structValueArray, $xsdElements, $subPropArray);
+                        }
+                        else {
+
+                            $subKeyValue = $structValues[$subKey];
+
+                            $multipleAllowed = false;
+                            if ($xsdElements[$key]['maxOccurs'] != '1') {  //look at top of structure
+                                $multipleAllowed = true;
+                            }
+
+                            // frontend value is the value that will be presented in the data field
+                            // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
+                            $frontendValue = (isset($propertyElement['default']) AND $writeMode) ? $propertyElement['default'] : null;
+
+                            // @todo - hoe zit dit precies met die $config
+                            if (true) { //$config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') { // the value in the file supersedes default @todo!!!????????? hoe zit dit??
+//                            $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');  // no purpose as it is superseded by next line
+                                $frontendValue = $subKeyValue;
+                            }
+
+//                            $subPropArray = array(
+//                                'subPropertiesRole' => 'subProperty',
+//                                'subPropertiesBase' => $key,
+//                                'subPropertiesStructID' => $multipleAllowed ? $counterForFrontEnd : -1
+//                            );
+//                            $this->presentationElements[$groupName][] =
+//                                $this->newPresentationElement($xsdElements, $propertyElement, $subKey,
+//                                    $key . '[' . $id . '][' . $propertyKey . ']', $frontendValue, $multipleAllowed, $subPropArray);
+//
+
+
+                            $this->presentationElements[$groupName][] =
+                                $this->newWayPresentationElement(
+                                    $config, $xsdElements[$subKey], $propertyElement, $key . '[' . $id . '][' . $propertyKey . ']',
+                                    $frontendValue, $multipleAllowed, $subPropArray);
+
+                        }
+                    }
+                }
+            }
+            // @todo:: staat dit hier goed????
+            $this->presentationElements[$groupName][] =
+                $this->newWayPresentationElement(
+                    $config, array('type'=>'structSubPropertiesClose'), $em, $key . '[' . $id . ']','', $multipleAllowed, $subPropArray);
+
+            $counterForFrontEnd++;
+        }
+    }
+
+
+
+// This fully adds an element that is a combination of all possible formelement-types
+// Can also add these as a subproperty
+
+// @todo - check for multi allowed => return false want dan is het formaat in het XML niet ok
+
+    public function addCombinedElement($config, $groupName, $key, $element,
+                                       $formData, $xsdElements, $subPropArray = array()) // presentation elements will be extended -> make it class variable
+    {
+        if (isset($xsdElements[$key]) ) {
+            if ($xsdElements[$key]['type'] == 'openTag') {
+
+                // Is single or multiple values in yoda-metadata.xml
+                // Make a numerated array for it like it would be in a multi value situation
+                if (!count($formData[$key])) {
+                    $formValues[] = $formData;
+                }
+                else {
+                    //@todo::: Chechk of het wel een mutliple field mag zijn?!
+                    $formValues = $formData[$key];
+                }
+
+                //$counter = 0;
+                // Step though all values that are within yoda-metadata.xml
+                foreach ($formValues as $arValues) { //$formData[$key]
+                    // 1) Add start tag - based upon type = openTag
+
+                    // This overall placeholder for multiple fields should indicate whether it is in its total mandatory
+                    // 1) Mandatory for vault processing
+                    // @todo:: Als er iets in het sublevel verplicht is, moet het top level ook verplicht aangeven????????????
+                    // 2) MultipleAllowed [OK]
+                    $this->presentationElements[$groupName][] =
+                        $this->newWayPresentationElement($config, array('type'=>'structCombinationOpen'), $element, $key, '', false, $subPropArray);
+
+                    // 2) step through all elements to complete the combined field
+                    foreach ($element as $id => $em) {
+                        // $elements now holds an array of formelements - these are subproperties
+
+                        $subKey = $key . '_' . $id;
+                        if( isset($xsdElements[$subKey])) {
+                            $this->presentationElements[$groupName][] =
+                                $this->newWayPresentationElement($config, $xsdElements[$subKey], $em, $key . '[' . $id .']', $arValues[$subKey], false, $subPropArray);
+                        }
+                    }
+                    // 3) Add stop tag derived from the start tag
+                    //$xsdEndTagElement = $xsdElements[$key];
+                    //$xsdEndTagElement['type'] = 'endTag';
+                    $this->presentationElements[$groupName][] =
+                        $this->newWayPresentationElement($config, array('type'=>'structCombinationClose'), $element, $key, '', false, $subPropArray);
+                }
+            }
+        }
+    }
+
+
+    // incliuding start / stop tags
+    //xsdELement => data from XSD
+    // $element => data from formelements
+    // keyId name of element in frontend
+    public function newWayPresentationElement($config, $xsdElement, $element, $keyId, $value, $overrideMultipleAllowed=false, $subpropertyInfo=array())
+    {
+        // @todo: - inefficient - will be determinded each time and element passes, b
+        $writeMode = true;
+        if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
+            $writeMode = false; // Distinnction made as readers, in case of no xml-file being present, should  NOT get default values
+        }
+
+        $frontendValue = (isset($element['default']) AND $writeMode) ? $element['default'] : null;
+
+        if($config['hasMetadataXml'] == 'true' || $config['hasMetadataXml'] == 'yes') {
+            $frontendValue = $value;
+        }
+
+        $multipleAllowed = $multipleAllowed = $this->getElementMultipleAllowed($xsdElement);
+        // Mandatory no longer based on XSD but taken from formelements.xml
+        $mandatory = false;
+        if (isset($element['mandatory']) AND strtolower($element['mandatory']) == 'true') {
+            $mandatory = true;
+        }
+
+        $elementOptions = array(); // holds the options
+        $elementMaxLength = 0;
+        // Determine restricitions/requirements for this
+        switch ($xsdElement['type']){
+            case 'structCombinationOpen':
+                $type = 'structCombinationOpen'; // Start combination of elements in 1 element so frontend knows that several passing items are brought to 1 element
+                break;
+            case 'structCombinationClose':
+                $type = 'structCombinationClose'; // combination of elements in 1 element so frontend knows that several passing items are brought to 1 element is to an end
+                break;
+            case 'structSubPropertiesOpen':
+                $type = 'structSubPropertiesOpen';
+                break;
+            case 'structSubPropertiesClose':
+                $type = 'structSubPropertiesClose';
+                break;
+            case 'xs:date':
+                $type = 'date';
+                break;
+            case 'stringURI':
+            case 'stringNormal':
+                $type = 'text';
+                $elementMaxLength = $xsdElement['simpleTypeData']['maxLength'];
+                break;
+            case 'xs:integer':
+                $type = 'numeric';
+                $elementMaxLength = 10;  // arbitrary length for this moment
+                break;
+            case 'xs:anyURI':
+                $type = 'text';
+                $elementMaxLength = 1024;
+                break;
+            case 'stringLong':
+                $type = 'textarea';
+                $elementMaxLength = $xsdElement['simpleTypeData']['maxLength'];
+                break;
+            case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
+                /*
+                case 'optionsDatasetType':
+                case 'optionsDatasetAccess':
+                case 'optionsYesNo':
+                case 'optionsOther':
+                case 'optionsPersonalPersistentIdentifierType':
+                */
+            case (substr($xsdElement['type'], 0, 7) == 'options'):
+                $elementOptions = $xsdElement['simpleTypeData']['options'];
+                $type = 'select';
+                break;
+        }
+
+        //'select' has options
+        // 'edit/multiline' has length
+        // 'date' has nothing extra
+        // Handled separately as these specifics might grow.
+        $elementSpecifics = array(); // holds all element specific info
+        if ($type == 'text' OR $type == 'textarea' OR $type=='numeric') {
+            $elementSpecifics = array('maxLength' => $elementMaxLength);
+        } elseif ($type == 'select') {
+            $elementSpecifics = array('options' => $elementOptions);
+        }
+
+        $elementData = array(
+            'key' => $keyId, // Key to be used by frontend
+            'value' => $frontendValue,
+            'label' => $element['label'],
+            'helpText' => $element['help'],
+            'type' => $type,
+            'mandatory' => $mandatory,
+            'multipleAllowed' => $multipleAllowed,
+            'elementSpecifics' => $elementSpecifics,
+        );
+
+        if (count($subpropertyInfo)) {
+            foreach ($subpropertyInfo as $key=>$value) {
+                $elementData[$key] = $value;
+            }
+        }
+        return $elementData;
+    }
+
+
 
     /**
      * @param $xsdElements
@@ -746,7 +828,7 @@ class Metadata_form_model extends CI_Model {
      * construct an array with all required data for frontend presentation in the metadataform
 
      */
-    public function newPresentationElement($xsdElements, $element, $xsdKey, $keyId, $frontendValue, $multipleAllowed, $subpropertyInfo=array())
+    public function obsolete_newPresentationElement($xsdElements, $element, $xsdKey, $keyId, $frontendValue, $multipleAllowed, $subpropertyInfo=array())
     {
         // Mandatory no longer based on XSD but taken from formelements.xml
         $mandatory = false;
@@ -758,6 +840,12 @@ class Metadata_form_model extends CI_Model {
         $elementMaxLength = 0;
         // Determine restricitions/requirements for this
         switch ($xsdElements[$xsdKey]['type']){
+            case 'openTag':
+                $type = 'tagstart'; // Start combination of elements in 1 element so frontend knows that several passing items are brought to 1 element
+                break;
+            case 'endTag':
+                $type = 'tagend'; // combination of elements in 1 element so frontend knows that several passing items are brought to 1 element is to an end
+                break;
             case 'xs:date':
                 $type = 'date';
                 break;
