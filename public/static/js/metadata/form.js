@@ -75,16 +75,12 @@ $(function () {
 
     // Supproperty handling
     $(document).on('click', ".subproperties-toggle", function () {
-        var subPropertiesBase = $(this).attr('data-subpropertyBase');
-        var structureId = $(this).data('structure-id');
         if ($(this).hasClass('glyphicon-chevron-down')) {
             $(this).removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-right');
-            $('.rowSubPropertyBase-' + subPropertiesBase + '-' + structureId).addClass('hide');
-        }
-        else {
+            $(this).parents('.form-group').next().toggle();
+        } else {
             $(this).removeClass('glyphicon-chevron-right').addClass('glyphicon-chevron-down');
-            $(this).parent().parent().removeClass('hide');
-            $('.rowSubPropertyBase-'+ subPropertiesBase + '-' + structureId).removeClass('hide');
+            $(this).parents('.form-group').next().toggle();
         }
     });
 });

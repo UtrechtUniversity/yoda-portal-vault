@@ -1,4 +1,4 @@
-<div class="form-group subproperty rowSubPropertyBase-<?php echo $e->subPropertiesBase;?>-<?php echo $e->subPropertiesStructID; ?>" xmlns="http://www.w3.org/1999/html">
+<div class="form-group subproperty" xmlns="http://www.w3.org/1999/html">
     <label class="col-sm-2 control-label">
     </label>
 

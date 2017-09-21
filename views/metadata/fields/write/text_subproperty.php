@@ -1,4 +1,4 @@
-<div class="form-group subproperty rowSubPropertyBase-<?php echo $e->subPropertiesBase;?>-<?php echo $e->subPropertiesStructID; ?>" xmlns="http://www.w3.org/1999/html">
+<div class="form-group subproperty" xmlns="http://www.w3.org/1999/html">
     <label class="col-sm-2 control-label">
     </label>
 
@@ -15,11 +15,7 @@
                 <input type="text"
                     <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
                        class="form-control"
-                            <?php if ($e->subPropertiesStructID>-1) { ?>
-                             name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
-                            <?php } else { ?>
-                                name="<?php echo $e->key; ?>"
-                            <?php } ?>
+                       name="<?php echo $e->key; ?>"
                        value="<?php echo htmlentities($e->value); ?>">
             </div>
         </div>
