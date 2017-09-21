@@ -418,11 +418,11 @@ class Metadata_form_model extends CI_Model {
         // load xsd and get all the info regarding restrictions
         $xsdElements = $this->loadXsd($rodsaccount, $config['xsdPath']); // based on element names
 
-        echo $config['xsdPath'];
-        echo '<pre>';
-        print_r($xsdElements);
-        echo '</pre>';
-        echo '<hr><hr>';
+//        echo $config['xsdPath'];
+//        echo '<pre>';
+//        print_r($xsdElements);
+//        echo '</pre>';
+//        echo '<hr><hr>';
 
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
@@ -484,9 +484,9 @@ class Metadata_form_model extends CI_Model {
                 }
                 elseif (isset($element['combined'])) { // STARTING combination of
                     // Start of a row that combines multiple fields
-
-                    $this->addCombinedElement($config, $groupName, $key, $element, $formData, $xsdElements);
-
+                    if (!$this->addCombinedElement($config, $groupName, $key, $element, $formData, $xsdElements)) {
+                        return false;
+                    }
                 }
                 elseif (!isset($element['label'])) { // STEPPING INTO DEEPER LEVELS -- we step into a hierarchy => SUPPROPERTIES
 
@@ -501,7 +501,9 @@ class Metadata_form_model extends CI_Model {
                             $structValueArray = array('');
                         }
                     }
-                    $this->addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements);
+                    if (!$this->addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements)) {
+                        return false;
+                    }
                 }
 
                 else // This is the first level only!
@@ -529,10 +531,10 @@ class Metadata_form_model extends CI_Model {
             }
         }
 
-        echo '<pre>';
-        print_r($this->presentationElements);
-        echo '</pre>';
-        //exit;
+//        echo '<pre>';
+//        print_r($this->presentationElements);
+//        echo '</pre>';
+//        exit;
 
         return $this->presentationElements;
     }
@@ -611,32 +613,20 @@ class Metadata_form_model extends CI_Model {
                         );
 
                         if (isset($propertyElement['combined'])) {
-
-//                            echo 'key: ' . $key;
-//                            echo '<br>';
-//                            echo 'id: ' . $id;
-//                            echo '<br>';
-//                            echo 'propertyKey' . $propertyKey;
-                            //exit;
                             //$this->addCombinedElement($config, $groupName, $key, $element, $formData, $xsdElements);
                             // todo:: check value array -> is this what is required here???
 
                             $offsetKeyForFrontEnd = $key . $keyCounterSuffix . '[' . $id . ']' . '[' . $propertyKey . ']';
 
-                            $this->addCombinedElement($config, $groupName, $subKey, $propertyElement, $structValueArray, $xsdElements,
-                                $offsetKeyForFrontEnd, $subPropArray);
+                            // trap incorrect formatting
+                            if (!$this->addCombinedElement($config, $groupName, $subKey, $propertyElement, $structValueArray, $xsdElements,
+                                $offsetKeyForFrontEnd, $subPropArray)) {
+                                return false;
+                            }
                         }
                         else {
 
                             $subKeyValue = $structValues[$subKey];
-
-                            echo '<hr>';
-                            echo 'key: ' . $key;
-                            echo '<br>';
-                            echo 'subKey: ' . $subKey;
-                            echo '<br>';
-                            print_r($xsdElements[$subKey]);
-                            echo '<hr>';
 
                             $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$subKey]);
 
@@ -687,6 +677,7 @@ class Metadata_form_model extends CI_Model {
 
             $elementCounterForFrontEnd++; // new element (if still present in array)
         }
+        return true;
     }
 
 
@@ -694,22 +685,28 @@ class Metadata_form_model extends CI_Model {
 // This fully adds an element that is a combination of all possible formelement-types
 // Can also add these as a subproperty
 
-// @todo - check for multi allowed => return false want dan is het formaat in het XML niet ok
-
 // There are two keys
 // one is directed at the frontend, to be used for an element's name.
 // the other is used as an index at the internal arrays
 
-
+// if counts are wrong in single element situation, return FALSE.
+// Else return TRUE
     public function addCombinedElement($config, $groupName, $key, $element,
                                        $formData, $xsdElements, $elementOffsetFrontEnd='', $subPropArray = array()) // presentation elements will be extended -> make it class variable
     {
         if (isset($xsdElements[$key]) ) {
 
-            echo $key;
-            echo '<br>';
-            echo $elementOffsetFrontEnd;
-//            exit;
+//            echo '<br> COMBINED ELEMENT';
+//            echo 'Key: ' . $key;
+//            echo '<br>';
+//            echo 'Offset->' . $elementOffsetFrontEnd; // is de NIET ge-arrayriseerde zonder de key
+            //                                          -> Die Key wordt er later achter geplakt, al dan niet met [teller]
+
+            //            exit;
+
+//            echo '<pre>';
+//            print_r($formData);
+//            echo '</pre>';
 
             if ($xsdElements[$key]['type'] == 'openTag') {
 
@@ -723,36 +720,84 @@ class Metadata_form_model extends CI_Model {
                     $formValues = $formData[$key];
                 }
 
-                //$counter = 0;
+                if ($elementOffsetFrontEnd) { // is vanuit een subproperty siutatie
+                    $baseCombiElementOffsetFrontEnd = $elementOffsetFrontEnd; // . "[$key]";
+                }
+                else {
+                    $baseCombiElementOffsetFrontEnd = $key;
+                }
+
+//                echo '<hr>Key: ' . $key . '<hr>';
+
+                $combiElementMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
+                if ($key=='Person' OR $key=='Related_Datapackage_Properties_ORCID_Combination') {
+//                    echo 'multiple Allowed' . $combiElementMultipleAllowed;
+//                    echo 'Present' . count($formValues);
+//                    echo '<pre>';
+//                    print_r($formValues);
+//                    echo '</pre>';
+//                    exit;
+                }
+
+                // multiple values present where only one value is allowed.
+                // Incorrect xml format
+                if (!$combiElementMultipleAllowed AND count($formValues)>1) {
+                    return false;
+                }
+
+
                 // Step though all values that are within yoda-metadata.xml
+                $combiCounter = 0; // To create unique names in array form for frontend
+
                 foreach ($formValues as $arValues) { //$formData[$key]
                     // 1) Add start tag - based upon type = openTag
+
+                    $combiElementName =  $baseCombiElementOffsetFrontEnd;
+                    if ($combiElementMultipleAllowed) {
+                        $combiElementName .= "[$combiCounter]";
+                    }
 
                     // This overall placeholder for multiple fields should indicate whether it is in its total mandatory
                     // 1) Mandatory for vault processing
                     // @todo:: Als er iets in het sublevel verplicht is, moet het top level ook verplicht aangeven????????????
                     // 2) MultipleAllowed [OK]
                     $this->presentationElements[$groupName][] =
-                        $this->newWayPresentationElement($config, array('type'=>'structCombinationOpen'), $element, $elementOffsetFrontEnd, '', false, $subPropArray);
+                        $this->newWayPresentationElement($config, array('type'=>'structCombinationOpen'), $element, $combiElementName, '', false, $subPropArray);
 
                     // 2) step through all elements to complete the combined field
                     foreach ($element as $id => $em) {
                         // $elements now holds an array of formelements - these are subproperties
-
                         $subKey = $key . '_' . $id;
-                        if( isset($xsdElements[$subKey])) {
-                            $this->presentationElements[$groupName][] =
-                                $this->newWayPresentationElement($config, $xsdElements[$subKey], $em, $elementOffsetFrontEnd . '[' . $id .']', $arValues[$subKey], false, $subPropArray);
+
+                        // @todo: een element kan ook weer een multiple variabele zijn !!!!!!!!!!!!!!!!! nog meenemen
+                        $subCombiCounter = 0;
+                        // => dus hier lopen if so en keyname for front end aanpassen
+                        $subCombiMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$subKey]);
+
+                        $allSubCombiValues = array();
+                        $allSubCombiValues[] = $arValues[$subKey];
+
+                        foreach ($allSubCombiValues as $subCombiValue) {
+                            if (isset($xsdElements[$subKey])) {
+                                $this->presentationElements[$groupName][] =
+                                    $this->newWayPresentationElement($config, $xsdElements[$subKey], $em,
+                                        $combiElementName . '[' . $id . ']' . ($subCombiMultipleAllowed ? '[]' : ''),
+                                        $subCombiValue, false, $subPropArray);
+                                $subCombiCounter++;
+                            }
                         }
                     }
                     // 3) Add stop tag derived from the start tag
                     //$xsdEndTagElement = $xsdElements[$key];
                     //$xsdEndTagElement['type'] = 'endTag';
                     $this->presentationElements[$groupName][] =
-                        $this->newWayPresentationElement($config, array('type'=>'structCombinationClose'), $element, $elementOffsetFrontEnd, '', false, $subPropArray);
+                        $this->newWayPresentationElement($config, array('type'=>'structCombinationClose'), $element, $combiElementName, '', false, $subPropArray);
+
+                    $combiCounter++;
                 }
             }
         }
+        return true;
     }
 
 
@@ -1217,6 +1262,12 @@ class Metadata_form_model extends CI_Model {
                 }
             }
         }
+
+//        echo '<pre>';
+//            print_r($newFormData);
+//        echo '</pre>';
+        //exit;
+
         return $newFormData;
     }
 
