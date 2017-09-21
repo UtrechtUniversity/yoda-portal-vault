@@ -418,12 +418,6 @@ class Metadata_form_model extends CI_Model {
         // load xsd and get all the info regarding restrictions
         $xsdElements = $this->loadXsd($rodsaccount, $config['xsdPath']); // based on element names
 
-//        echo $config['xsdPath'];
-//        echo '<pre>';
-//        print_r($xsdElements);
-//        echo '</pre>';
-//        echo '<hr><hr>';
-
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
             $writeMode = false; // Distinnction made as readers, in case of no xml-file being present, should  NOT get default values
@@ -445,8 +439,6 @@ class Metadata_form_model extends CI_Model {
         if ($formGroupedElements === false) {
             return false;
         }
-
-        //$presentationElements = array();
 
         $groupName = 'undefined';
 
@@ -515,26 +507,25 @@ class Metadata_form_model extends CI_Model {
 
                     $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
 
+                    $multiPostFix = ''; // Addition to element name when mupliple instances can occur
                     if (!$multipleAllowed) {
                         if (count($valueArray) > 1) {
                             return false; // break it off as this does not comply with xml
                         }
+                    }
+                    else {
+                        $multiPostFix = '[]'; // Create array as variable can have multiple values, hier mag [] - volgorde is niet belangrijk
                     }
 
                     /// Step through all present values (if multiple and create element for each of them)
                     foreach ($valueArray as $keyValue)
                     {
                         $this->presentationElements[$groupName][] =
-                            $this->newWayPresentationElement($config, $xsdElements[$key], $element, $key, $keyValue);
+                            $this->newWayPresentationElement($config, $xsdElements[$key], $element, $key . $multiPostFix, $keyValue);
                     }
                 }
             }
         }
-
-//        echo '<pre>';
-//        print_r($this->presentationElements);
-//        echo '</pre>';
-//        exit;
 
         return $this->presentationElements;
     }
@@ -630,12 +621,6 @@ class Metadata_form_model extends CI_Model {
 
                             $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$subKey]);
 
-
-//                            $multipleAllowed = false;
-//                            if ($xsdElements[$key]['maxOccurs'] != '1') {  //look at top of structure
-//                                $multipleAllowed = true;
-//                            }
-
                             // frontend value is the value that will be presented in the data field
                             // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
                             $frontendValue = (isset($propertyElement['default']) AND $writeMode) ? $propertyElement['default'] : null;
@@ -705,20 +690,39 @@ class Metadata_form_model extends CI_Model {
             //            exit;
 
 //            echo '<pre>';
+//            echo 'KEY: ' . $key;
 //            print_r($formData);
 //            echo '</pre>';
 
             if ($xsdElements[$key]['type'] == 'openTag') {
 
-                // Is single or multiple values in yoda-metadata.xml
-                // Make a numerated array for it like it would be in a multi value situation
-                if (!count($formData[$key])) {
-                    $formValues[] = $formData;
+                if ($elementOffsetFrontEnd) { // initiated from being subproperty position
+//                    if (!count($formData[0][$key])) {
+//                        $formValues[] = $formData[0];
+//                    } else {
+//                        //@todo::: Chechk of het wel een mutliple field mag zijn?!
+//                        $formValues = $formData[0][$key];
+//                    }
+//                    echo 'hallo';
+                    $formValues = $formData; // take it over directly as it is indexed already
                 }
                 else {
-                    //@todo::: Chechk of het wel een mutliple field mag zijn?!
-                    $formValues = $formData[$key];
+                    // Is single or multiple values in yoda-metadata.xml
+                    // Make a numerated array for it like it would be in a multi value situation
+                    if (!count($formData[$key])) {
+                        $formValues[] = $formData;
+                    } else {
+                        //@todo::: Chechk of het wel een mutliple field mag zijn?!
+                        $formValues = $formData[$key];
+                    }
                 }
+//                echo '<pre>';
+//                echo 'KEY: ' . $key;
+//                print_r($formValues);
+//                echo '</pre>';
+                //exit;
+
+
 
                 if ($elementOffsetFrontEnd) { // is vanuit een subproperty siutatie
                     $baseCombiElementOffsetFrontEnd = $elementOffsetFrontEnd; // . "[$key]";
@@ -731,10 +735,13 @@ class Metadata_form_model extends CI_Model {
 
                 $combiElementMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
                 if ($key=='Person' OR $key=='Related_Datapackage_Properties_ORCID_Combination') {
-//                    echo 'multiple Allowed' . $combiElementMultipleAllowed;
-//                    echo 'Present' . count($formValues);
+//                    echo '<br>key: ' . $key;
+//                    echo '<br>multiple Allowed: ' . $combiElementMultipleAllowed;
+//                    echo '<br>Present: ' . count($formValues);
 //                    echo '<pre>';
-//                    print_r($formValues);
+//                        print_r($formValues);
+////                        echo '<hr>';
+////                        print_r($formData);
 //                    echo '</pre>';
 //                    exit;
                 }
@@ -768,6 +775,10 @@ class Metadata_form_model extends CI_Model {
                     foreach ($element as $id => $em) {
                         // $elements now holds an array of formelements - these are subproperties
                         $subKey = $key . '_' . $id;
+
+//                        echo '<br>subKey: ' . $subKey;
+//                        echo '<br>formD: ' . $formData[0][$subKey];
+                        //print_r($arValues);
 
                         // @todo: een element kan ook weer een multiple variabele zijn !!!!!!!!!!!!!!!!! nog meenemen
                         $subCombiCounter = 0;
