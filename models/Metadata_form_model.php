@@ -526,6 +526,11 @@ class Metadata_form_model extends CI_Model {
                 }
             }
         }
+//
+//        echo '<pre>';
+//        print_r($this->presentationElements);
+//        echo '</pre>';
+//        exit;
 
         return $this->presentationElements;
     }
@@ -694,9 +699,24 @@ class Metadata_form_model extends CI_Model {
 //            print_r($formData);
 //            echo '</pre>';
 
+            if ($key=='Person' OR $key=='Related_Datapackage_Properties_ORCID_Combination') {
+//                echo '<pre>';
+//                echo $key;
+//                echo '<br>';
+//                print_r($formData);
+//
+                if($elementOffsetFrontEnd) {
+                    $formData = $formData[0];
+                }
+//
+//                print_r($formData);
+//
+//                echo '</pre>';
+            }
+
             if ($xsdElements[$key]['type'] == 'openTag') {
 
-                if ($elementOffsetFrontEnd) { // initiated from being subproperty position
+                if ($elementOffsetFrontEnd AND false) { // initiated from being subproperty position
 //                    if (!count($formData[0][$key])) {
 //                        $formValues[] = $formData[0];
 //                    } else {
@@ -734,17 +754,6 @@ class Metadata_form_model extends CI_Model {
 //                echo '<hr>Key: ' . $key . '<hr>';
 
                 $combiElementMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
-                if ($key=='Person' OR $key=='Related_Datapackage_Properties_ORCID_Combination') {
-//                    echo '<br>key: ' . $key;
-//                    echo '<br>multiple Allowed: ' . $combiElementMultipleAllowed;
-//                    echo '<br>Present: ' . count($formValues);
-//                    echo '<pre>';
-//                        print_r($formValues);
-////                        echo '<hr>';
-////                        print_r($formData);
-//                    echo '</pre>';
-//                    exit;
-                }
 
                 // multiple values present where only one value is allowed.
                 // Incorrect xml format
@@ -830,7 +839,12 @@ class Metadata_form_model extends CI_Model {
             $frontendValue = $value;
         }
 
-        $multipleAllowed = $multipleAllowed = $this->getElementMultipleAllowed($xsdElement);
+        if ($overrideMultipleAllowed) {
+            $multipleAllowed = true;
+        }
+        else {
+            $multipleAllowed = $this->getElementMultipleAllowed($xsdElement);
+        }
         // Mandatory no longer based on XSD but taken from formelements.xml
         $mandatory = false;
         if (isset($element['mandatory']) AND strtolower($element['mandatory']) == 'true') {
@@ -1264,7 +1278,18 @@ class Metadata_form_model extends CI_Model {
                                     $newFormData[$key . '_' . $key2 . '_' . $key3] = $data3;
                                 } else {
                                     foreach ($data3 as $key4 => $data4) {
-                                        $newFormData[$key . '_' . $key2 . '_' . $key3 . '_' . $key4] = $data4;
+                                        if (is_numeric($key4)) { // is array enumeration -> add it like an array for handling purposes in the layers using this data
+                                            $arTemp = array();
+                                            foreach($data4 as $tag=>$tagVal) {
+                                                $arTemp[$key . '_' . $key2 . '_' . $key3 . '_' . $tag] = $tagVal;
+                                            }
+                                            //print_r($data4);
+                                            //exit;
+                                            $newFormData[$key . '_' . $key2 . '_' . $key3][$key4] = $arTemp;
+                                        }
+                                        else {
+                                            $newFormData[$key . '_' . $key2 . '_' . $key3 . '_' . $key4] = $data4;
+                                        }
                                     }
                                 }
                             }
@@ -1273,11 +1298,11 @@ class Metadata_form_model extends CI_Model {
                 }
             }
         }
-
+//
 //        echo '<pre>';
 //            print_r($newFormData);
 //        echo '</pre>';
-        //exit;
+//        exit;
 
         return $newFormData;
     }
