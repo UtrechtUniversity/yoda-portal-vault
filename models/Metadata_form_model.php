@@ -446,7 +446,6 @@ class Metadata_form_model extends CI_Model {
                         foreach ($temp as $elementInfo) { // step through each instance of each element
 
                             $xml_item = $xml->createElement($elementName); // base element
-                            //$xml_item->appendChild($xml->createTextNode($val));
                             $metaStructureXML = $this->xmlMetaStructure($xml, $elementInfo, $xml_item);
                             // Only add to actual structure if
                             if ($metaStructureXML['anyDataPresent']  ) {
@@ -526,7 +525,7 @@ class Metadata_form_model extends CI_Model {
     }
 
 
-    //
+    //$topLevelName - for deletion purpose (Sub info can always be deleted (i.e. not added)
     public function xmlMetaStructure ($xmlMain, $arMetadata, $xmlParentElement, $anyDataPresent = false)
     {
         $arrayMeta = array();
@@ -582,50 +581,13 @@ class Metadata_form_model extends CI_Model {
      */
     public function processPost($rodsaccount, $config) {
 
-//         $allFormMetadata = $this->processPostedData($rodsaccount, $config['xsdPath']);
-//
-//        exit;
-
-//         $allFormMetadata = $this->reorganisePostedData($rodsaccount, $config['xsdPath']);
-//         exit;
-
         $allFormMetadata = $this->CI->input->post();
 
         if (isset($allFormMetadata['vault_submission'])) { // clean up: this is extra input in the posted data that should not be handled as being metadata
             unset($allFormMetadata['vault_submission']);
         }
 
-
-//        echo '<pre>';
-//        print_r($arrayPost);
-//        echo '</pre>';
-
-//        $allFormMetadata = array(
-//            'Title' => array(0=>$arrayPost['Title'], 2=>'BLABLA'),
-//            'Creator' => array(0 => $arrayPost['Creator'],
-//                1=> $arrayPost['Creator']),
-//            //'Title' => array(0=>$arrayPost['Title'], 2=>'BLABLA'),
-//             'Person' => array(0=>$arrayPost['Person'], 1=>$arrayPost['Person']),
-//            //'Description' => array( 0=>$arrayPost['Description'], 1=>'asd' ),
-//            'Discipline' => array(0 => 'hallo',
-//                1=>'bla'),
-//            //'Person' => array( 0 => $arrayPost['Person'],
-//            //                1 => $arrayPost['Person']),
-//            'Related_Datapackage' =>  $arrayPost['Related_Datapackage'],
-//        );
-
-
-
-//        echo '<pre>';
-//        print_r($allFormMetadata);
-//        echo '</pre>';
-
-//        $allFormMetadata = $arrayPost;
-
         $xmlString = $this->metadataToXmlString($allFormMetadata, $rodsaccount, $config);
-
-        echo $xmlString;
-        exit;
 
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
@@ -875,12 +837,25 @@ class Metadata_form_model extends CI_Model {
                             if($multipleAllowed) {
                                 $multiPostFix = '[]'; // Create array as variable can have multiple values, hier mag [] - volgorde is niet belangrijk
                             }
-                            $this->presentationElements[$groupName][] =
-                                $this->newWayPresentationElement(
-                                    $config, $xsdElements[$subKey], $propertyElement,
-                                    $key . $keyCounterSuffix . '[' . $id . '][' . $propertyKey . ']' . $multiPostFix,
-                                    $frontendValue, $multipleAllowed, $subPropArray);
 
+                            // frontend value can be an array - so multiple fields
+                            if (is_array($frontendValue)) {
+                                foreach($frontendValue as $fek=>$fev) {
+                                    $this->presentationElements[$groupName][] =
+                                        $this->newWayPresentationElement(
+                                            $config, $xsdElements[$subKey], $propertyElement,
+                                            $key . $keyCounterSuffix . '[' . $id . '][' . $propertyKey . ']' . $multiPostFix,
+                                            $fev, $multipleAllowed, $subPropArray);
+                                }
+
+                            }
+                            else {
+                                $this->presentationElements[$groupName][] =
+                                    $this->newWayPresentationElement(
+                                        $config, $xsdElements[$subKey], $propertyElement,
+                                        $key . $keyCounterSuffix . '[' . $id . '][' . $propertyKey . ']' . $multiPostFix,
+                                        $frontendValue, $multipleAllowed, $subPropArray);
+                            }
                         }
                     }
                 }
@@ -1494,6 +1469,7 @@ class Metadata_form_model extends CI_Model {
                                     }
                                 }
                             }
+
                             // Put array of subproperties under common key for later purposes
                             $newFormData[$key][] = $subPropertiesArray;
                         }
@@ -1502,15 +1478,21 @@ class Metadata_form_model extends CI_Model {
                                 if (!is_array($data3)) {
                                     $newFormData[$key . '_' . $key2 . '_' . $key3] = $data3;
                                 } else {
+
                                     foreach ($data3 as $key4 => $data4) {
                                         if (is_numeric($key4)) { // is array enumeration -> add it like an array for handling purposes in the layers using this data
-                                            $arTemp = array();
-                                            foreach($data4 as $tag=>$tagVal) {
-                                                $arTemp[$key . '_' . $key2 . '_' . $key3 . '_' . $tag] = $tagVal;
+                                            if (!is_array($data4)) { // situation of multiple subproperties
+                                                $newFormData[$key . '_' . $key2 . '_' . $key3] = $data3;
                                             }
-                                            //print_r($data4);
-                                            //exit;
-                                            $newFormData[$key . '_' . $key2 . '_' . $key3][$key4] = $arTemp;
+                                            else {
+                                                $arTemp = array();
+                                                foreach ($data4 as $tag => $tagVal) {
+                                                    $arTemp[$key . '_' . $key2 . '_' . $key3 . '_' . $tag] = $tagVal;
+                                                }
+
+                                                //exit;
+                                                $newFormData[$key . '_' . $key2 . '_' . $key3][$key4] = $arTemp;
+                                            }
                                         }
                                         else {
                                             $newFormData[$key . '_' . $key2 . '_' . $key3 . '_' . $key4] = $data4;
@@ -1524,6 +1506,9 @@ class Metadata_form_model extends CI_Model {
             }
         }
 //
+        // $newFormData['Creator_Properties_Affiliation'] = array(0=>'af1',1=>'af2');
+
+
 //        echo '<pre>';
 //            print_r($newFormData);
 //        echo '</pre>';
