@@ -187,6 +187,17 @@ class Metadata_form_model extends CI_Model {
             unset($arrayPost['vault_submission']) ;
         }
 
+
+//        $arrayPost = array(
+//            'Title' => $arrayPost['Title'],
+//            'Description' => $arrayPost['Description'],
+//            'Discipline' => array(0 => 'hallo',
+//                1=>''),
+//            'Person' => $arrayPost['Person']
+//            //'Related_Datapackage' => $arrayPost['Related_Datapackage']
+//        );
+//
+
         // First reorganise in such a way that data coming back from front end
         foreach($arrayPost as $key=>$value) {
             if (is_array($value)) { // multiplicity && subproperty handling
@@ -298,94 +309,267 @@ class Metadata_form_model extends CI_Model {
      *
      * Per form element that holds data create xml structure
      */
-    public function metadataToXmlString($allFormMetadata)
+    public function metadataToXmlString($allFormMetadata, $rodsaccount, $config)
     {
-//
-//        echo '<pre>';
-//        print_r($allFormMetadata);
-//        echo '</pre>';
-//
+        $xsdPath = $config['xsdPath'];
+        $xsdElements = $this->loadXsd($rodsaccount, $xsdPath);
+
+
         $xml = new DOMDocument( "1.0", "UTF-8" );
         $xml->formatOutput = true;
 
         $xml_metadata = $xml->createElement( "metadata" );
 
-        foreach ($allFormMetadata as $elements) {
+//        foreach ($allFormMetadata as $elements) {
 
-            foreach ($elements as $elementName=>$elementData) {
-                $xml_item = $xml->createElement($elementName);  //@todo - moet deze hier
+            foreach ($allFormMetadata as $elementName=>$elementData) {
+                //echo 'Main Element' . $elementName;
 
-                if(is_array($elementData)) { // Mutiple situation
 
-                    foreach ($elementData as $key => $value) {
 
-                        if (is_numeric($key)) { // enumeration - multiple
+//                $xml_item = $xml->createElement($elementName);  //@todo - moet deze hier????????????????? voor combi's ziet ie in de loop
+//                                                                // Maar als deze niet wordt geappend aan metadata!!, is er geen probleem!!!
 
-                            if (!is_array($value)) { // multiple - no structure
-                                $xml_item = $xml->createElement($elementName); // Per round add 1 new item with same node name to toplevel
-                                $xml_item->appendChild($xml->createTextNode($value));
-                                $xml_metadata->appendChild($xml_item);
-                            }
-                            else { // enumerated subproperty structure
-                                // entire structure comes by n times
+                // TOP LEVEL COMBINED FIELD
+                if (false) { // check whether combined within formElements info
+                    $combiElementsData = array();
+                    if (!is_numeric(key($elementData))) {
+                        $combiElementsData[] = $elementData; // make it an enumerated array
+                    } else {
+                        $combiElementsData = $elementData;
+                    }
 
-                                foreach($value as $key2=>$value2) {
-                                    if(!is_array($value2)) {  // $key2 = Name/ Property
-                                        // strucure is existant - checked by reorganisePostedData. The leadproperty must be added eventhough it could hold no actual data at this moment
-                                        // Aanvankelijk werd de leadprop niet opgeslagen ... dit leidde tot een foute xml structuur en werd laden afgebroken hierdoor
-                                        $xml_item = $xml->createElement($elementName);
-                                        $xml_sub1 = $xml->createElement($key2);
-                                        $xml_sub1->appendChild($xml->createTextNode($value2));
-                                        $xml_item->appendChild($xml_sub1);
-                                        $xml_metadata->appendChild($xml_item);
-                                    }
-                                    else {
-                                        $xml_sub1 = $xml->createElement($key2);
-                                        foreach ($value2 as $key3 => $value3) {
-                                            if ($value3) {
-                                                $xml_sub2 = $xml->createElement($key3);
-                                                $xml_sub2->appendChild($xml->createTextNode($value3));
-                                                $xml_sub1->appendChild($xml_sub2);
-                                            }
-                                        }
-                                        $xml_item->appendChild($xml_sub1);
-                                        $xml_metadata->appendChild($xml_item);
-                                    }
-                                }
-                            }
+                    foreach ($combiElementsData as $combinedKey => $combinedData) {
+                        $xml_item = $xml->createElement($elementName);
+
+                        foreach ($combinedData as $combiName => $combiVal) { // Loop all tags for this instane
+
+                            $xmlCombi = $xml->createElement($combiName);
+                            $xmlCombi->appendChild($xml->createTextNode($combiVal));
+                            $xml_item->appendChild($xmlCombi);
                         }
-                        else { // 1-off property structure
-                            $xml_sub1 = $xml->createElement($key); //Name of Property
+                        $xml_metadata->appendChild($xml_item); //$xml->createElement($elementName);
+                    }
+                }
+                elseif (false) { // Subproperty struct
+//                    echo '<pre>';
+//                    print_r($elementData);
+//                    echo '</pre>';
+//                    exit;
 
-                            if (!is_array($value)) { // eerste niveau - main property level
-                                $xml_sub1->appendChild($xml->createTextNode($value));
-                                $xml_item->appendChild($xml_sub1);
+                    if (!is_numeric(key($elementData))) {
+                        $subPropLevelData[] = $elementData;
+                    }
+                    else {
+                        $subPropLevelData = $elementData;
+                    }
+
+                    // 1 subproperty struct bestaat uit een leading element en een body aan subproperties met eventueel combi-elementen
+                    // --- LEAD ELEMENT
+                    // --- PROPERTIES (n??)
+                    // -------SUBPROP1 (n)
+                    // -------SUBPROP2 (n)
+                    // -------COMBI-DESIGNATOR (n)
+                    // ------------item1 (n)
+                    // ------------item2 (n)
+                    // ------SUBPROP3 (n)
+
+                    foreach($subPropLevelData as $subPropStruct) {
+
+                        echo '<pre>';
+                            print_r($subPropStruct);
+                        echo '</pre>';
+
+                        // when at an actual value
+                        // step through the entire struct
+                        foreach($subPropStruct as $k=>$v) {
+                            echo '<br>elementName: ' . $elementName;
+                            $xmlElement = $xml->createElement($elementName); // highest level under <metadata>
+
+                            // step througn an entire structure and see whether it can be added or not
+                            if (!is_array($v)) {
+                                echo '<br>key: ' . $k;
+                                echo '<br>Val' . $v;
+
+                                $xmlLeadElement = $xml->createElement($k);
+                                $xmlLeadElement->appendChild($xml->createTextNode($v));
+                                // Add element to current level
                             }
-                            else { // tweede niveau - subproperties
-                                foreach ($value as $key2 => $value2) {
-                                    $xml_sub2 = $xml->createElement($key2);
-                                    $xml_sub2->appendChild($xml->createTextNode($value2));
-                                    $xml_sub1->appendChild($xml_sub2);
-
+                            else { // Add total subproperty level
+                                if (!is_numeric(key($v))) {
+                                    $propertyData[] = $v;
                                 }
-                                $xml_item->appendChild($xml_sub1);
+                                else {
+                                    $propertyData = $v;
+                                }
+
+                                $xmlProperty = $xml->createElement($k);
+
+                                foreach ($propertyData as $prop) {
+
+                                    print_r($prop);
+                                }
+
+
+
                             }
-                            $xml_metadata->appendChild($xml_item);
+
+                            $xmlElement->appendChild($xmlLeadElement);
+                            $xmlElement->appendChild($xmlProperty);
+                            $xml_metadata->appendChild($xmlElement);
+                        }
+                    }
+                    //exit;
+                }
+
+                // SIMPLE ELEMENT - TOP LEVEL
+                elseif (true) { // dit moet de laatste keuze worden, de hieraan voorafgaande zijn speciale
+                    $topLevelData = array();
+                    if (!is_numeric(key($elementData))) {
+                        $topLevelData[] = $elementData;
+                    }
+                    else {
+                        $topLevelData = $elementData;
+                    }
+
+                    // N items in array => add N elements with name $elementName and to be added to $xml_metadata
+                    foreach($topLevelData as $key => $val) { // per $val => entire structure to be added to $elementName
+
+                        $temp = array();
+                        if (!(is_array($val) AND is_numeric(key($val)))) {
+                            // enumerated structures where we only need the structure itself.
+                            $temp[] = $val;
+                        } else {
+                            $temp = $val;
+                        }
+
+                        foreach ($temp as $elementInfo) { // step through each instance of each element
+
+                            $xml_item = $xml->createElement($elementName); // base element
+                            //$xml_item->appendChild($xml->createTextNode($val));
+                            $metaStructureXML = $this->xmlMetaStructure($xml, $elementInfo, $xml_item);
+                            // Only add to actual structure if
+                            if ($metaStructureXML['anyDataPresent']  ) {
+                                $xml_metadata->appendChild($metaStructureXML['xmlParentElement']);
+                            }
                         }
                     }
                 }
-                else { // 1 topnode - 1 value
-                    $xml_item = $xml->createElement($elementName);
-                    $xml_item->appendChild($xml->createTextNode($elementData));
-                    $xml_metadata->appendChild($xml_item);
+                elseif (false) {
+
+                    if (is_array($elementData)) { // Mutiple situation
+
+                        foreach ($elementData as $key => $value) {
+
+                            if (is_numeric($key)) { // enumeration - multiple
+
+                                if (!is_array($value)) { // multiple - no structure
+                                    $xml_item = $xml->createElement($elementName); // Per round add 1 new item with same node name to toplevel
+                                    $xml_item->appendChild($xml->createTextNode($value));
+                                    $xml_metadata->appendChild($xml_item);
+                                } else { // enumerated subproperty structure
+                                    // entire structure comes by n times
+
+                                    foreach ($value as $key2 => $value2) {
+                                        if (!is_array($value2)) {  // $key2 = Name/ Property
+                                            // strucure is existant - checked by reorganisePostedData. The leadproperty must be added eventhough it could hold no actual data at this moment
+                                            // Aanvankelijk werd de leadprop niet opgeslagen ... dit leidde tot een foute xml structuur en werd laden afgebroken hierdoor
+                                            $xml_item = $xml->createElement($elementName);
+                                            $xml_sub1 = $xml->createElement($key2);
+                                            $xml_sub1->appendChild($xml->createTextNode($value2));
+                                            $xml_item->appendChild($xml_sub1);
+                                            $xml_metadata->appendChild($xml_item);
+                                        } else {
+                                            $xml_sub1 = $xml->createElement($key2);
+                                            foreach ($value2 as $key3 => $value3) {
+                                                if ($value3) {
+                                                    $xml_sub2 = $xml->createElement($key3);
+                                                    $xml_sub2->appendChild($xml->createTextNode($value3));
+                                                    $xml_sub1->appendChild($xml_sub2);
+                                                }
+                                            }
+                                            $xml_item->appendChild($xml_sub1);
+                                            $xml_metadata->appendChild($xml_item);
+                                        }
+                                    }
+                                }
+                            } else { // 1-off property structure
+                                $xml_sub1 = $xml->createElement($key); //Name of Property
+
+                                if (!is_array($value)) { // eerste niveau - main property level
+                                    $xml_sub1->appendChild($xml->createTextNode($value));
+                                    $xml_item->appendChild($xml_sub1);
+                                } else { // tweede niveau - subproperties
+                                    foreach ($value as $key2 => $value2) {
+                                        $xml_sub2 = $xml->createElement($key2);
+                                        $xml_sub2->appendChild($xml->createTextNode($value2));
+                                        $xml_sub1->appendChild($xml_sub2);
+
+                                    }
+                                    $xml_item->appendChild($xml_sub1);
+                                }
+                                $xml_metadata->appendChild($xml_item);
+                            }
+                        }
+                    } else { // 1 topnode - 1 value
+                        $xml_item = $xml->createElement($elementName);
+                        $xml_item->appendChild($xml->createTextNode($elementData));
+                        $xml_metadata->appendChild($xml_item);
+                    }
                 }
             }
-        }
+ //       }
 
         $xml->appendChild($xml_metadata);
 
         return $xml->saveXML();
     }
+
+
+    //
+    public function xmlMetaStructure ($xmlMain, $arMetadata, $xmlParentElement, $anyDataPresent = false)
+    {
+        $arrayMeta = array();
+        if (!is_array($arMetadata)) {
+            $arrayMeta[] = $arMetadata;
+        }
+        else {
+            $arrayMeta = $arMetadata;
+        }
+
+        foreach ($arrayMeta as $key => $val) {
+            //$xml_item = $xml->createElement($elementName);
+
+            if (!is_array($val) AND is_numeric($key)) {
+                $xmlParentElement->appendChild($xmlMain->createTextNode($val));
+                //return $xmlParentElement;
+                if ($val) {
+                    $anyDataPresent = true;
+                }
+            }
+            else {
+                // $val kan hier multi zijn
+                $arraySubLevels = array();
+                if (!is_numeric(key($val))) { // if not enumerated
+                    $arraySubLevels[] = $val;
+                }
+                else {
+                    $arraySubLevels = $val;
+                }
+                foreach ($arraySubLevels as $key2=>$val2) {
+                    $xmlElement = $xmlMain->createElement($key);
+                    //$xmlNew
+                    $structInfo = $this->xmlMetaStructure($xmlMain, $val2, $xmlElement, $anyDataPresent);
+                    $xmlParentElement->appendChild($structInfo['xmlParentElement']);
+                    $anyDataPresent = $structInfo['anyDataPresent'];
+                }
+            }
+        }
+        return array('xmlParentElement' => $xmlParentElement,
+                'anyDataPresent' => $anyDataPresent
+            );
+    }
+
 
     /**
      * @param $rodsaccount
@@ -398,9 +582,51 @@ class Metadata_form_model extends CI_Model {
      */
     public function processPost($rodsaccount, $config) {
 
-        $allFormMetadata = $this->reorganisePostedData($rodsaccount, $config['xsdPath']);
+//         $allFormMetadata = $this->processPostedData($rodsaccount, $config['xsdPath']);
+//
+//        exit;
 
-        $xmlString = $this->metadataToXmlString($allFormMetadata);
+//         $allFormMetadata = $this->reorganisePostedData($rodsaccount, $config['xsdPath']);
+//         exit;
+
+
+        //@todo: VAULT submission moet er nog !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        $arrayPost = $this->CI->input->post();
+
+        if (isset($arrayPost['vault_submission'])) { // clean up: this is extra input in the posted data that should not be handled as being metadata
+            unset($arrayPost['vault_submission']);
+        }
+
+//        echo '<pre>';
+//        print_r($arrayPost);
+//        echo '</pre>';
+
+        $allFormMetadata = array(
+            'Title' => array(0=>$arrayPost['Title'], 2=>'BLABLA'),
+            'Creator' => array(0 => $arrayPost['Creator'],
+                1=> $arrayPost['Creator']),
+            //'Title' => array(0=>$arrayPost['Title'], 2=>'BLABLA'),
+             'Person' => array(0=>$arrayPost['Person'], 1=>$arrayPost['Person']),
+            //'Description' => array( 0=>$arrayPost['Description'], 1=>'asd' ),
+            'Discipline' => array(0 => 'hallo',
+                1=>'bla'),
+            //'Person' => array( 0 => $arrayPost['Person'],
+            //                1 => $arrayPost['Person']),
+            'Related_Datapackage' =>  $arrayPost['Related_Datapackage'],
+        );
+
+
+
+//        echo '<pre>';
+//        print_r($allFormMetadata);
+//        echo '</pre>';
+
+        $xmlString = $this->metadataToXmlString($allFormMetadata, $rodsaccount, $config);
+
+        echo $xmlString;
+        exit;
+
 
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
