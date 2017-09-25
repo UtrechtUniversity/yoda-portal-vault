@@ -9,7 +9,7 @@
         </span>
     </label>
 
-    <div class="col-sm-7">
+    <div class="col-sm-9">
         <div class="row">
             <div class="col-sm-1">
                 <?php if ($e->mandatory) { ?>
