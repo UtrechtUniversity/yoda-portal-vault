@@ -149,6 +149,8 @@ function duplicateField(field, cloneType)
                 break;
             }
         }
+        newField.attr('name', name.replace('['+structureId+']', '['+newStructureId+']'));
+
 
         FieldSubPropertiesGroup.find('.form-group').each(function(){
             // Destroy select2 before cloning.
@@ -166,11 +168,9 @@ function duplicateField(field, cloneType)
                 newField = $(newMainFieldGroup).find('select');
             }
 
-            // @todo
             // Change the field name
             var name = newField.attr('name');
-            name = name.replace('['+structureId+']', '['+newStructureId+']');
-            newField.attr('name', name);
+            newField.attr('name', name.replace('['+structureId+']', '['+newStructureId+']'));
 
             // Add the new field handlers
             newField.val('');
