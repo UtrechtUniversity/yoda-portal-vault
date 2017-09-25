@@ -589,32 +589,30 @@ class Metadata_form_model extends CI_Model {
 //         $allFormMetadata = $this->reorganisePostedData($rodsaccount, $config['xsdPath']);
 //         exit;
 
+        $allFormMetadata = $this->CI->input->post();
 
-        //@todo: VAULT submission moet er nog !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        $arrayPost = $this->CI->input->post();
-
-        if (isset($arrayPost['vault_submission'])) { // clean up: this is extra input in the posted data that should not be handled as being metadata
-            unset($arrayPost['vault_submission']);
+        if (isset($allFormMetadata['vault_submission'])) { // clean up: this is extra input in the posted data that should not be handled as being metadata
+            unset($allFormMetadata['vault_submission']);
         }
+
 
 //        echo '<pre>';
 //        print_r($arrayPost);
 //        echo '</pre>';
 
-        $allFormMetadata = array(
-            'Title' => array(0=>$arrayPost['Title'], 2=>'BLABLA'),
-            'Creator' => array(0 => $arrayPost['Creator'],
-                1=> $arrayPost['Creator']),
-            //'Title' => array(0=>$arrayPost['Title'], 2=>'BLABLA'),
-             'Person' => array(0=>$arrayPost['Person'], 1=>$arrayPost['Person']),
-            //'Description' => array( 0=>$arrayPost['Description'], 1=>'asd' ),
-            'Discipline' => array(0 => 'hallo',
-                1=>'bla'),
-            //'Person' => array( 0 => $arrayPost['Person'],
-            //                1 => $arrayPost['Person']),
-            'Related_Datapackage' =>  $arrayPost['Related_Datapackage'],
-        );
+//        $allFormMetadata = array(
+//            'Title' => array(0=>$arrayPost['Title'], 2=>'BLABLA'),
+//            'Creator' => array(0 => $arrayPost['Creator'],
+//                1=> $arrayPost['Creator']),
+//            //'Title' => array(0=>$arrayPost['Title'], 2=>'BLABLA'),
+//             'Person' => array(0=>$arrayPost['Person'], 1=>$arrayPost['Person']),
+//            //'Description' => array( 0=>$arrayPost['Description'], 1=>'asd' ),
+//            'Discipline' => array(0 => 'hallo',
+//                1=>'bla'),
+//            //'Person' => array( 0 => $arrayPost['Person'],
+//            //                1 => $arrayPost['Person']),
+//            'Related_Datapackage' =>  $arrayPost['Related_Datapackage'],
+//        );
 
 
 
@@ -622,11 +620,12 @@ class Metadata_form_model extends CI_Model {
 //        print_r($allFormMetadata);
 //        echo '</pre>';
 
+//        $allFormMetadata = $arrayPost;
+
         $xmlString = $this->metadataToXmlString($allFormMetadata, $rodsaccount, $config);
 
         echo $xmlString;
         exit;
-
 
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
