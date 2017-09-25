@@ -98,3 +98,13 @@ legend {
 #ui-datepicker-div {
     z-index: 999!important;
 }
+
+.combination-start .form-group {
+    float: left;
+    width: 50%;
+}
+
+.combination-start .form-group label {
+    margin-left: 5px;
+    width: 22%;
+}
