@@ -37,6 +37,7 @@ class Vaultsubmission
         $isVaultPackage = $this->formConfig['isVaultPackage'];
 
         $invalidFields = $this->validateXsd($xsdFilePath, $metadataFilePath);
+
         $mandatoryFields = $this->checkMandatoryFields();
 
         // Validate update Vault Package
@@ -140,9 +141,11 @@ class Vaultsubmission
             return array();
         }
 
+        $structs = array('structCombinationOpen', 'structCombinationClose', 'structSubPropertiesOpen','structSubPropertiesClose');
+
         foreach ($formElements as $group => $elements) {
             foreach ($elements as $name => $properties) {
-                if ($properties['mandatory']) {
+                if ($properties['mandatory'] AND !in_array($properties['type'], $structs)) {
                     if (!$properties['value']) {
                         if (!in_array($properties['key'], $invalidFields)) {
                             $invalidFields[] = $properties['key'];
