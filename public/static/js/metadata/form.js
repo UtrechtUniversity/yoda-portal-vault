@@ -94,6 +94,8 @@ function validateNumber(event) {
 
 function duplicateField(field, cloneType)
 {
+    console.log(123);
+
     // Dublicate one single field.
     var html = "";
 
@@ -178,11 +180,11 @@ function duplicateField(field, cloneType)
 
             // Add the new field handlers
             newField.val('');
-            /*
+
             newMainFieldGroup.find('button').bind( "click", function() {
-                duplicateSubpropertyField(newMainFieldGroup, 'subproperty');
+                duplicateField(newMainFieldGroup, 'subproperty');
             });
-            */
+
             newMainFieldGroup.find('[data-toggle="tooltip"]').tooltip();
 
             if (newField.hasClass('numeric-field')) {
