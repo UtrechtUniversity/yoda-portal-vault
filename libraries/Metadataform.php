@@ -38,12 +38,16 @@ class Metadataform {
     {
         $mandatoryCounts = array();
 
+        // exclude the following tags in counting the completeness
+        $structs = array('structCombinationOpen', 'structCombinationClose', 'structSubPropertiesOpen','structSubPropertiesClose');
+
         foreach ($formElements as $group => $elements) {
 
             foreach ($elements as $name => $properties) {
 
                 // Some fields are multipleAllowed. This should only be counted as 1 field.
-                if($properties['mandatory']) {
+                if($properties['mandatory'] AND !in_array($properties['type'], $structs)) {
+
                     if(!isset($mandatoryCounts[$properties['key']])) {
                         $mandatoryCounts[$properties['key']] = 0;
                     }

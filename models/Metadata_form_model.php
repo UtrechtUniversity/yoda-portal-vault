@@ -446,7 +446,8 @@ class Metadata_form_model extends CI_Model {
                         foreach ($temp as $elementInfo) { // step through each instance of each element
 
                             $xml_item = $xml->createElement($elementName); // base element
-                            $metaStructureXML = $this->xmlMetaStructure($xml, $elementInfo, $xml_item);
+                            $level = 0; // for deletion handling - deeper levels (>0)can always be deleted (i.e. not written to file when empty value)
+                            $metaStructureXML = $this->xmlMetaStructure($xml, $elementInfo, $xml_item, $level);
                             // Only add to actual structure if
                             if ($metaStructureXML['anyDataPresent']  ) {
                                 $xml_metadata->appendChild($metaStructureXML['xmlParentElement']);
@@ -526,8 +527,10 @@ class Metadata_form_model extends CI_Model {
 
 
     //$topLevelName - for deletion purpose (Sub info can always be deleted (i.e. not added)
-    public function xmlMetaStructure ($xmlMain, $arMetadata, $xmlParentElement, $anyDataPresent = false)
+    public function xmlMetaStructure ($xmlMain, $arMetadata, $xmlParentElement, $level, $anyDataPresent = false)
     {
+        $doAddThisLevel =true;
+
         $arrayMeta = array();
         if (!is_array($arMetadata)) {
             $arrayMeta[] = $arMetadata;
@@ -540,13 +543,19 @@ class Metadata_form_model extends CI_Model {
             //$xml_item = $xml->createElement($elementName);
 
             if (!is_array($val) AND is_numeric($key)) {
-                $xmlParentElement->appendChild($xmlMain->createTextNode($val));
                 //return $xmlParentElement;
-                if ($val) {
+                ///een val is altijd het eind ding van een element.
+                // Als er geen waarde is, moet dus ook het element worden verwijderd
+                if ($val!='') {
+                    $xmlParentElement->appendChild($xmlMain->createTextNode($val));
                     $anyDataPresent = true;
+                }
+                else {
+                    $doAddThisLevel = false;
                 }
             }
             else {
+                $level++;
                 // $val kan hier multi zijn
                 $arraySubLevels = array();
                 if (!is_numeric(key($val))) { // if not enumerated
@@ -556,16 +565,26 @@ class Metadata_form_model extends CI_Model {
                     $arraySubLevels = $val;
                 }
                 foreach ($arraySubLevels as $key2=>$val2) {
+
                     $xmlElement = $xmlMain->createElement($key);
                     //$xmlNew
-                    $structInfo = $this->xmlMetaStructure($xmlMain, $val2, $xmlElement, $anyDataPresent);
-                    $xmlParentElement->appendChild($structInfo['xmlParentElement']);
+
+                    // Deze aanroep gebeurt in het kader van $xmlElement / $key.
+                    //
+                    $structInfo = $this->xmlMetaStructure($xmlMain, $val2, $xmlElement, $level, $anyDataPresent);
+
+                    // Add (entire) srtructure or 1 value
+                    // Het element wordt hier al geappend zonder dat zeker is of dit moet (en dan komt ie als lege tag in yoda-metadata.xml)
+                    if ($structInfo['doAddThisLevel']) {
+                        $xmlParentElement->appendChild($structInfo['xmlParentElement']);
+                    }
                     $anyDataPresent = $structInfo['anyDataPresent'];
                 }
             }
         }
         return array('xmlParentElement' => $xmlParentElement,
-                'anyDataPresent' => $anyDataPresent
+                'anyDataPresent' => $anyDataPresent,
+                'doAddThisLevel' => $doAddThisLevel
             );
     }
 
