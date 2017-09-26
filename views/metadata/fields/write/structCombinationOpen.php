@@ -1,8 +1,1 @@
-<div class="combination-start">
-<!--
-<hr>
-COMBINATION  Start tag <?php echo $e->key; ?>
-<br>Is mandatory? <?php echo $e->mandatory ? 'YES' : 'NO' ?>
-<br>Multi? <?php echo $e->multipleAllowed() ? 'YES' : 'NO' ?>
-<hr>
--->
+<span class="combination-start">

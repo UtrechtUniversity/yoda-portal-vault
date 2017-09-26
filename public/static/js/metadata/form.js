@@ -132,7 +132,11 @@ function duplicateField(field, cloneType)
 
     // Main property with properties, clone the whole set.
     if (cloneType == 'main') {
-        var FieldSubPropertiesGroup = field.next().clone();
+        field.next().find('select').select2('destroy');
+        var currentFieldSubPropertiesGroup = field.next();
+        currentFieldSubPropertiesGroup.find('select').select2('destroy');
+
+        var fieldSubPropertiesGroup = currentFieldSubPropertiesGroup.clone();
         var newStructureId = null;
 
         // Set name counter.
@@ -152,7 +156,7 @@ function duplicateField(field, cloneType)
         newField.attr('name', name.replace('['+structureId+']', '['+newStructureId+']'));
 
 
-        FieldSubPropertiesGroup.find('.form-group').each(function(){
+        fieldSubPropertiesGroup.find('.form-group').each(function(){
             // Destroy select2 before cloning.
             var isSelect2 = $(this).hasClass('select2');
             if (isSelect2) {
@@ -202,6 +206,8 @@ function duplicateField(field, cloneType)
                 $(newField).find('select').select2();
             }
         });
+
+        currentFieldSubPropertiesGroup.find('select').select2();
 
         // Insert main field
         $(field).next().after(newFieldGroup);
