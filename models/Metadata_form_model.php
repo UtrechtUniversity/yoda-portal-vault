@@ -1350,6 +1350,11 @@ class Metadata_form_model extends CI_Model {
 
         $this->addElements($xsdElements, $elements, $supportedSimpleTypes, $simpleTypeData);
 
+//        echo '<pre>';
+//        print_r($xsdElements);
+//        echo '</pre>';
+//        exit;
+
         return $xsdElements;
     }
 
