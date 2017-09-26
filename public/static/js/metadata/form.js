@@ -213,7 +213,7 @@ function duplicateField(field, cloneType)
         $(field).next().after(newFieldGroup);
 
         // Insert subproperties.
-        $(newFieldGroup).after(FieldSubPropertiesGroup);
+        $(newFieldGroup).after(fieldSubPropertiesGroup);
 
     } else {
         // Insert property
