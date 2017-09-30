@@ -94,8 +94,6 @@ function validateNumber(event) {
 
 function duplicateField(field, cloneType)
 {
-    console.log(123);
-
     // Dublicate one single field.
     var html = "";
 
@@ -148,17 +146,17 @@ function duplicateField(field, cloneType)
 
         // Find new structure id
         for (i = structureId; i < 1000; i++) {
-            var tmpName = name.replace('['+structureId+']', '['+i+']');
-            //if ($( "input[name='Related_Datapackage[0][Title]']" ).length == 0) {
-            if ($( "input[name='" + tmpName + "']" ).length == 0) {
+            var tmpName = name.replace('[' + structureId + ']', '[' + i + ']');
+            if ($("input[name='" + tmpName + "']").length == 0) {
                 newStructureId = i;
                 break;
             }
         }
-        newField.attr('name', name.replace('['+structureId+']', '['+newStructureId+']'));
+        newField.attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']'));
 
 
-        fieldSubPropertiesGroup.find('.form-group').each(function(){
+        // loop all sub properties
+        fieldSubPropertiesGroup.find('.form-group').each(function () {
             // Destroy select2 before cloning.
             var isSelect2 = $(this).hasClass('select2');
             if (isSelect2) {
@@ -176,12 +174,12 @@ function duplicateField(field, cloneType)
 
             // Change the field name
             var name = newField.attr('name');
-            newField.attr('name', name.replace('['+structureId+']', '['+newStructureId+']'));
+            newField.attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']')); // example: [0] for [1]
 
             // Add the new field handlers
             newField.val('');
 
-            newMainFieldGroup.find('button').bind( "click", function() {
+            newMainFieldGroup.find('button').bind("click", function () {
                 duplicateField(newMainFieldGroup, 'subproperty');
             });
 
@@ -217,8 +215,94 @@ function duplicateField(field, cloneType)
         // Insert subproperties.
         $(newFieldGroup).after(fieldSubPropertiesGroup);
 
+    } else if (cloneType == 'combined') { // werkt alleen als je op het plusje klikt bij het veld. Als subproperty komt hij hier niet.
+        // combined field.
+        var fields = newFieldGroup.find('.form-control');
+        var newCombinedStructure;
+        fields.each(function () {
+            var name = $(this).attr('name');
+            // strip alles tussen [] om de counter te pakken.
+            var nameParts = name.match(/\[(.*?)\]/g);
+            var combinedStructure = nameParts[3].slice(1, -1);
+
+            /*
+            // Find new combined structure id
+            for (i = combinedStructure; i < 1000; i++) {
+                console.log(name);
+                // Hij mag hier alleen de laatste counter replacen,
+                var tmpName = name.replace('[' + combinedStructure + ']', '[' + i + ']');
+                if ($("input[name='" + tmpName + "']").length == 0) {
+                    newStructureId = i;
+                    break;
+                }
+                console.log(tmpName);
+            }
+            // Hij mag hier alleen de laatste counter replacen,
+            //$(this).attr('name', name.replace('[' + combinedStructure + ']', '[' + newCombinedStructure + ']'));
+            */
+
+            // Clear value
+            $(this).val('');
+
+            // numeric field
+            if ($(this).hasClass('numeric-field')) {
+                $(this).keypress(validateNumber);
+            }
+
+            if ($(this).hasClass('datepicker')) {
+                $(this).removeAttr('id');
+                $(this).removeClass('hasDatepicker');
+                $(this).datepicker({
+                    dateFormat: "yy-mm-dd",
+                    changeMonth: true,
+                    changeYear: true
+                });
+            }
+
+            // Select select2
+            if ($(this).is("select")) {
+                $(this).select2();
+            }
+        });
+
+        // Activate the old dropdowns
+        newFieldGroup.find('select').select2();
+
+        // Insert field group
+        $(field).after(newFieldGroup);
+
     } else {
-        // Insert property
+        // Insert field group
         $(field).after(newFieldGroup);
     }
+}
+
+// Add the new field handlers
+newField.val('');
+
+newMainFieldGroup.find('button').bind("click", function () {
+    duplicateField(newMainFieldGroup, 'subproperty');
+});
+
+newMainFieldGroup.find('[data-toggle="tooltip"]').tooltip();
+
+if (newField.hasClass('numeric-field')) {
+    newField.keypress(validateNumber);
+}
+
+if (newField.hasClass('datepicker')) {
+    newField.removeAttr('id');
+    newField.removeClass('hasDatepicker');
+    newField.datepicker({
+        dateFormat: "yy-mm-dd",
+        changeMonth: true,
+        changeYear: true
+    });
+}
+
+if (isSelect2) {
+    // Init select2 for the 2 fields.
+    $(this).find('select').select2();
+    newMainFieldGroup.find('select').select2();
+    $(newField).find('select').select2();
 }

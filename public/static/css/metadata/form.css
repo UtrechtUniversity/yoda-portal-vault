@@ -107,3 +107,11 @@ legend {
 .combination-start .form-group label {
     width: 22%;
 }
+
+.no-padding {
+    padding: 0;
+}
+
+.combined-plus {
+    margin-top: 25px;
+}
