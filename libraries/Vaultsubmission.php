@@ -176,6 +176,7 @@ class Vaultsubmission
 
                 // Hij loopt door alle
                 // add check for empty lead elements in a lead/subproperty structure.
+                // Even if not mandatory, if subprops exist but no main => cancel submission to vault
                 if ($properties['subPropertiesRole']=='subPropertyStartStructure'
                     AND $properties['type']!='structSubPropertiesOpen'
                     AND !$properties['value']) {
@@ -185,7 +186,6 @@ class Vaultsubmission
                     // Subproperties
 
                     if(isset($formData[$properties['subPropertiesBase']])) { // only add to array if main field is present in actual data in yoda-metadata.xml
-
                         $invalidFields[] = $properties['key'];
                     }
                 }
