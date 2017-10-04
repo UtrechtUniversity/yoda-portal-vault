@@ -130,7 +130,10 @@ class Vaultsubmission
     {
         $invalidFields = array();
         $this->CI->load->model('Metadata_form_model');
+
+
         $formElements = $this->CI->Metadata_form_model->getFormElements($this->account, $this->formConfig);
+
 
         //Iinvalid yodametadat.xml file caused getFormElements to return false instead of full representation of all elements.
         // There can therefore be no conclusion on all mandatory data being present or not.
@@ -140,6 +143,24 @@ class Vaultsubmission
         if ($formElements===false) {
             return array();
         }
+
+        // Get the actual yoda-metadata.xml to be able to do inventory
+        $formData = $this->CI->Metadata_form_model->loadFormData($this->account, $this->formConfig['metadataXmlPath']);
+
+        if ($formData === false) {
+            return array();
+        }
+
+
+        // @todo: this now steps trhough all visible and indiciation elements.
+        // Maybe refactored in looping through the mainfields only
+        // And have extra software dig deeper per element depending on the type of element.
+        // This loop is caused by the fact that initially there were only mainfields. Now there are subproperties and compound structures
+
+        // For now do a discovery in this loop regarding mandatory or present subproperties
+        // formElements has ALL elements, including subs, flattened in an array
+        // Therefore, all this needs to be properly investigated as empty lead elements of structs do not have to be reported when NO subprop data is present
+        // Only in the next steps this is possible to be determined
 
         $structs = array('structCombinationOpen', 'structCombinationClose', 'structSubPropertiesOpen','structSubPropertiesClose');
 
@@ -152,8 +173,30 @@ class Vaultsubmission
                         }
                     }
                 }
+
+                // Hij loopt door alle
+                // add check for empty lead elements in a lead/subproperty structure.
+                if ($properties['subPropertiesRole']=='subPropertyStartStructure'
+                    AND $properties['type']!='structSubPropertiesOpen'
+                    AND !$properties['value']) {
+
+                    // only add to when there actually is something in the subproperties
+                    // Mandatory present in subproperties??
+                    // Subproperties
+
+                    if(isset($formData[$properties['subPropertiesBase']])) { // only add to array if main field is present in actual data in yoda-metadata.xml
+
+                        $invalidFields[] = $properties['key'];
+                    }
+                }
             }
         }
+
+//        echo '<pre>';
+//        print_r($invalidFields);
+//        echo '</pre>';
+//        exit;
+
         return $invalidFields;
     }
 
@@ -187,16 +230,20 @@ class Vaultsubmission
         $fieldLabels = array();
         foreach ($fields as $field) {
             // Convert fields as Creator[Name] or Contributor[Name] to Creator_Name or Contributor_Name
-            $fieldID = str_replace(array(']', '['), array('', '_'), $field);
+            // quick fix be able to handle new key names that incorporate array handling even further like:
+            //  Related_Datapackage[0][Title]
+            //  Related_Datapackage[0][Properties][PI][]
+
+            $temp = preg_replace('/[0-9]+/', '', $field);
+            $temp = str_replace('[]', '', $temp);
+            $fieldID = str_replace(array(']', '['), array('', '_'), $temp);
 
             if (isset($formElementLabels[$fieldID])) {
                 $fieldLabels[] = $formElementLabels[$fieldID];
             } else {
                 $fieldLabels[] = $field;
             }
-
         }
-
         return 'The following fields are invalid for vault submission: ' . implode(', ', $fieldLabels);
     }
 }
