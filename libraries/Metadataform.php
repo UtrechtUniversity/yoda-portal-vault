@@ -45,6 +45,7 @@ class Metadataform {
 
             foreach ($elements as $name => $properties) {
 
+                // @TODO - ook verplichte subproperties meenemen???
                 // Some fields are multipleAllowed. This should only be counted as 1 field.
                 if($properties['mandatory'] AND !in_array($properties['type'], $structs)) {
 
