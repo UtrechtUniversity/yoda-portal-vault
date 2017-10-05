@@ -640,13 +640,6 @@ class Metadata_form_model extends CI_Model
         // load xsd and get all the info regarding restrictions
         $xsdElements = $this->loadXsd($rodsaccount, $config['xsdPath']); // based on element names
 
-//        echo '<pre>';
-//        echo 'Key: ' . $key;
-//        print_r($xsdElements);
-//        echo '</pre>';
-//
-
-
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
             $writeMode = false; // Distinnction made as readers, in case of no xml-file being present, should  NOT get default values
@@ -664,20 +657,10 @@ class Metadata_form_model extends CI_Model
             }
         }
 
-//        echo '<pre>';
-//        print_r($formData);
-//        echo '</pre>';
-//
-
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
         if ($formGroupedElements === false) {
             return false;
         }
-
-//        echo '<pre>';
-//        echo 'Key: ' . $key;
-//        print_r($formGroupedElements);
-//        echo '</pre>';
 
         $groupName = 'undefined';
 
@@ -834,18 +817,7 @@ class Metadata_form_model extends CI_Model
                             $config, array('type' => 'structSubPropertiesOpen'), $em, $key . $keyCounterInfix . '[' . $id . ']', '', $multipleAllowed, $subPropArray);
 
                 } else { // STEP THROUGH EACH SUB PROPERTY
-                    //
-
                     foreach ($em as $propertyKey => $propertyElement) {
-
-                        if ($key == 'Creator') {
-                            echo '<pre>';
-                            echo $key;
-                            echo '<br>';
-                            echo $propertyKey;
-                            echo '</pre>';
-                        }
-
                         $subKey = $key . '_' . $id . '_' . $propertyKey;
                         $subPropArray = array(
                             'subPropertiesRole' => 'subProperty',
@@ -854,24 +826,13 @@ class Metadata_form_model extends CI_Model
                         );
 
                         if ($this->isCompoundElement($propertyElement)) { //isset($propertyElement['combined'])) {
-                            echo '<pre>';
-                                //print_r($propertyElement);
 
-                                //print_r($xsdElements);
+                            $arRouting = $xsdElements[$subKey]['tagNameRouting'];
 
-                                //print_r($structValueArray);
+                            $subKeyValue = $structValues[$arRouting[1]][$arRouting[2]];
 
-                                print_r($structValues);
+                            $subKeyValue = $this->enumerateArray($subKeyValue);
 
-                                $arRouting = $xsdElements[$subKey]['tagNameRouting'];
-                                print_r($arRouting);
-
-                                $subKeyValue = $structValues[$arRouting[1]][$arRouting[2]];
-
-                                $subKeyValue = $this->enumerateArray($subKeyValue);
-
-                                echo '</pre>';
-                            //exit;
 
                             //$this->addCompoundElement($config, $groupName, $key, $element, $formData, $xsdElements);
                             // todo:: check value array -> is this what is required here???
@@ -903,17 +864,7 @@ class Metadata_form_model extends CI_Model
 //                            $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');  // no purpose as it is superseded by next line
                                 $frontendValue = $subKeyValue;
                             }
-
-//                            $subPropArray = array(
-//                                'subPropertiesRole' => 'subProperty',
-//                                'subPropertiesBase' => $key,
-//                                'subPropertiesStructID' => $multipleAllowed ? $counterForFrontEnd : -1
-//                            );
-//                            $this->presentationElements[$groupName][] =
-//                                $this->newPresentationElement($xsdElements, $propertyElement, $subKey,
-//                                    $key . '[' . $id . '][' . $propertyKey . ']', $frontendValue, $multipleAllowed, $subPropArray);
-//
-
+                            
                             $multiPostFix = '';
                             if ($multipleAllowed) {
                                 $multiPostFix = '[]'; // Create array as variable can have multiple values, hier mag [] - volgorde is niet belangrijk
@@ -970,72 +921,31 @@ class Metadata_form_model extends CI_Model
     public function addCompoundElement($config, $groupName, $key, $element,
                                        $formData, $xsdElements, $elementOffsetFrontEnd = '', $subPropArray = array()) // presentation elements will be extended -> make it class variable
     {
-//        if($key == 'License') {
-//
-//            echo 'Frontend Offset: ' . $elementOffsetFrontEnd;
-//
-//            echo '<pre>';
-//            print_r($element);
-//
-//            echo '<hr>';
-//
-//            print_r($xsdElements[$key]);
-//
-//            echo '<hr>';
-//
-//            print_r($formData);
-//
-//            echo '</pre>';
-//            //exit;
-//        }
-
-
         if (isset($xsdElements[$key])) {
 
-//            if ($key == 'Person' OR $key == 'Related_Datapackage_Properties_ORCID_Combination') {
-////                echo '<pre>';
-////                echo $key;
-////                echo '<br>';
-////                print_r($formData);
-////
-//                if ($elementOffsetFrontEnd) {
-//                    $formData = $formData[0];
-//                }
-////
-////                print_r($formData);
-////
-////                echo '</pre>';
-//            }
+            // Extend the passed array with compound specific data for the frontend
+
+            // $element holds the structure under the parent level
+            // Count te be decremented by 1 as @attributes is not part of the fields for the frontend
+            /**
+            [@attributes] => Array
+                [class] => compound
+
+            [Persistent_Identifier]
+                [label] => Persistent Identifier
+                [help] => Persistent identifier PI (e.g. an ORCID, DAI, or ScopusID)
+
+            [Persistent_Identifier_Type]
+                [label] => Type of Persistent Identifier
+                [help] => What type of persistent person identifier
+
+
+             */
+            $subPropArrayExtended = $subPropArray;
+            $subPropArrayExtended['fieldCount'] = count($element)-1;
+            $subPropArrayExtended['fieldPosition'] = 0;
 
             if ($xsdElements[$key]['type'] == 'openTag') {
-
-//                if ($elementOffsetFrontEnd AND false) { // initiated from being subproperty position
-//                    if (!count($formData[0][$key])) {
-//                        $formValues[] = $formData[0];
-//                    } else {
-//                        //@todo::: Chechk of het wel een mutliple field mag zijn?!
-//                        $formValues = $formData[0][$key];
-//                    }
-//                    echo 'hallo';
-//                    $formValues = $formData; // take it over directly as it is indexed already
-//                } else {
-//                    // Is single or multiple values in yoda-metadata.xml
-//                    // Make a numerated array for it like it would be in a multi value situation
-//                    if (!count($formData[$key])) {
-//                        $formValues[] = $formData;
-//                    } else {
-//                        //@todo::: Chechk of het wel een mutliple field mag zijn?!
-//                        $formValues = $formData[$key];
-//                    }
-//                }
-
-
-//                echo '<pre>';
-//                echo 'KEY: ' . $key;
-//                print_r($formValues);
-//                echo '</pre>';
-                //exit;
-
 
                 if ($elementOffsetFrontEnd) { // is vanuit een subproperty siutatie
                     $baseCombiElementOffsetFrontEnd = $elementOffsetFrontEnd; // . "[$key]";
@@ -1043,33 +953,20 @@ class Metadata_form_model extends CI_Model
                     $baseCombiElementOffsetFrontEnd = $key;
                 }
 
-//                echo '<hr>Key: ' . $key . '<hr>';
-
                 $combiElementMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
 
                 // multiple values present where only one value is allowed.
                 // Incorrect xml format
-                if (!$combiElementMultipleAllowed AND count($formValues) > 1) {
-                    return false;
-                }
-
+                // @TODO - check muliplicitiy against number of values
+//                if (!$combiElementMultipleAllowed AND count($formValues) > 1) {
+//                    return false;
+//                }
 
                 // Step though all values that are within yoda-metadata.xml
                 $combiCounter = 0; // To create unique names in array form for frontend
 
-//                echo '<pre>';
-//                print_r($formData);
-//                echo '</pre>';
-
                 foreach ($formData as $arValues) { //   $formValues
                     // 1) Add start tag - based upon type = openTag
-                    if($key == 'License') {
-                        echo 'in value loop: ';
-                        echo '<pre>';
-                            print_r($arValues);
-                        echo '</pre>';
-                        //exit;
-                    }
                     $combiElementName = $baseCombiElementOffsetFrontEnd;
                     if ($combiElementMultipleAllowed) {
                         $combiElementName .= "[$combiCounter]";
@@ -1080,44 +977,42 @@ class Metadata_form_model extends CI_Model
                     // @todo:: Als er iets in het sublevel verplicht is, moet het top level ook verplicht aangeven????????????
                     // 2) MultipleAllowed [OK]
                     $this->presentationElements[$groupName][] =
-                        $this->newWayPresentationElement($config, array('type' => 'structCombinationOpen'), $element, $combiElementName, '', false, $subPropArray);
+                        $this->newWayPresentationElement($config, array('type' => 'structCombinationOpen'), $element, $combiElementName, '', false, $subPropArrayExtended);
 
                     // 2) step through all elements to complete the combined field
+                    $fieldPosition = 0;
                     foreach ($element as $id => $em) {
                         // $elements now holds an array of formelements - these are subproperties
                         $subKey = $key . '_' . $id;
 
                         if ($id != '@attributes') { // exclude this item added due to class=compound
-                            if ($key == 'License') {
-                                echo '<br>subKey: ' . $subKey;
-                                echo '<br>field-id: ' . $id;
-
-                                echo '<br>Value: ' . $arValues[$id];
-                                //exit;
-                            }
-
-                            // @todo: een element kan ook weer een multiple variabele zijn !!!!!!!!!!!!!!!!! nog meenemen
+                            // @todo: een element kan ook weer een multiple variabele zijn !!!!!!!!!!!!!!!!! nog meenemen later
                             $subCombiCounter = 0;
                             // => dus hier lopen if so en keyname for front end aanpassen
                             $subCombiMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$subKey]);
 
 //                            $allSubCombiValues = array();
 //                            $allSubCombiValues[] = $arValues[$subKey];
+                            unset($subPropArrayExtended['fieldPosition']);
+                            $subPropArrayExtended['fieldPosition'] = $fieldPosition;
 
                             if (isset($xsdElements[$subKey])) {
                                 $this->presentationElements[$groupName][] =
                                     $this->newWayPresentationElement($config, $xsdElements[$subKey], $em,
                                         $combiElementName . '[' . $id . ']' . ($subCombiMultipleAllowed ? '[]' : ''),
-                                        $arValues[$id], false, $subPropArray);
+                                        $arValues[$id], false, $subPropArrayExtended);
                                 $subCombiCounter++;
+
+                                $fieldPosition++;
                             }
                         }
                     }
                     // 3) Add stop tag derived from the start tag
                     //$xsdEndTagElement = $xsdElements[$key];
                     //$xsdEndTagElement['type'] = 'endTag';
+                    unset($subPropArrayExtended['fieldPosition']);
                     $this->presentationElements[$groupName][] =
-                        $this->newWayPresentationElement($config, array('type' => 'structCombinationClose'), $element, $combiElementName, '', false, $subPropArray);
+                        $this->newWayPresentationElement($config, array('type' => 'structCombinationClose'), $element, $combiElementName, '', false, $subPropArrayExtended);
 
                     $combiCounter++;
                 }
@@ -1133,7 +1028,7 @@ class Metadata_form_model extends CI_Model
     // keyId name of element in frontend
     public function newWayPresentationElement($config, $xsdElement, $element, $keyId, $value, $overrideMultipleAllowed = false, $subpropertyInfo = array())
     {
-        // @todo: - inefficient - will be determinded each time and element passes, b
+        // @todo: - inefficient - will be determinded each time and element passes,
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
             $writeMode = false; // Distinnction made as readers, in case of no xml-file being present, should  NOT get default values
