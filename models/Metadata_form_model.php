@@ -864,7 +864,7 @@ class Metadata_form_model extends CI_Model
 //                            $frontendValue = htmlspecialchars($keyValue, ENT_QUOTES, 'UTF-8');  // no purpose as it is superseded by next line
                                 $frontendValue = $subKeyValue;
                             }
-                            
+
                             $multiPostFix = '';
                             if ($multipleAllowed) {
                                 $multiPostFix = '[]'; // Create array as variable can have multiple values, hier mag [] - volgorde is niet belangrijk
