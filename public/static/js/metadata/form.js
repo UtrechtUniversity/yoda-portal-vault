@@ -1,3 +1,5 @@
+var arrayCounterBackEnd = 1000; // is incremented each time used thus securing uniqueness and consistent passing to back end
+
 $(function () {
     $('[data-toggle="tooltip"]').tooltip();
     $( ".datepicker" ).datepicker({
@@ -53,7 +55,12 @@ $(function () {
 
     $("button.duplicate-field").on( "click", function() {
         var cloneType = $(this).data('clone');
-        var field = $(this).closest('.form-group');
+        if (cloneType == 'combined') {
+            var field = $(this).closest('.combination-start');
+        }
+        else {
+            var field = $(this).closest('.form-group');
+        }
         duplicateField(field, cloneType);
     });
 
@@ -104,6 +111,8 @@ function duplicateField(field, cloneType)
     }
 
     var newFieldGroup = field.clone();
+
+
     var newField = newFieldGroup.find('.form-control');
     newField.val('');
     newFieldGroup.find('button').bind( "click", function() {
@@ -154,7 +163,6 @@ function duplicateField(field, cloneType)
         }
         newField.attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']'));
 
-
         // loop all sub properties
         fieldSubPropertiesGroup.find('.form-group').each(function () {
             // Destroy select2 before cloning.
@@ -165,7 +173,7 @@ function duplicateField(field, cloneType)
 
             // Field
             var newMainFieldGroup = $(this);
-            var newField = newMainFieldGroup.find('.form-control');
+            var newField = newMainFieldGroup.find('.form-control'); // gaat er vanuit dat er maar 1 control is
 
             // Get the native select field from the select2 plugin.
             if (isSelect2) {
@@ -215,48 +223,83 @@ function duplicateField(field, cloneType)
         // Insert subproperties.
         $(newFieldGroup).after(fieldSubPropertiesGroup);
 
-    } else if (cloneType == 'combined') { // werkt alleen als je op het plusje klikt bij het veld. Als subproperty komt hij hier niet.
+    } else if (cloneType == 'combined') { // werkt alleen als je op het plusje klikt bij het veld.
         // combined field.
-        var fields = newFieldGroup.find('.form-control');
+
+        // to be passed by frontend button designating which level of the array structure is variant. This, as there can be various levels
+        var arrayBackendLevel = field.attr('data-backendLevel');
+
+        $(field).after(newFieldGroup);
+
+        var fields = newFieldGroup.find('.form-control');  // finc the fields in the newly added group and adjust the properties accordingly
         var newCombinedStructure;
+
+        arrayCounterBackEnd++; // globally increment this value as any element can use this to guarentee uniqueness
+
+        // Step through all controls and adjust properties that require changing
+        // 1) name attribute (when used as arrays in backend)
+        // 2) 3rd party fields require extra care to be able to be reused again fully
+        // 3) numberic fields
+        keepOrgSelect2ForNextLoop = false;
         fields.each(function () {
+
             var name = $(this).attr('name');
-            // strip alles tussen [] om de counter te pakken.
-            var nameParts = name.match(/\[(.*?)\]/g);
-            var combinedStructure = nameParts[3].slice(1, -1);
 
-            /*
-            // Find new combined structure id
-            for (i = combinedStructure; i < 1000; i++) {
-                console.log(name);
-                // Hij mag hier alleen de laatste counter replacen,
-                var tmpName = name.replace('[' + combinedStructure + ']', '[' + i + ']');
-                if ($("input[name='" + tmpName + "']").length == 0) {
-                    newStructureId = i;
-                    break;
+            // the select2 control comes by twices in this loop. As the container and as the select.
+            // The container designates the entire frontend representation and defines that we have a select2
+            //
+            var isSelect2 = $(this).hasClass('select2-container');
+            if (isSelect2) {
+               keepOrgSelect2ForNextLoop = $(this); // keep it for next loop when the actual select is found
+            }
+
+            // Construct new element name with newly created counter
+            // arrayBackendLevel holds which arrayLevel must be adjusted as there can be many
+            // Do not do this for the select2 container as this does not have a name.
+            // That must be dealt with in the next round of the loop when the actual select itzelf comes by
+
+            if(!isSelect2) {
+                baseSplitName = name.split('[', 1); // get base name for element
+
+                newElementName = baseSplitName[0];
+
+                // Now get all the other parts that constitute the full name
+                var nameParts = name.match(/\[(.*?)\]/g);
+                for (i = 0; i < nameParts.length; i++) {
+                    if (i == arrayBackendLevel) {
+                        newElementName += '[' + arrayCounterBackEnd + ']'
+                    }
+                    else {
+                        newElementName += nameParts[i];
+                    }
                 }
-                console.log(tmpName);
+
+                $(this).attr('name', newElementName);
+
+                // Clear value
+                $(this).val('');
+
+                // numeric field
+                if ($(this).hasClass('numeric-field')) {
+                    $(this).keypress(validateNumber);
+                }
+
+                if ($(this).hasClass('datepicker')) {
+                    $(this).removeAttr('id');
+                    $(this).removeClass('hasDatepicker');
+                    $(this).datepicker({
+                        dateFormat: "yy-mm-dd",
+                        changeMonth: true,
+                        changeYear: true
+                    });
+                }
+
             }
-            // Hij mag hier alleen de laatste counter replacen,
-            //$(this).attr('name', name.replace('[' + combinedStructure + ']', '[' + newCombinedStructure + ']'));
-            */
 
-            // Clear value
-            $(this).val('');
-
-            // numeric field
-            if ($(this).hasClass('numeric-field')) {
-                $(this).keypress(validateNumber);
-            }
-
-            if ($(this).hasClass('datepicker')) {
-                $(this).removeAttr('id');
-                $(this).removeClass('hasDatepicker');
-                $(this).datepicker({
-                    dateFormat: "yy-mm-dd",
-                    changeMonth: true,
-                    changeYear: true
-                });
+            // Kept it from previous loop and now finalize situation
+            if (keepOrgSelect2ForNextLoop) {
+                keepOrgSelect2ForNextLoop.remove();
+                keepOrgSelect2ForNextLoop = false;
             }
 
             // Select select2

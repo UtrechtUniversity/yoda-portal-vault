@@ -632,13 +632,15 @@ class Metadata_form_model extends CI_Model
         2) !isset($element['label']) => Subproperty (weak distinction! to be refactored???)
         3) rest is  normal item
 
-        @todo:: 1) add countFields/fieldCount to all elements in a struct (includiing OPEN and CLOSE tags)
-
     */
     public function getFormElements($rodsaccount, $config)
     {
         // load xsd and get all the info regarding restrictions
         $xsdElements = $this->loadXsd($rodsaccount, $config['xsdPath']); // based on element names
+
+//        echo '<pre>';
+//        print_r($xsdElements);
+//        echo '</pre>';
 
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
@@ -740,10 +742,11 @@ class Metadata_form_model extends CI_Model
             }
         }
 //
+//          exit;
 //        echo '<pre>';
 //        print_r($this->presentationElements);
 //        echo '</pre>';
-//        exit;
+
 
         return $this->presentationElements;
     }
@@ -903,9 +906,6 @@ class Metadata_form_model extends CI_Model
 // if counts are wrong in single element situation, return FALSE.
 // Else return TRUE
 
-    // @todo: update all concerning elements wihtin this array
-    // @todo: 1) fieldPosition - number per item
-    // @todo: 2) fieldCount
 
     /**
      * @param $config
@@ -942,10 +942,24 @@ class Metadata_form_model extends CI_Model
 
              */
             $subPropArrayExtended = $subPropArray;
-            $subPropArrayExtended['fieldCount'] = count($element)-1;
-            $subPropArrayExtended['fieldPosition'] = 0;
+            $subPropArrayExtended['compoundFieldCount'] = count($element)-1;
+            $subPropArrayExtended['compoundFieldPosition'] = 0;
+            $subPropArrayExtended['compoundBackendArrayLevel'] = 0;
 
             if ($xsdElements[$key]['type'] == 'openTag') {
+
+//                echo '<pre>';
+//                echo '<br>offset' . $elementOffsetFrontEnd;
+//                echo '<br>';
+//                print_r($subPropArray);
+//                echo '</pre>';
+//
+                if ($elementOffsetFrontEnd) {
+                    unset($subPropArrayExtended['compoundBackendArrayLevel']);
+                    $subPropArrayExtended['compoundBackendArrayLevel'] = 3;
+                }
+
+
 
                 if ($elementOffsetFrontEnd) { // is vanuit een subproperty siutatie
                     $baseCombiElementOffsetFrontEnd = $elementOffsetFrontEnd; // . "[$key]";
@@ -953,7 +967,13 @@ class Metadata_form_model extends CI_Model
                     $baseCombiElementOffsetFrontEnd = $key;
                 }
 
+//                echo "<br>Key: ".$key;
+//                echo '<br>CombiOffset: ' . $baseCombiElementOffsetFrontEnd;
+
+
                 $combiElementMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
+
+//                echo '<br>multi allowed?' . $combiElementMultipleAllowed;
 
                 // multiple values present where only one value is allowed.
                 // Incorrect xml format
@@ -968,9 +988,13 @@ class Metadata_form_model extends CI_Model
                 foreach ($formData as $arValues) { //   $formValues
                     // 1) Add start tag - based upon type = openTag
                     $combiElementName = $baseCombiElementOffsetFrontEnd;
+
+//                    echo '<br>combination: ' . $combiElementName;
+//
                     if ($combiElementMultipleAllowed) {
                         $combiElementName .= "[$combiCounter]";
                     }
+//                    echo '<br>combination: ' . $combiElementName;
 
                     // This overall placeholder for multiple fields should indicate whether it is in its total mandatory
                     // 1) Mandatory for vault processing
@@ -993,8 +1017,8 @@ class Metadata_form_model extends CI_Model
 
 //                            $allSubCombiValues = array();
 //                            $allSubCombiValues[] = $arValues[$subKey];
-                            unset($subPropArrayExtended['fieldPosition']);
-                            $subPropArrayExtended['fieldPosition'] = $fieldPosition;
+                            unset($subPropArrayExtended['compoundFieldPosition']);
+                            $subPropArrayExtended['compoundFieldPosition'] = $fieldPosition;
 
                             if (isset($xsdElements[$subKey])) {
                                 $this->presentationElements[$groupName][] =

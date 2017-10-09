@@ -176,6 +176,12 @@ class Element {
     public $subPropertiesRole = ''; //{startSubPropertyStructure, subProperty, endSubPropertyStructure}
     public $subPropertiesBase = '';
     public $subPropertiesStructID = '';
+
+    // Compound related properties
+    public $compoundFieldCount = 0;
+    public $compoundFieldPosition = 0;
+    public $compoundBackendArrayLevel = 0;
+
     /**
      * Constructor
      */
@@ -222,6 +228,15 @@ class Element {
             $this->subPropertiesBase = $data['subPropertiesBase']; //what does it belong to (each structure has its own identifier)
             $this->subPropertiesStructID = $data['subPropertiesStructID'];
         }
+
+        // Compound related properties
+        if (isset($data['compoundFieldCount'])) {
+            $this->compoundFieldCount = $data['compoundFieldCount'];
+            $this->compoundFieldPosition = $data['compoundFieldPosition'];
+            $this->compoundBackendArrayLevel = $data['compoundBackendArrayLevel'];
+
+        }
+
 
 //        if ($this->subPropertiesRole == 'subProperty') { //differentiate view for actual subproperty (i.e. not the controlling element of a subproperty structure)
 //            $this->type .= '_subproperty';

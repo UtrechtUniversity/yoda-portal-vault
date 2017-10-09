@@ -1,1 +1,1 @@
-<span class="combination-start">
+<span class="combination-start" data-backendLevel="<?php echo $e->compoundBackendArrayLevel?>">
