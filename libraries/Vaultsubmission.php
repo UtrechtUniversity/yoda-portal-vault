@@ -131,6 +131,7 @@ class Vaultsubmission
         $invalidFields = array();
         $this->CI->load->model('Metadata_form_model');
 
+        // $xsdElements = $this->CI->Metadata_form_model->loadXsd($this->account, $this->formConfig['xsdPath']);
 
         $formElements = $this->CI->Metadata_form_model->getFormElements($this->account, $this->formConfig);
 
@@ -151,7 +152,6 @@ class Vaultsubmission
             return array();
         }
 
-
         // @todo: this now steps trhough all visible and indiciation elements.
         // Maybe refactored in looping through the mainfields only
         // And have extra software dig deeper per element depending on the type of element.
@@ -164,39 +164,67 @@ class Vaultsubmission
 
         $structs = array('structCombinationOpen', 'structCombinationClose', 'structSubPropertiesOpen','structSubPropertiesClose');
 
+        $compoundMode = false; // when stepping through a compound the loop can continue
+
         foreach ($formElements as $group => $elements) {
             foreach ($elements as $name => $properties) {
-                if ($properties['mandatory'] AND !in_array($properties['type'], $structs)) {
-                    if (!$properties['value']) {
-                        if (!in_array($properties['key'], $invalidFields)) {
+
+                if (!$compoundMode) {
+                    if ($properties['mandatory'] AND !in_array($properties['type'], $structs)) {
+                        if (!$properties['value']) {
+                            if (!in_array($properties['key'], $invalidFields)) {
+                                $invalidFields[] = $properties['key'];
+                            }
+                        }
+                    }
+                    // add check for empty lead elements in a lead/subproperty structure.
+                    // Even if not mandatory, if subprops exist but no main => cancel submission to vault
+                    if ($properties['subPropertiesRole'] == 'subPropertyStartStructure'
+                        AND $properties['type'] != 'structSubPropertiesOpen'
+                        AND !$properties['value']
+                    ) {
+                        // only add to when there actually is something in the subproperties
+                        // Mandatory present in subproperties??
+                        // Subproperties
+
+                        if (isset($formData[$properties['subPropertiesBase']])) { // only add to array if main field is present in actual data in yoda-metadata.xml
                             $invalidFields[] = $properties['key'];
                         }
                     }
+
+                    // trap the opening of a compound which requires specific handling
+                    if($properties['type']== 'structCombinationOpen') {
+
+                        $compoundMode = 'true';
+                        $compoundMissing = array();
+                        $compoundCounter = 0;
+                        // Next coming items are part of the same compound.
+                        // These must all be present (as defined now in user stories).
+                    }
                 }
+                else { // the actual handling regarding compound elements
+                    if ($properties['type'] == 'structCombinationClose') { // compound closing tag found => draw conclusions
+                        $compoundMode = false; // end of cycling through
+                        // Add completeness conclusions to $invalidFields[]
 
-                // Hij loopt door alle
-                // add check for empty lead elements in a lead/subproperty structure.
-                // Even if not mandatory, if subprops exist but no main => cancel submission to vault
-                if ($properties['subPropertiesRole']=='subPropertyStartStructure'
-                    AND $properties['type']!='structSubPropertiesOpen'
-                    AND !$properties['value']) {
-
-                    // only add to when there actually is something in the subproperties
-                    // Mandatory present in subproperties??
-                    // Subproperties
-
-                    if(isset($formData[$properties['subPropertiesBase']])) { // only add to array if main field is present in actual data in yoda-metadata.xml
-                        $invalidFields[] = $properties['key'];
+                        $countedMissing = count($compoundMissing);
+                        if ($countedMissing AND $compoundCounter != $countedMissing ) { // all missing is allowed as well
+                            foreach($compoundMissing as $keyCompound) {
+                                if (!in_array($keyCompound, $invalidFields)) {
+                                    $invalidFields[] = $keyCompound;
+                                }
+                            }
+                        }
+                    }
+                    else { // check for completeness of values
+                        $compoundCounter++;
+                        if(!$properties['value']) {
+                            $compoundMissing[] = $properties['key'];
+                        }
                     }
                 }
             }
         }
-
-//        echo '<pre>';
-//        print_r($invalidFields);
-//        echo '</pre>';
-//        exit;
-
         return $invalidFields;
     }
 
@@ -239,7 +267,9 @@ class Vaultsubmission
             $fieldID = str_replace(array(']', '['), array('', '_'), $temp);
 
             if (isset($formElementLabels[$fieldID])) {
-                $fieldLabels[] = $formElementLabels[$fieldID];
+                if (!in_array($formElementLabels[$fieldID], $fieldLabels)) { // get rid of duplicate elements that differ as their indexes differ-translation is the same
+                    $fieldLabels[] = $formElementLabels[$fieldID];
+                }
             } else {
                 $fieldLabels[] = $field;
             }

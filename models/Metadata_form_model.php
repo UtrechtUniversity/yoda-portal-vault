@@ -356,12 +356,6 @@ class Metadata_form_model extends CI_Model
         // Get the mainFields only - filter out the grouping
         $formMainFields  = $this->formElementsMainFieldList($formGroupedElements);
 
-//        echo '<pre>';
-//        echo 'HIER';
-//        print_r($formMainFields);
-//        echo '</pre>';
-//        exit;
-
         // XML initialization
         $xml = new DOMDocument("1.0", "UTF-8");
         $xml->formatOutput = true;
@@ -371,6 +365,7 @@ class Metadata_form_model extends CI_Model
 
         // Step through all fields and
         foreach($formMainFields as $mainField=>$mainFieldData) {
+
             $isSubPropertyStructure = false;
             if (!$this->isCompoundElement($mainFieldData) AND $this->isSubpropertyStructure($mainFieldData)) {
                 $isSubPropertyStructure = true;
@@ -382,8 +377,25 @@ class Metadata_form_model extends CI_Model
             }
             $elementData = ($allFormMetadata[$mainField]);
 
-//            echo '<hr>';
-//            echo 'MAINFIELD: ' . $mainField;
+            // Prepwork required for removal of entire empty compounds where necessary
+            $arEmptyCompoundTestNames = array();
+            $isCompoundInStruct = false;
+            if (isset($mainFieldData['Properties'])) {
+                $Properties = $mainFieldData['Properties'];
+                foreach ($Properties as $pkey => $pval) { // For this moment think of only one compound present in subproperty-struct
+                    $tempArray = array();
+                    foreach ($pval as $itemName => $itemVal) {
+                        if (substr($itemName, 0, 5) == '@attr') {
+                            $isCompoundInStruct = true;
+                        } elseif ($isCompoundInStruct) {
+                            $tempArray[] = $itemName;
+                        }
+                    }
+                    if ($isCompoundInStruct) {
+                        $arEmptyCompoundTestNames[$pkey] = $tempArray;
+                    }
+                }
+            }
 
             // $allFormMetadata[$mainField]
             $topLevelData = array();
@@ -394,7 +406,6 @@ class Metadata_form_model extends CI_Model
             }
 
 //            echo '<br>Element name: ' . $mainField;
-
             foreach ($topLevelData as $key => $val) { // per $val => entire structure to be added to $elementName
                 $temp = array();
                 if (!(is_array($val) AND is_numeric(key($val)))) {
@@ -405,6 +416,35 @@ class Metadata_form_model extends CI_Model
                 }
 
                 foreach ($temp as $elementInfo) { // step through each instance of each element
+                    // Test for and remove fully empty structures as they intervene with saving the xml structure
+                    if ($isSubPropertyStructure AND $arEmptyCompoundTestNames) { // can we test compound values in the subproperty-struct?
+                        foreach ($arEmptyCompoundTestNames as $compoundKeyName => $compoundFieldNames) { // shoould be either 0 or 1 loop
+
+                            $isEnumerated = is_numeric(key($elementInfo['Properties'][$compoundKeyName]));
+
+                            if ($isEnumerated) {
+                                $testArray = $elementInfo['Properties'][$compoundKeyName];  // base to test whether all compound elements are are empty
+
+                                foreach ($testArray as $idTest => $testValues) {
+                                    $isFilledCompound = false;
+
+                                    foreach ($compoundFieldNames as $cfName) {
+                                        //echo '<br>' . $compoundKeyName . '-' . $cfName;
+                                        if ($testArray[$idTest][$cfName]) {
+                                            $isFilledCompound = true; // at least one value
+                                            break;
+                                        }
+                                    }
+
+                                    if (!$isFilledCompound) {
+                                        //echo 'unset: ' . $idTest;
+                                        unset($elementInfo['Properties'][$compoundKeyName][$idTest]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     if($isSubPropertyStructure ) {
                         // first element of lead-subproperty struct must have a value.
                         // Per posted data structure for this element, check whether the lead element holds a value.
@@ -415,82 +455,23 @@ class Metadata_form_model extends CI_Model
                         }
                     }
 
-
                     $xml_item = $xml->createElement($mainField); // base element
                     $level = 0; // for deletion handling - deeper levels (>0)can always be deleted (i.e. not written to file when empty value)
                     $metaStructureXML = $this->xmlMetaStructure($xml, $elementInfo, $xml_item, $level);
                     // Only add to actual structure if
+
                     if ($metaStructureXML['anyDataPresent']) {
                         $xml_metadata->appendChild($metaStructureXML['xmlParentElement']);
                     }
                 }
             }
-
-
-//            if (!$this->isCompoundElement($mainFieldData) AND $this->isSubpropertyStructure($mainFieldData)) {
-//            }
-//            else { // non subproperty
-//            }
-
-            if(false) {
-                echo '<pre>';
-
-                if ($mainField == 'Related_Datapackage') {
-                    if (!$this->isCompoundElement($mainFieldData) AND $this->isSubpropertyStructure($mainFieldData)) {
-                        // echo ' - IsSUBPROPStruct';
-
-                        // is er data in het lead element
-
-                        if (true) {
-
-                        }
-                    }
-                    print_r($mainFieldData);
-
-                    $elementData = ($allFormMetadata[$mainField]);
-
-                    // $allFormMetadata[$mainField]
-                    $topLevelData = array();
-                    if (!is_numeric(key($elementData))) {
-                        $topLevelData[] = $elementData;
-                    } else {
-                        $topLevelData = $elementData;
-                    }
-
-                    echo 'topLevelData: ';
-                    echo '<br>';
-                    print_r($topLevelData);
-
-                    foreach ($topLevelData as $key => $val) {
-                        $temp = array();
-                        if (!(is_array($val) AND is_numeric(key($val)))) {
-                            // enumerated structures where we only need the structure itself.
-                            $temp[] = $val;
-                        } else {
-                            $temp = $val;
-                        }
-
-                        foreach ($temp as $elementInfo) {
-                            echo '<pre>ElINfo: <br>';
-                            print_r($elementInfo);
-                            if (reset($elementInfo) == '') { // check first element in lead/sub struct
-                                echo 'DO NOT SAVE ENTIRE STRUCT';
-                            } else {
-                                echo "DO SAVE";
-                            }
-
-                            echo '</pre>';
-                        }
-
-                    }
-                }
-                echo '</pre>';
-            }
         }
 
         $xml->appendChild($xml_metadata);
 
-//        echo $xml->saveXML();
+        //echo $xml->saveXML();
+
+
         return $xml->saveXML();
     }
 
@@ -641,6 +622,8 @@ class Metadata_form_model extends CI_Model
 //        echo '<pre>';
 //        print_r($xsdElements);
 //        echo '</pre>';
+//
+//        echo '<hr><hr><hr>';
 
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
@@ -743,10 +726,11 @@ class Metadata_form_model extends CI_Model
         }
 //
 //          exit;
+//        echo '<hr><hr><hr>';
 //        echo '<pre>';
 //        print_r($this->presentationElements);
 //        echo '</pre>';
-
+//
 
         return $this->presentationElements;
     }
@@ -1145,6 +1129,7 @@ class Metadata_form_model extends CI_Model
             'mandatory' => $mandatory,
             'multipleAllowed' => $multipleAllowed,
             'elementSpecifics' => $elementSpecifics,
+            'elementRouting' => $xsdElement['tagNameRouting']  // @todo: change tagNameRouting to elementRouting
         );
 
         if (count($subpropertyInfo)) {
