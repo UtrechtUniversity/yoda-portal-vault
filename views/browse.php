@@ -77,9 +77,9 @@
                             </button>
                             <ul class="dropdown-menu action-list" role="menu"></ul>
                         </div>
-			<label for="vault-status">
+			<label class="folder-status-pending" for="vault-status">
 			    <i class="fa fa-info-circle" aria-hidden="true"></i>
-			    <span class="folder-status-pending"></span>
+			    <span class="pending-msg"></span>
 			</label>
                     </div>
                 </div>

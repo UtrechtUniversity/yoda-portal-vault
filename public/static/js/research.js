@@ -485,11 +485,11 @@ function topInformation(dir, showAlert)
 			$('label.folder-status-pending').show();
 
 			if (vaultStatus == 'UNPUBLISHED') {
-                            $('label.folder-status-pending').text('Submission pending...');
+                            $('label.folder-status-pending span.pending-msg').text('Submission pending...');
 			} else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
-                            $('label.folder-status-pending').text('Approval pending...');
+                            $('label.folder-status-pending span.pending-msg).text('Approval pending...');
 			} else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
-                            $('label.folder-status-pending').text('Publication pending...');
+                            $('label.folder-status-pending span.pending-msg').text('Publication pending...');
 			}
 		    }
                 }
@@ -793,7 +793,8 @@ function vaultSubmitForPublication(folder)
     $.getJSON("vault/submit_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html(btnText);
-            $('label.folder-status-pending').html('Submission pending...');
+            $('label.folder-status-pending span.pending-msg').html('Submission pending...');
+            $('label.folder-status-pending').show();
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
@@ -813,7 +814,8 @@ function vaultApproveForPublication(folder)
     $.getJSON("vault/approve_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html(btnText);
-            $('label.folder-status-pending').html('Publication pending...');
+            $('label.folder-status-pending span.pending-msg').html('Publication pending...');
+            $('label.folder-status-pending').show();
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
@@ -833,7 +835,8 @@ function vaultCancelPublication(folder)
     $.getJSON("vault/cancel_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html(btnText);
-            $('label.folder-status-pending').html('Cancellation pending...');
+            $('label.folder-status-pending span.pending-msg').html('Cancellation pending...');
+            $('label.folder-status-pending').show();
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
