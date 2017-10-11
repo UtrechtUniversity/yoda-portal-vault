@@ -286,7 +286,6 @@ function toggleActionLogList(folder)
 
 function changeBrowserUrl(path)
 {
-
     var url = window.location.pathname;
     if (typeof path != 'undefined') {
         url += "?dir=" +  path;
@@ -310,6 +309,7 @@ function topInformation(dir, showAlert)
             var metadata = data.result.userMetadata;
             var status = data.result.folderStatus;
             var vaultStatus = data.result.vaultStatus;
+            var vaultStatus = data.result.vaultActionPending;
             var userType = data.result.userType;
             var hasWriteRights = "yes";
             var isDatamanager = data.result.isDatamanager;
@@ -366,7 +366,6 @@ function topInformation(dir, showAlert)
                 }
                 var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
                 $('.btn-group button.toggle-folder-status').attr('data-path', dir);
-
                 $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
 
                 $('.top-info-buttons').show();
@@ -444,7 +443,7 @@ function topInformation(dir, showAlert)
                 // explicitely hide top info buttons related to research - this wasn't always the case
                 $('.top-info-buttons .research').hide();
                 // folder status (vault folder)
-                if (typeof vaultStatus != 'undefined') {
+                if (typeof vaultStatus != 'undefined' && typeof vaultActionPending != 'undefined') {
                     $('.btn-group button.folder-status').next().prop("disabled", true);
                     $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
 
@@ -460,25 +459,35 @@ function topInformation(dir, showAlert)
                         $('.btn-group button.folder-status').text('Unpublished');
                     }
 
-                    // Set action for datamanager and researcher.
-                    if (isDatamanager == 'yes') {
-                        if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
-                            actions['cancel-publication'] = 'Cancel publication';
-                            actions['approve-for-publication'] = 'Approve for publication';
-                            $('.btn-group button.folder-status').next().prop("disabled", false);
-                        } else if (vaultStatus == 'UNPUBLISHED' && inResearchGroup  == 'yes') {
-                            actions['submit-for-publication'] = 'Submit for publication';
-                            $('.btn-group button.folder-status').next().prop("disabled", false);
+                    // Set actions for datamanager and researcher.
+		    if (vaultActionPending == 'no') {
+			if (isDatamanager == 'yes') {
+                            if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
+				actions['cancel-publication'] = 'Cancel publication';
+				actions['approve-for-publication'] = 'Approve for publication';
+				$('.btn-group button.folder-status').next().prop("disabled", false);
+                            } else if (vaultStatus == 'UNPUBLISHED' && inResearchGroup  == 'yes') {
+				actions['submit-for-publication'] = 'Submit for publication';
+				$('.btn-group button.folder-status').next().prop("disabled", false);
+			    }
+			} else {
+                            if (vaultStatus == 'UNPUBLISHED') {
+				actions['submit-for-publication'] = 'Submit for publication';
+				$('.btn-group button.folder-status').next().prop("disabled", false);
+                            } else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
+				actions['cancel-publication'] = 'Cancel publication';
+				$('.btn-group button.folder-status').next().prop("disabled", false);
+                            }
 			}
-                    } else {
-                        if (vaultStatus == 'UNPUBLISHED') {
-                            actions['submit-for-publication'] = 'Submit for publication';
-                            $('.btn-group button.folder-status').next().prop("disabled", false);
-                        } else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
-                            actions['cancel-publication'] = 'Cancel publication';
-                            $('.btn-group button.folder-status').next().prop("disabled", false);
-                        }
-                    }
+		    } else {
+			if (vaultStatus == 'UNPUBLISHED') {
+                            $('.btn-group label.folder-status-pending').text('Submission pending...');
+			} else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
+                            $('.btn-group label.folder-status-pending').text('Approval pending...');
+			} else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
+                            $('.btn-group label.folder-status-pending').text('Publication pending...');
+			}
+		    }
                 }
 
                 // Set action for datamanager and researcher.
@@ -502,7 +511,6 @@ function topInformation(dir, showAlert)
                             $('.top-info-buttons').show();
                             $('.top-info-buttons .vault').show();
                             $('.top-info-buttons .vault .vault-access').hide();
-                            //$('.top-info-buttons .vault .metadata-form').hide();
                 }
             }
 
@@ -780,7 +788,7 @@ function vaultSubmitForPublication(folder)
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/submit_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status').html('Processing...');
+            $('.btn-group button.folder-status-pending').html('Submission pending...');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
@@ -799,7 +807,7 @@ function vaultApproveForPublication(folder)
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/approve_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status').html('Processing...');
+            $('.btn-group button.folder-status-pending').html('Publication pending...');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
@@ -818,7 +826,7 @@ function vaultCancelPublication(folder)
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/cancel_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status').html('Processing...');
+            $('.btn-group button.folder-status-pending').html('Cancellation pending...');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);

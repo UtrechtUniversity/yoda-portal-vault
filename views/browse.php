@@ -50,12 +50,12 @@
 
                         <div class="btn-group">
                             <button type="button" class="btn btn-default folder-status" disabled="disabled">
-                                Actions</button>
+                                Actions
+			    </button>
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span><span class="sr-only">Actions</span>
                             </button>
-                            <ul class="dropdown-menu action-list" role="menu">
-                            </ul>
+			    <ul class="dropdown-menu action-list" role="menu"></ul>
                         </div>
                     </div>
 
@@ -69,13 +69,14 @@
                         </div>
 
                         <div class="btn-group">
-                            <button type="button" class="btn btn-default folder-status" disabled="disabled">
-                                Actions</button>
+                            <button type="button" id="vault-status" class="btn btn-default folder-status" disabled="disabled">
+                                Actions
+			    </button>
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span><span class="sr-only">Actions</span>
                             </button>
-                            <ul class="dropdown-menu action-list" role="menu">
-                            </ul>
+                            <ul class="dropdown-menu action-list" role="menu"></ul>
+			    <label class="folder-status-pending" for="vault-status"></label>
                         </div>
                     </div>
                 </div>
