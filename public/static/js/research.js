@@ -309,7 +309,7 @@ function topInformation(dir, showAlert)
             var metadata = data.result.userMetadata;
             var status = data.result.folderStatus;
             var vaultStatus = data.result.vaultStatus;
-            var vaultStatus = data.result.vaultActionPending;
+            var vaultActionPending = data.result.vaultActionPending;
             var userType = data.result.userType;
             var hasWriteRights = "yes";
             var isDatamanager = data.result.isDatamanager;
