@@ -487,7 +487,7 @@ function topInformation(dir, showAlert)
 			if (vaultStatus == 'UNPUBLISHED') {
                             $('label.folder-status-pending span.pending-msg').text('Submission pending...');
 			} else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
-                            $('label.folder-status-pending span.pending-msg).text('Approval pending...');
+                            $('label.folder-status-pending span.pending-msg').text('Approval pending...');
 			} else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
                             $('label.folder-status-pending span.pending-msg').text('Publication pending...');
 			}
