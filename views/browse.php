@@ -76,8 +76,8 @@
                                 <span class="caret"></span><span class="sr-only">Actions</span>
                             </button>
                             <ul class="dropdown-menu action-list" role="menu"></ul>
-			    <label class="folder-status-pending" for="vault-status"></label>
                         </div>
+			<label class="folder-status-pending fa fa-info-circle" for="vault-status"></label>
                     </div>
                 </div>
             </div>

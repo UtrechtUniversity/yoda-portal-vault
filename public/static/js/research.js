@@ -461,6 +461,8 @@ function topInformation(dir, showAlert)
 
                     // Set actions for datamanager and researcher.
 		    if (vaultActionPending == 'no') {
+			$('label.folder-status-pending').hide();
+
 			if (isDatamanager == 'yes') {
                             if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
 				actions['cancel-publication'] = 'Cancel publication';
@@ -480,12 +482,14 @@ function topInformation(dir, showAlert)
                             }
 			}
 		    } else {
+			$('label.folder-status-pending').show();
+
 			if (vaultStatus == 'UNPUBLISHED') {
-                            $('.btn-group label.folder-status-pending').text('Submission pending...');
+                            $('label.folder-status-pending').text('Submission pending...');
 			} else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
-                            $('.btn-group label.folder-status-pending').text('Approval pending...');
+                            $('label.folder-status-pending').text('Approval pending...');
 			} else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
-                            $('.btn-group label.folder-status-pending').text('Publication pending...');
+                            $('label.folder-status-pending').text('Publication pending...');
 			}
 		    }
                 }
@@ -788,7 +792,8 @@ function vaultSubmitForPublication(folder)
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/submit_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status-pending').html('Submission pending...');
+            $('.btn-group button.folder-status').html(btnText);
+            $('label.folder-status-pending').html('Submission pending...');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
@@ -807,7 +812,8 @@ function vaultApproveForPublication(folder)
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/approve_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status-pending').html('Publication pending...');
+            $('.btn-group button.folder-status').html(btnText);
+            $('label.folder-status-pending').html('Publication pending...');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
@@ -826,7 +832,8 @@ function vaultCancelPublication(folder)
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/cancel_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status-pending').html('Cancellation pending...');
+            $('.btn-group button.folder-status').html(btnText);
+            $('label.folder-status-pending').html('Cancellation pending...');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
