@@ -77,7 +77,10 @@
                             </button>
                             <ul class="dropdown-menu action-list" role="menu"></ul>
                         </div>
-			<label class="folder-status-pending fa fa-info-circle" for="vault-status"></label>
+			<label for="vault-status">
+			    <i class="fa fa-info-circle" aria-hidden="true"></i>
+			    <span class="folder-status-pending"></span>
+			</label>
                     </div>
                 </div>
             </div>
@@ -85,9 +88,6 @@
         <ul class="list-group lock-items"></ul>
         <ul class="list-group actionlog-items"></ul>
     </div>
-
-
-
 
     <div class="col-md-12">
         <div class="row">
