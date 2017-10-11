@@ -330,19 +330,17 @@ function topInformation(dir, showAlert)
 
             // folder status (normal folder)
             if (typeof status != 'undefined' && typeof isVaultPackage == 'undefined') {
-		            // reset action dropdown.
+		// reset action dropdown.
                 $('.btn-group button.folder-status').next().prop("disabled", false);
 
                 if (status == '') {
                     $('.btn-group button.toggle-folder-status').text('Lock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
-
-                    actions['submit'] = 'Submit';
                     $('.btn-group button.folder-status').text('Actions');
+                    actions['submit'] = 'Submit';
                 } else if (status == 'LOCKED') {
                     $('.btn-group button.toggle-folder-status').text('Unlock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
-
                     $('.btn-group button.folder-status').text('Locked');
                     actions['submit'] = 'Submit';
                 } else if (status == 'SUBMITTED') {
@@ -385,9 +383,9 @@ function topInformation(dir, showAlert)
                 if (lockFound == "here") {
                     showStatusBtn = true;
                 } else {
-		            // Lock is either on descendant or ancestor Folder
-		            showStatusBtn = false;
-		        }
+		    // Lock is either on descendant or ancestor Folder
+		    showStatusBtn = false;
+		}
             } else {
                 // No lock found, show the btn.
                 showStatusBtn = true;
@@ -399,7 +397,6 @@ function topInformation(dir, showAlert)
                 // disable status dropdown.
                 $('.btn-group button.folder-status').next().prop("disabled", true);
                 hasWriteRights = 'no';
-
             }
 
             if (isDatamanager == 'yes') {
@@ -442,7 +439,7 @@ function topInformation(dir, showAlert)
                 }
             }
 
-	        // is vault package
+	    // is vault package
             if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
                 // explicitely hide top info buttons related to research - this wasn't always the case
                 $('.top-info-buttons .research').hide();
@@ -459,8 +456,6 @@ function topInformation(dir, showAlert)
                         $('.btn-group button.folder-status').text('Published');
                     } else if (vaultStatus == 'DEPUBLISHED') {
                         $('.btn-group button.folder-status').text('Depublished');
-                    } else if (vaultStatus == 'PENDING') {
-                        $('.btn-group button.folder-status').text('Processing...');
                     } else {
                         $('.btn-group button.folder-status').text('Unpublished');
                     }
