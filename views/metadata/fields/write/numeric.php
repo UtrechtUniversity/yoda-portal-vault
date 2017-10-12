@@ -16,13 +16,7 @@
                             <?php
                                 // this is added as stacked icons make tooltip handling harder.
                                 $toolTipLock = '';
-                                $toolTipCheckmark = '';
-                                if($e->value) {
-                                    $toolTipCheckmark = 'aria-hidden="true" data-toggle="tooltip" title="Filled out correctly for the vault"';
-                                }
-                                else {
-                                    $toolTipLock = 'aria-hidden="true" data-toggle="tooltip" title="Required for the vault"';
-                                }
+                                $toolTipCheckmark = 'aria-hidden="true" data-toggle="tooltip" title="Filled out correctly for the vault"';
                             ?>
 
                             <i class="fa fa-lock safe fa-stack-1x" <?php echo $toolTipLock; ?> ></i>
