@@ -73,5 +73,6 @@
                 <?php } ?>
             </div>
         </div>
+        <?php  get_instance()->load->view('metadata/fields/write/compound-duplicate-button', array('e',$e)); ?>
     </div>
 </div>
