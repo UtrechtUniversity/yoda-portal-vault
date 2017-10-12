@@ -245,6 +245,11 @@ function duplicateField(field, cloneType)
 
             var name = $(this).attr('name');
 
+            // solution to get the tab navigation working
+            if ($(this).prop('tabindex')=='-1') {
+                $(this).prop('tabindex',0);
+            }
+
             // the select2 control comes by twices in this loop. As the container and as the select.
             // The container designates the entire frontend representation and defines that we have a select2
             //
