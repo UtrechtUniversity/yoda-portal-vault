@@ -298,7 +298,6 @@ function duplicateField(field, cloneType)
                         changeYear: true
                     });
                 }
-
             }
 
             // Kept it from previous loop and now finalize situation
