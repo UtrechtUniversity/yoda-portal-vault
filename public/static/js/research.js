@@ -497,20 +497,6 @@ function topInformation(dir, showAlert)
 		    }
                 }
 
-                // Set action for datamanager and researcher.
-                if (isDatamanager == 'yes') {
-                    if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
-                        actions['approve-for-publication'] = 'Approve for publication';
-                        actions['cancel-publication'] = 'Cancel publication';
-                        $('.btn-group button.folder-status').next().prop("disabled", false);
-                    }
-                } else {
-                    if (vaultStatus == 'UNPUBLISHED') {
-                        actions['submit-for-publication'] = 'Submit for publication';
-                        $('.btn-group button.folder-status').next().prop("disabled", false);
-                    }
-                }
-
                 // Datamanager sees all buttons in vault, researcher only folder status.
                 if (isDatamanager == 'yes') {
                             $('.top-info-buttons .vault').show();
