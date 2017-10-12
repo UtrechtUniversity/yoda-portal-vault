@@ -11,7 +11,7 @@
 
             <div class="col-sm-1">
                 <?php if ($e->mandatory) { ?>
-                    <?php if($metadataExists) { ?>
+                    <?php if($e->value and is_numeric($e->value)) { ?>
                         <span class="fa-stack ">
                             <?php
                                 // this is added as stacked icons make tooltip handling harder.
@@ -69,5 +69,6 @@
                 <?php } ?>
             </div>
          </div>
+        <?php  get_instance()->load->view('metadata/fields/write/compound-duplicate-button', array('e',$e)); ?>
     </div>
 </div>

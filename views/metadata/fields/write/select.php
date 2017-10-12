@@ -11,7 +11,9 @@
 
             <div class="col-sm-1">
                 <?php if ($e->mandatory) { ?>
-                    <?php if($metadataExists) { ?>
+                    <?php
+                        // simple reasoning: if mandatory and value is valid then checkmark can be placed. (be it by default or not)
+                        if(in_array($e->value, $e->options)) { ?>
                         <span class="fa-stack ">
                             <?php
                             // this is added as stacked icons make tooltip handling harder.
@@ -26,9 +28,7 @@
                             ?>
 
                             <i class="fa fa-lock safe fa-stack-1x" <?php echo $toolTipLock; ?> ></i>
-                            <?php if($e->value) { ?>
-                                <i class="fa fa-check fa-stack-1x checkmark-green-top-right" <?php echo $toolTipCheckmark; ?> ></i>
-                            <?php } ?>
+                            <i class="fa fa-check fa-stack-1x checkmark-green-top-right" <?php echo $toolTipCheckmark; ?> ></i>
                         </span>
                     <?php } else { ?>
                         <i class="fa fa-lock safe-single" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
@@ -70,19 +70,7 @@
                     </select>
                 <?php } ?>
             </div>
-
-            <?php if ($e->compoundFieldPosition ==($e->compoundFieldCount-1) ) {
-                ?>
-                <span class="input-group-btn">
-                    <button class="btn btn-default duplicate-field combined-plus"
-                            data-clone="combined"  type="button">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                    </button>
-                </span>
-                <?php
-            } ?>
-
-
+            <?php  get_instance()->load->view('metadata/fields/write/compound-duplicate-button', array('e',$e)); ?>
         </div>
     </div>
 </div>
