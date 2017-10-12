@@ -12,24 +12,16 @@
 
             <div class="col-sm-1">
                 <?php if ($e->mandatory) { ?>
-                    <?php if($metadataExists) { ?>
+                    <?php if($e->value) { ?>
                         <span class="fa-stack ">
                             <?php
                             // this is added as stacked icons make tooltip handling harder.
                             $toolTipLock = '';
-                            $toolTipCheckmark = '';
-                            if($e->value) {
-                                $toolTipCheckmark = 'aria-hidden="true" data-toggle="tooltip" title="Filled out correctly for the vault"';
-                            }
-                            else {
-                                $toolTipLock = 'aria-hidden="true" data-toggle="tooltip" title="Required for the vault"';
-                            }
+                            $toolTipCheckmark = 'aria-hidden="true" data-toggle="tooltip" title="Filled out correctly for the vault"';
                             ?>
 
                             <i class="fa fa-lock safe fa-stack-1x" <?php echo $toolTipLock; ?> ></i>
-                            <?php if($e->value) { ?>
-                                <i class="fa fa-check fa-stack-1x checkmark-green-top-right" <?php echo $toolTipCheckmark; ?> ></i>
-                            <?php } ?>
+                            <i class="fa fa-check fa-stack-1x checkmark-green-top-right" <?php echo $toolTipCheckmark; ?> ></i>
                         </span>
                     <?php } else { ?>
                         <i class="fa fa-lock safe-single" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
