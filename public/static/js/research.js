@@ -310,6 +310,7 @@ function topInformation(dir, showAlert)
             var status = data.result.folderStatus;
             var vaultStatus = data.result.vaultStatus;
             var vaultActionPending = data.result.vaultActionPending;
+            var vaultNewStatus = data.result.vaultNewStatus;
             var userType = data.result.userType;
             var hasWriteRights = "yes";
             var isDatamanager = data.result.isDatamanager;
@@ -484,11 +485,13 @@ function topInformation(dir, showAlert)
 		    } else {
 			$('label.folder-status-pending').show();
 
-			if (vaultStatus == 'UNPUBLISHED') {
+			if (vaultNewStatus == 'UNPUBLISHED') {
+                            $('label.folder-status-pending span.pending-msg').text('Cancellation pending...');
+			} else if (vaultNewStatus == 'SUBMITTED_FOR_PUBLICATION') {
                             $('label.folder-status-pending span.pending-msg').text('Submission pending...');
-			} else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
+			} else if (vaultNewStatus == 'APPROVED_FOR_PUBLICATION') {
                             $('label.folder-status-pending span.pending-msg').text('Approval pending...');
-			} else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
+			} else if (vaultNewStatus == 'PUBLISHED') {
                             $('label.folder-status-pending span.pending-msg').text('Publication pending...');
 			}
 		    }
