@@ -730,7 +730,8 @@ class Metadata_form_model extends CI_Model
 //        echo '<pre>';
 //        print_r($this->presentationElements);
 //        echo '</pre>';
-//
+
+// exit;
 
         return $this->presentationElements;
     }

@@ -36,6 +36,12 @@ class Metadataform {
 
     public function calculateMandatoryCompleteness($formElements)
     {
+//        echo '<hr><hr><hr>';
+//        echo '<pre>';
+//        print_r($formElements);
+//        echo '</pre>';
+        $mainLevelProperties = array();
+
         $mandatoryCounts = array();
 
         // exclude the following tags in counting the completeness
@@ -44,21 +50,39 @@ class Metadataform {
         foreach ($formElements as $group => $elements) {
 
             foreach ($elements as $name => $properties) {
+                $includeInMandatoryCount = true;
 
-                // @TODO - ook verplichte subproperties meenemen???
-                // Some fields are multipleAllowed. This should only be counted as 1 field.
+                // Create an array with the properties of the base for subpropertie-mandatory-analysis
+                $base = $properties['subPropertiesBase'];
+                if ($base AND !isset($mainLevelProperties[$base]) AND !in_array($properties['type'], $structs)) {
+                    $mainLevelProperties[$base] = $properties;
+                }
+
                 if($properties['mandatory'] AND !in_array($properties['type'], $structs)) {
 
-                    if(!isset($mandatoryCounts[$properties['key']])) {
-                        $mandatoryCounts[$properties['key']] = 0;
+                    // mandatoriness for subproperties only counts if parent level has value
+
+                    if ($properties['subPropertiesRole']=='subProperty') { // is subproperty element
+
+                        $parentValue = $mainLevelProperties[$base]['value'];
+
+                        if (!$parentValue) {
+                            $includeInMandatoryCount = false;
+                        }
                     }
 
-                    $markAsPresent = 0;
-                    if($properties['value']) {
-                        $markAsPresent = 1;
-                    }
+                    if ($includeInMandatoryCount) {
+                        if (!isset($mandatoryCounts[$properties['key']])) {
+                            $mandatoryCounts[$properties['key']] = 0;
+                        }
 
-                    $mandatoryCounts[$properties['key']] = $markAsPresent;
+                        $markAsPresent = 0;
+                        if ($properties['value']) {
+                            $markAsPresent = 1;
+                        }
+
+                        $mandatoryCounts[$properties['key']] = $markAsPresent;
+                    }
                 }
             }
         }

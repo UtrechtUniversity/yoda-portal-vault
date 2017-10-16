@@ -166,17 +166,39 @@ class Vaultsubmission
 
         $compoundMode = false; // when stepping through a compound the loop can continue
 
+        $mainLevelProperties = array();
+
         foreach ($formElements as $group => $elements) {
             foreach ($elements as $name => $properties) {
 
+                $base = $properties['subPropertiesBase'];
+                if ($base AND !isset($mainLevelProperties[$base]) AND !in_array($properties['type'], $structs)) {
+                    $mainLevelProperties[$base] = $properties;
+                }
+
                 if (!$compoundMode) {
                     if ($properties['mandatory'] AND !in_array($properties['type'], $structs)) {
-                        if (!$properties['value']) {
-                            if (!in_array($properties['key'], $invalidFields)) {
-                                $invalidFields[] = $properties['key'];
+                        // Subproperty element set as mandatory - is only possible if parent level has value
+                        if ($properties['subPropertiesRole']=='subProperty') { // is subproperty element
+                            // mandatoriness for subproperties only counts if parent level has value
+                            $parentValue = $mainLevelProperties[$base]['value'];
+                            if ($parentValue) {
+                                if (!$properties['value']) {
+                                    if (!in_array($properties['key'], $invalidFields)) {
+                                        $invalidFields[] = $properties['key'];
+                                    }
+                                }
+                            }
+                        }
+                        else { // normal element - that must be present
+                            if (!$properties['value']) {
+                                if (!in_array($properties['key'], $invalidFields)) {
+                                    $invalidFields[] = $properties['key'];
+                                }
                             }
                         }
                     }
+
                     // add check for empty lead elements in a lead/subproperty structure.
                     // Even if not mandatory, if subprops exist but no main => cancel submission to vault
                     if ($properties['subPropertiesRole'] == 'subPropertyStartStructure'
