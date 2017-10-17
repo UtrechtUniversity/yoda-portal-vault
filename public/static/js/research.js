@@ -305,7 +305,7 @@ function toggleSystemMetadata(folder)
                 var logItems = data.result;
                 if (logItems.length) {
                     $.each(logItems, function (index, value) {
-                        html += '<li class="list-group-item"><span>' + value[2] + ' - <strong>' + value[1] + '</strong> - ' + value[0] + '</span></li>';
+                        html += '<li class="list-group-item"><span><strong>' + value[0] + '</strong>: ' + value[1] + '</span></li>';
                     });
                 }
                 else {

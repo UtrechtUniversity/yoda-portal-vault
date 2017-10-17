@@ -621,7 +621,7 @@ RULE;
 
         $ruleBody = <<<'RULE'
 myRule {
-    iiFrontSystemMetadata(*folder, *result, *status, *statusInfo);
+    iiFrontEndSystemMetadata(*folder, *result, *status, *statusInfo);
 }
 RULE;
         try {
