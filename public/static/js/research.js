@@ -537,6 +537,13 @@ function topInformation(dir, showAlert)
 		actionLogIcon = '';
 	    }
 
+	    // System metadata.
+            $('.system-metadata-items').hide();
+            systemMetadataIcon = ' <i class="fa fa-book system-metadata-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="System metadata"></i>';
+            if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'no') {
+		systemMetadataIcon = '';
+	    }
+
             $('.btn-group button.folder-status').attr('data-write', hasWriteRights);
 
             // Handle actions
@@ -545,7 +552,7 @@ function topInformation(dir, showAlert)
             // data.basename.replace(/ /g, "&nbsp;")
             folderName = htmlEncode(data.result.basename).replace(/ /g, "&nbsp;");
 
-            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + lockIcon + actionLogIcon);
+            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + lockIcon + systemMetadataIcon + actionLogIcon);
             $('.top-information').show();
         });
     }
