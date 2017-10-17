@@ -575,7 +575,7 @@ function topInformation(dir, showAlert)
 	    // System metadata.
             $('.system-metadata-items').hide();
             systemMetadataIcon = ' <i class="fa fa-info-circle system-metadata-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="System metadata"></i>';
-            if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'no') {
+            if (typeof isVaultPackage == 'undefined' || isVaultPackage == 'no') {
 		systemMetadataIcon = '';
 	    }
 
