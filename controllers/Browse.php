@@ -162,7 +162,7 @@ class Browse extends MY_Controller
         if ($result['*status'] == 'Success') {
 
             foreach($result['*result'] as $item){
-                $systemMetadata[] = array($item[0], $item[0], $item[0]);
+                $systemMetadata[] = array($item[0], $item[1]);
             }
         }
 
