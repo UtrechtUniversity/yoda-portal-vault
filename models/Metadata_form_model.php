@@ -725,7 +725,6 @@ class Metadata_form_model extends CI_Model
             }
         }
 //
-//          exit;
 //        echo '<hr><hr><hr>';
 //        echo '<pre>';
 //        print_r($this->presentationElements);
@@ -835,6 +834,15 @@ class Metadata_form_model extends CI_Model
                             }
                         } else {
                             $arRouting = $xsdElements[$subKey]['tagNameRouting'];
+
+//                            if($subKey=='Creator_Properties_Affiliation2') {
+//                                echo 'subKey: ' . $subKey;
+//                                echo '<pre>';
+//                                    print_r($xsdElements);
+//                                echo '</pre>';
+//                                exit;
+//                                //echo '<hr>';
+//                            }
 
                             // we know this is the 2nd(1 in tagNameRoute) and 3rd(2 in tagNameRoute) level so no real analysing required
                             $subKeyValue = $structValues[$arRouting[1]][$arRouting[2]];
@@ -1417,19 +1425,22 @@ class Metadata_form_model extends CI_Model
                 $elementSubLevel = $element->complexType->sequence->element;
 
                 //$prefixHigherLevel = $elementName . '_'; // to be used to identify elements
+
+                $prefixHigherLevelKeep = $prefixHigherLevel;
                 if (!$prefixHigherLevel) {
                     $prefixHigherLevel = $elementName . '_';
                 } else {
                     $prefixHigherLevel = $prefixHigherLevel . $elementName . '_';
                 }
 
+
                 // dieper niveau uitvoeren op basis an de gestelde prefix.
                 $this->addElements($xsdElements, $elementSubLevel, $supportedSimpleTypes, $simpleTypeData, $prefixHigherLevel);
 
-                $prefixHigherLevel = ''; //reset it again
+                $prefixHigherLevel = $prefixHigherLevelKeep; //''; //reset it again
 
                 // Closing tag - Deeper level
-                $xsdElements[$elementName . '_close'] = array(
+                $xsdElements[$prefixHigherLevel . $elementName . '_close'] = array(
                     'type' => 'closeTag',
                     'minOccurs' => $minOccurs,
                     'maxOccurs' => $maxOccurs,
@@ -1465,92 +1476,6 @@ class Metadata_form_model extends CI_Model
         $formData = json_decode($json, TRUE);
 
         return $formData;
-
-// ------------------------- following is obsolete
-
-
-        echo '<br>TEST indexing'; //Related_Datapackage_Properties_Persistent_Identifier_Type
-        echo '<br>';
-//        $path = array('Related_Datapackage']['Properties']['Persistent_Identifier_Type');
-
-        echo $formData['Related_Datapackage']['Properties']['Persistent_Identifier_Type'];
-        echo '<br>';
-        echo '<br>Affiliation';
-        echo '<br>' . $formData['Creator']['Properties']['Affiliation'];
-        echo print_r($formData['Creator']['Properties']['Affiliation']);
-
-        exit;
-
-        $newFormData = array();
-        foreach ($formData as $key => $data) {
-            if (!is_array($data)) {
-                $newFormData[$key] = $data;
-            } else {
-                // First sublevel.
-                // Could be an enumeration - i.e multiple instances of same element
-                foreach ($data as $key2 => $data2) {
-                    if (!is_array($data2)) {  // normal multisituation handling
-                        if (is_numeric($key2)) {
-                            $newFormData[$key][$key2] = $data2;
-                        } else {
-                            $newFormData[$key . '_' . $key2] = $data2;
-                        }
-                    } else {
-                        if (is_numeric($key2)) { // SUBPROPERTIES: enumeration and therefore a complete set
-                            $subPropertiesArray = array();
-
-                            foreach ($data2 as $key3 => $data3) {
-                                if (!is_array($data3)) {
-                                    $subPropertiesArray[$key . '_' . $key3] = $data3;
-                                } else {
-                                    foreach ($data3 as $key4 => $data4) {
-                                        $subPropertiesArray[$key . '_' . $key3 . '_' . $key4] = $data4;
-                                    }
-                                }
-                            }
-
-                            // Put array of subproperties under common key for later purposes
-                            $newFormData[$key][] = $subPropertiesArray;
-                        } else {
-                            foreach ($data2 as $key3 => $data3) {
-                                if (!is_array($data3)) {
-                                    $newFormData[$key . '_' . $key2 . '_' . $key3] = $data3;
-                                } else {
-
-                                    foreach ($data3 as $key4 => $data4) {
-                                        if (is_numeric($key4)) { // is array enumeration -> add it like an array for handling purposes in the layers using this data
-                                            if (!is_array($data4)) { // situation of multiple subproperties
-                                                $newFormData[$key . '_' . $key2 . '_' . $key3] = $data3;
-                                            } else {
-                                                $arTemp = array();
-                                                foreach ($data4 as $tag => $tagVal) {
-                                                    $arTemp[$key . '_' . $key2 . '_' . $key3 . '_' . $tag] = $tagVal;
-                                                }
-
-                                                //exit;
-                                                $newFormData[$key . '_' . $key2 . '_' . $key3][$key4] = $arTemp;
-                                            }
-                                        } else {
-                                            $newFormData[$key . '_' . $key2 . '_' . $key3 . '_' . $key4] = $data4;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-//
-        // $newFormData['Creator_Properties_Affiliation'] = array(0=>'af1',1=>'af2');
-
-
-//        echo '<pre>';
-//            print_r($newFormData);
-//        echo '</pre>';
-//        exit;
-
-        return $newFormData;
     }
 
     /**
