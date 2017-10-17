@@ -158,7 +158,15 @@ class Browse extends MY_Controller
 
         $result = $this->filesystem->listSystemMetadata($rodsaccount, $fullPath);
 
-        echo json_encode(array('result' => $result['*$result'], 'status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+        $systemMetadata = array();
+        if ($result['*status'] == 'Success') {
+
+            foreach($result['*result'] as $item){
+                $systemMetadata[] = array($item[0], $item[0], $item[0]);
+            }
+        }
+
+        echo json_encode(array('result' => $systemMetadata, 'status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
     }
 
     /**
