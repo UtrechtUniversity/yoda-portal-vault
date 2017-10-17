@@ -290,7 +290,7 @@ function toggleActionLogList(folder)
 function toggleSystemMetadata(folder)
 {
     var systemMetadata = $('.system-metadata-items');
-    var isVisible = actionList.is(":visible");
+    var isVisible = systemMetadata.is(":visible");
 
     // Toggle system metadata.
     if (isVisible) {
