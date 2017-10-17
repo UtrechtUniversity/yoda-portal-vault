@@ -70,6 +70,10 @@ $( document ).ready(function() {
         toggleActionLogList($(this).attr('data-folder'));
     });
 
+    $("body").on("click", "i.system-metadata-icon", function() {
+        toggleSystemMetadata($(this).attr('data-folder'));
+    });
+
     $("body").on("click", ".browse", function() {
         browse($(this).attr('data-path'));
     });
@@ -283,6 +287,37 @@ function toggleActionLogList(folder)
     }
 }
 
+function toggleSystemMetadata(folder)
+{
+    var systemMetadata = $('.system-metadata-items');
+    var isVisible = actionList.is(":visible");
+
+    // Toggle system metadata.
+    if (isVisible) {
+        systemMetadata.hide();
+    } else {
+        // Get locks
+        $.getJSON("browse/system_metadata?folder=" + folder, function (data) {
+            systemMetadata.hide();
+
+            if (data.status == 'Success') {
+                var html = '<li class="list-group-item disabled">System metadata:</li>';
+                var logItems = data.result;
+                if (logItems.length) {
+                    $.each(logItems, function (index, value) {
+                        html += '<li class="list-group-item"><span>' + value[2] + ' - <strong>' + value[1] + '</strong> - ' + value[0] + '</span></li>';
+                    });
+                }
+                else {
+                    html += '<li class="list-group-item">No system metadata present</li>';
+                }
+                systemMetadata.html(html).show();
+            } else {
+                setMessage('error', data.statusInfo);
+            }
+        });
+    }
+}
 
 function changeBrowserUrl(path)
 {
@@ -539,7 +574,7 @@ function topInformation(dir, showAlert)
 
 	    // System metadata.
             $('.system-metadata-items').hide();
-            systemMetadataIcon = ' <i class="fa fa-book system-metadata-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="System metadata"></i>';
+            systemMetadataIcon = ' <i class="fa fa-info-circle system-metadata-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="System metadata"></i>';
             if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'no') {
 		systemMetadataIcon = '';
 	    }
