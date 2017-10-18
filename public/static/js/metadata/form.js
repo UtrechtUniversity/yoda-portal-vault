@@ -5,7 +5,14 @@ $(function () {
     $( ".datepicker" ).datepicker({
         dateFormat: "yy-mm-dd",
         changeMonth: true,
-        changeYear: true
+        changeYear: true,
+        showButtonPanel: true,
+        selectCurrent: true,
+        closeText: 'Clear',
+        onClose: function (dateText, obj) {
+            if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
+                $.datepicker._clearDate(this);
+        }
     });
     $('select').select2();
 
@@ -129,7 +136,13 @@ function duplicateField(field, cloneType)
         newField.datepicker({
             dateFormat: "yy-mm-dd",
             changeMonth: true,
-            changeYear: true
+            changeYear: true,
+            showButtonPanel: true,
+            closeText: 'Clear',
+            onClose: function (dateText, obj) {
+                if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
+                    $.datepicker._clearDate(this);
+            }
         });
     }
 
@@ -203,7 +216,13 @@ function duplicateField(field, cloneType)
                 newField.datepicker({
                     dateFormat: "yy-mm-dd",
                     changeMonth: true,
-                    changeYear: true
+                    changeYear: true,
+                    showButtonPanel: true,
+                    closeText: 'Clear',
+                    onClose: function (dateText, obj) {
+                        if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
+                            $.datepicker._clearDate(this);
+                    }
                 });
             }
 
@@ -295,7 +314,13 @@ function duplicateField(field, cloneType)
                     $(this).datepicker({
                         dateFormat: "yy-mm-dd",
                         changeMonth: true,
-                        changeYear: true
+                        changeYear: true,
+                        showButtonPanel: true,
+                        closeText: 'Clear',
+                        onClose: function (dateText, obj) {
+                            if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
+                                $.datepicker._clearDate(this);
+                        }
                     });
                 }
             }
@@ -343,7 +368,13 @@ if (newField.hasClass('datepicker')) {
     newField.datepicker({
         dateFormat: "yy-mm-dd",
         changeMonth: true,
-        changeYear: true
+        changeYear: true,
+        showButtonPanel: true,
+        closeText: 'Clear',
+        onClose: function (dateText, obj) {
+            if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
+                $.datepicker._clearDate(this);
+        }
     });
 }
 
