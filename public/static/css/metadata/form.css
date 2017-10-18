@@ -99,6 +99,11 @@ legend {
     z-index: 999!important;
 }
 
+.ui-datepicker-current {
+    visibility:hidden
+}
+
+
 .combination-start .form-group {
     float: left;
     width: 50%;
