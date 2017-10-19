@@ -107,16 +107,39 @@ class Folder_Status_model extends CI_Model
         return $result;
     }
 
-    // including version of conditions&terms
-    function submit_for_publication($folder,  $confirmationVersion)
+    function submit_for_publication($folder)
     {
         $outputParams = array('*status', '*statusInfo');
-        $inputParams = array('*folder' => $folder,
-            '*confirmationVersion' => $confirmationVersion);
+        $inputParams = array('*folder' => $folder);
 
         $this->CI->load->library('irodsrule');
         $rule = $this->irodsrule->make('iiVaultSubmit', $inputParams, $outputParams);
         $result = $rule->execute();
+        return $result;
+    }
+
+    function getLicenseText($fullPath)
+    {
+        $outputParams = array('*result', '*status', '*statusInfo');
+        $inputParams = array('*folder' => $fullPath);
+
+        $this->CI->load->library('irodsrule');
+        $rule = $this->irodsrule->make('iiGetPublicationLicenseText', $inputParams, $outputParams);
+        $result = $rule->execute();
+
+        return $result;
+
+        $result = array(
+            '*status' => 'Success',
+            '*statusInfo' => '',
+            '*result' => 'MODEL RESPONSE: ' . $fullPath
+        );
+//        $result = array(
+//            '*status' => 'Error',
+//            '*statusInfo' => 'HH - Could not retrieve required license data - Please try again.',
+//            '*result' => 'RESPONSE: ' . $fullPath
+//        );
+
         return $result;
     }
 

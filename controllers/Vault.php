@@ -112,6 +112,22 @@ class Vault extends MY_Controller
         echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
     }
 
+    public function license()
+    {
+        $path = $this->input->get('path');
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $fullPath =  $pathStart . $path;
+
+        $this->load->model('Folder_Status_model');
+        $result = $this->Folder_Status_model->getLicenseText($fullPath);
+
+        // welk model moet license komen??
+        echo json_encode(array('status' => $result['*status'],
+            'statusInfo' => $result['*statusInfo'],
+            'result' => $result['*result']
+            ));
+    }
+
     public function submit_for_publication()
     {
         $this->load->model('Folder_Status_model');
@@ -119,12 +135,7 @@ class Vault extends MY_Controller
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
 
-        $confirmationVersion = $this->config->item('confirmation-version');
-        if (!$confirmationVersion) {
-            $confirmationVersion = '0';
-        }
-
-        $result = $this->Folder_Status_model->submit_for_publication($fullPath, $confirmationVersion);
+        $result = $this->Folder_Status_model->submit_for_publication($fullPath);
         echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
     }
 

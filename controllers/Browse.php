@@ -59,8 +59,6 @@ class Browse extends MY_Controller
         $searchData = compact('searchTerm', 'searchStatusValue', 'searchType', 'searchStart', 'searchOrderDir', 'searchOrderColumn', 'showStatus', 'showTerm', 'searchItemsPerPage');
         $searchHtml = $this->load->view('search', $searchData, true);
 
-        $confirmationVersion = $this->config->item('confirmation-version');
-
         $viewParams = array(
             'styleIncludes' => array(
                 'css/research.css',
@@ -77,7 +75,6 @@ class Browse extends MY_Controller
             'searchHtml' => $searchHtml,
             'items' => $items,
             'dir' => $dir,
-            'confirmationVersion' => strlen($confirmationVersion) ? $confirmationVersion : '0'
         );
         loadView('browse', $viewParams);
     }

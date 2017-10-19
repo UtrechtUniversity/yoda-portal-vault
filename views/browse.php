@@ -10,12 +10,6 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
-                <br>Version: <?php echo $confirmationVersion; ?>
-                <br><i>Please scroll down to read the entire text and confirm to the conditions</i>
-                <h3>Please confirm that you agree with following terms and conditions</h3>
-
-                <?php $this->load->view('/publication_confirmation_versions/' . $confirmationVersion ); ?>
-
             </div>
 
             <div class="modal-footer">

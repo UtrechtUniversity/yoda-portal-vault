@@ -32,12 +32,33 @@ $( document ).ready(function() {
     });
 
     $("body").on("click", "a.action-submit-for-publication", function() {
-        $('.action-confirm-submit-for-publication').attr( 'data-folder', $(this).attr('data-folder') );
+        $('#confirmAgreementConditions .modal-body').text(''); // clear it first
+
+        folder = $(this).attr('data-folder');
+        $.getJSON("vault/license?path=" + folder, function (data) {
+            if (data.status == 'Success') {
+                $('#confirmAgreementConditions .modal-body').html(data.result);
+
+                $('.action-confirm-submit-for-publication').attr( 'data-folder', $(this).attr('data-folder') );
+
+                // set default status and show dialog
+                $(".action-confirm-submit-for-publication").prop('disabled', true);
+                $("#confirmAgreementConditions .confirm-conditions").prop('checked', false);
+
+                $('#confirmAgreementConditions').modal('show');
+            } else {
+                setMessage('error', data.statusInfo);
+
+                return;
+            }
+        });
+
+//        $('.action-confirm-submit-for-publication').attr( 'data-folder', $(this).attr('data-folder') );
 
         // set default status and show dialog
-        $(".action-confirm-submit-for-publication").prop('disabled', true);
-        $("#confirmAgreementConditions .confirm-conditions").prop('checked', false);
-        $('#confirmAgreementConditions').modal('show');
+//        $(".action-confirm-submit-for-publication").prop('disabled', true);
+//        $("#confirmAgreementConditions .confirm-conditions").prop('checked', false);
+        // $('#confirmAgreementConditions').modal('show');
     });
 
     $("#confirmAgreementConditions").on("click", '.confirm-conditions', function() {
@@ -68,10 +89,6 @@ $( document ).ready(function() {
 
     $("body").on("click", "i.actionlog-icon", function() {
         toggleActionLogList($(this).attr('data-folder'));
-    });
-
-    $("body").on("click", "i.system-metadata-icon", function() {
-        toggleSystemMetadata($(this).attr('data-folder'));
     });
 
     $("body").on("click", ".browse", function() {
@@ -287,37 +304,6 @@ function toggleActionLogList(folder)
     }
 }
 
-function toggleSystemMetadata(folder)
-{
-    var systemMetadata = $('.system-metadata-items');
-    var isVisible = systemMetadata.is(":visible");
-
-    // Toggle system metadata.
-    if (isVisible) {
-        systemMetadata.hide();
-    } else {
-        // Get locks
-        $.getJSON("browse/system_metadata?folder=" + folder, function (data) {
-            systemMetadata.hide();
-
-            if (data.status == 'Success') {
-                var html = '<li class="list-group-item disabled">System metadata:</li>';
-                var logItems = data.result;
-                if (logItems.length) {
-                    $.each(logItems, function (index, value) {
-                        html += '<li class="list-group-item"><span><strong>' + value[0] + '</strong>: ' + value[1] + '</span></li>';
-                    });
-                }
-                else {
-                    html += '<li class="list-group-item">No system metadata present</li>';
-                }
-                systemMetadata.html(html).show();
-            } else {
-                setMessage('error', data.statusInfo);
-            }
-        });
-    }
-}
 
 function changeBrowserUrl(path)
 {
@@ -345,7 +331,6 @@ function topInformation(dir, showAlert)
             var status = data.result.folderStatus;
             var vaultStatus = data.result.vaultStatus;
             var vaultActionPending = data.result.vaultActionPending;
-            var vaultNewStatus = data.result.vaultNewStatus;
             var userType = data.result.userType;
             var hasWriteRights = "yes";
             var isDatamanager = data.result.isDatamanager;
@@ -520,16 +505,28 @@ function topInformation(dir, showAlert)
 		    } else {
 			$('label.folder-status-pending').show();
 
-			if (vaultNewStatus == 'UNPUBLISHED') {
-                            $('label.folder-status-pending span.pending-msg').text('Cancellation pending...');
-			} else if (vaultNewStatus == 'SUBMITTED_FOR_PUBLICATION') {
+			if (vaultStatus == 'UNPUBLISHED') {
                             $('label.folder-status-pending span.pending-msg').text('Submission pending...');
-			} else if (vaultNewStatus == 'APPROVED_FOR_PUBLICATION') {
+			} else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
                             $('label.folder-status-pending span.pending-msg').text('Approval pending...');
-			} else if (vaultNewStatus == 'PUBLISHED') {
+			} else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
                             $('label.folder-status-pending span.pending-msg').text('Publication pending...');
 			}
 		    }
+                }
+
+                // Set action for datamanager and researcher.
+                if (isDatamanager == 'yes') {
+                    if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
+                        actions['approve-for-publication'] = 'Approve for publication';
+                        actions['cancel-publication'] = 'Cancel publication';
+                        $('.btn-group button.folder-status').next().prop("disabled", false);
+                    }
+                } else {
+                    if (vaultStatus == 'UNPUBLISHED') {
+                        actions['submit-for-publication'] = 'Submit for publication';
+                        $('.btn-group button.folder-status').next().prop("disabled", false);
+                    }
                 }
 
                 // Datamanager sees all buttons in vault, researcher only folder status.
@@ -572,13 +569,6 @@ function topInformation(dir, showAlert)
 		actionLogIcon = '';
 	    }
 
-	    // System metadata.
-            $('.system-metadata-items').hide();
-            systemMetadataIcon = ' <i class="fa fa-info-circle system-metadata-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="System metadata"></i>';
-            if (typeof isVaultPackage == 'undefined' || isVaultPackage == 'no') {
-		systemMetadataIcon = '';
-	    }
-
             $('.btn-group button.folder-status').attr('data-write', hasWriteRights);
 
             // Handle actions
@@ -587,7 +577,7 @@ function topInformation(dir, showAlert)
             // data.basename.replace(/ /g, "&nbsp;")
             folderName = htmlEncode(data.result.basename).replace(/ /g, "&nbsp;");
 
-            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + lockIcon + systemMetadataIcon + actionLogIcon);
+            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + lockIcon + actionLogIcon);
             $('.top-information').show();
         });
     }
