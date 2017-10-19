@@ -80,8 +80,8 @@
             </div>
         </div>
         <ul class="list-group lock-items"></ul>
-        <ul class="list-group actionlog-items"></ul>
         <ul class="list-group system-metadata-items"></ul>
+        <ul class="list-group actionlog-items"></ul>
     </div>
 
     <div class="col-md-12">
