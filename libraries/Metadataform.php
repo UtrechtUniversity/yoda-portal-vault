@@ -205,6 +205,7 @@ class Element {
     public $compoundFieldCount = 0;
     public $compoundFieldPosition = 0;
     public $compoundBackendArrayLevel = 0;
+    public $compoundMultipleAllowed = false; // indicator whether compound in which an element possibly resides is multiple allowed
 
     /**
      * Constructor
@@ -258,13 +259,9 @@ class Element {
             $this->compoundFieldCount = $data['compoundFieldCount'];
             $this->compoundFieldPosition = $data['compoundFieldPosition'];
             $this->compoundBackendArrayLevel = $data['compoundBackendArrayLevel'];
+            $this->compoundMultipleAllowed = $data['compoundMultipleAllowed'];
 
         }
-
-
-//        if ($this->subPropertiesRole == 'subProperty') { //differentiate view for actual subproperty (i.e. not the controlling element of a subproperty structure)
-//            $this->type .= '_subproperty';
-//        }
 
 
 /* Possible functure mesage handling

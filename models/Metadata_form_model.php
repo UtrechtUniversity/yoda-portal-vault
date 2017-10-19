@@ -725,7 +725,6 @@ class Metadata_form_model extends CI_Model
             }
         }
 //
-//        echo '<hr><hr><hr>';
 //        echo '<pre>';
 //        print_r($this->presentationElements);
 //        echo '</pre>';
@@ -967,6 +966,9 @@ class Metadata_form_model extends CI_Model
                 $combiElementMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
 
 //                echo '<br>multi allowed?' . $combiElementMultipleAllowed;
+
+                // front end should know whether entire compound is clonable in order to show the clone button
+                $subPropArrayExtended['compoundMultipleAllowed'] = $combiElementMultipleAllowed;
 
                 // multiple values present where only one value is allowed.
                 // Incorrect xml format
