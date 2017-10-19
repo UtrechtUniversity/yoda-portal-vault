@@ -52,13 +52,6 @@ $( document ).ready(function() {
                 return;
             }
         });
-
-//        $('.action-confirm-submit-for-publication').attr( 'data-folder', $(this).attr('data-folder') );
-
-        // set default status and show dialog
-//        $(".action-confirm-submit-for-publication").prop('disabled', true);
-//        $("#confirmAgreementConditions .confirm-conditions").prop('checked', false);
-        // $('#confirmAgreementConditions').modal('show');
     });
 
     $("#confirmAgreementConditions").on("click", '.confirm-conditions', function() {
