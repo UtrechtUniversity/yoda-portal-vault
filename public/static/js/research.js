@@ -34,12 +34,12 @@ $( document ).ready(function() {
     $("body").on("click", "a.action-submit-for-publication", function() {
         $('#confirmAgreementConditions .modal-body').text(''); // clear it first
 
+        $('.action-confirm-submit-for-publication').attr( 'data-folder', $(this).attr('data-folder') );
+
         folder = $(this).attr('data-folder');
         $.getJSON("vault/license?path=" + folder, function (data) {
             if (data.status == 'Success') {
                 $('#confirmAgreementConditions .modal-body').html(data.result);
-
-                $('.action-confirm-submit-for-publication').attr( 'data-folder', $(this).attr('data-folder') );
 
                 // set default status and show dialog
                 $(".action-confirm-submit-for-publication").prop('disabled', true);
@@ -65,6 +65,7 @@ $( document ).ready(function() {
 
     $("#confirmAgreementConditions").on("click", ".action-confirm-submit-for-publication", function() {
         $('#confirmAgreementConditions').modal('hide');
+        alert($(this).attr('data-folder'));
         vaultSubmitForPublication($(this).attr('data-folder'));
     });
 
