@@ -260,12 +260,8 @@ class Element {
             $this->compoundFieldPosition = $data['compoundFieldPosition'];
             $this->compoundBackendArrayLevel = $data['compoundBackendArrayLevel'];
             $this->compoundMultipleAllowed = $data['compoundMultipleAllowed'];
+
         }
-
-
-//        if ($this->subPropertiesRole == 'subProperty') { //differentiate view for actual subproperty (i.e. not the controlling element of a subproperty structure)
-//            $this->type .= '_subproperty';
-//        }
 
 
 /* Possible functure mesage handling

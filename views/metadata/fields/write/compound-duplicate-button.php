@@ -1,4 +1,6 @@
-<?php // present button only when compound is clonable and at end of element range ?>
+<?php
+// present button only when compound is clonable and at end of element range
+?>
 <?php if ( $e->compoundMultipleAllowed AND   $e->compoundFieldPosition ==($e->compoundFieldCount-1) ) { ?>
 
     <span class="input-group-btn">
