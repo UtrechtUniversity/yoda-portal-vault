@@ -37,7 +37,7 @@ $( document ).ready(function() {
         $('.action-confirm-submit-for-publication').attr( 'data-folder', $(this).attr('data-folder') );
 
         folder = $(this).attr('data-folder');
-        $.getJSON("vault/license?path=" + folder, function (data) {
+        $.getJSON("vault/terms?path=" + folder, function (data) {
             if (data.status == 'Success') {
                 $('#confirmAgreementConditions .modal-body').html(data.result);
 

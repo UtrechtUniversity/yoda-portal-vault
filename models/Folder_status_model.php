@@ -119,13 +119,13 @@ class Folder_Status_model extends CI_Model
         return $result;
     }
 
-    function getLicenseText($fullPath)
+    function getTermsText($fullPath)
     {
         $outputParams = array('*result', '*status', '*statusInfo');
         $inputParams = array('*folder' => $fullPath);
 
         $this->CI->load->library('irodsrule');
-        $rule = $this->irodsrule->make('iiGetPublicationLicenseText', $inputParams, $outputParams);
+        $rule = $this->irodsrule->make('iiGetPublicationTermsText', $inputParams, $outputParams);
         $result = $rule->execute();
 
         return $result;

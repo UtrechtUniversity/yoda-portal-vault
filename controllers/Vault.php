@@ -112,14 +112,15 @@ class Vault extends MY_Controller
         echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
     }
 
-    public function license()
+    // Get the text of the terms a researcher has to confirm
+    public function terms()
     {
         $path = $this->input->get('path');
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $fullPath =  $pathStart . $path;
 
         $this->load->model('Folder_Status_model');
-        $result = $this->Folder_Status_model->getLicenseText($fullPath);
+        $result = $this->Folder_Status_model->getTermsText($fullPath);
 
         // welk model moet license komen??
         echo json_encode(array('status' => $result['*status'],
