@@ -725,10 +725,9 @@ class Metadata_form_model extends CI_Model
             }
         }
 //
-//        echo '<hr><hr><hr>';
-//        echo '<pre>';
-//        print_r($this->presentationElements);
-//        echo '</pre>';
+        echo '<pre>';
+        print_r($this->presentationElements);
+        echo '</pre>';
 
 // exit;
 
@@ -960,13 +959,15 @@ class Metadata_form_model extends CI_Model
                     $baseCombiElementOffsetFrontEnd = $key;
                 }
 
-//                echo "<br>Key: ".$key;
-//                echo '<br>CombiOffset: ' . $baseCombiElementOffsetFrontEnd;
+                echo "<br>Key: ".$key;
+                echo '<br>CombiOffset: ' . $baseCombiElementOffsetFrontEnd;
 
 
                 $combiElementMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
 
-//                echo '<br>multi allowed?' . $combiElementMultipleAllowed;
+                echo '<br>multi allowed?' . $combiElementMultipleAllowed;
+
+                $subPropArrayExtended['compoundMultipleAllowed'] = $combiElementMultipleAllowed; // front end should know whether compound is clonable
 
                 // multiple values present where only one value is allowed.
                 // Incorrect xml format
