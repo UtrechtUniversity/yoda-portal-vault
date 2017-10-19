@@ -128,19 +128,6 @@ class Folder_Status_model extends CI_Model
         $result = $rule->execute();
 
         return $result;
-
-        $result = array(
-            '*status' => 'Success',
-            '*statusInfo' => '',
-            '*result' => 'MODEL RESPONSE: ' . $fullPath
-        );
-//        $result = array(
-//            '*status' => 'Error',
-//            '*statusInfo' => 'HH - Could not retrieve required license data - Please try again.',
-//            '*result' => 'RESPONSE: ' . $fullPath
-//        );
-
-        return $result;
     }
 
     function approve_for_publication($folder)
