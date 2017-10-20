@@ -540,8 +540,6 @@ function topInformation(dir, showAlert)
                             $('label.folder-status-pending span.pending-msg').text('Submission pending...');
 			} else if (vaultNewStatus == 'APPROVED_FOR_PUBLICATION') {
                             $('label.folder-status-pending span.pending-msg').text('Approval pending...');
-			} else if (vaultNewStatus == 'PUBLISHED') {
-                            $('label.folder-status-pending span.pending-msg').text('Publication pending...');
 			}
 		    }
                 }
