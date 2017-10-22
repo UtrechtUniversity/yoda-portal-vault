@@ -445,32 +445,48 @@ class Metadata_form_model extends CI_Model
                         }
                     }
 
-                    if($isSubPropertyStructure ) {
+                    if ($isSubPropertyStructure) {
                         // first element of lead-subproperty struct must have a value.
                         // Per posted data structure for this element, check whether the lead element holds a value.
                         // If not, don't write the data (which only consists of subproperty data) to the xml
 
-                        if (reset($elementInfo)=='') {
+                        if (reset($elementInfo) == '') {
                             break;
                         }
                     }
 
                     $xml_item = $xml->createElement($mainField); // base element
+
+                    if ($mainField == 'Creator') {
+                        $this->debug = true;
+//                        echo 'hier<br>';
+                    }
                     $level = 0; // for deletion handling - deeper levels (>0)can always be deleted (i.e. not written to file when empty value)
                     $metaStructureXML = $this->xmlMetaStructure($xml, $elementInfo, $xml_item, $level);
                     // Only add to actual structure if
 
+                    if ($this->debug) {
+//                        echo '<pre>';
+//                        print_r($metaStructureXML['xmlParentElement']);
+//                        echo '</pre>';
+
+                    }
+
                     if ($metaStructureXML['anyDataPresent']) {
+//                        echo $mainField;
+//                        echo '<br>ANY DATA PRESENT DUS TOEVEOGEN';
                         $xml_metadata->appendChild($metaStructureXML['xmlParentElement']);
+                    }
+
+                    if ($this->debug) {
+                        $this->debug = false;
                     }
                 }
             }
         }
+//        exit;
 
         $xml->appendChild($xml_metadata);
-
-        //echo $xml->saveXML();
-
 
         return $xml->saveXML();
     }
@@ -520,17 +536,29 @@ class Metadata_form_model extends CI_Model
                 }
                 foreach ($arraySubLevels as $key2 => $val2) {
 
+                    if($this->debug) {
+//                        echo '<br>Key: ' . $key;
+//                        echo '<br>';
+                    }
+
                     $xmlElement = $xmlMain->createElement($key);
                     //$xmlNew
 
                     // Deze aanroep gebeurt in het kader van $xmlElement / $key.
-                    //
                     $structInfo = $this->xmlMetaStructure($xmlMain, $val2, $xmlElement, $level, $anyDataPresent);
+
+                    if ($this->debug) {
+//                        echo '<pre>KEY:' . $key;
+//                        print_r($structInfo);
+//                        echo '</pre>';
+                    }
 
                     // Add (entire) srtructure or 1 value
                     // Het element wordt hier al geappend zonder dat zeker is of dit moet (en dan komt ie als lege tag in yoda-metadata.xml)
-                    if ($structInfo['doAddThisLevel']) {
+                    if ($structInfo['doAddThisLevel'] AND is_object($structInfo['xmlParentElement']->firstChild)) {
                         $xmlParentElement->appendChild($structInfo['xmlParentElement']);
+
+//                        echo '<br>KEY ADDED:' . $key;
                     }
                     $anyDataPresent = $structInfo['anyDataPresent'];
                 }
