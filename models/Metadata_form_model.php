@@ -437,7 +437,6 @@ class Metadata_form_model extends CI_Model
                                     }
 
                                     if (!$isFilledCompound) {
-                                        //echo 'unset: ' . $idTest;
                                         unset($elementInfo['Properties'][$compoundKeyName][$idTest]);
                                     }
                                 }
@@ -445,32 +444,31 @@ class Metadata_form_model extends CI_Model
                         }
                     }
 
-                    if($isSubPropertyStructure ) {
+                    if ($isSubPropertyStructure) {
                         // first element of lead-subproperty struct must have a value.
                         // Per posted data structure for this element, check whether the lead element holds a value.
                         // If not, don't write the data (which only consists of subproperty data) to the xml
 
-                        if (reset($elementInfo)=='') {
+                        if (reset($elementInfo) == '') {
                             break;
                         }
                     }
 
                     $xml_item = $xml->createElement($mainField); // base element
+
                     $level = 0; // for deletion handling - deeper levels (>0)can always be deleted (i.e. not written to file when empty value)
                     $metaStructureXML = $this->xmlMetaStructure($xml, $elementInfo, $xml_item, $level);
-                    // Only add to actual structure if
 
                     if ($metaStructureXML['anyDataPresent']) {
                         $xml_metadata->appendChild($metaStructureXML['xmlParentElement']);
                     }
+
                 }
             }
         }
+//        exit;
 
         $xml->appendChild($xml_metadata);
-
-        //echo $xml->saveXML();
-
 
         return $xml->saveXML();
     }
@@ -479,14 +477,6 @@ class Metadata_form_model extends CI_Model
     //$topLevelName - for deletion purpose (Sub info can always be deleted (i.e. not added)
     public function xmlMetaStructure($xmlMain, $arMetadata, $xmlParentElement, $level, $anyDataPresent = false)
     {
-//        if($level==0) {
-//            echo '<pre>';
-//            print_r($arMetadata);
-//            echo '</pre>';
-//
-//        }
-
-
         $doAddThisLevel = true;
 
         $arrayMeta = array();
@@ -497,8 +487,6 @@ class Metadata_form_model extends CI_Model
         }
 
         foreach ($arrayMeta as $key => $val) {
-            //$xml_item = $xml->createElement($elementName);
-
             if (!is_array($val) AND is_numeric($key)) {
                 //return $xmlParentElement;
                 ///een val is altijd het eind ding van een element.
@@ -519,17 +507,14 @@ class Metadata_form_model extends CI_Model
                     $arraySubLevels = $val;
                 }
                 foreach ($arraySubLevels as $key2 => $val2) {
-
                     $xmlElement = $xmlMain->createElement($key);
-                    //$xmlNew
 
                     // Deze aanroep gebeurt in het kader van $xmlElement / $key.
-                    //
                     $structInfo = $this->xmlMetaStructure($xmlMain, $val2, $xmlElement, $level, $anyDataPresent);
 
                     // Add (entire) srtructure or 1 value
                     // Het element wordt hier al geappend zonder dat zeker is of dit moet (en dan komt ie als lege tag in yoda-metadata.xml)
-                    if ($structInfo['doAddThisLevel']) {
+                    if ($structInfo['doAddThisLevel'] AND is_object($structInfo['xmlParentElement']->firstChild)) {
                         $xmlParentElement->appendChild($structInfo['xmlParentElement']);
                     }
                     $anyDataPresent = $structInfo['anyDataPresent'];
