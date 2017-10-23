@@ -120,3 +120,7 @@ legend {
 .combined-plus {
     margin-top: 25px;
 }
+
+button[data-clone*="main"] {
+    margin-left: 15px!important;
+}
