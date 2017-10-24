@@ -52,20 +52,20 @@
 
             <div class="col-sm-1">
                 <?php if ($e->mandatory) { ?>
+                    <span class="fa-stack ">
                     <?php if($e->value) { ?>
-                        <span class="fa-stack ">
-                            <?php
-                            // this is added as stacked icons make tooltip handling harder.
-                            $toolTipLock = '';
-                            $toolTipCheckmark = 'aria-hidden="true" data-toggle="tooltip" title="Filled out correctly for the vault"';
-                            ?>
+                        <?php
+                        // this is added as stacked icons make tooltip handling harder.
+                        $toolTipLock = '';
+                        $toolTipCheckmark = 'aria-hidden="true" data-toggle="tooltip" title="Filled out correctly for the vault"';
+                        ?>
 
-                            <i class="fa fa-lock safe fa-stack-1x" <?php echo $toolTipLock; ?> ></i>
-                            <i class="fa fa-check fa-stack-1x checkmark-green-top-right" <?php echo $toolTipCheckmark; ?> ></i>
-                        </span>
+                        <i class="fa fa-lock safe fa-stack-1x" <?php echo $toolTipLock; ?> ></i>
+                        <i class="fa fa-check fa-stack-1x checkmark-green-top-right" <?php echo $toolTipCheckmark; ?> ></i>
                     <?php } else { ?>
-                        <i class="fa fa-lock safe-single" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
+                        <i class="fa fa-lock safe fa-stack-1x" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
                     <?php } ?>
+                    </span>
                 <?php } ?>
             </div>
 
@@ -105,7 +105,6 @@
                 <?php } ?>
             </div>
         </div>
-        <?php  get_instance()->load->view('metadata/fields/write/compound-duplicate-button', array('e',$e)); ?>
     </div>
 </div>
 <?php } ?>
