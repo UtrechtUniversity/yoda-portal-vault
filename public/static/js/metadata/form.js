@@ -348,39 +348,3 @@ function duplicateField(field, cloneType)
         $(field).after(newFieldGroup);
     }
 }
-
-// Add the new field handlers
-newField.val('');
-
-newMainFieldGroup.find('button').bind("click", function () {
-    duplicateField(newMainFieldGroup, 'subproperty');
-});
-
-newMainFieldGroup.find('[data-toggle="tooltip"]').tooltip();
-
-if (newField.hasClass('numeric-field')) {
-    newField.keypress(validateNumber);
-}
-
-if (newField.hasClass('datepicker')) {
-    newField.removeAttr('id');
-    newField.removeClass('hasDatepicker');
-    newField.datepicker({
-        dateFormat: "yy-mm-dd",
-        changeMonth: true,
-        changeYear: true,
-        showButtonPanel: true,
-        closeText: 'Clear',
-        onClose: function (dateText, obj) {
-            if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
-                $.datepicker._clearDate(this);
-        }
-    });
-}
-
-if (isSelect2) {
-    // Init select2 for the 2 fields.
-    $(this).find('select').select2();
-    newMainFieldGroup.find('select').select2();
-    $(newField).find('select').select2();
-}
