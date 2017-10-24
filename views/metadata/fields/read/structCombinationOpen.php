@@ -1,4 +1,4 @@
-<div class="combination-start">
+<div class="combination-start form-group">
 <!--
 <hr>
 COMBINATION  Start tag <?php echo $e->key; ?>
