@@ -8,6 +8,8 @@ $(function () {
         changeYear: true,
         showButtonPanel: true,
         selectCurrent: true,
+        yearRange: "c-2000:c+2000",
+        minDate: new Date(800, 1 - 1, 1),
         closeText: 'Clear'
     }).focus(function() {
         var thisDatepicker = $(this);
