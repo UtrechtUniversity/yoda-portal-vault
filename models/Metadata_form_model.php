@@ -580,6 +580,25 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
+     * @param $compoundElement
+     * @return int
+     *
+     * Get the count of form elements within compoound field represented in $element
+     * label, help and @attributes are not allowed to be counted as are not elements!
+     */
+    public function getCountOfElementsInCompound($compoundElement)
+    {
+        $exclude = array('label', 'help', '@attributes');
+        $count=0;
+        foreach($compoundElement as $elementName=>$elementData) {
+            if (!in_array($elementName, $exclude)) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+
+    /**
      * @param $element
      * @return bool
      *
@@ -664,11 +683,7 @@ class Metadata_form_model extends CI_Model
                     $groupName = $element['name'];
 
                 }
-                // elseif (isset($element['@attributes']['class']) AND strtoupper($element['@attributes']['class'])=='COMPOUND') {
-                // STARTING combination of //
-                elseif ($this->isCompoundElement($element)) { //(isset($element['combined'])) { // STARTING combination of
-                    // Start of a row that combines multiple fields
-
+                elseif ($this->isCompoundElement($element)) {
                     // formdata is passed as an enumerated string
                     if (!$this->addCompoundElement($config, $groupName, $key, $element, $this->enumerateArray($formData[$key]), $xsdElements)) {
                         return false;
@@ -898,6 +913,8 @@ class Metadata_form_model extends CI_Model
     public function addCompoundElement($config, $groupName, $key, $element,
                                        $formData, $xsdElements, $elementOffsetFrontEnd = '', $subPropArray = array()) // presentation elements will be extended -> make it class variable
     {
+        // A combined element from 2017/10/25 on has a title & help text
+
         if (isset($xsdElements[$key])) {
 
             // Extend the passed array with compound specific data for the frontend
@@ -919,24 +936,17 @@ class Metadata_form_model extends CI_Model
 
              */
             $subPropArrayExtended = $subPropArray;
-            $subPropArrayExtended['compoundFieldCount'] = count($element)-1;
+
+            $subPropArrayExtended['compoundFieldCount'] = $this->getCountOfElementsInCompound($element);
             $subPropArrayExtended['compoundFieldPosition'] = 0;
             $subPropArrayExtended['compoundBackendArrayLevel'] = 0;
 
             if ($xsdElements[$key]['type'] == 'openTag') {
 
-//                echo '<pre>';
-//                echo '<br>offset' . $elementOffsetFrontEnd;
-//                echo '<br>';
-//                print_r($subPropArray);
-//                echo '</pre>';
-//
                 if ($elementOffsetFrontEnd) {
                     unset($subPropArrayExtended['compoundBackendArrayLevel']);
-                    $subPropArrayExtended['compoundBackendArrayLevel'] = 3;
+                    $subPropArrayExtended['compoundBackendArrayLevel'] = 3;  // @todo - moet nog dynamisch!!!! maar nu klopt het altijd
                 }
-
-
 
                 if ($elementOffsetFrontEnd) { // is vanuit een subproperty siutatie
                     $baseCombiElementOffsetFrontEnd = $elementOffsetFrontEnd; // . "[$key]";
@@ -944,23 +954,10 @@ class Metadata_form_model extends CI_Model
                     $baseCombiElementOffsetFrontEnd = $key;
                 }
 
-//                echo "<br>Key: ".$key;
-//                echo '<br>CombiOffset: ' . $baseCombiElementOffsetFrontEnd;
-
-
                 $combiElementMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
-
-//                echo '<br>multi allowed?' . $combiElementMultipleAllowed;
 
                 // front end should know whether entire compound is clonable in order to show the clone button
                 $subPropArrayExtended['compoundMultipleAllowed'] = $combiElementMultipleAllowed;
-
-                // multiple values present where only one value is allowed.
-                // Incorrect xml format
-                // @TODO - check muliplicitiy against number of values
-//                if (!$combiElementMultipleAllowed AND count($formValues) > 1) {
-//                    return false;
-//                }
 
                 // Step though all values that are within yoda-metadata.xml
                 $combiCounter = 0; // To create unique names in array form for frontend
@@ -984,12 +981,13 @@ class Metadata_form_model extends CI_Model
                         $this->newWayPresentationElement($config, array('type' => 'structCombinationOpen'), $element, $combiElementName, '', false, $subPropArrayExtended);
 
                     // 2) step through all elements to complete the combined field
+
                     $fieldPosition = 0;
                     foreach ($element as $id => $em) {
                         // $elements now holds an array of formelements - these are subproperties
                         $subKey = $key . '_' . $id;
 
-                        if ($id != '@attributes') { // exclude this item added due to class=compound
+                        if ($id != '@attributes') { // exclude this item added due to class=compound in the tag itself
                             // @todo: een element kan ook weer een multiple variabele zijn !!!!!!!!!!!!!!!!! nog meenemen later
                             $subCombiCounter = 0;
                             // => dus hier lopen if so en keyname for front end aanpassen
