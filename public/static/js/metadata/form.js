@@ -8,11 +8,12 @@ $(function () {
         changeYear: true,
         showButtonPanel: true,
         selectCurrent: true,
-        closeText: 'Clear',
-        onClose: function (dateText, obj) {
-            if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
-                $.datepicker._clearDate(this);
-        }
+        closeText: 'Clear'
+    }).focus(function() {
+        var thisDatepicker = $(this);
+        $('.ui-datepicker-close').click(function() {
+            $.datepicker._clearDate(thisDatepicker);
+        });
     });
     $('select').select2();
 
@@ -138,11 +139,12 @@ function duplicateField(field, cloneType)
             changeMonth: true,
             changeYear: true,
             showButtonPanel: true,
-            closeText: 'Clear',
-            onClose: function (dateText, obj) {
-                if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
-                    $.datepicker._clearDate(this);
-            }
+            closeText: 'Clear'
+        }).focus(function() {
+            var thisDatepicker = $(this);
+            $('.ui-datepicker-close').click(function() {
+                $.datepicker._clearDate(thisDatepicker);
+            });
         });
     }
 
@@ -218,11 +220,12 @@ function duplicateField(field, cloneType)
                     changeMonth: true,
                     changeYear: true,
                     showButtonPanel: true,
-                    closeText: 'Clear',
-                    onClose: function (dateText, obj) {
-                        if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
-                            $.datepicker._clearDate(this);
-                    }
+                    closeText: 'Clear'
+                }).focus(function() {
+                    var thisDatepicker = $(this);
+                    $('.ui-datepicker-close').click(function() {
+                        $.datepicker._clearDate(thisDatepicker);
+                    });
                 });
             }
 
@@ -316,11 +319,12 @@ function duplicateField(field, cloneType)
                         changeMonth: true,
                         changeYear: true,
                         showButtonPanel: true,
-                        closeText: 'Clear',
-                        onClose: function (dateText, obj) {
-                            if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
-                                $.datepicker._clearDate(this);
-                        }
+                        closeText: 'Clear'
+                    }).focus(function() {
+                        var thisDatepicker = $(this);
+                        $('.ui-datepicker-close').click(function() {
+                            $.datepicker._clearDate(thisDatepicker);
+                        });
                     });
                 }
             }
