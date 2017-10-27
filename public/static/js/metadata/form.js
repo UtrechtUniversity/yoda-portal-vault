@@ -1,4 +1,124 @@
 var arrayCounterBackEnd = 1000; // is incremented each time used thus securing uniqueness and consistent passing to back end
+var testText = '123455';
+
+
+function StringToXMLDom(string){
+    var xmlDoc=null;
+    if (window.DOMParser)
+    {
+        parser=new DOMParser();
+        xmlDoc=parser.parseFromString(string,"text/xml");
+    }
+    else // Internet Explorer
+    {
+        xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+        xmlDoc.async="false";
+        xmlDoc.loadXML(string);
+    }
+    return xmlDoc;
+}
+
+//console.log('xml: ');
+//console.log(StringToXMLDom('<a>123%2232&2332@4343</a>'));
+
+//console.log(new DOMParser().parseFromString(testText, "text/xml"));
+
+var xml_special_to_escaped_one_map = {
+    '&': '&amp;',
+    '"': '&quot;',
+    '<': '&lt;',
+    '>': '&gt;'
+};
+
+var escaped_one_to_xml_special_map = {
+    '&amp;': '&',
+    '&quot;': '"',
+    '&lt;': '<',
+    '&gt;': '>'
+};
+
+function encodeXml(string) {
+    return string.replace(/([\&"<>])/g, function(str, item) {
+        return xml_special_to_escaped_one_map[item];
+    });
+};
+
+function decodeXml(string) {
+    return string.replace(/(&quot;|&lt;|&gt;|&amp;)/g,
+        function(str, item) {
+            return escaped_one_to_xml_special_map[item];
+        });
+}
+
+console.log(encodeXml('ab@ cd _ dde< >'));
+//DOMParser.createElement('tag')
+//var xmldoc = new ActiveXObject("Microsoft.XMLDOM")
+xmldoc = new DOMParser();
+var e = xmldoc.parseFromString('test', 'text/xml'); // xmldoc.createElement("test");
+e.text = "å";
+
+//console.log(new DOMParser().createTextNode('1<2>'));
+//
+//xmldoc.appendChild(e);
+
+console.log(xmldoc);
+
+// if (xmldoc.documentElement.text.charCodeAt(0) == 229)
+
+//console.log(xmldoc.documentElement.text);
+
+function makeXML(s)
+{
+    sText = ("" + s).split("<").join("&lt;").split(">").join("&gt;").split('"').join("&#34;").split("'").join("&#39;").split("&").join("&amp;");
+
+    sText = sText.replace(/[\r]/g, '&#13;');
+    sText = sText.replace(/[\n]/g, '&#10;');
+    console.log(sText);
+    return sText;
+}
+
+function validateTextLengths()
+{
+    var canSubmit = true;
+
+    $('.form-control').each(function () {
+        var $this = $(this);
+
+        type = '';
+        if ($this.is("input")) {
+            type = 'text';
+        } else if ($this.is("select")) {
+            type = 'select';
+        } else if ($this.is("textarea")) {
+            type = 'textarea';
+        }
+
+        if ( type == 'text' || type == 'textarea') {
+            maxLength = $(this).attr('maxLength');
+            if (maxLength) {
+                valXML = makeXML($(this).val());
+
+                if (valXML.length > maxLength) {
+                    label='';
+                    // determine label to indicate where the length problem occurs:
+                    $(this).closest('.form-group').find('.control-label span').each(function(){
+                        label =  $(this).html();
+                    });
+
+                    //mainLabel =
+                    $(this).closest('.subproperties').prev('.form-group').find('.control-label span').each(function(){
+                       label = $(this).html() + ' - ' + label;
+                    });
+
+                    setMessage('error', 'The information cannot be saved as following field holds too many characters: ' + label);
+                    canSubmit = false;
+                    return false;
+                }
+            }
+        }
+    });
+    return canSubmit;
+}
 
 $(function () {
     $('[data-toggle="tooltip"]').tooltip();
