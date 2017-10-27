@@ -145,9 +145,7 @@ class Metadataform {
     public function open($action, $class, $method = 'post')
     {
         //return '<form method="' . $method . '" action="' . $action . '" class="' . $class . '">';
-        $options = array ('class' => $class,
-                        'onSubmit' => 'return validateTextLengths()'
-            );
+        $options = array ('class' => $class);
         return form_open($action, $options);
     }
 
