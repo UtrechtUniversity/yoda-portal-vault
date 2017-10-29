@@ -99,9 +99,9 @@
                                 class="form-control datepicker"
                                 <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
                                     data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
-                                    name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
+                                    name="<?php echo $e->key; ?>"
                                 <?php else: ?>
-                                    name="<?php echo $e->key; ?>[]"
+                                    name="<?php echo $e->key; ?>"
                                 <?php endif; ?>
                                 readonly="true" value="<?php echo htmlentities($e->value); ?>">
                         <span class="input-group-btn">

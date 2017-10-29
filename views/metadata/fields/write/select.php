@@ -17,9 +17,9 @@
         <select
             <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
                 data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
-                name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
+                name="<?php echo $e->key; ?>"
             <?php else: ?>
-                name="<?php echo $e->key; ?>[]"
+                name="<?php echo $e->key; ?>"
             <?php endif; ?>
                 class="form-control">
             <option value="">-</option>
@@ -78,9 +78,9 @@
                         <select
                                 <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
                                     data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
-                                    name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
+                                    name="<?php echo $e->key; ?>"
                                 <?php else: ?>
-                                    name="<?php echo $e->key; ?>[]"
+                                    name="<?php echo $e->key; ?>"
                                 <?php endif; ?>
                                 class="form-control">
                             <option value="">-</option>
