@@ -6,6 +6,7 @@ class Metadata_form_model extends CI_Model
 
     var $CI = NULL;
     var $presentationElements = array();
+    var $xsdElements = array();
 
     function __construct()
     {
@@ -345,8 +346,11 @@ class Metadata_form_model extends CI_Model
     public function metadataToXmlString($allFormMetadata, $rodsaccount, $config)
     {
         $xsdPath = $config['xsdPath'];
-        $xsdElements = $this->loadXsd($rodsaccount, $xsdPath);
+        $this->xsdElements = $this->loadXsd($rodsaccount, $xsdPath);
 
+//        echo '<pre>';
+//            print_r($allFormMetadata);
+//        echo '</pre>';
 
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
         if ($formGroupedElements === false) {
@@ -405,7 +409,7 @@ class Metadata_form_model extends CI_Model
                 $topLevelData = $elementData;
             }
 
-//            echo '<br>Element name: ' . $mainField;
+        //    echo '<br>Element name: ' . $mainField;
             foreach ($topLevelData as $key => $val) { // per $val => entire structure to be added to $elementName
                 $temp = array();
                 if (!(is_array($val) AND is_numeric(key($val)))) {
@@ -455,6 +459,9 @@ class Metadata_form_model extends CI_Model
                     }
 
                     $xml_item = $xml->createElement($mainField); // base element
+                    echo '<pre>';
+                    print_r($elementInfo);
+                    echo '</pre>';
 
                     $level = 0; // for deletion handling - deeper levels (>0)can always be deleted (i.e. not written to file when empty value)
                     $metaStructureXML = $this->xmlMetaStructure($xml, $elementInfo, $xml_item, $level);
@@ -475,7 +482,16 @@ class Metadata_form_model extends CI_Model
 
 
     //$topLevelName - for deletion purpose (Sub info can always be deleted (i.e. not added)
-    public function xmlMetaStructure($xmlMain, $arMetadata, $xmlParentElement, $level, $anyDataPresent = false)
+    /**
+     * @param $xmlMain
+     * @param $arMetadata
+     * @param $xmlParentElement
+     * @param $level
+     * @param bool $anyDataPresent
+     * @param string $totalTagName - for indexing in $xsdElements to find out whether a field is op type xs:date
+     * @return array
+     */
+    public function xmlMetaStructure($xmlMain, $arMetadata, $xmlParentElement, $level, $anyDataPresent = false, $totalTagName='')
     {
         $doAddThisLevel = true;
 
@@ -486,13 +502,24 @@ class Metadata_form_model extends CI_Model
             $arrayMeta = $arMetadata;
         }
 
+        if (!$totalTagName) {
+            $totalTagName = $xmlParentElement->tagName;
+        }
+        else {
+            $totalTagName = $totalTagName . '_' . $xmlParentElement->tagName;
+        }
+
         foreach ($arrayMeta as $key => $val) {
             if (!is_array($val) AND is_numeric($key)) {
                 //return $xmlParentElement;
                 ///een val is altijd het eind ding van een element.
                 // Als er geen waarde is, moet dus ook het element worden verwijderd
                 if ($val != '') {
-                    $xmlParentElement->appendChild($xmlMain->createTextNode($val));
+                    //echo '<br>type: '.  ;
+                    $xmlParentElement->appendChild($xmlMain->createTextNode($val)); echo '<br>Val: ' . $val . ' - ' . $this->xsdElements[$totalTagName]['type'];// . $totalPath;
+                    //echo '<pre>';
+                    //print_r($xmlParentElement);
+                    //echo '</pre>';
                     $anyDataPresent = true;
                 } else {
                     $doAddThisLevel = false;
@@ -510,7 +537,7 @@ class Metadata_form_model extends CI_Model
                     $xmlElement = $xmlMain->createElement($key);
 
                     // Deze aanroep gebeurt in het kader van $xmlElement / $key.
-                    $structInfo = $this->xmlMetaStructure($xmlMain, $val2, $xmlElement, $level, $anyDataPresent);
+                    $structInfo = $this->xmlMetaStructure($xmlMain, $val2, $xmlElement, $level, $anyDataPresent, $totalTagName);
 
                     // Add (entire) srtructure or 1 value
                     // Het element wordt hier al geappend zonder dat zeker is of dit moet (en dan komt ie als lege tag in yoda-metadata.xml)
@@ -547,6 +574,8 @@ class Metadata_form_model extends CI_Model
         }
 
         $xmlString = $this->metadataToXmlString($allFormMetadata, $rodsaccount, $config);
+
+        exit;
 
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
