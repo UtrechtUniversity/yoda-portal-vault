@@ -70,7 +70,7 @@ class Vaultsubmission
             // Lock error
             $lockResult = $this->checkLock();
             if (!$lockResult) {
-                $messages[] = 'A locking error occurred';
+                $messages[] = 'Action could not be executed because of a lock. Check locks (lock symbol)  for more information';
             }
         }
 
