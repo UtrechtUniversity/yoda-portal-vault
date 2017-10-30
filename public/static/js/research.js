@@ -362,6 +362,7 @@ function topInformation(dir, showAlert)
             var vaultNewStatus = data.result.vaultNewStatus;
             var userType = data.result.userType;
             var hasWriteRights = "yes";
+            var hasDatamanager = data.result.hasDatamanager;
             var isDatamanager = data.result.isDatamanager;
             var isVaultPackage = data.result.isVaultPackage;
             var researchGroupAccess = data.result.researchGroupAccess;
@@ -522,7 +523,7 @@ function topInformation(dir, showAlert)
 				actions['submit-for-publication'] = 'Submit for publication';
 				$('.btn-group button.folder-status').next().prop("disabled", false);
 			    }
-			} else {
+			} else if (hasDatamanager == 'yes') {
                             if (vaultStatus == 'UNPUBLISHED') {
 				actions['submit-for-publication'] = 'Submit for publication';
 				$('.btn-group button.folder-status').next().prop("disabled", false);
