@@ -102,6 +102,7 @@
                                 <?php if (($form->getPermission() == 'write' && $metadataExists === false) && $cloneMetadata) { ?>
                                     <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Clone from parent folder</button>
                                 <?php } ?>
+
                             </div>
                             <div class="col-sm-12">
 

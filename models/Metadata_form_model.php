@@ -6,6 +6,7 @@ class Metadata_form_model extends CI_Model
 
     var $CI = NULL;
     var $presentationElements = array();
+    var $xsdElements = array();
 
     function __construct()
     {
@@ -345,8 +346,7 @@ class Metadata_form_model extends CI_Model
     public function metadataToXmlString($allFormMetadata, $rodsaccount, $config)
     {
         $xsdPath = $config['xsdPath'];
-        $xsdElements = $this->loadXsd($rodsaccount, $xsdPath);
-
+        $this->xsdElements = $this->loadXsd($rodsaccount, $xsdPath);
 
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
         if ($formGroupedElements === false) {
@@ -405,7 +405,7 @@ class Metadata_form_model extends CI_Model
                 $topLevelData = $elementData;
             }
 
-//            echo '<br>Element name: ' . $mainField;
+        //    echo '<br>Element name: ' . $mainField;
             foreach ($topLevelData as $key => $val) { // per $val => entire structure to be added to $elementName
                 $temp = array();
                 if (!(is_array($val) AND is_numeric(key($val)))) {
@@ -462,7 +462,6 @@ class Metadata_form_model extends CI_Model
                     if ($metaStructureXML['anyDataPresent']) {
                         $xml_metadata->appendChild($metaStructureXML['xmlParentElement']);
                     }
-
                 }
             }
         }
@@ -475,7 +474,16 @@ class Metadata_form_model extends CI_Model
 
 
     //$topLevelName - for deletion purpose (Sub info can always be deleted (i.e. not added)
-    public function xmlMetaStructure($xmlMain, $arMetadata, $xmlParentElement, $level, $anyDataPresent = false)
+    /**
+     * @param $xmlMain
+     * @param $arMetadata
+     * @param $xmlParentElement
+     * @param $level
+     * @param bool $anyDataPresent
+     * @param string $totalTagName - for indexing in $xsdElements to find out whether a field is op type xs:date
+     * @return array
+     */
+    public function xmlMetaStructure($xmlMain, $arMetadata, $xmlParentElement, $level, $anyDataPresent = false, $totalTagName='')
     {
         $doAddThisLevel = true;
 
@@ -486,13 +494,29 @@ class Metadata_form_model extends CI_Model
             $arrayMeta = $arMetadata;
         }
 
+        if (!$totalTagName) {
+            $totalTagName = $xmlParentElement->tagName;
+        }
+        else {
+            $totalTagName = $totalTagName . '_' . $xmlParentElement->tagName;
+        }
+
         foreach ($arrayMeta as $key => $val) {
             if (!is_array($val) AND is_numeric($key)) {
                 //return $xmlParentElement;
                 ///een val is altijd het eind ding van een element.
                 // Als er geen waarde is, moet dus ook het element worden verwijderd
                 if ($val != '') {
+                    if ($this->xsdElements[$totalTagName]['type'] == 'xs:date') {
+                        // the date requires years to be added YYYY
+                        // 2017-10-12 -> length = 10
+                        // years before 1000 can be added by the datepicker but are formatted like: 900-12-25
+                        $val = str_repeat('0', 10-strlen($val)) . $val; // add preceiding 0's -> 0900-12-25
+                    }
                     $xmlParentElement->appendChild($xmlMain->createTextNode($val));
+                    //echo '<pre>';
+                    //print_r($xmlParentElement);
+                    //echo '</pre>';
                     $anyDataPresent = true;
                 } else {
                     $doAddThisLevel = false;
@@ -510,7 +534,7 @@ class Metadata_form_model extends CI_Model
                     $xmlElement = $xmlMain->createElement($key);
 
                     // Deze aanroep gebeurt in het kader van $xmlElement / $key.
-                    $structInfo = $this->xmlMetaStructure($xmlMain, $val2, $xmlElement, $level, $anyDataPresent);
+                    $structInfo = $this->xmlMetaStructure($xmlMain, $val2, $xmlElement, $level, $anyDataPresent, $totalTagName);
 
                     // Add (entire) srtructure or 1 value
                     // Het element wordt hier al geappend zonder dat zeker is of dit moet (en dan komt ie als lege tag in yoda-metadata.xml)
@@ -577,6 +601,25 @@ class Metadata_form_model extends CI_Model
     public function isCompoundElement($element)
     {
         return (isset($element['@attributes']['class']) AND strtoupper($element['@attributes']['class']) == 'COMPOUND');
+    }
+
+    /**
+     * @param $compoundElement
+     * @return int
+     *
+     * Get the count of form elements within compoound field represented in $element
+     * label, help and @attributes are not allowed to be counted as are not elements!
+     */
+    public function getCountOfElementsInCompound($compoundElement)
+    {
+        $exclude = array('label', 'help', '@attributes');
+        $count=0;
+        foreach($compoundElement as $elementName=>$elementData) {
+            if (!in_array($elementName, $exclude)) {
+                $count++;
+            }
+        }
+        return $count;
     }
 
     /**
@@ -664,11 +707,7 @@ class Metadata_form_model extends CI_Model
                     $groupName = $element['name'];
 
                 }
-                // elseif (isset($element['@attributes']['class']) AND strtoupper($element['@attributes']['class'])=='COMPOUND') {
-                // STARTING combination of //
-                elseif ($this->isCompoundElement($element)) { //(isset($element['combined'])) { // STARTING combination of
-                    // Start of a row that combines multiple fields
-
+                elseif ($this->isCompoundElement($element)) {
                     // formdata is passed as an enumerated string
                     if (!$this->addCompoundElement($config, $groupName, $key, $element, $this->enumerateArray($formData[$key]), $xsdElements)) {
                         return false;
@@ -898,6 +937,8 @@ class Metadata_form_model extends CI_Model
     public function addCompoundElement($config, $groupName, $key, $element,
                                        $formData, $xsdElements, $elementOffsetFrontEnd = '', $subPropArray = array()) // presentation elements will be extended -> make it class variable
     {
+        // A combined element from 2017/10/25 on has a title & help text
+
         if (isset($xsdElements[$key])) {
 
             // Extend the passed array with compound specific data for the frontend
@@ -919,24 +960,17 @@ class Metadata_form_model extends CI_Model
 
              */
             $subPropArrayExtended = $subPropArray;
-            $subPropArrayExtended['compoundFieldCount'] = count($element)-1;
+
+            $subPropArrayExtended['compoundFieldCount'] = $this->getCountOfElementsInCompound($element);
             $subPropArrayExtended['compoundFieldPosition'] = 0;
             $subPropArrayExtended['compoundBackendArrayLevel'] = 0;
 
             if ($xsdElements[$key]['type'] == 'openTag') {
 
-//                echo '<pre>';
-//                echo '<br>offset' . $elementOffsetFrontEnd;
-//                echo '<br>';
-//                print_r($subPropArray);
-//                echo '</pre>';
-//
                 if ($elementOffsetFrontEnd) {
                     unset($subPropArrayExtended['compoundBackendArrayLevel']);
-                    $subPropArrayExtended['compoundBackendArrayLevel'] = 3;
+                    $subPropArrayExtended['compoundBackendArrayLevel'] = 3;  // @todo - moet nog dynamisch!!!! maar nu klopt het altijd
                 }
-
-
 
                 if ($elementOffsetFrontEnd) { // is vanuit een subproperty siutatie
                     $baseCombiElementOffsetFrontEnd = $elementOffsetFrontEnd; // . "[$key]";
@@ -944,23 +978,10 @@ class Metadata_form_model extends CI_Model
                     $baseCombiElementOffsetFrontEnd = $key;
                 }
 
-//                echo "<br>Key: ".$key;
-//                echo '<br>CombiOffset: ' . $baseCombiElementOffsetFrontEnd;
-
-
                 $combiElementMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
-
-//                echo '<br>multi allowed?' . $combiElementMultipleAllowed;
 
                 // front end should know whether entire compound is clonable in order to show the clone button
                 $subPropArrayExtended['compoundMultipleAllowed'] = $combiElementMultipleAllowed;
-
-                // multiple values present where only one value is allowed.
-                // Incorrect xml format
-                // @TODO - check muliplicitiy against number of values
-//                if (!$combiElementMultipleAllowed AND count($formValues) > 1) {
-//                    return false;
-//                }
 
                 // Step though all values that are within yoda-metadata.xml
                 $combiCounter = 0; // To create unique names in array form for frontend
@@ -984,12 +1005,13 @@ class Metadata_form_model extends CI_Model
                         $this->newWayPresentationElement($config, array('type' => 'structCombinationOpen'), $element, $combiElementName, '', false, $subPropArrayExtended);
 
                     // 2) step through all elements to complete the combined field
+
                     $fieldPosition = 0;
                     foreach ($element as $id => $em) {
                         // $elements now holds an array of formelements - these are subproperties
                         $subKey = $key . '_' . $id;
 
-                        if ($id != '@attributes') { // exclude this item added due to class=compound
+                        if ($id != '@attributes') { // exclude this item added due to class=compound in the tag itself
                             // @todo: een element kan ook weer een multiple variabele zijn !!!!!!!!!!!!!!!!! nog meenemen later
                             $subCombiCounter = 0;
                             // => dus hier lopen if so en keyname for front end aanpassen

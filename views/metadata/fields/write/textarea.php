@@ -52,8 +52,8 @@
 
             <div class="col-sm-1">
                 <?php if ($e->mandatory) { ?>
+                    <span class="fa-stack ">
                     <?php if($e->value) { ?>
-                        <span class="fa-stack ">
                             <?php
                             // this is added as stacked icons make tooltip handling harder.
                             $toolTipLock = '';
@@ -62,10 +62,10 @@
 
                             <i class="fa fa-lock safe fa-stack-1x" <?php echo $toolTipLock; ?> ></i>
                             <i class="fa fa-check fa-stack-1x checkmark-green-top-right" <?php echo $toolTipCheckmark; ?> ></i>
-                        </span>
                     <?php } else { ?>
-                        <i class="fa fa-lock safe-single" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
+                        <i class="fa fa-lock safe fa-stack-1x" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
                     <?php } ?>
+                    </span>
                 <?php } ?>
             </div>
 
@@ -76,9 +76,9 @@
                             <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
                                 name="<?php echo $e->key; ?>[]"
                                 <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
-                                    name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
+                                    name="<?php echo $e->key; ?>"
                                 <?php else: ?>
-                                    name="<?php echo $e->key; ?>[]"
+                                    name="<?php echo $e->key; ?>"
                                 <?php endif; ?>
                                 class="form-control"><?php echo htmlentities($e->value); ?></textarea>
                         <span class="input-group-btn">
@@ -96,7 +96,6 @@
                 <?php } ?>
             </div>
         </div>
-        <?php  get_instance()->load->view('metadata/fields/write/compound-duplicate-button', array('e',$e)); ?>
     </div>
 </div>
 <?php } ?>

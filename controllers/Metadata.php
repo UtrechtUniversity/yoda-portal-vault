@@ -42,6 +42,7 @@ class Metadata extends MY_Controller
         if ($isDatamanager == 'yes' && $isVaultPackage == 'yes' && $mode == 'edit_in_vault') {
             // .tmp file for XSD validation
             $result = $this->Metadata_model->prepareVaultMetadataForEditing($formConfig['metadataXmlPath']);
+
             $tmpSavePath = $result['*tempMetadataXmlPath'] . '.tmp';
             $tmpFileExists = $this->Filesystem->read($rodsaccount, $tmpSavePath);
             if ($tmpFileExists !== false) {
@@ -128,6 +129,10 @@ class Metadata extends MY_Controller
             }
         }
 
+
+        $flashMessage = $this->session->flashdata('flashMessage');
+        $flashMessageType = $this->session->flashdata('flashMessageType');
+
         // Datamanager Edit metadata in vault btn & write permissions
         $showEditBtn = false;
         if ($isDatamanager == 'yes' && $isVaultPackage == 'yes') {
@@ -136,10 +141,12 @@ class Metadata extends MY_Controller
             } else {
                 $showEditBtn = true; // show edit button
             }
-        }
 
-        $flashMessage = $this->session->flashdata('flashMessage');
-        $flashMessageType = $this->session->flashdata('flashMessageType');
+            if ($formConfig['hasShadowMetadataXml']=='yes') {
+                $flashMessageType = 'warning';
+                $flashMessage = 'A previous update of metadata is currently being processed. Please <a href="javascript:location.reload();"><u>refresh this page</u></a> to try and see the latest data.';
+            }
+        }
 
         $viewParams = array(
             'styleIncludes' => array(
@@ -227,8 +234,10 @@ class Metadata extends MY_Controller
                 $tmpFileContent = $this->Filesystem->read($rodsaccount, $tmpSavePath);
                 $writeResult = $this->Filesystem->write($rodsaccount, $tempPath, $tmpFileContent);
                 if ($writeResult) {
-                    setMessage('success', 'The metadata is successfully updated.');
-                    $this->Filesystem->delete($rodsaccount, $tmpSavePath);
+                    if (!$isVaultPackage) {
+                        setMessage('success', 'The metadata is successfully updated.');
+                        $this->Filesystem->delete($rodsaccount, $tmpSavePath);
+                    }
                 } else {
                     setMessage('error', 'Unexpected metadata xml write error.');
                 }

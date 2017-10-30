@@ -1,10 +1,22 @@
+<?php
+/*
+ * required to make a distinction between toplevel compound and subproperty compound
+*/
+?>
+
+
 <?php if ($e->compoundFieldCount > 0) { // Compound field structure ?>
 
-<?php if ($e->compoundFieldPosition == 0) { // First field, add offset. ?>
-<div class="col-sm-4 col-sm-offset-3 no-padding">
+    <?php if ($e->compoundFieldPosition == 0) { // First field, add offset. ?>
+        <?php if ($e->subPropertiesBase ) { // First field in compound within a subproperty structure  ?>
+            <div class="col-sm-4 col-sm-offset-3 no-padding">
+        <?php } else { // First field in compound as a main field  ?>
+            <div class="col-sm-4 col-sm-offset-1 no-padding">
+         <?php } ?>
     <?php } else { ?>
-    <div class="col-sm-4">
-        <?php } ?>
+        <div class="col-sm-4">
+    <?php } ?>
+
         <label class="control-label">
             <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
                 <i data-structure-id="<?php echo $e->subPropertiesStructID; ?>" class="glyphicon glyphicon-chevron-down subproperties-toggle" data-toggle="tooltip" title="Click to open or close view on subproperties" data-html="true"></i>&nbsp;
@@ -52,20 +64,20 @@
 
             <div class="col-sm-1">
                 <?php if ($e->mandatory) { ?>
+                    <span class="fa-stack ">
                     <?php if($e->value) { ?>
-                        <span class="fa-stack ">
-                            <?php
-                            // this is added as stacked icons make tooltip handling harder.
-                            $toolTipLock = '';
-                            $toolTipCheckmark = 'aria-hidden="true" data-toggle="tooltip" title="Filled out correctly for the vault"';
-                            ?>
+                        <?php
+                        // this is added as stacked icons make tooltip handling harder.
+                        $toolTipLock = '';
+                        $toolTipCheckmark = 'aria-hidden="true" data-toggle="tooltip" title="Filled out correctly for the vault"';
+                        ?>
 
-                            <i class="fa fa-lock safe fa-stack-1x" <?php echo $toolTipLock; ?> ></i>
-                            <i class="fa fa-check fa-stack-1x checkmark-green-top-right" <?php echo $toolTipCheckmark; ?> ></i>
-                        </span>
+                        <i class="fa fa-lock safe fa-stack-1x" <?php echo $toolTipLock; ?> ></i>
+                        <i class="fa fa-check fa-stack-1x checkmark-green-top-right" <?php echo $toolTipCheckmark; ?> ></i>
                     <?php } else { ?>
-                        <i class="fa fa-lock safe-single" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
+                        <i class="fa fa-lock safe fa-stack-1x" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
                     <?php } ?>
+                    </span>
                 <?php } ?>
             </div>
 
@@ -87,9 +99,9 @@
                                 class="form-control datepicker"
                                 <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
                                     data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
-                                    name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
+                                    name="<?php echo $e->key; ?>"
                                 <?php else: ?>
-                                    name="<?php echo $e->key; ?>[]"
+                                    name="<?php echo $e->key; ?>"
                                 <?php endif; ?>
                                 readonly="true" value="<?php echo htmlentities($e->value); ?>">
                         <span class="input-group-btn">
@@ -105,7 +117,6 @@
                 <?php } ?>
             </div>
         </div>
-        <?php  get_instance()->load->view('metadata/fields/write/compound-duplicate-button', array('e',$e)); ?>
     </div>
 </div>
 <?php } ?>

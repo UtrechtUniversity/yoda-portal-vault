@@ -1,5 +1,57 @@
 var arrayCounterBackEnd = 1000; // is incremented each time used thus securing uniqueness and consistent passing to back end
 
+function encodeToXML(s)
+{
+    var sText = ("" + s).split("<").join("&lt;").split(">").join("&gt;").split('"').join("&#34;").split("'").join("&#39;").split("&").join("&amp;");
+    sText = sText.replace(/[\r]/g, '&#13;');
+    sText = sText.replace(/[\n]/g, '&#10;');
+
+    return sText;
+}
+
+function validateTextLengths()
+{
+    var canSubmit = true;
+
+    $('.form-control').each(function () {
+        var $this = $(this);
+
+        type = '';
+        if ($this.is("input")) {
+            type = 'text';
+        } else if ($this.is("select")) {
+            type = 'select';
+        } else if ($this.is("textarea")) {
+            type = 'textarea';
+        }
+
+        if ( type == 'text' || type == 'textarea') {
+            maxLength = $(this).attr('maxLength');
+            if (maxLength) {
+                valXML = encodeToXML($(this).val());
+
+                if (valXML.length > maxLength) {
+                    label='';
+                    // determine label to indicate where the length problem occurs:
+                    $(this).closest('.form-group').find('.control-label span').each(function(){
+                        label =  $(this).html();
+                    });
+
+                    //mainLabel =
+                    $(this).closest('.subproperties').prev('.form-group').find('.control-label span').each(function(){
+                       label = $(this).html() + ' - ' + label;
+                    });
+
+                    setMessage('error', 'The information cannot be saved as following field holds too many characters: ' + label);
+                    canSubmit = false;
+                    return false;
+                }
+            }
+        }
+    });
+    return canSubmit;
+}
+
 $(function () {
     $('[data-toggle="tooltip"]').tooltip();
     $( ".datepicker" ).datepicker({
@@ -8,11 +60,14 @@ $(function () {
         changeYear: true,
         showButtonPanel: true,
         selectCurrent: true,
-        closeText: 'Clear',
-        onClose: function (dateText, obj) {
-            if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
-                $.datepicker._clearDate(this);
-        }
+        yearRange: "c-2000:c+2000",
+        minDate: new Date(500, 1 - 1, 1),
+        closeText: 'Clear'
+    }).focus(function() {
+        var thisDatepicker = $(this);
+        $('.ui-datepicker-close').click(function() {
+            $.datepicker._clearDate(thisDatepicker);
+        });
     });
     $('select').select2();
 
@@ -137,12 +192,15 @@ function duplicateField(field, cloneType)
             dateFormat: "yy-mm-dd",
             changeMonth: true,
             changeYear: true,
+            yearRange: "c-2000:c+2000",
+            minDate: new Date(500, 1 - 1, 1),
             showButtonPanel: true,
-            closeText: 'Clear',
-            onClose: function (dateText, obj) {
-                if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
-                    $.datepicker._clearDate(this);
-            }
+            closeText: 'Clear'
+        }).focus(function() {
+            var thisDatepicker = $(this);
+            $('.ui-datepicker-close').click(function() {
+                $.datepicker._clearDate(thisDatepicker);
+            });
         });
     }
 
@@ -217,12 +275,15 @@ function duplicateField(field, cloneType)
                     dateFormat: "yy-mm-dd",
                     changeMonth: true,
                     changeYear: true,
+                    yearRange: "c-2000:c+2000",
+                    minDate: new Date(500, 1 - 1, 1),
                     showButtonPanel: true,
-                    closeText: 'Clear',
-                    onClose: function (dateText, obj) {
-                        if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
-                            $.datepicker._clearDate(this);
-                    }
+                    closeText: 'Clear'
+                }).focus(function() {
+                    var thisDatepicker = $(this);
+                    $('.ui-datepicker-close').click(function() {
+                        $.datepicker._clearDate(thisDatepicker);
+                    });
                 });
             }
 
@@ -315,12 +376,15 @@ function duplicateField(field, cloneType)
                         dateFormat: "yy-mm-dd",
                         changeMonth: true,
                         changeYear: true,
+                        yearRange: "c-2000:c+2000",
+                        minDate: new Date(500, 1 - 1, 1),
                         showButtonPanel: true,
-                        closeText: 'Clear',
-                        onClose: function (dateText, obj) {
-                            if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
-                                $.datepicker._clearDate(this);
-                        }
+                        closeText: 'Clear'
+                    }).focus(function() {
+                        var thisDatepicker = $(this);
+                        $('.ui-datepicker-close').click(function() {
+                            $.datepicker._clearDate(thisDatepicker);
+                        });
                     });
                 }
             }
@@ -347,40 +411,4 @@ function duplicateField(field, cloneType)
         // Insert field group
         $(field).after(newFieldGroup);
     }
-}
-
-// Add the new field handlers
-newField.val('');
-
-newMainFieldGroup.find('button').bind("click", function () {
-    duplicateField(newMainFieldGroup, 'subproperty');
-});
-
-newMainFieldGroup.find('[data-toggle="tooltip"]').tooltip();
-
-if (newField.hasClass('numeric-field')) {
-    newField.keypress(validateNumber);
-}
-
-if (newField.hasClass('datepicker')) {
-    newField.removeAttr('id');
-    newField.removeClass('hasDatepicker');
-    newField.datepicker({
-        dateFormat: "yy-mm-dd",
-        changeMonth: true,
-        changeYear: true,
-        showButtonPanel: true,
-        closeText: 'Clear',
-        onClose: function (dateText, obj) {
-            if ($(window.event.srcElement).hasClass('ui-datepicker-close'))
-                $.datepicker._clearDate(this);
-        }
-    });
-}
-
-if (isSelect2) {
-    // Init select2 for the 2 fields.
-    $(this).find('select').select2();
-    newMainFieldGroup.find('select').select2();
-    $(newField).find('select').select2();
 }
