@@ -1,7 +1,7 @@
 <div class="combination-start form-group" data-backendLevel="<?php echo $e->compoundBackendArrayLevel?>">
 
     <?php // Only toplevel compounds can have titles o subPropertuesBase must be empty
-        if (!$e->subPropertiesBase) { ?>
+        if (!$e->subPropertiesBase ) { ?>
 
             <label class="col-sm-2 control-label">
                 <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>">
@@ -9,7 +9,16 @@
                 </span>
             </label>
 
+    <?php } else { // This is a compound witin a subproperty structure -> sm-1 instead of sm-2 ?>
+
+        <label class="col-sm-1 control-label">
+                <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>">
+                    <?php echo $e->label; ?>
+                </span>
+        </label>
+
     <?php } ?>
+
 
     <!--
     <div class="form-group combination-start">
