@@ -1,5 +1,16 @@
 <div class="combination-start form-group" data-backendLevel="<?php echo $e->compoundBackendArrayLevel?>">
 
+    <?php // Only toplevel compounds can have titles o subPropertuesBase must be empty
+        if (!$e->subPropertiesBase) { ?>
+
+            <label class="col-sm-2 control-label">
+                <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>">
+                    <?php echo $e->label; ?>
+                </span>
+            </label>
+
+    <?php } ?>
+
     <!--
     <div class="form-group combination-start">
         <div class="col-sm-4 col-sm-offset-3 no-padding">
