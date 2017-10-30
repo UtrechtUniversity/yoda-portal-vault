@@ -9,7 +9,7 @@ $(function () {
         showButtonPanel: true,
         selectCurrent: true,
         yearRange: "c-2000:c+2000",
-        minDate: new Date(800, 1 - 1, 1),
+        minDate: new Date(500, 1 - 1, 1),
         closeText: 'Clear'
     }).focus(function() {
         var thisDatepicker = $(this);
@@ -140,6 +140,8 @@ function duplicateField(field, cloneType)
             dateFormat: "yy-mm-dd",
             changeMonth: true,
             changeYear: true,
+            yearRange: "c-2000:c+2000",
+            minDate: new Date(500, 1 - 1, 1),
             showButtonPanel: true,
             closeText: 'Clear'
         }).focus(function() {
@@ -221,6 +223,8 @@ function duplicateField(field, cloneType)
                     dateFormat: "yy-mm-dd",
                     changeMonth: true,
                     changeYear: true,
+                    yearRange: "c-2000:c+2000",
+                    minDate: new Date(500, 1 - 1, 1),
                     showButtonPanel: true,
                     closeText: 'Clear'
                 }).focus(function() {
@@ -320,6 +324,8 @@ function duplicateField(field, cloneType)
                         dateFormat: "yy-mm-dd",
                         changeMonth: true,
                         changeYear: true,
+                        yearRange: "c-2000:c+2000",
+                        minDate: new Date(500, 1 - 1, 1),
                         showButtonPanel: true,
                         closeText: 'Clear'
                     }).focus(function() {
