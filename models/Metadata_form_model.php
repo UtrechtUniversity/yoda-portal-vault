@@ -348,10 +348,6 @@ class Metadata_form_model extends CI_Model
         $xsdPath = $config['xsdPath'];
         $this->xsdElements = $this->loadXsd($rodsaccount, $xsdPath);
 
-//        echo '<pre>';
-//            print_r($allFormMetadata);
-//        echo '</pre>';
-
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
         if ($formGroupedElements === false) {
             return false;
@@ -459,9 +455,6 @@ class Metadata_form_model extends CI_Model
                     }
 
                     $xml_item = $xml->createElement($mainField); // base element
-//                    echo '<pre>';
-//                    print_r($elementInfo);
-//                    echo '</pre>';
 
                     $level = 0; // for deletion handling - deeper levels (>0)can always be deleted (i.e. not written to file when empty value)
                     $metaStructureXML = $this->xmlMetaStructure($xml, $elementInfo, $xml_item, $level);
@@ -519,7 +512,6 @@ class Metadata_form_model extends CI_Model
                         // 2017-10-12 -> length = 10
                         // years before 1000 can be added by the datepicker but are formatted like: 900-12-25
                         $val = str_repeat('0', 10-strlen($val)) . $val; // add preceiding 0's -> 0900-12-25
-//                        echo '<br>Val: ' . $val . ' - ' . $this->xsdElements[$totalTagName]['type'];// . $totalPath;
                     }
                     $xmlParentElement->appendChild($xmlMain->createTextNode($val));
                     //echo '<pre>';
