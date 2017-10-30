@@ -6,6 +6,7 @@ class Metadata_form_model extends CI_Model
 
     var $CI = NULL;
     var $presentationElements = array();
+    var $xsdElements = array();
 
     function __construct()
     {
@@ -345,8 +346,7 @@ class Metadata_form_model extends CI_Model
     public function metadataToXmlString($allFormMetadata, $rodsaccount, $config)
     {
         $xsdPath = $config['xsdPath'];
-        $xsdElements = $this->loadXsd($rodsaccount, $xsdPath);
-
+        $this->xsdElements = $this->loadXsd($rodsaccount, $xsdPath);
 
         $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
         if ($formGroupedElements === false) {
@@ -405,7 +405,7 @@ class Metadata_form_model extends CI_Model
                 $topLevelData = $elementData;
             }
 
-//            echo '<br>Element name: ' . $mainField;
+        //    echo '<br>Element name: ' . $mainField;
             foreach ($topLevelData as $key => $val) { // per $val => entire structure to be added to $elementName
                 $temp = array();
                 if (!(is_array($val) AND is_numeric(key($val)))) {
@@ -462,7 +462,6 @@ class Metadata_form_model extends CI_Model
                     if ($metaStructureXML['anyDataPresent']) {
                         $xml_metadata->appendChild($metaStructureXML['xmlParentElement']);
                     }
-
                 }
             }
         }
@@ -475,7 +474,16 @@ class Metadata_form_model extends CI_Model
 
 
     //$topLevelName - for deletion purpose (Sub info can always be deleted (i.e. not added)
-    public function xmlMetaStructure($xmlMain, $arMetadata, $xmlParentElement, $level, $anyDataPresent = false)
+    /**
+     * @param $xmlMain
+     * @param $arMetadata
+     * @param $xmlParentElement
+     * @param $level
+     * @param bool $anyDataPresent
+     * @param string $totalTagName - for indexing in $xsdElements to find out whether a field is op type xs:date
+     * @return array
+     */
+    public function xmlMetaStructure($xmlMain, $arMetadata, $xmlParentElement, $level, $anyDataPresent = false, $totalTagName='')
     {
         $doAddThisLevel = true;
 
@@ -486,13 +494,29 @@ class Metadata_form_model extends CI_Model
             $arrayMeta = $arMetadata;
         }
 
+        if (!$totalTagName) {
+            $totalTagName = $xmlParentElement->tagName;
+        }
+        else {
+            $totalTagName = $totalTagName . '_' . $xmlParentElement->tagName;
+        }
+
         foreach ($arrayMeta as $key => $val) {
             if (!is_array($val) AND is_numeric($key)) {
                 //return $xmlParentElement;
                 ///een val is altijd het eind ding van een element.
                 // Als er geen waarde is, moet dus ook het element worden verwijderd
                 if ($val != '') {
+                    if ($this->xsdElements[$totalTagName]['type'] == 'xs:date') {
+                        // the date requires years to be added YYYY
+                        // 2017-10-12 -> length = 10
+                        // years before 1000 can be added by the datepicker but are formatted like: 900-12-25
+                        $val = str_repeat('0', 10-strlen($val)) . $val; // add preceiding 0's -> 0900-12-25
+                    }
                     $xmlParentElement->appendChild($xmlMain->createTextNode($val));
+                    //echo '<pre>';
+                    //print_r($xmlParentElement);
+                    //echo '</pre>';
                     $anyDataPresent = true;
                 } else {
                     $doAddThisLevel = false;
@@ -510,7 +534,7 @@ class Metadata_form_model extends CI_Model
                     $xmlElement = $xmlMain->createElement($key);
 
                     // Deze aanroep gebeurt in het kader van $xmlElement / $key.
-                    $structInfo = $this->xmlMetaStructure($xmlMain, $val2, $xmlElement, $level, $anyDataPresent);
+                    $structInfo = $this->xmlMetaStructure($xmlMain, $val2, $xmlElement, $level, $anyDataPresent, $totalTagName);
 
                     // Add (entire) srtructure or 1 value
                     // Het element wordt hier al geappend zonder dat zeker is of dit moet (en dan komt ie als lege tag in yoda-metadata.xml)
