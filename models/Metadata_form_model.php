@@ -580,8 +580,6 @@ class Metadata_form_model extends CI_Model
 
         $xmlString = $this->metadataToXmlString($allFormMetadata, $rodsaccount, $config);
 
-        exit;
-
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
 
