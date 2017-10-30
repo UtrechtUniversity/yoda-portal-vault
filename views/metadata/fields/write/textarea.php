@@ -76,9 +76,9 @@
                             <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
                                 name="<?php echo $e->key; ?>[]"
                                 <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
-                                    name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
+                                    name="<?php echo $e->key; ?>"
                                 <?php else: ?>
-                                    name="<?php echo $e->key; ?>[]"
+                                    name="<?php echo $e->key; ?>"
                                 <?php endif; ?>
                                 class="form-control"><?php echo htmlentities($e->value); ?></textarea>
                         <span class="input-group-btn">

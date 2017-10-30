@@ -21,9 +21,9 @@
                class="form-control numeric-field"
             <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
                 data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
-                name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
+                name="<?php echo $e->key; ?>"
             <?php else: ?>
-                name="<?php echo $e->key; ?>[]"
+                name="<?php echo $e->key; ?>"
             <?php endif; ?>
                value="<?php echo htmlentities($e->value); ?>">
 
@@ -81,9 +81,9 @@
                                class="form-control numeric-field"
                             <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
                                 data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
-                                name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
+                                name="<?php echo $e->key; ?>"
                             <?php else: ?>
-                                name="<?php echo $e->key; ?>[]"
+                                name="<?php echo $e->key; ?>"
                             <?php endif; ?>
                                value="<?php echo htmlentities($e->value); ?>">
                         <span class="input-group-btn">
