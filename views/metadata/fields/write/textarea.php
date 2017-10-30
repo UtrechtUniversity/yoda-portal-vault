@@ -1,9 +1,9 @@
 <?php if ($e->compoundFieldCount > 0) { // Compound field structure ?>
 
 <?php if ($e->compoundFieldPosition == 0) { // First field, add offset. ?>
-<div class="col-sm-4 col-sm-offset-3 no-padding">
+<div class="field col-sm-4 col-sm-offset-3 no-padding">
     <?php } else { ?>
-    <div class="col-sm-4">
+    <div class="field col-sm-4">
         <?php } ?>
         <label class="control-label">
             <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
