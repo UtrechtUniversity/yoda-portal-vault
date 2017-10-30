@@ -9,12 +9,12 @@
 
     <?php if ($e->compoundFieldPosition == 0) { // First field, add offset. ?>
         <?php if ($e->subPropertiesBase ) { // First field in compound within a subproperty structure  ?>
-            <div class="col-sm-4 col-sm-offset-3 no-padding">
+            <div class="field col-sm-4 col-sm-offset-3 no-padding">
         <?php } else { // First field in compound as a main field  ?>
-            <div class="col-sm-4 col-sm-offset-1 no-padding">
+            <div class="field col-sm-4 col-sm-offset-1 no-padding">
          <?php } ?>
     <?php } else { ?>
-        <div class="col-sm-4">
+        <div class="field col-sm-4">
     <?php } ?>
 
         <label class="control-label">

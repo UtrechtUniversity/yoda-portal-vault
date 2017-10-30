@@ -212,7 +212,6 @@ function duplicateField(field, cloneType)
 
     // Main property with properties, clone the whole set.
     if (cloneType == 'main') {
-        field.next().find('select').select2('destroy');
         var currentFieldSubPropertiesGroup = field.next();
         currentFieldSubPropertiesGroup.find('select').select2('destroy');
 
@@ -236,63 +235,74 @@ function duplicateField(field, cloneType)
 
         // loop all sub properties
         fieldSubPropertiesGroup.find('.form-group').each(function () {
-            // Destroy select2 before cloning.
-            var isSelect2 = $(this).hasClass('select2');
-            if (isSelect2) {
-                $(this).find('select').select2('destroy');
-            }
-
-            // Field
+            var groupFields = $(this);
             var newMainFieldGroup = $(this);
-            var newField = newMainFieldGroup.find('.form-control'); // gaat er vanuit dat er maar 1 control is
 
-            // Get the native select field from the select2 plugin.
-            if (isSelect2) {
-                newField = $(newMainFieldGroup).find('select');
+            // Combination field, multiple fields.
+            if ($(this).hasClass('combination-start')) {
+                var groupFields = $(this).find('.field');
             }
 
-            // Change the field name
-            var name = newField.attr('name');
-            newField.attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']')); // example: [0] for [1]
+            groupFields.each(function () {
+                // Destroy select2 before cloning.
+                var isSelect2 = $(this).hasClass('select2');
+                if (isSelect2) {
+                    $(this).find('select').select2('destroy');
+                }
 
-            // Add the new field handlers
-            newField.val('');
+                // Field
+                var newField = $(this).find('.form-control'); // gaat er vanuit dat er maar 1 control is
 
+                // Get the native select field from the select2 plugin.
+                if (isSelect2) {
+                    newField = $(this).find('select');
+                }
+
+                // Change the field name
+                var name = newField.attr('name');
+                newField.attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']')); // example: [0] for [1]
+
+                // Add the new field handlers
+                newField.val('');
+
+                // Field bindings.
+                if (newField.hasClass('numeric-field')) {
+                    newField.keypress(validateNumber);
+                }
+
+                if (newField.hasClass('datepicker')) {
+                    newField.removeAttr('id');
+                    newField.removeClass('hasDatepicker');
+                    newField.datepicker({
+                        dateFormat: "yy-mm-dd",
+                        changeMonth: true,
+                        changeYear: true,
+                        yearRange: "c-2000:c+2000",
+                        minDate: new Date(500, 1 - 1, 1),
+                        showButtonPanel: true,
+                        closeText: 'Clear'
+                    }).focus(function () {
+                        var thisDatepicker = $(this);
+                        $('.ui-datepicker-close').click(function () {
+                            $.datepicker._clearDate(thisDatepicker);
+                        });
+                    });
+                }
+
+                if (isSelect2) {
+                    // Init select2 for the 2 fields.
+                    $(this).find('select').select2();
+                    newMainFieldGroup.find('select').select2();
+                    $(newField).find('select').select2();
+                }
+            });
+
+            // Fieldgroup bindings
             newMainFieldGroup.find('button').bind("click", function () {
-                duplicateField(newMainFieldGroup, 'subproperty');
+                duplicateField(newMainFieldGroup, $(this).data('clone'));
             });
 
             newMainFieldGroup.find('[data-toggle="tooltip"]').tooltip();
-
-            if (newField.hasClass('numeric-field')) {
-                newField.keypress(validateNumber);
-            }
-
-            if (newField.hasClass('datepicker')) {
-                newField.removeAttr('id');
-                newField.removeClass('hasDatepicker');
-                newField.datepicker({
-                    dateFormat: "yy-mm-dd",
-                    changeMonth: true,
-                    changeYear: true,
-                    yearRange: "c-2000:c+2000",
-                    minDate: new Date(500, 1 - 1, 1),
-                    showButtonPanel: true,
-                    closeText: 'Clear'
-                }).focus(function() {
-                    var thisDatepicker = $(this);
-                    $('.ui-datepicker-close').click(function() {
-                        $.datepicker._clearDate(thisDatepicker);
-                    });
-                });
-            }
-
-            if (isSelect2) {
-                // Init select2 for the 2 fields.
-                $(this).find('select').select2();
-                newMainFieldGroup.find('select').select2();
-                $(newField).find('select').select2();
-            }
         });
 
         currentFieldSubPropertiesGroup.find('select').select2();

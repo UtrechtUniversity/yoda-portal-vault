@@ -1,8 +1,8 @@
 <?php if ($e->compoundFieldCount > 0) { ?>
     <?php if ($e->compoundFieldPosition == 0) { // First field, add offset. ?>
-        <div class="col-sm-4 col-sm-offset-3 no-padding">
+        <div class="field select2 col-sm-4 col-sm-offset-3 no-padding">
     <?php } else { ?>
-        <div class="col-sm-4">
+        <div class="field select2 col-sm-4">
     <?php } ?>
 
         <label class="control-label">
@@ -89,11 +89,16 @@
                             <?php } ?>
                         </select>
                         <span class="input-group-btn">
-                            <?php if ($e->subPropertiesRole=='subPropertyStartStructure') { ?>
-                                <button class="btn btn-default duplicate-subproperty-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
-                            <?php } else { ?>
-                                <button class="btn btn-default duplicate-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
-                            <?php } ?>
+                            <button
+                                    class="btn btn-default duplicate-field"
+                                <?php if ($e->subPropertiesRole=='subPropertyStartStructure') { ?>
+                                    data-clone="main"
+                                <?php } else if ($e->subPropertiesRole=='subProperty') { ?>
+                                    data-clone="subproperty"
+                                <?php } ?>
+                                    type="button">
+                                <i class="fa fa-plus" aria-hidden="true"></i>
+                            </button>
                         </span>
 
                     </div>
