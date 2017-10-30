@@ -1,5 +1,57 @@
 var arrayCounterBackEnd = 1000; // is incremented each time used thus securing uniqueness and consistent passing to back end
 
+function encodeToXML(s)
+{
+    var sText = ("" + s).split("<").join("&lt;").split(">").join("&gt;").split('"').join("&#34;").split("'").join("&#39;").split("&").join("&amp;");
+    sText = sText.replace(/[\r]/g, '&#13;');
+    sText = sText.replace(/[\n]/g, '&#10;');
+
+    return sText;
+}
+
+function validateTextLengths()
+{
+    var canSubmit = true;
+
+    $('.form-control').each(function () {
+        var $this = $(this);
+
+        type = '';
+        if ($this.is("input")) {
+            type = 'text';
+        } else if ($this.is("select")) {
+            type = 'select';
+        } else if ($this.is("textarea")) {
+            type = 'textarea';
+        }
+
+        if ( type == 'text' || type == 'textarea') {
+            maxLength = $(this).attr('maxLength');
+            if (maxLength) {
+                valXML = encodeToXML($(this).val());
+
+                if (valXML.length > maxLength) {
+                    label='';
+                    // determine label to indicate where the length problem occurs:
+                    $(this).closest('.form-group').find('.control-label span').each(function(){
+                        label =  $(this).html();
+                    });
+
+                    //mainLabel =
+                    $(this).closest('.subproperties').prev('.form-group').find('.control-label span').each(function(){
+                       label = $(this).html() + ' - ' + label;
+                    });
+
+                    setMessage('error', 'The information cannot be saved as following field holds too many characters: ' + label);
+                    canSubmit = false;
+                    return false;
+                }
+            }
+        }
+    });
+    return canSubmit;
+}
+
 $(function () {
     $('[data-toggle="tooltip"]').tooltip();
     $( ".datepicker" ).datepicker({
