@@ -459,9 +459,9 @@ class Metadata_form_model extends CI_Model
                     }
 
                     $xml_item = $xml->createElement($mainField); // base element
-                    echo '<pre>';
-                    print_r($elementInfo);
-                    echo '</pre>';
+//                    echo '<pre>';
+//                    print_r($elementInfo);
+//                    echo '</pre>';
 
                     $level = 0; // for deletion handling - deeper levels (>0)can always be deleted (i.e. not written to file when empty value)
                     $metaStructureXML = $this->xmlMetaStructure($xml, $elementInfo, $xml_item, $level);
@@ -469,7 +469,6 @@ class Metadata_form_model extends CI_Model
                     if ($metaStructureXML['anyDataPresent']) {
                         $xml_metadata->appendChild($metaStructureXML['xmlParentElement']);
                     }
-
                 }
             }
         }
@@ -515,8 +514,14 @@ class Metadata_form_model extends CI_Model
                 ///een val is altijd het eind ding van een element.
                 // Als er geen waarde is, moet dus ook het element worden verwijderd
                 if ($val != '') {
-                    //echo '<br>type: '.  ;
-                    $xmlParentElement->appendChild($xmlMain->createTextNode($val)); echo '<br>Val: ' . $val . ' - ' . $this->xsdElements[$totalTagName]['type'];// . $totalPath;
+                    if ($this->xsdElements[$totalTagName]['type'] == 'xs:date') {
+                        // the date requires years to be added YYYY
+                        // 2017-10-12 -> length = 10
+                        // years before 1000 can be added by the datepicker but are formatted like: 900-12-25
+                        $val = str_repeat('0', 10-strlen($val)) . $val; // add preceiding 0's -> 0900-12-25
+//                        echo '<br>Val: ' . $val . ' - ' . $this->xsdElements[$totalTagName]['type'];// . $totalPath;
+                    }
+                    $xmlParentElement->appendChild($xmlMain->createTextNode($val));
                     //echo '<pre>';
                     //print_r($xmlParentElement);
                     //echo '</pre>';
