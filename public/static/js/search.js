@@ -94,6 +94,7 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
                     }
                 }
             },
+            "ordering": false,
             "processing": true,
             "serverSide": true,
             "pageLength": searchPageItems,

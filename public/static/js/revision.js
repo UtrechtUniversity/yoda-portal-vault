@@ -28,6 +28,7 @@ $( document ).ready(function() {
                 }
             }
         },
+        "ordering": false,
         "processing": true,
         "serverSide": true,
         "pageLength": revisionItemsPerPage,
@@ -245,6 +246,7 @@ function startBrowsing(path, items)
             "processing": true,
             "serverSide": true,
             "iDeferLoading": 0,
+            "ordering": false,
             "pageLength": browseDlgPageItems,
             "drawCallback": function (settings) {
                 $(".browse").on("click", function () {
