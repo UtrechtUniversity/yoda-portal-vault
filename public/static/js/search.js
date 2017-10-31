@@ -94,7 +94,6 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
                     }
                 }
             },
-            "ordering": false,
             "processing": true,
             "serverSide": true,
             "pageLength": searchPageItems,
@@ -110,9 +109,9 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             "aoColumnDefs": [
                 disableSorting
             ],
-            "order": [[ searchOrderColumn, searchOrderDir ]]
+            "ordering": false
         });
-
+        //"order": [[ searchOrderColumn, searchOrderDir ]]  // save for future purposes - it intervenes with newly added "ordering": false
 
         if (type == 'status') {
             searchStatus = $(".search-status option:selected").text();
