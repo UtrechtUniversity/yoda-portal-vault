@@ -226,7 +226,7 @@ function duplicateField(field, cloneType)
         // Find new structure id
         for (i = structureId; i < 1000; i++) {
             var tmpName = name.replace('[' + structureId + ']', '[' + i + ']');
-            if ($("input[name='" + tmpName + "']").length == 0) {
+            if ($("input[name='" + tmpName + "']").length == 0 && $("select[name='" + tmpName + "']").length == 0) {
                 newStructureId = i;
                 break;
             }
@@ -260,6 +260,7 @@ function duplicateField(field, cloneType)
 
                 // Change the field name
                 var name = newField.attr('name');
+
                 newField.attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']')); // example: [0] for [1]
 
                 // Add the new field handlers
