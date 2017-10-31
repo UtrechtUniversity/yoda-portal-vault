@@ -135,6 +135,7 @@ class Metadata extends MY_Controller
 
         // Datamanager Edit metadata in vault btn & write permissions
         $showEditBtn = false;
+        $messageDatamanagerAfterSaveInVault = '';  // message to datamanger via central messaging -> javascript setMessage
         if ($isDatamanager == 'yes' && $isVaultPackage == 'yes') {
             if ($mode == 'edit_in_vault') {
                 $form->setPermission('write'); // Set write permissions for editing metadata in the vault.
@@ -143,8 +144,9 @@ class Metadata extends MY_Controller
             }
 
             if ($formConfig['hasShadowMetadataXml']=='yes') {
-                $flashMessageType = 'warning';
-                $flashMessage = 'A previous update of metadata is currently being processed. Please <a href="javascript:location.reload();"><u>refresh this page</u></a> to try and see the latest data.';
+                //$flashMessageType = 'warning';
+                //$flashMessage = 'Update of metadata is pending.';
+                $messageDatamanagerAfterSaveInVault = 'Update of metadata is pending.';
             }
         }
 
@@ -171,6 +173,7 @@ class Metadata extends MY_Controller
             'cloneMetadata' => $cloneMetadata,
             'isVaultPackage' => $isVaultPackage,
             'showEditBtn' => $showEditBtn,
+            'messageDatamanagerAfterSaveInVault' => $messageDatamanagerAfterSaveInVault,
 
             'mandatoryTotal' => $mandatoryTotal,
             'mandatoryFilled' => $mandatoryFilled,
@@ -234,10 +237,8 @@ class Metadata extends MY_Controller
                 $tmpFileContent = $this->Filesystem->read($rodsaccount, $tmpSavePath);
                 $writeResult = $this->Filesystem->write($rodsaccount, $tempPath, $tmpFileContent);
                 if ($writeResult) {
-                    if (!$isVaultPackage) {
-                        setMessage('success', 'The metadata is successfully updated.');
-                        $this->Filesystem->delete($rodsaccount, $tmpSavePath);
-                    }
+                    //setMessage('success', 'Update of metadata is pending.'); // No message - this is, for this sitatuion dealt with by loading page
+                    $this->Filesystem->delete($rodsaccount, $tmpSavePath);
                 } else {
                     setMessage('error', 'Unexpected metadata xml write error.');
                 }
