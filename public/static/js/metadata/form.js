@@ -60,7 +60,7 @@ $(function () {
         changeYear: true,
         showButtonPanel: true,
         selectCurrent: true,
-        yearRange: "c-2000:c+2000",
+        yearRange: "c-2000:2100",
         minDate: new Date(500, 1 - 1, 1),
         closeText: 'Clear'
     }).focus(function() {
@@ -278,7 +278,7 @@ function duplicateField(field, cloneType)
                         dateFormat: "yy-mm-dd",
                         changeMonth: true,
                         changeYear: true,
-                        yearRange: "c-2000:c+2000",
+                        yearRange: "c-2000:2100",
                         minDate: new Date(500, 1 - 1, 1),
                         showButtonPanel: true,
                         closeText: 'Clear'
@@ -387,7 +387,7 @@ function duplicateField(field, cloneType)
                         dateFormat: "yy-mm-dd",
                         changeMonth: true,
                         changeYear: true,
-                        yearRange: "c-2000:c+2000",
+                        yearRange: "c-2000:2100",
                         minDate: new Date(500, 1 - 1, 1),
                         showButtonPanel: true,
                         closeText: 'Clear'
