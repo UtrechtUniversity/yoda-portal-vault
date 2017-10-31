@@ -172,3 +172,9 @@
         </div>
     </div>
 <?php } ?>
+
+<?php if ($messageDatamanagerAfterSaveInVault) { // trick to display data via central messaging system ?>
+        <script language="javascript">
+            setMessage('success', '<?php echo $messageDatamanagerAfterSaveInVault; ?>');
+        </script>
+<?php } ?>
