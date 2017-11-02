@@ -1,7 +1,3 @@
+        </div>
+    </div>
 </div>
-
-<!--
-<hr>
-COMBINATION End tag <?php echo $e->key; ?>
-<hr>
--->
