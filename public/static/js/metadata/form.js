@@ -234,13 +234,13 @@ function duplicateField(field, cloneType)
         newField.attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']'));
 
         // loop all sub properties
-        fieldSubPropertiesGroup.find('.form-group').each(function () {
+        fieldSubPropertiesGroup.find('.form-group').not('.row').each(function () {
             var groupFields = $(this);
             var newMainFieldGroup = $(this);
 
             // Combination field, multiple fields.
             if ($(this).hasClass('combination-start')) {
-                var groupFields = $(this).find('.field');
+                var groupFields = $(this).find('div').closest('.form-group').find('.field');
             }
 
             groupFields.each(function () {

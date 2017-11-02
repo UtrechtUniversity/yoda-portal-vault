@@ -103,24 +103,14 @@ legend {
     visibility:hidden
 }
 
-
-.combination-start .form-group {
-    float: left;
-    width: 50%;
-}
-
-.combination-start .form-group label {
-    width: 22%;
-}
-
 .no-padding {
     padding: 0;
 }
 
-.combined-plus {
-    margin-top: 25px;
-}
-
 button[data-clone*="main"] {
     margin-left: 15px!important;
+}
+
+.combined-main-label {
+    padding-top: 30px;
 }
