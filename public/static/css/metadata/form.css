@@ -112,5 +112,5 @@ button[data-clone*="main"] {
 }
 
 .combined-main-label {
-    padding-top: 30px;
+    padding-top: 30px!important;
 }
