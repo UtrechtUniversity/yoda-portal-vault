@@ -1,10 +1,5 @@
 <?php if ($e->compoundFieldCount > 0) { // Compound field structure ?>
-
-<?php if ($e->compoundFieldPosition == 0) { // First field, add offset. ?>
-<div class="field col-sm-4 col-sm-offset-3 no-padding">
-    <?php } else { ?>
-    <div class="field col-sm-4">
-        <?php } ?>
+    <div class="col-sm-6 field">
         <label class="control-label">
             <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
                 <i data-structure-id="<?php echo $e->subPropertiesStructID; ?>" class="glyphicon glyphicon-chevron-down subproperties-toggle" data-toggle="tooltip" title="Click to open or close view on subproperties" data-html="true"></i>&nbsp;
@@ -14,6 +9,10 @@
                 <?php echo $e->label; ?>
             </span>
         </label>
+
+    <?php if ( $e->compoundMultipleAllowed AND   $e->compoundFieldPosition ==($e->compoundFieldCount-1) ) { // present button only when compound is clonable and at end of element range ?>
+        <div class="input-group">
+    <?php } ?>
 
         <input type="text"
                placeholder="Enter a valid number..."
@@ -27,34 +26,33 @@
             <?php endif; ?>
                value="<?php echo htmlentities($e->value); ?>">
 
-    <?php if ( $e->compoundMultipleAllowed AND   $e->compoundFieldPosition ==($e->compoundFieldCount-1) ) { // present button only when compound is clonable and at end of element range ?>
+        <?php if ( $e->compoundMultipleAllowed AND   $e->compoundFieldPosition ==($e->compoundFieldCount-1) ) { // present button only when compound is clonable and at end of element range ?>
 
-        <span class="input-group-btn">
-            <button class="btn btn-default duplicate-field combined-plus"
-                    data-clone="combined"  type="button">
-                <i class="fa fa-plus" aria-hidden="true"></i>
-            </button>
-        </span>
+            <span class="input-group-btn">
+                <button class="btn btn-default duplicate-field combined-plus"
+                        data-clone="combined"  type="button">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                </button>
+            </span>
 
-    <?php } ?>
-    <?php } else { ?>
+        </div>
 
-<div class="form-group" xmlns="http://www.w3.org/1999/html">
-    <label class="col-sm-2 control-label">
-        <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
-            <i data-structure-id="<?php echo $e->subPropertiesStructID; ?>" class="glyphicon glyphicon-chevron-down subproperties-toggle" data-subpropertyBase="<?php echo $e->subPropertiesBase; ?>"  data-toggle="tooltip" title="Click to open or close view on subproperties" data-html="true"></i>&nbsp;
-        <?php endif; ?>
-        <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>"><?php echo $e->label; ?></span>
-    </label>
+        <?php } ?>
 
-    <div class="col-sm-9">
-        <div class="row">
+    </div>
+<?php } else { ?>
 
-            <div class="col-sm-1">
+    <div class="form-group" xmlns="http://www.w3.org/1999/html">
+        <label class="col-sm-2 control-label">
+            <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
+                <i data-structure-id="<?php echo $e->subPropertiesStructID; ?>" class="glyphicon glyphicon-chevron-down subproperties-toggle" data-subpropertyBase="<?php echo $e->subPropertiesBase; ?>"  data-toggle="tooltip" title="Click to open or close view on subproperties" data-html="true"></i>&nbsp;
+            <?php endif; ?>
+            <span data-toggle="tooltip" title="<?php echo $e->helpText; ?>"><?php echo $e->label; ?></span>
+        </label>
+
+            <span class="fa-stack col-sm-1">
                 <?php if ($e->mandatory) { ?>
-                    <span class="fa-stack ">
-                    <?php if($e->value and is_numeric($e->value)) { ?>
-
+                    <?php if($e->value) { ?>
                             <?php
                                 // this is added as stacked icons make tooltip handling harder.
                                 $toolTipLock = '';
@@ -62,49 +60,48 @@
                             ?>
 
                             <i class="fa fa-lock safe fa-stack-1x" <?php echo $toolTipLock; ?> ></i>
-                            <?php if($e->value) { ?>
-                                <i class="fa fa-check fa-stack-1x checkmark-green-top-right" <?php echo $toolTipCheckmark; ?> ></i>
-                            <?php } ?>
+                            <i class="fa fa-check fa-stack-1x checkmark-green-top-right" <?php echo $toolTipCheckmark; ?> ></i>
                     <?php } else { ?>
                         <i class="fa fa-lock safe fa-stack-1x" aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
                     <?php } ?>
-                     </span>
                 <?php } ?>
-            </div>
+            </span>
 
-            <div class="col-sm-11">
-                <?php if ($e->multipleAllowed()) { ?>
-                    <div class="input-group">
+        <div class="col-sm-9">
+            <div class="row">
+                <div class="col-sm-12">
+                    <?php if ($e->multipleAllowed()) { ?>
+                        <div class="input-group">
+                            <input type="text"
+                                   placeholder="Enter a valid number..."
+                                <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
+                                   class="form-control numeric-field"
+                                <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
+                                    data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
+                                    name="<?php echo $e->key; ?>"
+                                <?php else: ?>
+                                    name="<?php echo $e->key; ?>"
+                                <?php endif; ?>
+                                   value="<?php echo htmlentities($e->value); ?>">
+                            <span class="input-group-btn">
+                                <?php if ($e->subPropertiesRole=='subPropertyStartStructure') { ?>
+                                    <button class="btn btn-default duplicate-subproperty-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                                <?php } else { ?>
+                                    <button class="btn btn-default duplicate-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                                <?php } ?>
+                            </span>
+
+                        </div>
+                    <?php } else { ?>
+
                         <input type="text"
                                placeholder="Enter a valid number..."
                             <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
-                               class="form-control numeric-field"
-                            <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
-                                data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
-                                name="<?php echo $e->key; ?>"
-                            <?php else: ?>
-                                name="<?php echo $e->key; ?>"
-                            <?php endif; ?>
-                               value="<?php echo htmlentities($e->value); ?>">
-                        <span class="input-group-btn">
-                            <?php if ($e->subPropertiesRole=='subPropertyStartStructure') { ?>
-                                <button class="btn btn-default duplicate-subproperty-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
-                            <?php } else { ?>
-                                <button class="btn btn-default duplicate-field" type="button"><i class="fa fa-plus" aria-hidden="true"></i></button>
-                            <?php } ?>
-                        </span>
+                               class="form-control numeric-field" name="<?php echo $e->key; ?>" value="<?php echo htmlentities($e->value); ?>">
 
-                    </div>
-                <?php } else { ?>
-
-                    <input type="text"
-                           placeholder="Enter a valid number..."
-                        <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
-                           class="form-control numeric-field" name="<?php echo $e->key; ?>" value="<?php echo htmlentities($e->value); ?>">
-
-                <?php } ?>
-            </div>
-         </div>
+                    <?php } ?>
+                </div>
+             </div>
+        </div>
     </div>
-</div>
 <?php } ?>
