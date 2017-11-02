@@ -258,7 +258,7 @@ function toggleLocksList(folder)
                 var html = '<li class="list-group-item disabled">Locks:</li>';
                 var locks = data.result;
                 $.each(locks, function (index, value) {
-                    html += '<li class="list-group-item"><span class="browse" data-path="' + value + '">' + value + '</span></li>';
+                    html += '<li class="list-group-item"><span class="browse" data-path="' + encodeURIComponent(value) + '">' + value + '</span></li>';
                 });
                 $('.lock-items').html(html);
                 $('.lock-items').show();
