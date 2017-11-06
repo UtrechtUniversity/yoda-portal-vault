@@ -9,6 +9,19 @@ function encodeToXML(s)
     return sText;
 }
 
+function bytesLengthOfUTF8String(str) {
+  // returns the byte length of an utf8 string
+  var s = str.length;
+  for (var i=str.length-1; i>=0; i--) {
+    var code = str.charCodeAt(i);
+    if (code > 0x7f && code <= 0x7ff) s++;
+    else if (code > 0x7ff && code <= 0xffff) s+=2;
+    else if (code > 0x10000 && code <= 0x10ffff) s+=3;
+    if (code >= 0xdc00 && code <= 0xdfff) i--; //trail surrogate
+  }
+  return s;
+}
+
 function validateTextLengths()
 {
     var canSubmit = true;
@@ -27,10 +40,10 @@ function validateTextLengths()
 
         if ( type == 'text' || type == 'textarea') {
             maxLength = $(this).attr('maxLength');
-            if (maxLength) {
+	    if (maxLength) {
                 valXML = encodeToXML($(this).val());
-
-                if (valXML.length > maxLength) {
+		bytesLength = bytesLengthOfUTF8String(valXML);
+		if (bytesLength > maxLength) {
                     label='';
                     // determine label to indicate where the length problem occurs:
                     $(this).closest('.form-group').find('.control-label span').each(function(){
@@ -42,11 +55,13 @@ function validateTextLengths()
                        label = $(this).html() + ' - ' + label;
                     });
 
-                    setMessage('error', 'The information cannot be saved as following field holds too many characters: ' + label);
+		    // console.log('Length of ' + label + ' is ' + bytesLen + ' bytes.');
+                    setMessage('error', 'The information cannot be saved as following field holds too many bytes (' + bytesLength + '>' + maxLength + '): ' + label);
+
                     canSubmit = false;
                     return false;
                 }
-            }
+	    }
         }
     });
     return canSubmit;
