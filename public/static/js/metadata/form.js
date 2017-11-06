@@ -23,7 +23,7 @@ function bytesLengthOfUTF8String(str) {
 }
 
 function excessUTF8Characters(str, maxLength) {
-  
+  // return the number of characters beyond the max byte length maxLength 
   var s = 0;
   var end = str.length;
   var lastPos = 0;
@@ -35,6 +35,7 @@ function excessUTF8Characters(str, maxLength) {
     if (code > 0x7f && code <= 0x7ff) s+=2;
     else if (code > 0x7ff && code <= 0xffff) s+=3;
     else if (code > 0x10000 && code <= 0x10ffff) s+=4;
+    if (code >= 0xdc00 && code <= 0xdfff) i++; //trail surrogate
     if (s>maxLength) {
        lastPos = i;
        break;
