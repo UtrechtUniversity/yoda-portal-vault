@@ -9,6 +9,46 @@ function encodeToXML(s)
     return sText;
 }
 
+function bytesLengthOfUTF8String(str) {
+  // returns the byte length of an utf8 string
+  var s = str.length;
+  for (var i=str.length-1; i>=0; i--) {
+    var code = str.charCodeAt(i);
+    if (code > 0x7f && code <= 0x7ff) s++;
+    else if (code > 0x7ff && code <= 0xffff) s+=2;
+    else if (code > 0x10000 && code <= 0x10ffff) s+=3;
+    if (code >= 0xdc00 && code <= 0xdfff) i--; //trail surrogate
+  }
+  return s;
+}
+
+function excessUTF8Characters(str, maxLength) {
+  // return the number of characters beyond the max byte length maxLength 
+  var s = 0;
+  var end = str.length;
+  var lastPos = 0;
+  var excess = 0;
+
+  for (var i=0; i<end; i++) {
+    var code = str.charCodeAt(i);
+    if (code < 0x007f) s++;
+    if (code > 0x7f && code <= 0x7ff) s+=2;
+    else if (code > 0x7ff && code <= 0xffff) s+=3;
+    else if (code > 0x10000 && code <= 0x10ffff) s+=4;
+    if (code >= 0xdc00 && code <= 0xdfff) i++; //trail surrogate
+    if (s>maxLength) {
+       lastPos = i;
+       break;
+    }
+  }
+  
+  if (lastPos !=0) {
+      excess = str.substring(lastPos, end).length;
+  } 
+  return excess;
+}
+
+
 function validateTextLengths()
 {
     var canSubmit = true;
@@ -27,10 +67,10 @@ function validateTextLengths()
 
         if ( type == 'text' || type == 'textarea') {
             maxLength = $(this).attr('maxLength');
-            if (maxLength) {
+	    if (maxLength) {
                 valXML = encodeToXML($(this).val());
-
-                if (valXML.length > maxLength) {
+            	excess = excessUTF8Characters(valXML, maxLength);
+		if (excess > 0) {
                     label='';
                     // determine label to indicate where the length problem occurs:
                     $(this).closest('.form-group').find('.control-label span').each(function(){
@@ -42,11 +82,12 @@ function validateTextLengths()
                        label = $(this).html() + ' - ' + label;
                     });
 
-                    setMessage('error', 'The information cannot be saved as following field holds too many characters: ' + label);
+                    setMessage('error', 'The information cannot be saved as following field is ' + excess + ' characters too long: ' + label);
+
                     canSubmit = false;
                     return false;
                 }
-            }
+	    }
         }
     });
     return canSubmit;
