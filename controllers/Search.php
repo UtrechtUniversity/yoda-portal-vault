@@ -64,8 +64,8 @@ class Search extends MY_Controller
         // $filter is changed as iRods cannot handle '%' and '_' and \
         $searchString = $filter;
         $searchStringEscaped = str_replace(
-					array('\\', '%', '_'),
-					array('\\\\', '\\%','\\_'),
+					array('\\', '%', '_', '`'),
+					array('\\\\', '\\%','\\_', '\\`'),
 					$filter);
 
         // Generic error handling intialisation
