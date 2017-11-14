@@ -279,27 +279,34 @@ function toggleActionLogList(folder)
     if (isVisible) {
         actionList.hide();
     } else {
-        // Get locks
-        $.getJSON("browse/list_actionlog?folder=" + folder, function (data) {
-            actionList.hide();
-
-            if (data.status == 'Success') {
-                var html = '<li class="list-group-item disabled">Provenance information:</li>';
-                var logItems = data.result;
-                if (logItems.length) {
-                    $.each(logItems, function (index, value) {
-                        html += '<li class="list-group-item"><span>' + value[2] + ' - <strong>' + value[1] + '</strong> - ' + value[0] + '</span></li>';
-                    });
-                }
-                else {
-                    html += '<li class="list-group-item">No provenance information present</li>';
-                }
-                actionList.html(html).show();
-            } else {
-                setMessage('error', data.statusInfo);
-            }
-        });
+        buildActionLog(folder);
     }
+}
+
+function buildActionLog(folder)
+{
+    var actionList = $('.actionlog-items');
+
+    // Get provenance information
+    $.getJSON("browse/list_actionlog?folder=" + folder, function (data) {
+        actionList.hide();
+
+        if (data.status == 'Success') {
+            var html = '<li class="list-group-item disabled">Provenance information:</li>';
+            var logItems = data.result;
+            if (logItems.length) {
+                $.each(logItems, function (index, value) {
+                    html += '<li class="list-group-item"><span>' + value[2] + ' - <strong>' + value[1] + '</strong> - ' + value[0] + '</span></li>';
+                });
+            }
+            else {
+                html += '<li class="list-group-item">No provenance information present</li>';
+            }
+            actionList.html(html).show();
+        } else {
+            setMessage('error', data.statusInfo);
+        }
+    });
 }
 
 function toggleSystemMetadata(folder)
@@ -639,6 +646,10 @@ function toggleFolderStatus(newStatus, path)
             var actions = [];
             actions['submit'] = 'Submit';
 
+            if ($('.actionlog-items').is(":visible")) {
+                buildActionLog(path);
+            }
+
             if (newStatus == 'LOCKED') {
                 $('.btn-group button.toggle-folder-status').text('Unlock');
                 $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
@@ -661,6 +672,12 @@ function toggleFolderStatus(newStatus, path)
                     $('.lock-icon').addClass('hide');
                     $('.lock-icon').attr('data-locks', 0);
                 }
+
+                // unlocking -> hide lock-items as there are none
+                if ($('.lock-items').is(":visible")) {
+                    $('.lock-items').hide();
+                }
+
                 $('.btn-group button.folder-status').text('Actions');
                 setMessage('success', 'Successfully unlocked this folder');
             }
