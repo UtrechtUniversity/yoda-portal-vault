@@ -278,19 +278,9 @@ class Browse extends MY_Controller
     {
         $allowed = true;
         foreach ($restrictingKeys as $key) {
-            if ($key == 'org_lock_protect') { // special case for locking
-                if (isset($row['org_lock_protect'])) {
-                    if($row['org_lock_protect'] <= $row['path']) {
-                        $allowed = false;
-                        break;
-                    }
-                }
-            }
-            else {
-                if (isset($row[$key])) {  // simply check the presence of this key and it restricts showing of this row
-                    $allowed = false;
-                    break;
-                }
+            if (isset($row[$key])) {  // simply check the presence of this key and it restricts showing of this row
+                $allowed = false;
+                break;
             }
         }
 
