@@ -69,9 +69,14 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
         // Remove table content
         $('#search tbody').remove();
 
+	var encodedSearchString = encodeURIComponent(value);
+	if (encodedSearchString.length > 1000) {
+		setMessage('error', 'The search string is too long');
+		return true;
+	}
 
         // Initialize new Datatable
-        var url = "search/data?filter=" + encodeURIComponent(value) + "&type=" + type;
+        var url = "search/data?filter=" + encodedSearchString + "&type=" + type;
         $('#search').DataTable( {
             "bFilter": false,
             "bInfo": false,
