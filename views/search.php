@@ -31,7 +31,7 @@
         <div class="search-term">
             <input type="hidden" name="search_param" value="all" id="search_param">
         </div>
-        <input type="text" class="form-control search-term<?php echo $showStatus ? ' hide' : ''; ?>" id="search-filter" placeholder="Search term..." value="<?php echo htmlentities($searchTerm); ?>">
+        <input type="text" class="form-control search-term<?php echo $showStatus ? ' hide' : ''; ?>" id="search-filter" placeholder="Search term..." value="<?php echo htmlentities($searchTerm); ?>" maxlength="255">
         <span class="input-group-btn search-term<?php echo $showStatus ? ' hide' : ''; ?>">
             <button class="btn btn-default search-btn" data-items-per-page="<?php echo $searchItemsPerPage; ?>" type="button"><span class="glyphicon glyphicon-search"></span></button>
         </span>
