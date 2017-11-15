@@ -570,6 +570,11 @@ class Metadata_form_model extends CI_Model
             unset($allFormMetadata['vault_submission']);
         }
 
+        echo '<pre>';
+        print_r($allFormMetadata);
+        echo '</pre>';
+        exit;
+
         $xmlString = $this->metadataToXmlString($allFormMetadata, $rodsaccount, $config);
 
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
@@ -650,7 +655,7 @@ class Metadata_form_model extends CI_Model
 //        echo '<pre>';
 //        print_r($xsdElements);
 //        echo '</pre>';
-//
+//        exit;
 //        echo '<hr><hr><hr>';
 
         $writeMode = true;
@@ -1093,6 +1098,9 @@ class Metadata_form_model extends CI_Model
             case 'structSubPropertiesClose':
                 $type = 'structSubPropertiesClose';
                 break;
+            case 'flexDate':
+                $type = 'flexDate';
+                break;
             case 'xs:date':
                 $type = 'date';
                 break;
@@ -1148,100 +1156,6 @@ class Metadata_form_model extends CI_Model
             'multipleAllowed' => $multipleAllowed,
             'elementSpecifics' => $elementSpecifics,
             'elementRouting' => $xsdElement['tagNameRouting']  // @todo: change tagNameRouting to elementRouting
-        );
-
-        if (count($subpropertyInfo)) {
-            foreach ($subpropertyInfo as $key => $value) {
-                $elementData[$key] = $value;
-            }
-        }
-        return $elementData;
-    }
-
-
-    /**
-     * @param $xsdElements
-     * @param $element
-     * @param $xsdKey
-     * @param $keyId
-     * @param $frontendValue
-     * @param $multipleAllowed
-     * @param array $subpropertyInfo
-     * @return array
-     * construct an array with all required data for frontend presentation in the metadataform
-     */
-    public function obsolete_newPresentationElement($xsdElements, $element, $xsdKey, $keyId, $frontendValue, $multipleAllowed, $subpropertyInfo = array())
-    {
-        // Mandatory no longer based on XSD but taken from formelements.xml
-        $mandatory = false;
-        if (isset($element['mandatory']) AND strtolower($element['mandatory']) == 'true') {
-            $mandatory = true;
-        }
-
-        $elementOptions = array(); // holds the options
-        $elementMaxLength = 0;
-        // Determine restricitions/requirements for this
-        switch ($xsdElements[$xsdKey]['type']) {
-            case 'openTag':
-                $type = 'tagstart'; // Start combination of elements in 1 element so frontend knows that several passing items are brought to 1 element
-                break;
-            case 'endTag':
-                $type = 'tagend'; // combination of elements in 1 element so frontend knows that several passing items are brought to 1 element is to an end
-                break;
-            case 'xs:date':
-                $type = 'date';
-                break;
-            case 'stringURI':
-            case 'stringNormal':
-                $type = 'text';
-                $elementMaxLength = $xsdElements[$xsdKey]['simpleTypeData']['maxLength'];
-                break;
-            case 'xs:integer':
-                $type = 'numeric';
-                $elementMaxLength = 10;  // arbitrary length for this moment
-                break;
-            case 'xs:anyURI':
-                $type = 'text';
-                $elementMaxLength = 1024;
-                break;
-            case 'stringLong':
-                $type = 'textarea';
-                $elementMaxLength = $xsdElements[$xsdKey]['simpleTypeData']['maxLength'];
-                break;
-            case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
-                /*
-                case 'optionsDatasetType':
-                case 'optionsDatasetAccess':
-                case 'optionsYesNo':
-                case 'optionsOther':
-                case 'optionsPersonalPersistentIdentifierType':
-                */
-            case (substr($xsdElements[$xsdKey]['type'], 0, 7) == 'options'):
-                $elementOptions = $xsdElements[$xsdKey]['simpleTypeData']['options'];
-                $type = 'select';
-                break;
-        }
-
-        //'select' has options
-        // 'edit/multiline' has length
-        // 'date' has nothing extra
-        // Handled separately as these specifics might grow.
-        $elementSpecifics = array(); // holds all element specific info
-        if ($type == 'text' OR $type == 'textarea' OR $type == 'numeric') {
-            $elementSpecifics = array('maxLength' => $elementMaxLength);
-        } elseif ($type == 'select') {
-            $elementSpecifics = array('options' => $elementOptions);
-        }
-
-        $elementData = array(
-            'key' => $keyId, // Key to be used by frontend
-            'value' => $frontendValue,
-            'label' => $element['label'],
-            'helpText' => $element['help'],
-            'type' => $type,
-            'mandatory' => $mandatory,
-            'multipleAllowed' => $multipleAllowed,
-            'elementSpecifics' => $elementSpecifics,
         );
 
         if (count($subpropertyInfo)) {
@@ -1341,7 +1255,7 @@ class Metadata_form_model extends CI_Model
         $supportedSimpleTypes[] = 'xs:date'; // add some standard xsd simpleTypes that should be working as well
         $supportedSimpleTypes[] = 'xs:anyURI';
         $supportedSimpleTypes[] = 'xs:integer';
-
+        $supportedSimpleTypes[] = 'flexDate';
         // Basic information is complete
 
         // NOW collect stuff regarding fields
