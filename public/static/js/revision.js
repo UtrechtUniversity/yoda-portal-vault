@@ -177,7 +177,6 @@ function restoreRevision(overwriteFlag)
                 return false;
             }
             else if (data.status == 'PROMPT_FileEnteredByUserExistsAsFolder') {
-                $('#form-restore-overwrite').addClass('hide');
                 setAlert('This filename already exists as folder. Please enter another.');
                 return false;
             }
