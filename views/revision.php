@@ -7,9 +7,7 @@
 <div class="modal" id="select-folder">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-
             <div class="panel-body">
-
                 <div class="alert alert-warning hide" id="alert-panel-dlg">
                     <span></span>
                 </div>
@@ -21,41 +19,29 @@
                         </h3>
 
                         <div class="input-group-sm has-feedback pull-right">
-    <!--                        <button class="btn btn-default"  id="btn-cancel-overite-dialog" >Cancel</button>-->
                             <button class="btn btn-default" data-dismiss="modal">Close</button>
                         </div>
                     </div>
 
                     <input type="hidden" id="restoration-objectid" value="">
-<!--                    <br>-->
+                    <div class="panel revision-restore-dialog">
+                        <div class="panel-body">
+                            <ol class="breadcrumb dlg-breadcrumb">
+                                <li class="active">Home</li>
+                            </ol>
 
-<!--                    <div class="modal-body">-->
-                        <div class="panel revision-restore-dialog">
-                            <div class="panel-body">
-                                <ol class="breadcrumb dlg-breadcrumb">
-                                    <li class="active">Home</li>
-                                </ol>
-
-                                <table id="folder-browser" class="table yoda-table table-bordered">
-                                    <thead>
+                            <table id="folder-browser" class="table yoda-table table-bordered">
+                                <thead>
                                     <tr>
                                         <th>Name</th>
                                         <th>Modified date</th>
                                     </tr>
-                                    </thead>
-                                </table>
-                            </div>
+                                </thead>
+                            </table>
                         </div>
-<!--                    </div>-->
-
-
+                    </div>
                 </div>
             </div>
-<!--            <div class="modal-header">-->
-<!--                <span class="modal-title">Select folder to restore revision</span>-->
-<!--            </div>-->
-
-
 
             <div class="modal-footer">
                 <button class="btn btn-default" id="btn-restore"><i class="fa fa-magic" aria-hidden="true"></i> Restore</button>
@@ -70,7 +56,6 @@
 
                         <div class="input-group-sm has-feedback pull-right">
                             <button class="btn btn-default" data-dismiss="modal">Close</button>
-<!--                            <button class="btn btn-default"  id="btn-cancel-overite-dialog" >Cancel</button>-->
                         </div>
                     </div>
                     <div class="panel-body">
@@ -117,12 +102,9 @@
 
                             <button class="btn btn-default pull-right"  id="btn-select-other-folder" >Select other folder...</button>
                         </div>
-
                     </div>
-
                 </div>
             </div>
-
         </div>
     </div>
 </div>
@@ -143,7 +125,6 @@
             <p class="alert-panel-main hide" style="color:green;">
                 <i class="fa fa-check"></i> Your file was successfully restored!
             </p>
-
 
             <table id="file-browser" class="table table-bordered">
                 <thead>
