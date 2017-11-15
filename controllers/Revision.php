@@ -139,10 +139,12 @@ class Revision extends MY_Controller
             case 'FileExists':
                 $frontEndState = 'PROMPT_Overwrite';
                 break;
+            case 'FileExistsAsFolder':
+                $frontEndState = 'PROMPT_OverwriteFolder';
+                break;
             case 'PermissionDenied':
                 $frontEndState = 'PROMPT_PermissionDenied';
                 break;
-
             case 'Success':
                 $frontEndState = 'SUCCESS';
                 break;

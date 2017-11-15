@@ -70,7 +70,7 @@
 
                             <div class="panel-body">
                                 <div class="row">
-                                    <form class="form-inline pull-left">
+                                    <form id="form-restore-overwrite" class="form-inline pull-left">
                                         <p>Overwrite this file</p>
                                         <button class="btn btn-danger" id="btn-restore-overwrite">Overwrite</button>
                                     </form>
