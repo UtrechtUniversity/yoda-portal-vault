@@ -124,7 +124,6 @@ class Revision extends MY_Controller
                 $frontEndState = 'UNRECOVERABLE';
                 break;
             case 'TargetPathDoesNotExist':
-                //$statusInfo = '';
                 $frontEndState = 'PROMPT_SelectPathAgain';
                 break;
             case 'TargetPathLocked':
@@ -132,6 +131,9 @@ class Revision extends MY_Controller
                 break;
             case 'FileExistsEnteredByUser':
                 $frontEndState = 'PROMPT_FileExistsEnteredByUser';
+                break;
+            case 'FileEnteredByUserExistsAsFolder':
+                $frontEndState = 'PROMPT_FileEnteredByUserExistsAsFolder';
                 break;
             case 'VaultNotAllowed':
                 $frontEndState = 'PROMPT_VaultNotAllowed';

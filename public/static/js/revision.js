@@ -156,6 +156,7 @@ function restoreRevision(overwriteFlag)
                 // set the correct mode of the dialog
                 $('.mode-dlg-locked').addClass('hide');
                 $('.mode-dlg-exists').removeClass('hide');
+                $('#form-restore-overwrite').removeClass('hide');
             }
             else if (data.status == 'PROMPT_OverwriteFolder') {
                 //alertPanelsHide();
@@ -165,13 +166,18 @@ function restoreRevision(overwriteFlag)
                 // set the correct mode of the dialog
                 $('.mode-dlg-locked').addClass('hide');
                 $('.mode-dlg-exists').removeClass('hide');
-		$('#form-restore-overwrite').addClass('hide');
+                $('#form-restore-overwrite').addClass('hide');
             }
             else if (data.status == 'PROMPT_SelectPathAgain') {
                 setAlert('The folder you selected does not exist anymore. Please select another folder.');
             }
             else if (data.status == 'PROMPT_FileExistsEnteredByUser') {
                 setAlert('This filename already exists. Please enter another.');
+                return false;
+            }
+            else if (data.status == 'PROMPT_FileEnteredByUserExistsAsFolder') {
+                $('#form-restore-overwrite').addClass('hide');
+                setAlert('This filename already exists as folder. Please enter another.');
                 return false;
             }
             else if (data.status == 'PROMPT_NewFolderNotAllowed') {
