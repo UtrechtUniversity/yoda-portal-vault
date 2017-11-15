@@ -150,6 +150,7 @@ function restoreRevision(overwriteFlag)
                 $('.mode-dlg-exists').addClass('hide');
             }
             else if (data.status == 'PROMPT_Overwrite') {
+		alertPanelsHide();
                 $('.alert-panel-overwrite').removeClass('hide');
                 $('.cover').removeClass('hide');
                 $('.revision-restore-dialog').addClass('hide');
@@ -159,7 +160,7 @@ function restoreRevision(overwriteFlag)
                 $('#form-restore-overwrite').removeClass('hide');
             }
             else if (data.status == 'PROMPT_OverwriteFolder') {
-                //alertPanelsHide();
+                alertPanelsHide();
                 $('.alert-panel-overwrite').removeClass('hide');
                 $('.cover').removeClass('hide');
                 $('.revision-restore-dialog').addClass('hide');
