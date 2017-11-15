@@ -150,7 +150,7 @@ function restoreRevision(overwriteFlag)
                 $('.mode-dlg-exists').addClass('hide');
             }
             else if (data.status == 'PROMPT_Overwrite') {
-		alertPanelsHide();
+		dlgAlertHide();
                 $('.alert-panel-overwrite').removeClass('hide');
                 $('.cover').removeClass('hide');
                 $('.revision-restore-dialog').addClass('hide');
@@ -160,7 +160,7 @@ function restoreRevision(overwriteFlag)
                 $('#form-restore-overwrite').removeClass('hide');
             }
             else if (data.status == 'PROMPT_OverwriteFolder') {
-                alertPanelsHide();
+                dlgAlertHide();
                 $('.alert-panel-overwrite').removeClass('hide');
                 $('.cover').removeClass('hide');
                 $('.revision-restore-dialog').addClass('hide');
@@ -208,7 +208,7 @@ function dlgAlertShow(errorMessage)
     $('#alert-panel-dlg span').html(errorMessage);
 }
 
-function dlgAlertHide(errorMessage)
+function dlgAlertHide()
 {
     $('#alert-panel-dlg').addClass('hide');
 }
