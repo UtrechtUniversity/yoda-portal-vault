@@ -272,10 +272,24 @@ class Vaultsubmission
         return false;
     }
 
+
+// There's two moments validation of yoda-metadata.xml will take place:
+// 1) When opening the metadata form
+// 2) WHen submitting a folder to the vault
+
+// Na xsd validatie is deze lijst beperkt bruikbaar daar er geen hierarchische info is komend vanaf xsd-validation
+// Usable for translation on irods-metadata-keys of attributes
+// If not recognised the found key is left unchanged
+// Using this for translating errors coming from schemaValidateSource() only will work for fields that
+
     private function formatFieldErrors($fields)
     {
         $this->CI->load->model('Metadata_form_model');
         $formElementLabels = $this->CI->Metadata_form_model->getFormElementLabels($this->account, $this->formConfig);
+
+        echo '<pre>';
+        print_r($formElementLabels);
+        echo '</pre>';
 
         $fieldLabels = array();
         foreach ($fields as $field) {

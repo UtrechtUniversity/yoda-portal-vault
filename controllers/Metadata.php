@@ -299,20 +299,20 @@ class Metadata extends MY_Controller
         }
         else {
             // save metadata xml.  Not possible if is LOCKED btw
-            if ($formConfig['hasMetadataXml']=='true') {
-                if ($folderStatus == 'SUBMITTED') {
-                    setMessage('error', 'The form has already been submitted');
-                    return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
-                }
-
-                $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
-                //print_r($formConfig);
-                //exit;
-                if ($this->vaultsubmission->checkLock()) {
-                    setMessage('error', 'The form is locked possibly by another user.');
-                    return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
-                }
-            }
+//            if ($formConfig['hasMetadataXml']=='true') {
+//                if ($folderStatus == 'SUBMITTED') {
+//                    setMessage('error', 'The form has already been submitted');
+//                    return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+//                }
+//
+//                $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
+//                //print_r($formConfig);
+//                //exit;
+//                if ($this->vaultsubmission->checkLock()) {
+//                    setMessage('error', 'The form is locked possibly by another user.');
+//                    return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+//                }
+//            }
             if ($this->input->server('REQUEST_METHOD') == 'POST') {
                 $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
             }

@@ -17,12 +17,13 @@
 
         <input
             type="text"
+            placeholder="<?php echo $e->pattern; ?>"
             class="form-control"
             <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
                 data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
                 name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
             <?php else: ?>
-                name="<?php echo $e->key; ?>[]"
+                name="<?php echo $e->key; ?>"
             <?php endif; ?>
             value="<?php echo htmlentities($e->value); ?>">
 
@@ -87,6 +88,7 @@
                     <div class="input-group">
                         <input
                                 type="text"
+                                placeholder="<?php echo $e->pattern; ?>"
                                 class="form-control"
                                 <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
                                     data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
@@ -104,9 +106,7 @@
                         </span>
                     </div>
                 <?php } else { ?>
-                        <input type="text" class="form-control" name="<?php echo $e->key; ?>_year" value="<?php echo htmlentities($e->value); ?>">
-                        <input type="text" class="form-control" name="<?php echo $e->key; ?>_month" value="<?php echo htmlentities($e->value); ?>">
-                        <input type="text" class="form-control" name="<?php echo $e->key; ?>_day" value="<?php echo htmlentities($e->value); ?>">
+                        <input type="text" placeholder="<?php echo $e->pattern; ?>" class="form-control" name="<?php echo $e->key; ?>" value="<?php echo htmlentities($e->value); ?>">
                 <?php } ?>
             </div>
         </div>
