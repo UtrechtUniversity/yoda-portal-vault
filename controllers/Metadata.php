@@ -299,7 +299,16 @@ class Metadata extends MY_Controller
             }
         }
         else {
-            // save metadata xml.  Not possible if is LOCKED btw
+            // save metadata xml.  Check for correct conditions
+            if ($folderStatus == 'SUBMITTED') {
+                setMessage('error', 'The form has already been submitted');
+                return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+            }
+            if ($folderStatus == 'LOCKED' || $lockStatus == 'ancestor') {
+                setMessage('error', 'The metadata form is locked possibly by the action of another user.');
+                return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+            }
+
             if ($this->input->server('REQUEST_METHOD') == 'POST') {
                 $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
             }

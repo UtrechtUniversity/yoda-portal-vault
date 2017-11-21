@@ -137,13 +137,10 @@ function restoreRevision(overwriteFlag)
             $('.path').text(decodeURIComponent(urlEncodedPath));
 
             if(data.status== 'UNRECOVERABLE') {
-               // alertPanelsHide();
                 $('.alert-panel-error').removeClass('hide');
                 $('.alert-panel-error span').html('Error information: ' + data.statusInfo);
             }
             else if (data.status == 'PROMPT_TargetPathLocked') {
-                //alertPanelsHide();
-                //$('.alert-panel-path-not-exists').removeClass('hide');
                 // This is a different situation
                 $('.alert-panel-overwrite').removeClass('hide');
                 $('.cover').removeClass('hide');
@@ -153,21 +150,34 @@ function restoreRevision(overwriteFlag)
                 $('.mode-dlg-exists').addClass('hide');
             }
             else if (data.status == 'PROMPT_Overwrite') {
-                //alertPanelsHide();
+		$('#alertBox').addClass('hide');
                 $('.alert-panel-overwrite').removeClass('hide');
                 $('.cover').removeClass('hide');
                 $('.revision-restore-dialog').addClass('hide');
                 // set the correct mode of the dialog
                 $('.mode-dlg-locked').addClass('hide');
                 $('.mode-dlg-exists').removeClass('hide');
+                $('#form-restore-overwrite').removeClass('hide');
+            }
+            else if (data.status == 'PROMPT_OverwriteFolder') {
+                $('#alertBox').addClass('hide');
+                $('.alert-panel-overwrite').removeClass('hide');
+                $('.cover').removeClass('hide');
+                $('.revision-restore-dialog').addClass('hide');
+                // set the correct mode of the dialog
+                $('.mode-dlg-locked').addClass('hide');
+                $('.mode-dlg-exists').removeClass('hide');
+                $('#form-restore-overwrite').addClass('hide');
             }
             else if (data.status == 'PROMPT_SelectPathAgain') {
-                //alertPanelsHide();
-                //$('.alert-panel-path-not-exists').removeClass('hide');
                 setAlert('The folder you selected does not exist anymore. Please select another folder.');
             }
             else if (data.status == 'PROMPT_FileExistsEnteredByUser') {
                 setAlert('This filename already exists. Please enter another.');
+                return false;
+            }
+            else if (data.status == 'PROMPT_FileEnteredByUserExistsAsFolder') {
+                setAlert('This filename already exists as folder. Please enter another.');
                 return false;
             }
             else if (data.status == 'PROMPT_NewFolderNotAllowed') {
@@ -179,18 +189,13 @@ function restoreRevision(overwriteFlag)
                 return false;
             }
             else if (data.status == 'PROMPT_PermissionDenied') {
-                //alertPanelsHide();
-                //$('.alert-panel-path-permission-denied').removeClass('hide')
                 setAlert('You do not have enough permissions for the folder you selected. Please select another folder.');
             }
             else if (data.status == 'SUCCESS') {
-                //alertPanelsHide();
                 window.location.href = '/research/?dir=' + urlEncodedPath;
             }
         },
         error: function(data) {
-            //alertPanelsHide();
-            //$('.alert-panel-error').removeClass('hide');
             setAlert('Something went wrong. Please check your internet connection');
         }
     });
@@ -202,7 +207,7 @@ function dlgAlertShow(errorMessage)
     $('#alert-panel-dlg span').html(errorMessage);
 }
 
-function dlgAlertHide(errorMessage)
+function dlgAlertHide()
 {
     $('#alert-panel-dlg').addClass('hide');
 }

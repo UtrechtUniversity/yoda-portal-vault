@@ -69,9 +69,17 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
         // Remove table content
         $('#search tbody').remove();
 
+	var encodedSearchString = encodeURIComponent(value);
+	/* limit the length of the encoded string to the worst case of 255*4*3=3060
+ 	*  maxLength of characters (255) * max bytes in UTF-8 encoded character (4) * URL encoding of byte (%HH) (3)
+ 	*/
+	if (encodedSearchString.length > 3060) {
+		setMessage('error', 'The search string is too long');
+		return true;
+	}
 
         // Initialize new Datatable
-        var url = "search/data?filter=" + encodeURIComponent(value) + "&type=" + type;
+        var url = "search/data?filter=" + encodedSearchString + "&type=" + type;
         $('#search').DataTable( {
             "bFilter": false,
             "bInfo": false,
