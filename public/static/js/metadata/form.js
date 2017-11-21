@@ -111,6 +111,7 @@ $(function () {
         });
     });
     $('select').select2();
+    $('.flexdate').inputmask("9999(-99(-99))",{ alias: "yyyy-mm-dd", placeholder: "YYYY(-MM(-DD))" });
 
     // Delete all metadata btn
     $( ".delete-all-metadata-btn" ).on('click', function(e){

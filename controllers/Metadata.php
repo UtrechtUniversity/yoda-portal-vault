@@ -162,6 +162,7 @@ class Metadata extends MY_Controller
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.js',
                 'lib/sweetalert/sweetalert.min.js',
                 'lib/select2/js/select2.min.js',
+                'lib/jquery-inputmask/jquery.inputmask.bundle.js',
                 'js/metadata/form.js',
             ),
             'activeModule'   => 'research',
