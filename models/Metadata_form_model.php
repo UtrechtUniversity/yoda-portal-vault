@@ -689,6 +689,9 @@ class Metadata_form_model extends CI_Model
             }
         }
 
+//        echo '<pre>';
+//        print_r($this->presentationElements);
+//        echo '</pre>';
         return $this->presentationElements;
     }
 
@@ -989,12 +992,6 @@ class Metadata_form_model extends CI_Model
     // keyId name of element in frontend
     public function newWayPresentationElement($config, $xsdElement, $element, $keyId, $value, $overrideMultipleAllowed = false, $subpropertyInfo = array())
     {
-//        echo '<hr>';
-//        echo '<pre>';
-//            print_r($element);
-//        echo '</pre>';
-
-        // @todo: - inefficient - will be determinded each time and element passes,
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
             $writeMode = false; // Distinnction made as readers, in case of no xml-file being present, should  NOT get default values
