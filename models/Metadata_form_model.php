@@ -1030,9 +1030,6 @@ class Metadata_form_model extends CI_Model
             case 'structSubPropertiesClose':
                 $type = 'structSubPropertiesClose';
                 break;
-            case 'flexDate':
-                $type = 'flexdate';
-                break;
             case 'xs:date':
                 $type = 'date';
                 break;
