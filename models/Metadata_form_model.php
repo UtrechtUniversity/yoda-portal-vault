@@ -1031,7 +1031,7 @@ class Metadata_form_model extends CI_Model
                 $type = 'structSubPropertiesClose';
                 break;
             case 'flexDate':
-                $type = 'flexDate';
+                $type = 'flexdate';
                 break;
             case 'xs:date':
                 $type = 'date';
@@ -1081,7 +1081,7 @@ class Metadata_form_model extends CI_Model
         // Special handling for value of flexDate - controls
         // Required as this is a value that is one level deeper due to flexible
         if (isset($element['@attributes']['flexdate'])) {
-            $type = 'flexDate';
+            $type = 'flexdate';
             $datePattern = 'YYYY-MM-DD';
 
             $flexDatePossibilities = array('YYYY_MM_DD' => 'YYYY-MM-DD',

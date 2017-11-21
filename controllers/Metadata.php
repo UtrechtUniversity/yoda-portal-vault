@@ -162,6 +162,7 @@ class Metadata extends MY_Controller
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.js',
                 'lib/sweetalert/sweetalert.min.js',
                 'lib/select2/js/select2.min.js',
+                'lib/jquery-inputmask/jquery.inputmask.bundle.js',
                 'js/metadata/form.js',
             ),
             'activeModule'   => 'research',
@@ -298,21 +299,16 @@ class Metadata extends MY_Controller
             }
         }
         else {
-            // save metadata xml.  Not possible if is LOCKED btw
-//            if ($formConfig['hasMetadataXml']=='true') {
-//                if ($folderStatus == 'SUBMITTED') {
-//                    setMessage('error', 'The form has already been submitted');
-//                    return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
-//                }
-//
-//                $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
-//                //print_r($formConfig);
-//                //exit;
-//                if ($this->vaultsubmission->checkLock()) {
-//                    setMessage('error', 'The form is locked possibly by another user.');
-//                    return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
-//                }
-//            }
+            // save metadata xml.  Check for correct conditions
+            if ($folderStatus == 'SUBMITTED') {
+                setMessage('error', 'The form has already been submitted');
+                return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+            }
+            if ($folderStatus == 'LOCKED' || $lockStatus == 'ancestor') {
+                setMessage('error', 'The metadata form is locked possibly by the action of another user.');
+                return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+            }
+
             if ($this->input->server('REQUEST_METHOD') == 'POST') {
                 $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
             }
