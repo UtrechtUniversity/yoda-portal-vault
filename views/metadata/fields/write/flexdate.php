@@ -22,7 +22,7 @@
                     data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
                     name="<?php echo $e->key; ?>[<?php echo $e->subPropertiesStructID; ?>]"
                 <?php else: ?>
-                    name="<?php echo $e->key; ?>[]"
+                    name="<?php echo $e->key; ?>"
                 <?php endif; ?>
                 value="<?php echo htmlentities($e->value); ?>">
 
