@@ -22,28 +22,6 @@ class Metadata_form_model extends CI_Model
      * @param $config
      * @return array
      *
-     * returns all groupnames in an array for the requested for form (in $config['elements']
-     */
-    public function getFormGroupNamesAsArray($rodsaccount, $config)
-    {
-        $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
-
-        $groupNames = array();
-        foreach ($formGroupedElements['Group'] as $formElements) {
-            foreach ($formElements as $key => $element) {
-                if ($key == '@attributes') {
-                    $groupNames[] = $element['name'];
-                }
-            }
-        }
-        return $groupNames;
-    }
-
-    /**
-     * @param $rodsaccount
-     * @param $config
-     * @return array
-     *
      * creates an array to be indexed by fully qualified element name.  eg 'creation_date'
      * This especially for subproperties eg 'creator_properties_pi' which is in fact a construct
      *
@@ -66,11 +44,7 @@ class Metadata_form_model extends CI_Model
                 if ($key == '@attributes') {
                     $groupNames[] = $element['name'];
                 } else {
-                    $this->iterateElements($element, $key, $elementLabels, $key);
-                    echo '<hr>';
-                    echo '<pre>';
-                        print_r($element);
-                    echo '</pre>';
+                    $this->_iterateElements($element, $key, $elementLabels, $key);
                 }
             }
         }
@@ -85,7 +59,7 @@ class Metadata_form_model extends CI_Model
      * supporting function for getFormElementLabels
      * Adjusted so the leadproperty label is taken into account ($leadPropertyBase is passed throughout all iteration levels)
      */
-    public function iterateElements($element, $key, &$elementLabels, $leadPropertyBase, $level = 0)
+    private function _iterateElements($element, $key, &$elementLabels, $leadPropertyBase, $level = 0)
     {
         $flexDateKeys = array('YYYY', 'YYYY_MM', 'YYYY_MM_DD'); // these postfixes have to correspond with the xsd definition
 
@@ -107,7 +81,7 @@ class Metadata_form_model extends CI_Model
         } else { // not a label and therefore look at extra level.
             $level++;
             foreach ($element as $key2 => $element2) {
-                $this->iterateElements($element2, $key . '_' . $key2, $elementLabels, $leadPropertyBase, $level);
+                $this->_iterateElements($element2, $key . '_' . $key2, $elementLabels, $leadPropertyBase, $level);
             }
         }
     }
@@ -161,72 +135,31 @@ class Metadata_form_model extends CI_Model
      * [Affiliation] =>
      * )
      */
-    public function arrayHoldsAnyData($array)
-    {
-        foreach ($array as $key => $value) {
-            if (!is_array($value)) {
-                if ($value) {
-                    return true;
-                }
-            } else {
-                foreach ($value as $key1 => $value1) {
-                    if (!is_array($value1)) {
-                        if ($value1) {
-                            return true;
-                        }
-                    } else {
-                        foreach ($value1 as $key2 => $value2) {
-                            if ($value2) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public function formElementsMainFieldList($formGroupedElements)
-    {
-        $elements = array();
-
-        $formAllGroupedElements = array();
-        foreach ($formGroupedElements['Group'] as $index => $array) {
-            if ($index == '0') {
-                // is the index of an array. So we have multiple groups.
-                $formAllGroupedElements = $formGroupedElements['Group'];
-            } else {
-                $formAllGroupedElements[] = $formGroupedElements['Group']; // rewrite it as an indexable array as input for coming foreach
-            }
-            break;
-        }
-
-        // Form elements is hierarchical too.
-        // Bring it back to one level with
-        // 1) parent indication
-        // 2) fully qualified name (unique!)
-        // 3) Add start end tags for combination fields
-
-        // HIER ALLEEN DE HOOFD ELEMENTEN
-        foreach ($formAllGroupedElements as $formElements) {
-
-            foreach ($formElements as $key => $element) {
-                // Find group definition
-                // Find hierarchies of elements regarding subproperties.
-                if ($key != '@attributes') { // GROUP handling
-//                    echo '<pre>';
-//                    echo 'Key = ' . $key;
-//                    echo '<br>';
-//                    print_r($element);
-//                    echo '</pre>';
-
-                    $elements[$key] = $element;
-                }
-            }
-        }
-        return $elements;
-    }
+//    public function arrayHoldsAnyData($array)
+//    {
+//        foreach ($array as $key => $value) {
+//            if (!is_array($value)) {
+//                if ($value) {
+//                    return true;
+//                }
+//            } else {
+//                foreach ($value as $key1 => $value1) {
+//                    if (!is_array($value1)) {
+//                        if ($value1) {
+//                            return true;
+//                        }
+//                    } else {
+//                        foreach ($value1 as $key2 => $value2) {
+//                            if ($value2) {
+//                                return true;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+//    }
 
 
     /**
@@ -276,17 +209,14 @@ class Metadata_form_model extends CI_Model
             return false;
         }
 
-        // Get the mainFields only - filter out the grouping
-//        $formMainFields  = $this->formElementsMainFieldList($formGroupedElements);
-
         // XML initialization
         $xml = new DOMDocument("1.0", "UTF-8");
         $xml->formatOutput = true;
 
         $xml_metadata = $xml->createElement("metadata");
 
-
-        // Step through all fields and
+        // Step through all fields
+        // $this->formMainFields is filled in loadFormElements
         foreach($this->formMainFields  as $mainField=>$mainFieldData) { //formMainFields
 
             $isSubPropertyStructure = false;
@@ -777,7 +707,7 @@ if (false) {
                 }
                 elseif ($this->_isCompoundElement($element)) {
                     // formdata is passed as an enumerated string
-                    if (!$this->addCompoundElement($config, $groupName, $key, $element, $this->_enumerateArray($formData[$key]), $xsdElements)) {
+                    if (!$this->_addCompoundElement($config, $groupName, $key, $element, $this->_enumerateArray($formData[$key]), $xsdElements)) {
                         return false;
                     }
                     // echo 'After compound element';
@@ -786,7 +716,7 @@ if (false) {
 
                     $structValueArray = $this->_enumerateArray($formData[$key]);
 
-                    if (!$this->addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements)) {
+                    if (!$this->_addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements)) {
                         return false;
                     }
                 } else // This is the first level only!
@@ -797,7 +727,7 @@ if (false) {
                     // @todo - refactor to _enumerateArray!
                     $valueArray = $this->_getElementValueAsArray($value);
 
-                    $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
+                    $multipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$key]);
 
                     $multiPostFix = ''; // Addition to element name when mupliple instances can occur
                     if (!$multipleAllowed) {
@@ -832,7 +762,7 @@ if (false) {
 
     // General rule: if a subproperty is present, the lead element has to be present as well
 
-    public function addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements)
+    private function _addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements)
     {
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
@@ -855,7 +785,7 @@ if (false) {
                     $subKeyValue = $structValues[$id];
 
                     // Use toplevel here as that defines multiplicity for a structure (is in fact not an element
-                    $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
+                    $multipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$key]);
 
                     $keyCounterInfix = '';
 
@@ -909,13 +839,13 @@ if (false) {
                             $subKeyValue = $this->_enumerateArray($subKeyValue);
 
 
-                            //$this->addCompoundElement($config, $groupName, $key, $element, $formData, $xsdElements);
+                            //$this->_addCompoundElement($config, $groupName, $key, $element, $formData, $xsdElements);
                             // todo:: check value array -> is this what is required here???
 
                             $offsetKeyForFrontEnd = $key . $keyCounterInfix . '[' . $id . ']' . '[' . $propertyKey . ']';
 
                             // trap incorrect formatting
-                            if (!$this->addCompoundElement($config, $groupName, $subKey, $propertyElement, $subKeyValue, $xsdElements,
+                            if (!$this->_addCompoundElement($config, $groupName, $subKey, $propertyElement, $subKeyValue, $xsdElements,
                                 $offsetKeyForFrontEnd, $subPropArray)
                             ) {
                                 return false;
@@ -923,21 +853,12 @@ if (false) {
                         } else {
                             $arRouting = $xsdElements[$subKey]['tagNameRouting'];
 
-//                            if($subKey=='Creator_Properties_Affiliation2') {
-//                                echo 'subKey: ' . $subKey;
-//                                echo '<pre>';
-//                                    print_r($xsdElements);
-//                                echo '</pre>';
-//                                exit;
-//                                //echo '<hr>';
-//                            }
-
                             // we know this is the 2nd(1 in tagNameRoute) and 3rd(2 in tagNameRoute) level so no real analysing required
                             $subKeyValue = $structValues[$arRouting[1]][$arRouting[2]];
 
                             $subKeyValue = $this->_enumerateArray($subKeyValue);
 
-                            $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$subKey]);
+                            $multipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$subKey]);
 
                             // frontend value is the value that will be presented in the data field
                             // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
@@ -999,7 +920,7 @@ if (false) {
      * @param array $subPropArray
      * @return bool
      */
-    public function addCompoundElement($config, $groupName, $key, $element,
+    private function _addCompoundElement($config, $groupName, $key, $element,
                                        $formData, $xsdElements, $elementOffsetFrontEnd = '', $subPropArray = array()) // presentation elements will be extended -> make it class variable
     {
         // A combined element from 2017/10/25 on has a title & help text
@@ -1044,7 +965,7 @@ if (false) {
                     $baseCombiElementOffsetFrontEnd = $key;
                 }
 
-                $combiElementMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
+                $combiElementMultipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$key]);
 
                 // front end should know whether entire compound is clonable in order to show the clone button
                 $subPropArrayExtended['compoundMultipleAllowed'] = $combiElementMultipleAllowed;
@@ -1081,7 +1002,7 @@ if (false) {
                             // @todo: een element kan ook weer een multiple variabele zijn !!!!!!!!!!!!!!!!! nog meenemen later
                             $subCombiCounter = 0;
                             // => dus hier lopen if so en keyname for front end aanpassen
-                            $subCombiMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$subKey]);
+                            $subCombiMultipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$subKey]);
 
 //                            $allSubCombiValues = array();
 //                            $allSubCombiValues[] = $arValues[$subKey];
@@ -1135,7 +1056,7 @@ if (false) {
         if ($overrideMultipleAllowed) {
             $multipleAllowed = true;
         } else {
-            $multipleAllowed = $this->getElementMultipleAllowed($xsdElement);
+            $multipleAllowed = $this->_isElementMultipleAllowed($xsdElement);
         }
         // Mandatory no longer based on XSD but taken from formelements.xml
         $mandatory = false;
@@ -1257,7 +1178,7 @@ if (false) {
      * Supporting function for getFormELements
      * is multiple allowed for the given element from the xsd
      */
-    public function getElementMultipleAllowed($xsdElement)
+    private function _isElementMultipleAllowed($xsdElement)
     {
         $multipleAllowed = false;
         if ($xsdElement['maxOccurs'] != '1') {
@@ -1527,10 +1448,49 @@ if (false) {
         }
 
         if ($data) {  // make the descriptive data for the actual form fields (i.e. not grouping info) accessible globally in class
-            $this->formMainFields  = $this->formElementsMainFieldList($data);
+            $this->formMainFields  = $this->_getFormElementsMainFieldList($data);
         }
 
         return $data;
     }
 
+    private function _getFormElementsMainFieldList($formGroupedElements)
+    {
+        $elements = array();
+
+        $formAllGroupedElements = array();
+        foreach ($formGroupedElements['Group'] as $index => $array) {
+            if ($index == '0') {
+                // is the index of an array. So we have multiple groups.
+                $formAllGroupedElements = $formGroupedElements['Group'];
+            } else {
+                $formAllGroupedElements[] = $formGroupedElements['Group']; // rewrite it as an indexable array as input for coming foreach
+            }
+            break;
+        }
+
+        // Form elements is hierarchical too.
+        // Bring it back to one level with
+        // 1) parent indication
+        // 2) fully qualified name (unique!)
+        // 3) Add start end tags for combination fields
+
+        // HIER ALLEEN DE HOOFD ELEMENTEN
+        foreach ($formAllGroupedElements as $formElements) {
+            foreach ($formElements as $key => $element) {
+                // Find group definition
+                // Find hierarchies of elements regarding subproperties.
+                if ($key != '@attributes') { // GROUP handling
+//                    echo '<pre>';
+//                    echo 'Key = ' . $key;
+//                    echo '<br>';
+//                    print_r($element);
+//                    echo '</pre>';
+
+                    $elements[$key] = $element;
+                }
+            }
+        }
+        return $elements;
+    }
 }
