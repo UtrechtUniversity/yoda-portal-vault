@@ -5,8 +5,8 @@ class Metadata_form_model extends CI_Model
 {
 
     var $CI = NULL;
-    var $presentationElements = array();
-    var $xsdElements = array();
+    var $presentationElements = array(); // Main array representing all elements required to build the actual form (write / read )
+    var $xsdElements = array(); // Xsd representation
     var $formMainFields = array(); // holding all info regarding form fields without the grouping information
 
     function __construct()
