@@ -290,7 +290,7 @@ class Metadata_form_model extends CI_Model
         foreach($this->formMainFields  as $mainField=>$mainFieldData) { //formMainFields
 
             $isSubPropertyStructure = false;
-            if (!$this->isCompoundElement($mainFieldData) AND $this->isSubpropertyStructure($mainFieldData)) {
+            if (!$this->_isCompoundElement($mainFieldData) AND $this->_isSubpropertyStructure($mainFieldData)) {
                 $isSubPropertyStructure = true;
             }
 
@@ -526,6 +526,7 @@ class Metadata_form_model extends CI_Model
      * @return array
      *
      * Created unemarated array of a possibly associative array
+     * For consistent value processing
      */
     private function _enumerateArray(array $array)
     {
@@ -544,7 +545,7 @@ class Metadata_form_model extends CI_Model
      *
      * Determine whether given element actually is a compound element and consists of several element in itself
      */
-    public function isCompoundElement($element)
+    private function _isCompoundElement($element)
     {
         return (isset($element['@attributes']['class']) AND strtoupper($element['@attributes']['class']) == 'COMPOUND');
     }
@@ -556,7 +557,7 @@ class Metadata_form_model extends CI_Model
      * Get the count of form elements within compoound field represented in $element
      * label, help and @attributes are not allowed to be counted as are not elements!
      */
-    public function getCountOfElementsInCompound($compoundElement)
+    private function _getCountOfElementsInCompound($compoundElement)
     {
         $exclude = array('label', 'help', '@attributes');
         $count=0;
@@ -574,7 +575,7 @@ class Metadata_form_model extends CI_Model
      *
      * Determine whether given element is a subroperty structure - i.e. lead element and N subproperties
      */
-    public function isSubpropertyStructure($element)
+    private function _isSubpropertyStructure($element)
     {
         return (!isset($element['label']));
     }
@@ -774,14 +775,14 @@ if (false) {
                     $groupName = $element['name'];
 
                 }
-                elseif ($this->isCompoundElement($element)) {
+                elseif ($this->_isCompoundElement($element)) {
                     // formdata is passed as an enumerated string
                     if (!$this->addCompoundElement($config, $groupName, $key, $element, $this->_enumerateArray($formData[$key]), $xsdElements)) {
                         return false;
                     }
                     // echo 'After compound element';
                     //exit;
-                } elseif ($this->isSubpropertyStructure($element)) {//(!isset($element['label'])) { // STEPPING INTO DEEPER LEVELS -- we step into a hierarchy => SUPPROPERTIES
+                } elseif ($this->_isSubpropertyStructure($element)) {//(!isset($element['label'])) { // STEPPING INTO DEEPER LEVELS -- we step into a hierarchy => SUPPROPERTIES
 
                     $structValueArray = $this->_enumerateArray($formData[$key]);
 
@@ -794,7 +795,7 @@ if (false) {
 
                     // turn it into an array as multiple entries must be presented n times with same element properties but different value
                     // @todo - refactor to _enumerateArray!
-                    $valueArray = $this->getElementValueAsArray($value);
+                    $valueArray = $this->_getElementValueAsArray($value);
 
                     $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
 
@@ -899,7 +900,7 @@ if (false) {
                             'subPropertiesStructID' => $multipleAllowed ? $elementCounterForFrontEnd : -1
                         );
 
-                        if ($this->isCompoundElement($propertyElement)) { //isset($propertyElement['combined'])) {
+                        if ($this->_isCompoundElement($propertyElement)) { //isset($propertyElement['combined'])) {
 
                             $arRouting = $xsdElements[$subKey]['tagNameRouting'];
 
@@ -1026,7 +1027,7 @@ if (false) {
              */
             $subPropArrayExtended = $subPropArray;
 
-            $subPropArrayExtended['compoundFieldCount'] = $this->getCountOfElementsInCompound($element);
+            $subPropArrayExtended['compoundFieldCount'] = $this->_getCountOfElementsInCompound($element);
             $subPropArrayExtended['compoundFieldPosition'] = 0;
             $subPropArrayExtended['compoundBackendArrayLevel'] = 0;
 
@@ -1273,7 +1274,7 @@ if (false) {
      *
      * return the value as being part of an array
      */
-    public function getElementValueAsArray($value)
+    private function _getElementValueAsArray($value)
     {
         // The number of values determine the number of elements to be created
         if (!is_array($value)) {
