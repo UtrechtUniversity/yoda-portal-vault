@@ -527,7 +527,7 @@ class Metadata_form_model extends CI_Model
      *
      * Created unemarated array of a possibly associative array
      */
-    public function enumerateArray(array $array)
+    private function _enumerateArray(array $array)
     {
         if (!is_numeric(key($array))) {
             $enumeratedArray = array();
@@ -776,14 +776,14 @@ if (false) {
                 }
                 elseif ($this->isCompoundElement($element)) {
                     // formdata is passed as an enumerated string
-                    if (!$this->addCompoundElement($config, $groupName, $key, $element, $this->enumerateArray($formData[$key]), $xsdElements)) {
+                    if (!$this->addCompoundElement($config, $groupName, $key, $element, $this->_enumerateArray($formData[$key]), $xsdElements)) {
                         return false;
                     }
                     // echo 'After compound element';
                     //exit;
                 } elseif ($this->isSubpropertyStructure($element)) {//(!isset($element['label'])) { // STEPPING INTO DEEPER LEVELS -- we step into a hierarchy => SUPPROPERTIES
 
-                    $structValueArray = $this->enumerateArray($formData[$key]);
+                    $structValueArray = $this->_enumerateArray($formData[$key]);
 
                     if (!$this->addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements)) {
                         return false;
@@ -793,7 +793,7 @@ if (false) {
                     $value = isset($formData[$key]) ? $formData[$key] : ''; // dit gaat goed, nieuwe wijze
 
                     // turn it into an array as multiple entries must be presented n times with same element properties but different value
-                    // @todo - refactor to enumerateArray!
+                    // @todo - refactor to _enumerateArray!
                     $valueArray = $this->getElementValueAsArray($value);
 
                     $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
@@ -905,7 +905,7 @@ if (false) {
 
                             $subKeyValue = $structValues[$arRouting[1]][$arRouting[2]];
 
-                            $subKeyValue = $this->enumerateArray($subKeyValue);
+                            $subKeyValue = $this->_enumerateArray($subKeyValue);
 
 
                             //$this->addCompoundElement($config, $groupName, $key, $element, $formData, $xsdElements);
@@ -934,7 +934,7 @@ if (false) {
                             // we know this is the 2nd(1 in tagNameRoute) and 3rd(2 in tagNameRoute) level so no real analysing required
                             $subKeyValue = $structValues[$arRouting[1]][$arRouting[2]];
 
-                            $subKeyValue = $this->enumerateArray($subKeyValue);
+                            $subKeyValue = $this->_enumerateArray($subKeyValue);
 
                             $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$subKey]);
 
