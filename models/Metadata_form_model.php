@@ -179,7 +179,7 @@ class Metadata_form_model extends CI_Model
     {
         $dateTypes = array ('YYYY-MM-DD' => 'YYYY_MM_DD', 'YYYY' => 'YYYY', 'YYYY-MM' => 'YYYY_MM');
 
-        $dateType = 'YYYY-MM-DD'; // default value
+        $dateType = 'YYYY_MM_DD'; // default value
 
         $count = substr_count($val, '-');
 
@@ -191,6 +191,31 @@ class Metadata_form_model extends CI_Model
         }
 
         return $dateType;
+    }
+
+
+    /**
+     * @param $extraNodeDateType
+     * @param $val
+     * @return string
+
+     Prevents wrong formats of date to be saved to
+     */
+
+    private function _correctDateFormat($extraNodeDateType, $val)
+    {
+        if (substr_count($val, '-') != substr_count($extraNodeDateType,'_')) {
+            return $val;
+        }
+
+        $arDateParts = explode('-', $val);
+        $arPartLengths = explode('_', $extraNodeDateType);
+
+        for ($i=0; $i< count($arDateParts); $i++ ) {
+            $arDateParts[$i] = str_repeat('0', strlen($arPartLengths[$i])-strlen($arDateParts[$i])) . $arDateParts[$i];
+        }
+
+        return implode('-', $arDateParts);
     }
 
     /**
@@ -386,7 +411,9 @@ class Metadata_form_model extends CI_Model
                         $dateElementTagName = $this->xsdElements[$totalTagName]['tagNameRouting'][count($this->xsdElements[$totalTagName]['tagNameRouting'])-1];
                         $xmlNodeDateType =  $xmlMain->createElement($dateElementTagName . '_' . $extraNodeDateType); // construct name on basis of date element as well as actual type
 
-                        $xmlNodeDateType->appendChild($xmlMain->createTextNode($val));
+                        $dateVal = $this->_correctDateFormat($extraNodeDateType, $val);
+
+                        $xmlNodeDateType->appendChild($xmlMain->createTextNode($dateVal));
                         $xmlParentElement->appendChild($xmlNodeDateType);
                     }
                     else { // normal addition of value to the same level
