@@ -93,6 +93,18 @@ function validateTextLengths()
     return canSubmit;
 }
 
+function disableEnterKeyForInputs()
+{
+    // Disable enter key for all inputs of the metadata form
+    $('.metadata-form input').on('keyup keypress', function(e) {
+        var keyCode = e.keyCode || e.which;
+        if (keyCode === 13) {
+            e.preventDefault();
+            return false;
+        }
+    });
+}
+
 $(function () {
     $('[data-toggle="tooltip"]').tooltip();
     $( ".datepicker" ).datepicker({
@@ -167,14 +179,7 @@ $(function () {
         duplicateField(field, cloneType);
     });
 
-    // Disable enter key
-    $('.metadata-form input').on('keyup keypress', function(e) {
-        var keyCode = e.keyCode || e.which;
-        if (keyCode === 13) {
-            e.preventDefault();
-            return false;
-        }
-    });
+    disableEnterKeyForInputs();
 
     // numeric validation
     $('.numeric-field').keypress(validateNumber);
@@ -463,4 +468,6 @@ function duplicateField(field, cloneType)
         // Insert field group
         $(field).after(newFieldGroup);
     }
+
+    disableEnterKeyForInputs();
 }
