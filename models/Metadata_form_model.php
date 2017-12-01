@@ -5,8 +5,9 @@ class Metadata_form_model extends CI_Model
 {
 
     var $CI = NULL;
-    var $presentationElements = array();
-    var $xsdElements = array();
+    var $presentationElements = array(); // Main array representing all elements required to build the actual form (write / read )
+    var $xsdElements = array(); // Xsd representation
+    var $formMainFields = array(); // holding all info regarding form fields without the grouping information
 
     function __construct()
     {
@@ -21,30 +22,15 @@ class Metadata_form_model extends CI_Model
      * @param $config
      * @return array
      *
-     * returns all groupnames in an array for the requested for form (in $config['elements']
-     */
-    public function getFormGroupNamesAsArray($rodsaccount, $config)
-    {
-        $formGroupedElements = $this->loadFormElements($rodsaccount, $config['formelementsPath']);
-
-        $groupNames = array();
-        foreach ($formGroupedElements['Group'] as $formElements) {
-            foreach ($formElements as $key => $element) {
-                if ($key == '@attributes') {
-                    $groupNames[] = $element['name'];
-                }
-            }
-        }
-        return $groupNames;
-    }
-
-    /**
-     * @param $rodsaccount
-     * @param $config
-     * @return array
-     *
      * creates an array to be indexed by fully qualified element name.  eg 'creation_date'
      * This especially for subproperties eg 'creator_properties_pi' which is in fact a construct
+     *
+     * Flexdate translations require addition of three extra possibilities.
+     * A specification of (YYYY, YYYY-MM, YYYY-MM-DD)
+     * This as the value is not actuatlly saved as the name of the field.
+     * But with extra info as how to validate it with the xsd
+     * This has to be translated as well but these names are not known to corresponding formelements.
+     *
      */
     public function getFormElementLabels($rodsaccount, $config)
     {
@@ -53,11 +39,12 @@ class Metadata_form_model extends CI_Model
         $groupNames = array();
         $elementLabels = array();
         foreach ($formGroupedElements['Group'] as $formElements) {
+
             foreach ($formElements as $key => $element) {
                 if ($key == '@attributes') {
                     $groupNames[] = $element['name'];
                 } else {
-                    $this->iterateElements($element, $key, $elementLabels, $key);
+                    $this->_iterateElements($element, $key, $elementLabels, $key);
                 }
             }
         }
@@ -72,20 +59,29 @@ class Metadata_form_model extends CI_Model
      * supporting function for getFormElementLabels
      * Adjusted so the leadproperty label is taken into account ($leadPropertyBase is passed throughout all iteration levels)
      */
-    public function iterateElements($element, $key, &$elementLabels, $leadPropertyBase, $level = 0)
+    private function _iterateElements($element, $key, &$elementLabels, $leadPropertyBase, $level = 0)
     {
-        if (isset($element['label'])) {
+        $flexDateKeys = array('YYYY', 'YYYY_MM', 'YYYY_MM_DD'); // these postfixes have to correspond with the xsd definition
+
+        if (isset($element['label']) AND !isset($element['@attributes']['class'])) {
             $elementLabels[$key] = $element['label'];
+            if (isset($element['@attributes']['flexdate'])) {
+                foreach ($flexDateKeys as $flexdatePostfix) {
+                    $elementLabels[$key . '_' . $flexdatePostfix] = $element['label'];
+                }
+            }
             if ($level == 1) {
                 $elementLabels[$leadPropertyBase] = $element['label'];
             } elseif ($level > 1) {
                 $elementLabels[$key] = $elementLabels[$leadPropertyBase] . '-' . $element['label'];
-
+                if($leadPropertyBase=='Embargo_End_Date') {
+                    echo '<br> h2';
+                }
             }
-        } else {
+        } else { // not a label and therefore look at extra level.
             $level++;
             foreach ($element as $key2 => $element2) {
-                $this->iterateElements($element2, $key . '_' . $key2, $elementLabels, $leadPropertyBase, $level);
+                $this->_iterateElements($element2, $key . '_' . $key2, $elementLabels, $leadPropertyBase, $level);
             }
         }
     }
@@ -139,202 +135,87 @@ class Metadata_form_model extends CI_Model
      * [Affiliation] =>
      * )
      */
-    public function arrayHoldsAnyData($array)
-    {
-        foreach ($array as $key => $value) {
-            if (!is_array($value)) {
-                if ($value) {
-                    return true;
-                }
-            } else {
-                foreach ($value as $key1 => $value1) {
-                    if (!is_array($value1)) {
-                        if ($value1) {
-                            return true;
-                        }
-                    } else {
-                        foreach ($value1 as $key2 => $value2) {
-                            if ($value2) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
+//    public function arrayHoldsAnyData($array)
+//    {
+//        foreach ($array as $key => $value) {
+//            if (!is_array($value)) {
+//                if ($value) {
+//                    return true;
+//                }
+//            } else {
+//                foreach ($value as $key1 => $value1) {
+//                    if (!is_array($value1)) {
+//                        if ($value1) {
+//                            return true;
+//                        }
+//                    } else {
+//                        foreach ($value1 as $key2 => $value2) {
+//                            if ($value2) {
+//                                return true;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+//    }
+
 
     /**
-     * Posted data is not coming in in the correct structure due to the way the frontend had to be prepared to be able to clone elements with subproperties
+     * @param $val
+     * @return string
      *
-     * Therefore, reorganisation must take place
+     * determine which date type on the value that was passed by the user
      *
-     * Step through each element and given the type create the correct output so it can be converted to XML later on
+     * This function is written against the new flexible date picker
+     * That allows for different date patters being YYYY, YYYY-MM, YYYY-MM-DD
+     *
+     * Simple interpretation - if wrong conclusions were drawn the xsd will guard it all
+     * The value was erroneous in the first place then
+     * There is no validation of the value involved
      */
-    public function reorganisePostedData($rodsaccount, $xsdPath)
+    private function _determineDateTypeOnDateValue($val)
     {
-        $metadataElements = array();
-        $elementCounter = 0;
+        $dateTypes = array ('YYYY-MM-DD' => 'YYYY_MM_DD', 'YYYY' => 'YYYY', 'YYYY-MM' => 'YYYY_MM');
 
-        $xsdElements = $this->loadXsd($rodsaccount, $xsdPath);
+        $dateType = 'YYYY_MM_DD'; // default value
 
-        $arrayPost = $this->CI->input->post();
+        $count = substr_count($val, '-');
 
-        if (isset($arrayPost['vault_submission'])) { // clean up: this is extra input in the posted data that should not be handled as being metadata
-            unset($arrayPost['vault_submission']);
-        }
-
-
-//        $arrayPost = array(
-//            'Title' => $arrayPost['Title'],
-//            'Description' => $arrayPost['Description'],
-//            'Discipline' => array(0 => 'hallo',
-//                1=>''),
-//            'Person' => $arrayPost['Person']
-//            //'Related_Datapackage' => $arrayPost['Related_Datapackage']
-//        );
-//
-
-        // First reorganise in such a way that data coming back from front end
-        foreach ($arrayPost as $key => $value) {
-            if (is_array($value)) { // multiplicity && subproperty handling
-                $sublevelCounter = 0;
-                $keepArray = array();
-                $structType = '';
-
-                foreach ($value as $subKey => $subValue) {
-                    if (is_numeric($subKey)) {
-                        if ($subValue) {
-                            if (!isset($metadataElements[$elementCounter])) {
-                                $newValueCollection = array();
-                                foreach ($value as $index => $localVal) { // rebuild the array only holding values
-                                    if ($localVal) {
-                                        $newValueCollection[] = $localVal;
-                                    }
-                                }
-                                $metadataElements[$elementCounter] = array($key => $newValueCollection);
-                            }
-                        }
-                    } else { // subproperty handling - can either be a single struct or n-structs
-                        // A struct typically has 1 element as a hierarchical top element.
-                        // The other element holds properties
-
-                        if ($sublevelCounter == 0) {
-                            if (count($subValue) == 1) { // single instance of a struct
-                                $structType = 'SINGLE';
-                            } else { // multiple instances of struct
-                                $structType = 'MULTIPLE';
-                            }
-                            $keepArray[$sublevelCounter] = array($subKey => $subValue);
-                        } else {
-                            $keepArray[$sublevelCounter] = array($subKey => $subValue);
-                        }
-                    }
-                    $sublevelCounter++;
-                }
-
-                $multipleAllowed = false;
-                if ($xsdElements[$key]['maxOccurs'] != '1') {
-                    $multipleAllowed = true;
-                }
-                $isStruct = false;
-                if ($xsdElements[$key]['type'] == 'openTag') {
-                    $isStruct = true;
-                }
-
-                // after looping through an entire struct it becomes
-                if ($structType == 'SINGLE' AND !$multipleAllowed) {
-//                    echo '<br>KEY1: ' . $key;
-//                    echo '<pre>';
-//                        print_r($value);
-//                    echo '</pre>';
-                    // check values within entire structure to prevent from adding fully empty structure
-
-                    if ($this->arrayHoldsAnyData($value)) { // only add if actually holds any data
-                        $metadataElements[$elementCounter] = array($key => $value);
-                    }
-                } elseif ($structType == 'MULTIPLE' OR ($multipleAllowed AND $isStruct)) { // Multi situation
-                    $enumeratedData = array();
-                    foreach ($keepArray[0] as $keyData => $valData) { // step through the lead properties => then find corresponding subproperties
-                        foreach ($valData as $referenceID => $leadPropertyVal) { // referenceID is actually the counter in the array that coincides for lead and subproperties
-
-                            // Within keepArray[1] handle the corresponding subproperties
-                            $subpropArray = array();
-                            $structHoldsData = strlen($leadPropertyVal) > 0 ? true : false;
-                            foreach ($keepArray[1] as $subpropKey => $propValue) {
-                                foreach ($propValue as $subPropertyName => $subData) {
-                                    //echo '<br>' . $subPropertyName . ' - ' .$subData[$referenceID];
-                                    $subpropArray[$subPropertyName] = $subData[$referenceID];
-                                    if ($subData[$referenceID] AND !$structHoldsData) {
-                                        $structHoldsData = true;
-                                    }
-                                }
-                            }
-
-                            if ($structHoldsData) {
-                                $enumeratedData[] = array($keyData => $leadPropertyVal,
-                                    $subpropKey => $subpropArray
-                                );
-                            }
-
-                        }
-                    }
-                    if (count($enumeratedData)) {
-                        $metadataElements[$elementCounter] = array($key => $enumeratedData); // can contain multiple items - is an enumerated list
-                    }
-                }
-            } else {
-                // only add if actually containing a value
-                if ($value) {
-                    $metadataElements[$elementCounter] = array($key => $value);
-                }
+        foreach($dateTypes as $type=>$typeName) {
+            if ($count==substr_count($type,'-')) {
+                $dateType = $typeName;
+                break;
             }
-            $elementCounter++;
         }
 
-        return $metadataElements;
+        return $dateType;
     }
 
-    public function formElementsMainFieldList($formGroupedElements)
+
+    /**
+     * @param $extraNodeDateType
+     * @param $val
+     * @return string
+
+     Prevents wrong formats of date to be saved to
+     */
+
+    private function _correctDateFormat($extraNodeDateType, $val)
     {
-        $elements = array();
-
-        $formAllGroupedElements = array();
-        foreach ($formGroupedElements['Group'] as $index => $array) {
-            if ($index == '0') {
-                // is the index of an array. So we have multiple groups.
-                $formAllGroupedElements = $formGroupedElements['Group'];
-            } else {
-                $formAllGroupedElements[] = $formGroupedElements['Group']; // rewrite it as an indexable array as input for coming foreach
-            }
-            break;
+        if (substr_count($val, '-') != substr_count($extraNodeDateType,'_')) {
+            return $val;
         }
 
-        // Form elements is hierarchical too.
-        // Bring it back to one level with
-        // 1) parent indication
-        // 2) fully qualified name (unique!)
-        // 3) Add start end tags for combination fields
+        $arDateParts = explode('-', $val);
+        $arPartLengths = explode('_', $extraNodeDateType);
 
-        // HIER ALLEEN DE HOOFD ELEMENTEN
-        foreach ($formAllGroupedElements as $formElements) {
-
-            foreach ($formElements as $key => $element) {
-                // Find group definition
-                // Find hierarchies of elements regarding subproperties.
-                if ($key != '@attributes') { // GROUP handling
-//                    echo '<pre>';
-//                    echo 'Key = ' . $key;
-//                    echo '<br>';
-//                    print_r($element);
-//                    echo '</pre>';
-
-                    $elements[$key] = $element;
-                }
-            }
+        for ($i=0; $i< count($arDateParts); $i++ ) {
+            $arDateParts[$i] = str_repeat('0', strlen($arPartLengths[$i])-strlen($arDateParts[$i])) . $arDateParts[$i];
         }
-        return $elements;
+
+        return implode('-', $arDateParts);
     }
 
     /**
@@ -343,7 +224,7 @@ class Metadata_form_model extends CI_Model
      *
      * Per form element that holds data create xml structure
      */
-    public function metadataToXmlString($allFormMetadata, $rodsaccount, $config)
+    private function _metadataToXmlString($allFormMetadata, $rodsaccount, $config)
     {
         $xsdPath = $config['xsdPath'];
         $this->xsdElements = $this->loadXsd($rodsaccount, $xsdPath);
@@ -353,21 +234,18 @@ class Metadata_form_model extends CI_Model
             return false;
         }
 
-        // Get the mainFields only - filter out the grouping
-        $formMainFields  = $this->formElementsMainFieldList($formGroupedElements);
-
         // XML initialization
         $xml = new DOMDocument("1.0", "UTF-8");
         $xml->formatOutput = true;
 
         $xml_metadata = $xml->createElement("metadata");
 
-
-        // Step through all fields and
-        foreach($formMainFields as $mainField=>$mainFieldData) {
+        // Step through all fields
+        // $this->formMainFields is filled in loadFormElements
+        foreach($this->formMainFields  as $mainField=>$mainFieldData) { //formMainFields
 
             $isSubPropertyStructure = false;
-            if (!$this->isCompoundElement($mainFieldData) AND $this->isSubpropertyStructure($mainFieldData)) {
+            if (!$this->_isCompoundElement($mainFieldData) AND $this->_isSubpropertyStructure($mainFieldData)) {
                 $isSubPropertyStructure = true;
             }
 
@@ -457,7 +335,7 @@ class Metadata_form_model extends CI_Model
                     $xml_item = $xml->createElement($mainField); // base element
 
                     $level = 0; // for deletion handling - deeper levels (>0)can always be deleted (i.e. not written to file when empty value)
-                    $metaStructureXML = $this->xmlMetaStructure($xml, $elementInfo, $xml_item, $level);
+                    $metaStructureXML = $this->_xmlMetaStructure($xml, $elementInfo, $xml_item, $level);
 
                     if ($metaStructureXML['anyDataPresent']) {
                         $xml_metadata->appendChild($metaStructureXML['xmlParentElement']);
@@ -483,7 +361,7 @@ class Metadata_form_model extends CI_Model
      * @param string $totalTagName - for indexing in $xsdElements to find out whether a field is op type xs:date
      * @return array
      */
-    public function xmlMetaStructure($xmlMain, $arMetadata, $xmlParentElement, $level, $anyDataPresent = false, $totalTagName='')
+    private function _xmlMetaStructure($xmlMain, $arMetadata, $xmlParentElement, $level, $anyDataPresent = false, $totalTagName='')
     {
         $doAddThisLevel = true;
 
@@ -507,16 +385,41 @@ class Metadata_form_model extends CI_Model
                 ///een val is altijd het eind ding van een element.
                 // Als er geen waarde is, moet dus ook het element worden verwijderd
                 if ($val != '') {
+                    //echo '<br>total tag: ' . $totalTagName;
                     if ($this->xsdElements[$totalTagName]['type'] == 'xs:date') {
                         // the date requires years to be added YYYY
                         // 2017-10-12 -> length = 10
                         // years before 1000 can be added by the datepicker but are formatted like: 900-12-25
                         $val = str_repeat('0', 10-strlen($val)) . $val; // add preceiding 0's -> 0900-12-25
                     }
-                    $xmlParentElement->appendChild($xmlMain->createTextNode($val));
-                    //echo '<pre>';
-                    //print_r($xmlParentElement);
-                    //echo '</pre>';
+
+                    // Find out whether is a flexdate:
+                    $arrayForDatePattern = array();
+                    $counter = 0;
+                    foreach ($this->xsdElements[$totalTagName]['tagNameRouting'] as $tagKey) {
+                        if (!$counter) {
+                            $arrayForDatePattern = $this->formMainFields[$tagKey];
+                        }
+                        else {
+                            $arrayForDatePattern = $arrayForDatePattern[$tagKey];
+                        }
+                        $counter++;
+                    }
+                    if (isset( $arrayForDatePattern['@attributes']['flexdate'] )) { // requires extra level determining the type of date that was passed
+                        $extraNodeDateType = $this->_determineDateTypeOnDateValue($val);
+
+                        $dateElementTagName = $this->xsdElements[$totalTagName]['tagNameRouting'][count($this->xsdElements[$totalTagName]['tagNameRouting'])-1];
+                        $xmlNodeDateType =  $xmlMain->createElement($dateElementTagName . '_' . $extraNodeDateType); // construct name on basis of date element as well as actual type
+
+                        $dateVal = $this->_correctDateFormat($extraNodeDateType, $val);
+
+                        $xmlNodeDateType->appendChild($xmlMain->createTextNode($dateVal));
+                        $xmlParentElement->appendChild($xmlNodeDateType);
+                    }
+                    else { // normal addition of value to the same level
+                        $xmlParentElement->appendChild($xmlMain->createTextNode($val));
+                    }
+
                     $anyDataPresent = true;
                 } else {
                     $doAddThisLevel = false;
@@ -534,7 +437,7 @@ class Metadata_form_model extends CI_Model
                     $xmlElement = $xmlMain->createElement($key);
 
                     // Deze aanroep gebeurt in het kader van $xmlElement / $key.
-                    $structInfo = $this->xmlMetaStructure($xmlMain, $val2, $xmlElement, $level, $anyDataPresent, $totalTagName);
+                    $structInfo = $this->_xmlMetaStructure($xmlMain, $val2, $xmlElement, $level, $anyDataPresent, $totalTagName);
 
                     // Add (entire) srtructure or 1 value
                     // Het element wordt hier al geappend zonder dat zeker is of dit moet (en dan komt ie als lege tag in yoda-metadata.xml)
@@ -570,7 +473,7 @@ class Metadata_form_model extends CI_Model
             unset($allFormMetadata['vault_submission']);
         }
 
-        $xmlString = $this->metadataToXmlString($allFormMetadata, $rodsaccount, $config);
+        $xmlString = $this->_metadataToXmlString($allFormMetadata, $rodsaccount, $config);
 
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
@@ -580,8 +483,9 @@ class Metadata_form_model extends CI_Model
      * @return array
      *
      * Created unemarated array of a possibly associative array
+     * For consistent value processing
      */
-    public function enumerateArray(array $array)
+    private function _enumerateArray(array $array)
     {
         if (!is_numeric(key($array))) {
             $enumeratedArray = array();
@@ -598,7 +502,7 @@ class Metadata_form_model extends CI_Model
      *
      * Determine whether given element actually is a compound element and consists of several element in itself
      */
-    public function isCompoundElement($element)
+    private function _isCompoundElement($element)
     {
         return (isset($element['@attributes']['class']) AND strtoupper($element['@attributes']['class']) == 'COMPOUND');
     }
@@ -610,7 +514,7 @@ class Metadata_form_model extends CI_Model
      * Get the count of form elements within compoound field represented in $element
      * label, help and @attributes are not allowed to be counted as are not elements!
      */
-    public function getCountOfElementsInCompound($compoundElement)
+    private function _getCountOfElementsInCompound($compoundElement)
     {
         $exclude = array('label', 'help', '@attributes');
         $count=0;
@@ -628,7 +532,7 @@ class Metadata_form_model extends CI_Model
      *
      * Determine whether given element is a subroperty structure - i.e. lead element and N subproperties
      */
-    public function isSubpropertyStructure($element)
+    private function _isSubpropertyStructure($element)
     {
         return (!isset($element['label']));
     }
@@ -647,12 +551,6 @@ class Metadata_form_model extends CI_Model
         // load xsd and get all the info regarding restrictions
         $xsdElements = $this->loadXsd($rodsaccount, $config['xsdPath']); // based on element names
 
-//        echo '<pre>';
-//        print_r($xsdElements);
-//        echo '</pre>';
-//
-//        echo '<hr><hr><hr>';
-
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
             $writeMode = false; // Distinnction made as readers, in case of no xml-file being present, should  NOT get default values
@@ -665,6 +563,133 @@ class Metadata_form_model extends CI_Model
             $metadataPresent = true;
             $formData = $this->loadFormData($rodsaccount, $config['metadataXmlPath']);
 
+//            echo '<pre>';
+//            print_r($formData);
+//            echo '</pre>';
+//
+//            echo '<hr>';
+
+if (false) {
+
+            $totalArray = array();
+            $helpArray = array();
+
+            $metaArray = array();
+            $metaArray[] = array('baseName' => 'Related_Datapackage',
+                'name' => 'Related_Datapackage[0][Properties][Title]',
+                'value' => '1111');
+            $metaArray[] = array('baseName' => 'Related_Datapackage',
+                'name' => 'Related_Datapackage[1][Properties][Title]',
+                'value' => '2222');
+
+            $metaArray[] = array('baseName' => 'Related_Datapackage_BLA',
+                'name' => 'Related_Datapackage_BLA[0][BLABLA][Properties][Title]',
+                'value' => 'BLABLA0000');
+
+            $metaArray[] = array('baseName' => 'Related_Datapackage_BLA',
+                'name' => 'Related_Datapackage_BLA[1][BLABLA][Properties][Title]',
+                'value' => 'BLABLA1111');
+
+            $metaArray[] = array('baseName' => 'R',
+                'name' => 'R',
+                'value' => 'R0');
+            $metaArray[] = array('baseName' => 'S',
+                'name' => 'S',
+                'value' => 'S0');
+
+            $metaArray[] = array('baseName' => 'BLA',
+                'name' => 'BLA[TEST]',
+                'value' => 'BLA TEST');
+
+
+//            $metaArray[] = array('baseName' => 'R',
+//                'name' => 'R[1]',
+//                'value' => 'R1' );
+
+            $countItems = 0;
+
+            echo '<pre>';
+            print_r($metaArray);
+            echo '</pre>';
+
+            $prevBaseName = '-1';
+
+            foreach ($metaArray as $metadata) {
+                // if baseName changes, add the verzamelde gegeevns to the
+                if ($prevBaseName != '-1' AND $metadata['baseName'] != $prevBaseName) {
+                    $totalArray[$prevBaseName] = $helpArray;
+
+                    $helpArray = array();
+                }
+                $prevBaseName = $metadata['baseName'];
+
+                preg_match_all("/\[([^\]]*)\]/", $metadata['name'], $matches);
+
+                // now build an array
+                $allKeys = $matches[1];
+
+                $theArray = array();
+                $totalCount = count($matches[1]);
+
+                // determine whether curent base is enumerated - multiple instances for current base
+                $isEnumeration = is_numeric($allKeys[0]); // bepaalt of gepushed moet gaan worden verderop om array
+//                echo '<br>';
+//                echo $prevBaseName . ' - isENUM: ' . ($isEnumeration ? 'YES' : 'NO');
+//                echo '<br>';
+
+                if ($totalCount == 0) {
+                    $helpArray = $metadata['value'];
+                    //$theArray = array($key => $addToArray);
+                } else {
+                    $maxSteps = $totalCount - ($isEnumeration ? 1 : 0);
+
+                    //                $count=0;
+                    // if is Enumeration the last element to be processed is the index.
+                    // This can be skipped as it has no meaning
+                    for ($count = 0; $count < $maxSteps; $count++) {
+                        $key = array_pop($allKeys);
+                        if ($count == 0) {
+                            $addToArray = $metadata['value'];
+                        } else {
+                            $addToArray = $theArray;
+                        }
+                        $theArray = array($key => $addToArray);
+                    }
+                    echo '<hr>';
+                    echo '<pre>';
+                    echo 'After while: ';
+                    echo '<br>';
+                    print_r($theArray);
+                    echo '</pre>';
+
+                    if ($isEnumeration) {
+                        $helpArray[] = $theArray;
+                    } else {
+                        $helpArray = $theArray;
+                    }
+                }
+            }
+
+            $totalArray[$prevBaseName] = $helpArray;
+
+
+//
+//            echo '<hr>';
+//            echo '<pre>';
+//            print_r($helpArray);
+//            echo '</pre>';
+//
+//
+
+//            $totalArray['Related_Datapackage'] = $helpArray;
+
+            echo '<hr>';
+            echo '<pre>';
+            print_r($totalArray);
+            echo '</pre>';
+
+            exit;
+}
             if ($formData === false) {
                 return false;
             }
@@ -707,18 +732,18 @@ class Metadata_form_model extends CI_Model
                     $groupName = $element['name'];
 
                 }
-                elseif ($this->isCompoundElement($element)) {
+                elseif ($this->_isCompoundElement($element)) {
                     // formdata is passed as an enumerated string
-                    if (!$this->addCompoundElement($config, $groupName, $key, $element, $this->enumerateArray($formData[$key]), $xsdElements)) {
+                    if (!$this->_addCompoundElement($config, $groupName, $key, $element, $this->_enumerateArray($formData[$key]), $xsdElements)) {
                         return false;
                     }
                     // echo 'After compound element';
                     //exit;
-                } elseif ($this->isSubpropertyStructure($element)) {//(!isset($element['label'])) { // STEPPING INTO DEEPER LEVELS -- we step into a hierarchy => SUPPROPERTIES
+                } elseif ($this->_isSubpropertyStructure($element)) {//(!isset($element['label'])) { // STEPPING INTO DEEPER LEVELS -- we step into a hierarchy => SUPPROPERTIES
 
-                    $structValueArray = $this->enumerateArray($formData[$key]);
+                    $structValueArray = $this->_enumerateArray($formData[$key]);
 
-                    if (!$this->addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements)) {
+                    if (!$this->_addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements)) {
                         return false;
                     }
                 } else // This is the first level only!
@@ -726,10 +751,10 @@ class Metadata_form_model extends CI_Model
                     $value = isset($formData[$key]) ? $formData[$key] : ''; // dit gaat goed, nieuwe wijze
 
                     // turn it into an array as multiple entries must be presented n times with same element properties but different value
-                    // @todo - refactor to enumerateArray!
-                    $valueArray = $this->getElementValueAsArray($value);
+                    // @todo - refactor to _enumerateArray!
+                    $valueArray = $this->_getElementValueAsArray($value);
 
-                    $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
+                    $multipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$key]);
 
                     $multiPostFix = ''; // Addition to element name when mupliple instances can occur
                     if (!$multipleAllowed) {
@@ -743,18 +768,15 @@ class Metadata_form_model extends CI_Model
                     /// Step through all present values (if multiple and create element for each of them)
                     foreach ($valueArray as $keyValue) {
                         $this->presentationElements[$groupName][] =
-                            $this->newWayPresentationElement($config, $xsdElements[$key], $element, $key . $multiPostFix, $keyValue);
+                            $this->_addPresentationElement($config, $xsdElements[$key], $element, $key . $multiPostFix, $keyValue);
                     }
                 }
             }
         }
-//
+
 //        echo '<pre>';
 //        print_r($this->presentationElements);
 //        echo '</pre>';
-
-// exit;
-
         return $this->presentationElements;
     }
 
@@ -767,7 +789,7 @@ class Metadata_form_model extends CI_Model
 
     // General rule: if a subproperty is present, the lead element has to be present as well
 
-    public function addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements)
+    private function _addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements)
     {
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
@@ -790,7 +812,7 @@ class Metadata_form_model extends CI_Model
                     $subKeyValue = $structValues[$id];
 
                     // Use toplevel here as that defines multiplicity for a structure (is in fact not an element
-                    $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
+                    $multipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$key]);
 
                     $keyCounterInfix = '';
 
@@ -818,12 +840,12 @@ class Metadata_form_model extends CI_Model
                     );
 
                     $this->presentationElements[$groupName][] =
-                        $this->newWayPresentationElement(
+                        $this->_addPresentationElement(
                             $config, $xsdElements[$subKey], $em, $key . $keyCounterInfix . '[' . $id . ']', $frontendValue, $multipleAllowed, $subPropArray);
 
                     //  Add start tag
                     $this->presentationElements[$groupName][] =
-                        $this->newWayPresentationElement(
+                        $this->_addPresentationElement(
                             $config, array('type' => 'structSubPropertiesOpen'), $em, $key . $keyCounterInfix . '[' . $id . ']', '', $multipleAllowed, $subPropArray);
 
                 } else { // STEP THROUGH EACH SUB PROPERTY
@@ -835,22 +857,22 @@ class Metadata_form_model extends CI_Model
                             'subPropertiesStructID' => $multipleAllowed ? $elementCounterForFrontEnd : -1
                         );
 
-                        if ($this->isCompoundElement($propertyElement)) { //isset($propertyElement['combined'])) {
+                        if ($this->_isCompoundElement($propertyElement)) { //isset($propertyElement['combined'])) {
 
                             $arRouting = $xsdElements[$subKey]['tagNameRouting'];
 
                             $subKeyValue = $structValues[$arRouting[1]][$arRouting[2]];
 
-                            $subKeyValue = $this->enumerateArray($subKeyValue);
+                            $subKeyValue = $this->_enumerateArray($subKeyValue);
 
 
-                            //$this->addCompoundElement($config, $groupName, $key, $element, $formData, $xsdElements);
+                            //$this->_addCompoundElement($config, $groupName, $key, $element, $formData, $xsdElements);
                             // todo:: check value array -> is this what is required here???
 
                             $offsetKeyForFrontEnd = $key . $keyCounterInfix . '[' . $id . ']' . '[' . $propertyKey . ']';
 
                             // trap incorrect formatting
-                            if (!$this->addCompoundElement($config, $groupName, $subKey, $propertyElement, $subKeyValue, $xsdElements,
+                            if (!$this->_addCompoundElement($config, $groupName, $subKey, $propertyElement, $subKeyValue, $xsdElements,
                                 $offsetKeyForFrontEnd, $subPropArray)
                             ) {
                                 return false;
@@ -858,21 +880,12 @@ class Metadata_form_model extends CI_Model
                         } else {
                             $arRouting = $xsdElements[$subKey]['tagNameRouting'];
 
-//                            if($subKey=='Creator_Properties_Affiliation2') {
-//                                echo 'subKey: ' . $subKey;
-//                                echo '<pre>';
-//                                    print_r($xsdElements);
-//                                echo '</pre>';
-//                                exit;
-//                                //echo '<hr>';
-//                            }
-
                             // we know this is the 2nd(1 in tagNameRoute) and 3rd(2 in tagNameRoute) level so no real analysing required
                             $subKeyValue = $structValues[$arRouting[1]][$arRouting[2]];
 
-                            $subKeyValue = $this->enumerateArray($subKeyValue);
+                            $subKeyValue = $this->_enumerateArray($subKeyValue);
 
-                            $multipleAllowed = $this->getElementMultipleAllowed($xsdElements[$subKey]);
+                            $multipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$subKey]);
 
                             // frontend value is the value that will be presented in the data field
                             // If no metadata-file present, it will fall back to its default ONLY of in writable mode (i.e NO READER)
@@ -891,7 +904,7 @@ class Metadata_form_model extends CI_Model
 
                             foreach ($frontendValue as $fek => $fev) {
                                 $this->presentationElements[$groupName][] =
-                                    $this->newWayPresentationElement(
+                                    $this->_addPresentationElement(
                                         $config, $xsdElements[$subKey], $propertyElement,
                                         $key . $keyCounterInfix . '[' . $id . '][' . $propertyKey . ']' . $multiPostFix,
                                         $fev, $multipleAllowed, $subPropArray);
@@ -902,7 +915,7 @@ class Metadata_form_model extends CI_Model
             }
 
             $this->presentationElements[$groupName][] =
-                $this->newWayPresentationElement(
+                $this->_addPresentationElement(
                     $config, array('type' => 'structSubPropertiesClose'), $em, $key . $keyCounterInfix . '[' . $id . ']', '', $multipleAllowed, $subPropArray);
 
             $elementCounterForFrontEnd++; // new element (if still present in array)
@@ -934,10 +947,11 @@ class Metadata_form_model extends CI_Model
      * @param array $subPropArray
      * @return bool
      */
-    public function addCompoundElement($config, $groupName, $key, $element,
+    private function _addCompoundElement($config, $groupName, $key, $element,
                                        $formData, $xsdElements, $elementOffsetFrontEnd = '', $subPropArray = array()) // presentation elements will be extended -> make it class variable
     {
         // A combined element from 2017/10/25 on has a title & help text
+
 
         if (isset($xsdElements[$key])) {
 
@@ -961,7 +975,7 @@ class Metadata_form_model extends CI_Model
              */
             $subPropArrayExtended = $subPropArray;
 
-            $subPropArrayExtended['compoundFieldCount'] = $this->getCountOfElementsInCompound($element);
+            $subPropArrayExtended['compoundFieldCount'] = $this->_getCountOfElementsInCompound($element);
             $subPropArrayExtended['compoundFieldPosition'] = 0;
             $subPropArrayExtended['compoundBackendArrayLevel'] = 0;
 
@@ -978,7 +992,7 @@ class Metadata_form_model extends CI_Model
                     $baseCombiElementOffsetFrontEnd = $key;
                 }
 
-                $combiElementMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$key]);
+                $combiElementMultipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$key]);
 
                 // front end should know whether entire compound is clonable in order to show the clone button
                 $subPropArrayExtended['compoundMultipleAllowed'] = $combiElementMultipleAllowed;
@@ -1002,7 +1016,7 @@ class Metadata_form_model extends CI_Model
                     // @todo:: Als er iets in het sublevel verplicht is, moet het top level ook verplicht aangeven????????????
                     // 2) MultipleAllowed [OK]
                     $this->presentationElements[$groupName][] =
-                        $this->newWayPresentationElement($config, array('type' => 'structCombinationOpen'), $element, $combiElementName, '', false, $subPropArrayExtended);
+                        $this->_addPresentationElement($config, array('type' => 'structCombinationOpen'), $element, $combiElementName, '', false, $subPropArrayExtended);
 
                     // 2) step through all elements to complete the combined field
 
@@ -1015,7 +1029,7 @@ class Metadata_form_model extends CI_Model
                             // @todo: een element kan ook weer een multiple variabele zijn !!!!!!!!!!!!!!!!! nog meenemen later
                             $subCombiCounter = 0;
                             // => dus hier lopen if so en keyname for front end aanpassen
-                            $subCombiMultipleAllowed = $this->getElementMultipleAllowed($xsdElements[$subKey]);
+                            $subCombiMultipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$subKey]);
 
 //                            $allSubCombiValues = array();
 //                            $allSubCombiValues[] = $arValues[$subKey];
@@ -1024,7 +1038,7 @@ class Metadata_form_model extends CI_Model
 
                             if (isset($xsdElements[$subKey])) {
                                 $this->presentationElements[$groupName][] =
-                                    $this->newWayPresentationElement($config, $xsdElements[$subKey], $em,
+                                    $this->_addPresentationElement($config, $xsdElements[$subKey], $em,
                                         $combiElementName . '[' . $id . ']' . ($subCombiMultipleAllowed ? '[]' : ''),
                                         $arValues[$id], false, $subPropArrayExtended);
                                 $subCombiCounter++;
@@ -1038,7 +1052,7 @@ class Metadata_form_model extends CI_Model
                     //$xsdEndTagElement['type'] = 'endTag';
                     unset($subPropArrayExtended['fieldPosition']);
                     $this->presentationElements[$groupName][] =
-                        $this->newWayPresentationElement($config, array('type' => 'structCombinationClose'), $element, $combiElementName, '', false, $subPropArrayExtended);
+                        $this->_addPresentationElement($config, array('type' => 'structCombinationClose'), $element, $combiElementName, '', false, $subPropArrayExtended);
 
                     $combiCounter++;
                 }
@@ -1052,9 +1066,9 @@ class Metadata_form_model extends CI_Model
     //xsdELement => data from XSD
     // $element => data from formelements
     // keyId name of element in frontend
-    public function newWayPresentationElement($config, $xsdElement, $element, $keyId, $value, $overrideMultipleAllowed = false, $subpropertyInfo = array())
+
+    private function _addPresentationElement($config, $xsdElement, $element, $keyId, $value, $overrideMultipleAllowed = false, $subpropertyInfo = array())
     {
-        // @todo: - inefficient - will be determinded each time and element passes,
         $writeMode = true;
         if ($config['userType'] == 'reader' || $config['userType'] == 'none') {
             $writeMode = false; // Distinnction made as readers, in case of no xml-file being present, should  NOT get default values
@@ -1069,7 +1083,7 @@ class Metadata_form_model extends CI_Model
         if ($overrideMultipleAllowed) {
             $multipleAllowed = true;
         } else {
-            $multipleAllowed = $this->getElementMultipleAllowed($xsdElement);
+            $multipleAllowed = $this->_isElementMultipleAllowed($xsdElement);
         }
         // Mandatory no longer based on XSD but taken from formelements.xml
         $mandatory = false;
@@ -1138,6 +1152,32 @@ class Metadata_form_model extends CI_Model
             $elementSpecifics = array('options' => $elementOptions);
         }
 
+        // Special handling for value of flexDate - controls
+        // Required as this is a value that is one level deeper due to flexible
+        if (isset($element['@attributes']['flexdate'])) {
+            $type = 'flexdate';
+            $datePattern = 'YYYY-MM-DD';
+
+            $flexDatePossibilities = array('YYYY_MM_DD' => 'YYYY-MM-DD',
+                'YYYY'=>'YYYY',
+                'YYYY_MM'=> 'YYYY-MM');
+
+            // Find the element name (highest present in tagNameRoutig
+            $dateElementTagName = $xsdElement['tagNameRouting'][count($xsdElement['tagNameRouting'])-1];
+
+            foreach($flexDatePossibilities as $dp=>$pattern) {
+                $dateTag = $dateElementTagName . '_' . $dp;
+
+                if (isset($frontendValue[$dateTag])) { // if found, stop the search->there's only 1 hit
+                    $frontendValue =  $frontendValue[$dateTag];
+                    $datePattern = $pattern;
+                    break;
+                }
+            }
+
+            $elementSpecifics = array('pattern' => $datePattern);
+        }
+
         $elementData = array(
             'key' => $keyId, // Key to be used by frontend
             'value' => $frontendValue,
@@ -1158,100 +1198,6 @@ class Metadata_form_model extends CI_Model
         return $elementData;
     }
 
-
-    /**
-     * @param $xsdElements
-     * @param $element
-     * @param $xsdKey
-     * @param $keyId
-     * @param $frontendValue
-     * @param $multipleAllowed
-     * @param array $subpropertyInfo
-     * @return array
-     * construct an array with all required data for frontend presentation in the metadataform
-     */
-    public function obsolete_newPresentationElement($xsdElements, $element, $xsdKey, $keyId, $frontendValue, $multipleAllowed, $subpropertyInfo = array())
-    {
-        // Mandatory no longer based on XSD but taken from formelements.xml
-        $mandatory = false;
-        if (isset($element['mandatory']) AND strtolower($element['mandatory']) == 'true') {
-            $mandatory = true;
-        }
-
-        $elementOptions = array(); // holds the options
-        $elementMaxLength = 0;
-        // Determine restricitions/requirements for this
-        switch ($xsdElements[$xsdKey]['type']) {
-            case 'openTag':
-                $type = 'tagstart'; // Start combination of elements in 1 element so frontend knows that several passing items are brought to 1 element
-                break;
-            case 'endTag':
-                $type = 'tagend'; // combination of elements in 1 element so frontend knows that several passing items are brought to 1 element is to an end
-                break;
-            case 'xs:date':
-                $type = 'date';
-                break;
-            case 'stringURI':
-            case 'stringNormal':
-                $type = 'text';
-                $elementMaxLength = $xsdElements[$xsdKey]['simpleTypeData']['maxLength'];
-                break;
-            case 'xs:integer':
-                $type = 'numeric';
-                $elementMaxLength = 10;  // arbitrary length for this moment
-                break;
-            case 'xs:anyURI':
-                $type = 'text';
-                $elementMaxLength = 1024;
-                break;
-            case 'stringLong':
-                $type = 'textarea';
-                $elementMaxLength = $xsdElements[$xsdKey]['simpleTypeData']['maxLength'];
-                break;
-            case 'KindOfDataTypeType': // different option types will be a 'select' element (these are yet to be determined)
-                /*
-                case 'optionsDatasetType':
-                case 'optionsDatasetAccess':
-                case 'optionsYesNo':
-                case 'optionsOther':
-                case 'optionsPersonalPersistentIdentifierType':
-                */
-            case (substr($xsdElements[$xsdKey]['type'], 0, 7) == 'options'):
-                $elementOptions = $xsdElements[$xsdKey]['simpleTypeData']['options'];
-                $type = 'select';
-                break;
-        }
-
-        //'select' has options
-        // 'edit/multiline' has length
-        // 'date' has nothing extra
-        // Handled separately as these specifics might grow.
-        $elementSpecifics = array(); // holds all element specific info
-        if ($type == 'text' OR $type == 'textarea' OR $type == 'numeric') {
-            $elementSpecifics = array('maxLength' => $elementMaxLength);
-        } elseif ($type == 'select') {
-            $elementSpecifics = array('options' => $elementOptions);
-        }
-
-        $elementData = array(
-            'key' => $keyId, // Key to be used by frontend
-            'value' => $frontendValue,
-            'label' => $element['label'],
-            'helpText' => $element['help'],
-            'type' => $type,
-            'mandatory' => $mandatory,
-            'multipleAllowed' => $multipleAllowed,
-            'elementSpecifics' => $elementSpecifics,
-        );
-
-        if (count($subpropertyInfo)) {
-            foreach ($subpropertyInfo as $key => $value) {
-                $elementData[$key] = $value;
-            }
-        }
-        return $elementData;
-    }
-
     /**
      * @param $xsdElement
      * @return bool
@@ -1259,7 +1205,7 @@ class Metadata_form_model extends CI_Model
      * Supporting function for getFormELements
      * is multiple allowed for the given element from the xsd
      */
-    public function getElementMultipleAllowed($xsdElement)
+    private function _isElementMultipleAllowed($xsdElement)
     {
         $multipleAllowed = false;
         if ($xsdElement['maxOccurs'] != '1') {
@@ -1276,7 +1222,7 @@ class Metadata_form_model extends CI_Model
      *
      * return the value as being part of an array
      */
-    public function getElementValueAsArray($value)
+    private function _getElementValueAsArray($value)
     {
         // The number of values determine the number of elements to be created
         if (!is_array($value)) {
@@ -1313,6 +1259,11 @@ class Metadata_form_model extends CI_Model
         // At first simpleType handling - gathering limitations/restrictions/requirements
         $simpleTypeData = array();
 
+//        echo '<pre>';
+//        print_r($xml);
+//        echo '</pre>';
+//        echo '<hr>';
+
         foreach ($xml->simpleType as $key => $stype) {
             // simpleTye names
             $simpleTypeAttributes = (array)$stype->attributes();
@@ -1339,9 +1290,10 @@ class Metadata_form_model extends CI_Model
 
         $supportedSimpleTypes = array_keys($simpleTypeData);
         $supportedSimpleTypes[] = 'xs:date'; // add some standard xsd simpleTypes that should be working as well
+        $supportedSimpleTypes[] = 'xs:gYear';
+        $supportedSimpleTypes[] = 'xs:gYearMonth';
         $supportedSimpleTypes[] = 'xs:anyURI';
         $supportedSimpleTypes[] = 'xs:integer';
-
         // Basic information is complete
 
         // NOW collect stuff regarding fields
@@ -1351,10 +1303,11 @@ class Metadata_form_model extends CI_Model
         // Hier moet eigenlijk op getest worden of dit info bevat. Dit is de kern van informatie die je bij alle zaken brengt.
         // DIt is zelfs hierarchisch dus zou
         $elements = $xml->element->complexType->sequence->element;
+        // @todo: maybe add choice as possible complexType. This like under _addXsdElements()
 
-        $this->addElements($xsdElements, $elements, $supportedSimpleTypes, $simpleTypeData);
+        $this->_addXsdElements($xsdElements, $elements, $supportedSimpleTypes, $simpleTypeData);
 
-//        echo '<pre>';
+//        echo '<pre>xsdElements: <br>';
 //        print_r($xsdElements);
 //        echo '</pre>';
 //        exit;
@@ -1371,7 +1324,7 @@ class Metadata_form_model extends CI_Model
 
     Handling of hierarchical elements
      */
-    public function addElements(&$xsdElements, $elements, $supportedSimpleTypes, $simpleTypeData, $prefixHigherLevel = '')
+    private function _addXsdElements(&$xsdElements, $elements, $supportedSimpleTypes, $simpleTypeData, $prefixHigherLevel = '')
     {
         foreach ($elements as $element) {
             $attributes = $element->attributes();
@@ -1403,9 +1356,16 @@ class Metadata_form_model extends CI_Model
 //            echo '<br> PrefixHigherLevel: ' . $prefixHigherLevel;
 //            echo '<br> Element name: '.$elementName.'<br>';
 
+            $sequenceType = 'sequence';
             $isDeeperLevel = false;
-            if (@property_exists($element->complexType->sequence, 'element')) {  // Starting tag Deeper level
-                $isDeeperLevel = true;
+
+            $sequenceTypes = array('sequence', 'choice');
+            foreach ($sequenceTypes as $seqType) {
+                if (@property_exists($element->complexType->$seqType, 'element')) {  // Starting tag Deeper level
+                    $isDeeperLevel = true;
+                    $sequenceType = $seqType;
+                    break;
+                }
             }
 
             // with parentElement the routing to this element can be set
@@ -1430,8 +1390,8 @@ class Metadata_form_model extends CI_Model
                 );
             }
 
-            if ($isDeeperLevel) { // Add new level and extend the prefix-identifier
-                $elementSubLevel = $element->complexType->sequence->element;
+            if ($isDeeperLevel) { // Add new level and extend the prefix-identifier ->sequence type is determined above (can be 'sequence' or 'choice')
+                $elementSubLevel = $element->complexType->$sequenceType->element;
 
                 //$prefixHigherLevel = $elementName . '_'; // to be used to identify elements
 
@@ -1444,7 +1404,7 @@ class Metadata_form_model extends CI_Model
 
 
                 // dieper niveau uitvoeren op basis an de gestelde prefix.
-                $this->addElements($xsdElements, $elementSubLevel, $supportedSimpleTypes, $simpleTypeData, $prefixHigherLevel);
+                $this->_addXsdElements($xsdElements, $elementSubLevel, $supportedSimpleTypes, $simpleTypeData, $prefixHigherLevel);
 
                 $prefixHigherLevel = $prefixHigherLevelKeep; //''; //reset it again
 
@@ -1514,7 +1474,50 @@ class Metadata_form_model extends CI_Model
             $data['Group'][0] = $keepGroupData;
         }
 
+        if ($data) {  // make the descriptive data for the actual form fields (i.e. not grouping info) accessible globally in class
+            $this->formMainFields  = $this->_getFormElementsMainFieldList($data);
+        }
+
         return $data;
     }
 
+    private function _getFormElementsMainFieldList($formGroupedElements)
+    {
+        $elements = array();
+
+        $formAllGroupedElements = array();
+        foreach ($formGroupedElements['Group'] as $index => $array) {
+            if ($index == '0') {
+                // is the index of an array. So we have multiple groups.
+                $formAllGroupedElements = $formGroupedElements['Group'];
+            } else {
+                $formAllGroupedElements[] = $formGroupedElements['Group']; // rewrite it as an indexable array as input for coming foreach
+            }
+            break;
+        }
+
+        // Form elements is hierarchical too.
+        // Bring it back to one level with
+        // 1) parent indication
+        // 2) fully qualified name (unique!)
+        // 3) Add start end tags for combination fields
+
+        // HIER ALLEEN DE HOOFD ELEMENTEN
+        foreach ($formAllGroupedElements as $formElements) {
+            foreach ($formElements as $key => $element) {
+                // Find group definition
+                // Find hierarchies of elements regarding subproperties.
+                if ($key != '@attributes') { // GROUP handling
+//                    echo '<pre>';
+//                    echo 'Key = ' . $key;
+//                    echo '<br>';
+//                    print_r($element);
+//                    echo '</pre>';
+
+                    $elements[$key] = $element;
+                }
+            }
+        }
+        return $elements;
+    }
 }

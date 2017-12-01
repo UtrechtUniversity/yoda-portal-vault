@@ -190,6 +190,7 @@ class Element {
     public $type;
     public $value = null;
     public $options = array();
+    public $pattern = null; // date pattern for flexDate data type
     public $selected = array();
     public $mandatory = FALSE;
     public $group = null;
@@ -230,6 +231,10 @@ class Element {
         if ($this->type == 'select') {
             $this->options = $data['elementSpecifics']['options'];
         }
+        if ($this->type == 'flexDate') {
+            $this->pattern = $data['elementSpecifics']['pattern'];
+        }
+
 
         if (isset($data['multipleAllowed']) && $data['multipleAllowed']) {
             $this->multipleAllowed = $data['multipleAllowed'];

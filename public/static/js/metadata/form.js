@@ -123,6 +123,12 @@ $(function () {
         });
     });
     $('select').select2();
+    $('.flexdate').inputmask({
+        regex: "[0-9]{4}[-](0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])",
+        showMaskOnHover: false,
+        showMaskOnFocus: false,
+        placeholder: ''
+    });
 
     // Delete all metadata btn
     $( ".delete-all-metadata-btn" ).on('click', function(e){
@@ -250,6 +256,15 @@ function duplicateField(field, cloneType)
         });
     }
 
+    if (newField.hasClass('flexdate')) {
+        $('.flexdate').inputmask({
+            regex: "[0-9]{4}[-](0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])",
+            showMaskOnHover: false,
+            showMaskOnFocus: false,
+            placeholder: ''
+        });
+    }
+
     if (newFieldGroup.hasClass('select2')) {
         // Init select2 for the 2 fields.
         newFieldGroup.find('select').select2();
@@ -333,6 +348,15 @@ function duplicateField(field, cloneType)
                         $('.ui-datepicker-close').click(function () {
                             $.datepicker._clearDate(thisDatepicker);
                         });
+                    });
+                }
+
+                if (newField.hasClass('flexdate')) {
+                    $('.flexdate').inputmask({
+                        regex: "[0-9]{4}[-](0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])",
+                        showMaskOnHover: false,
+                        showMaskOnFocus: false,
+                        placeholder: ''
                     });
                 }
 
@@ -442,6 +466,15 @@ function duplicateField(field, cloneType)
                         $('.ui-datepicker-close').click(function() {
                             $.datepicker._clearDate(thisDatepicker);
                         });
+                    });
+                }
+
+                if ($(this).hasClass('flexdate')) {
+                    $(this).inputmask({
+                        regex: "[0-9]{4}[-](0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])",
+                        showMaskOnHover: false,
+                        showMaskOnFocus: false,
+                        placeholder: ''
                     });
                 }
             }
