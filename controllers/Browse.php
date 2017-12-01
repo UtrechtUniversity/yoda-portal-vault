@@ -208,47 +208,79 @@ class Browse extends MY_Controller
         $status = 'Success';
         $statusInformation = '';
 
+        $totalItemsLeftInView = $length;
+
+        $totalItems = 0;
+
         // Collections
         if ($restrict=='collections' OR !$restrict) {
-            $icon = 'fa-folder-o';
-            $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
-
-            $status = $collections['status'];
-            $statusInfo = $collections['statusInfo'];
-
+            // Get the actual total for the Collections
+            $testCollections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, 0);
+            $status = $testCollections['status'];
             if ($status=='Success') {
-                $totalItems += $collections['summary']['total'];
-                if ($collections['summary']['returned'] > 0) {
-                    foreach ($collections['rows'] as $row) {
-                        if ($this->_allowRowWhenBrowsing($row, $interveningKeys)) {
-                            $filePath = str_replace($pathStart, '', $row['path']);
-                            $rows[] = array(
-                                '<span class="browse" data-path="' . urlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                                date('Y-m-d H:i:s', $row['modify_time'])
-                            );
+                $totalItems = $testCollections['summary']['total'];
+
+                $icon = 'fa-folder-o';
+                $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+
+                $status = $collections['status'];
+                $statusInfo = $collections['statusInfo'];
+
+                if ($status == 'Success') {
+                    // @todo: does not always produce a total - more specifically when there is no resulting set of data!
+                    //$totalItems += $collections['summary']['total'];
+                    if ($collections['summary']['returned'] > 0) {
+                        foreach ($collections['rows'] as $row) {
+                            if ($this->_allowRowWhenBrowsing($row, $interveningKeys)) {
+                                $filePath = str_replace($pathStart, '', $row['path']);
+                                $rows[] = array(
+                                    '<span class="browse" data-path="' . urlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                    date('Y-m-d H:i:s', $row['modify_time'])
+                                );
+
+                                $totalItemsLeftInView--;
+                            }
                         }
                     }
                 }
             }
         }
 
+        $correctedStartForObjects = 0;
+        if ($start>$totalItems) {
+            // add the shift following the final collection page holding both Collections and Objects.
+            // These objects 'lost' on that combination page must be corrected for regarding the starting point in the dataobject list
+            $correctedStartForObjects = $start - $totalItems;
+        }
+
         // Objects
         if( $status=='Success' AND ($restrict=='objects' OR !$restrict)) {
-            $objects = $this->filesystem->browse($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $start);
-
-            $status = $objects['status'];
-            $statusInfo = $objects['statusInfo'];
+            // Get the actual total for the dataObjects
+            $testObjects = $this->filesystem->browse($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, 0);
+            $status = $testObjects['status'];
 
             if ($status=='Success') {
-                $totalItems += $objects['summary']['total'];
-                if ($objects['summary']['returned'] > 0) {
-                    foreach ($objects['rows'] as $row) {
-                        if ($this->_allowRowWhenBrowsing($row, $interveningKeys)) {
-                            $filePath = str_replace($pathStart, '', $row['path']);
-                            $rows[] = array(
-                                '<span data-path="' . urlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                                date('Y-m-d H:i:s', $row['modify_time'])
-                            );
+                $totalItems += $testObjects['summary']['total'];
+
+                // Actual selecting of wanted data for the view
+                $objects = $this->filesystem->browse($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $correctedStartForObjects);
+
+                $status = $objects['status'];
+                $statusInfo = $objects['statusInfo'];
+
+                if ($status == 'Success') {
+//                $totalItems += $objects['summary']['total']; // add the shift that is lost in the total count due to 1 page with both Collections and Objects
+
+                    if ($objects['summary']['returned'] > 0) {
+                        foreach ($objects['rows'] as $row) {
+                            if ($this->_allowRowWhenBrowsing($row, $interveningKeys) AND $totalItemsLeftInView) {
+                                $filePath = str_replace($pathStart, '', $row['path']);
+                                $rows[] = array(
+                                    '<span data-path="' . urlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                    date('Y-m-d H:i:s', $row['modify_time'])
+                                );
+                                $totalItemsLeftInView--;
+                            }
                         }
                     }
                 }
