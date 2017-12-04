@@ -287,10 +287,6 @@ class Vaultsubmission
         $this->CI->load->model('Metadata_form_model');
         $formElementLabels = $this->CI->Metadata_form_model->getFormElementLabels($this->account, $this->formConfig);
 
-        echo '<pre>';
-        print_r($formElementLabels);
-        echo '</pre>';
-
         $fieldLabels = array();
         foreach ($fields as $field) {
             // Convert fields as Creator[Name] or Contributor[Name] to Creator_Name or Contributor_Name
