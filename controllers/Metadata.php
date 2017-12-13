@@ -136,16 +136,14 @@ class Metadata extends MY_Controller
         // Datamanager Edit metadata in vault btn & write permissions
         $showEditBtn = false;
         $messageDatamanagerAfterSaveInVault = '';  // message to datamanger via central messaging -> javascript setMessage
-        if ($isDatamanager == 'yes' && $isVaultPackage == 'yes') {
+        if ($isDatamanager == 'yes' && $isVaultPackage == 'yes' && $formConfig['hasShadowMetadataXml'] == 'no') {
             if ($mode == 'edit_in_vault') {
                 $form->setPermission('write'); // Set write permissions for editing metadata in the vault.
             } else {
                 $showEditBtn = true; // show edit button
             }
 
-            if ($formConfig['hasShadowMetadataXml']=='yes') {
-                //$flashMessageType = 'warning';
-                //$flashMessage = 'Update of metadata is pending.';
+            if ($formConfig['hasShadowMetadataXml'] == 'yes') {
                 $messageDatamanagerAfterSaveInVault = 'Update of metadata is pending.';
             }
         }
