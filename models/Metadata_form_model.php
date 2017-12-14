@@ -238,11 +238,21 @@ class Metadata_form_model extends CI_Model
         $xml = new DOMDocument("1.0", "UTF-8");
         $xml->formatOutput = true;
 
+//        echo '<pre>';
+//        print_r($allFormMetadata);
+//        echo '</pre>';
+//        exit;
+
         $xml_metadata = $xml->createElement("metadata");
 
         // Step through all fields
         // $this->formMainFields is filled in loadFormElements
         foreach($this->formMainFields  as $mainField=>$mainFieldData) { //formMainFields
+
+//            echo '<hr>';
+//            echo '<h1>' . $mainField . '</h1>';
+//            print_r($mainFieldData);
+//            echo '<hr>';
 
             $isSubPropertyStructure = false;
             if (!$this->_isCompoundElement($mainFieldData) AND $this->_isSubpropertyStructure($mainFieldData)) {
@@ -282,6 +292,16 @@ class Metadata_form_model extends CI_Model
             } else {
                 $topLevelData = $elementData;
             }
+
+//            if ($mainField == 'geoLocation') {
+//                echo '<h1>' . $mainField . '</h1>';
+//                echo '<pre>';
+//                //print_r($mainFieldData);
+//                print_r($topLevelData);
+//                echo '</pre>';
+//                echo '<hr>';
+//            }
+//
 
         //    echo '<br>Element name: ' . $mainField;
             foreach ($topLevelData as $key => $val) { // per $val => entire structure to be added to $elementName
@@ -475,6 +495,10 @@ class Metadata_form_model extends CI_Model
 
         $xmlString = $this->_metadataToXmlString($allFormMetadata, $rodsaccount, $config);
 
+//        print_r($xmlString);
+//        exit;
+
+
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
 
@@ -493,6 +517,11 @@ class Metadata_form_model extends CI_Model
             return $enumeratedArray;
         }
         return $array;
+    }
+
+    private function _isGeoLocation($element)
+    {
+        return (isset($element['@attributes']['geoLocation']));
     }
 
 
@@ -601,6 +630,7 @@ class Metadata_form_model extends CI_Model
             foreach ($formElements as $key => $element) {
                 // Find group definition
                 // Find hierarchies of elements regarding subproperties.
+
                 if ($key == '@attributes') { // GROUP handling
                     $groupName = $element['name'];
 
@@ -619,29 +649,62 @@ class Metadata_form_model extends CI_Model
                     if (!$this->_addLeadAndSubpropertyElements($config, $groupName, $key, $element, $structValueArray, $xsdElements)) {
                         return false;
                     }
-                } else // This is the first level only!
-                {
-                    $value = isset($formData[$key]) ? $formData[$key] : ''; // dit gaat goed, nieuwe wijze
+                } else { // This is the first level only!
+                    if ($this->_isGeoLocation($element)) { // If so, formData will contain a structure of data to be
+                        $locationAttributeArray = array();
 
-                    // turn it into an array as multiple entries must be presented n times with same element properties but different value
-                    // @todo - refactor to _enumerateArray!
-                    $valueArray = $this->_getElementValueAsArray($value);
-
-                    $multipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$key]);
-
-                    $multiPostFix = ''; // Addition to element name when mupliple instances can occur
-                    if (!$multipleAllowed) {
-                        if (count($valueArray) > 1) {
-                            return false; // break it off as this does not comply with xml
+                        // Special case for geolocation - always should have keys westBoundLongitude, eastBoundLongitude, southBoundLatitude, northBoundLatitude
+                        if (!is_numeric(key($formData[$key]))) { // each index contains a one dimensional array with lat/longitude as key
+                            $locationAttributeArray[] = $formData[$key];
+                        } else {
+                            $locationAttributeArray = $formData[$key];
                         }
-                    } else {
-                        $multiPostFix = '[]'; // Create array as variable can have multiple values, hier mag [] - volgorde is niet belangrijk
-                    }
 
-                    /// Step through all present values (if multiple and create element for each of them)
-                    foreach ($valueArray as $keyValue) {
-                        $this->presentationElements[$groupName][] =
-                            $this->_addPresentationElement($config, $xsdElements[$key], $element, $key . $multiPostFix, $keyValue);
+                        $multipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$key]);
+
+                        //$multiPostFix = ''; // Addition to element name when mupliple instances can occur
+                        if (!$multipleAllowed) {
+                            if (count($locationAttributeArray) > 1) {
+                                return false; // break it off as this does not comply with xml
+                            }
+                        } else {
+                        //    $multiPostFix = '[]'; // Create array as variable can have multiple values, hier mag [] - volgorde is niet belangrijk
+                        }
+
+                        $boxCounter = 0; // For correct processing of posted form data add identifier for location information PER BOX
+                        foreach ($locationAttributeArray as $keyValue) {
+                            // each keyValue is an array with keys: westBoundLongitude, eastBoundLongitude, southBoundLatitude, northBoundLatitude
+
+                            $geoKey = $key . ($multipleAllowed? '[' . $boxCounter. ']' : '');  //$multiPostFix
+                            $this->presentationElements[$groupName][] =
+                                $this->_addPresentationElement($config, $xsdElements[$key], $element, $geoKey , $keyValue);
+                            $boxCounter++;
+                        }
+                    }
+                    else {
+
+                        $value = isset($formData[$key]) ? $formData[$key] : ''; // dit gaat goed, nieuwe wijze
+
+                        // turn it into an array as multiple entries must be presented n times with same element properties but different value
+                        // @todo - refactor to _enumerateArray!
+                        $valueArray = $this->_getElementValueAsArray($value);
+
+                        $multipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$key]);
+
+                        $multiPostFix = ''; // Addition to element name when mupliple instances can occur
+                        if (!$multipleAllowed) {
+                            if (count($valueArray) > 1) {
+                                return false; // break it off as this does not comply with xml
+                            }
+                        } else {
+                            $multiPostFix = '[]'; // Create array as variable can have multiple values, hier mag [] - volgorde is niet belangrijk
+                        }
+
+                        /// Step through all present values (if multiple and create element for each of them)
+                        foreach ($valueArray as $keyValue) {
+                            $this->presentationElements[$groupName][] =
+                                $this->_addPresentationElement($config, $xsdElements[$key], $element, $key . $multiPostFix, $keyValue);
+                        }
                     }
                 }
             }
@@ -1032,23 +1095,28 @@ class Metadata_form_model extends CI_Model
             $datePattern = 'YYYY-MM-DD';
 
             $flexDatePossibilities = array('YYYY_MM_DD' => 'YYYY-MM-DD',
-                'YYYY'=>'YYYY',
-                'YYYY_MM'=> 'YYYY-MM');
+                'YYYY' => 'YYYY',
+                'YYYY_MM' => 'YYYY-MM');
 
             // Find the element name (highest present in tagNameRoutig
-            $dateElementTagName = $xsdElement['tagNameRouting'][count($xsdElement['tagNameRouting'])-1];
+            $dateElementTagName = $xsdElement['tagNameRouting'][count($xsdElement['tagNameRouting']) - 1];
 
-            foreach($flexDatePossibilities as $dp=>$pattern) {
+            foreach ($flexDatePossibilities as $dp => $pattern) {
                 $dateTag = $dateElementTagName . '_' . $dp;
 
                 if (isset($frontendValue[$dateTag])) { // if found, stop the search->there's only 1 hit
-                    $frontendValue =  $frontendValue[$dateTag];
+                    $frontendValue = $frontendValue[$dateTag];
                     $datePattern = $pattern;
                     break;
                 }
             }
 
             $elementSpecifics = array('pattern' => $datePattern);
+        }
+
+        // Change type to geolocation selection box
+        if (isset($element['@attributes']['geoLocation'])) {
+            $type = 'geoLocationBox';
         }
 
         $elementData = array(

@@ -73,15 +73,26 @@
             <div class="col-sm-12">
                 <?php if ($e->multipleAllowed()) { ?>
                     <div class="input-group">
+                        <button><i class="fa fa-plus" aria-hidden="true"></i> Show map</button>
                         <input type="text"
-                            <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
-                               class="form-control"
-                                <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
-                                    data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
-                                    placeholder="If left empty corresponding subproperties are deleted when saving"
-                                <?php endif; ?>
-                               name="<?php echo $e->key; ?>"
-                               value="<?php echo htmlentities($e->value); ?>">
+                               name="<?php echo $e->key . '[westBoundLongitude]'; ?>"
+                               value="<?php echo htmlentities($e->value['westBoundLongitude']); ?>">
+
+                        <input type="text"
+                               name="<?php echo $e->key . '[eastBoundLongitude]'; ?>"
+                               value="<?php echo htmlentities($e->value['eastBoundLongitude']); ?>">
+
+                        <input type="text"
+                               name="<?php echo $e->key . '[southBoundLatitude]'; ?>"
+                               value="<?php echo htmlentities($e->value['southBoundLatitude']); ?>">
+
+                        <input type="text"
+                               name="<?php echo $e->key . '[northBoundLatitude]'; ?>"
+                               value="<?php echo htmlentities($e->value['northBoundLatitude']); ?>">
+
+
+
+
                         <span class="input-group-btn">
                             <button
                                     class="btn btn-default duplicate-field"
@@ -96,19 +107,22 @@
                         </span>
                     </div>
                 <?php } else { ?>
+                    <button><i class="fa fa-plus" aria-hidden="true"></i> Show map</button>
+                    <input type="text"
+                           name="<?php echo $e->key . '[westBoundLongitude]'; ?>"
+                           value="<?php echo htmlentities($e->value['westBoundLongitude']); ?>">
 
                     <input type="text"
-                        <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
-                           class="form-control"
-                            <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
-                                placeholder="If left empty corresponding subproperties are deleted when saving"
-                            <?php endif; ?>
-                           name="<?php echo $e->key; ?>"
-                           value="<?php echo htmlentities($e->value); ?>">
+                           name="<?php echo $e->key . '[eastBoundLongitude]'; ?>"
+                           value="<?php echo htmlentities($e->value['eastBoundLongitude']); ?>">
 
+                    <input type="text"
+                           name="<?php echo $e->key . '[southBoundLatitude]'; ?>"
+                           value="<?php echo htmlentities($e->value['southBoundLatitude']); ?>">
 
-
-
+                    <input type="text"
+                           name="<?php echo $e->key . '[northBoundLatitude]'; ?>"
+                           value="<?php echo htmlentities($e->value['northBoundLatitude']); ?>">
 
                 <?php } ?>
 
