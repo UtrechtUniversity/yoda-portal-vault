@@ -270,6 +270,11 @@ class Metadata_form_model extends CI_Model
             $isCompoundInStruct = false;
             if (isset($mainFieldData['Properties'])) {
                 $Properties = $mainFieldData['Properties'];
+
+//                echo '<pre>';
+//                print_r($Properties);
+//                echo '</pre>';
+
                 foreach ($Properties as $pkey => $pval) { // For this moment think of only one compound present in subproperty-struct
                     $tempArray = array();
                     foreach ($pval as $itemName => $itemVal) {
@@ -486,7 +491,6 @@ class Metadata_form_model extends CI_Model
      */
     public function processPost($rodsaccount, $config)
     {
-
         $allFormMetadata = $this->CI->input->post();
 
         if (isset($allFormMetadata['vault_submission'])) { // clean up: this is extra input in the posted data that should not be handled as being metadata
@@ -494,10 +498,6 @@ class Metadata_form_model extends CI_Model
         }
 
         $xmlString = $this->_metadataToXmlString($allFormMetadata, $rodsaccount, $config);
-
-//        print_r($xmlString);
-//        exit;
-
 
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }

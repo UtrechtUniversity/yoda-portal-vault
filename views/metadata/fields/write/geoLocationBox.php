@@ -15,17 +15,25 @@
         <div class="input-group">
     <?php } ?>
 
-        <input type="text"
-            <?php if($e->maxLength>0) { echo 'maxlength="' . $e->maxLength .'"'; } ?>
-               class="form-control"
-            <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
-                data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
-                placeholder="If left empty corresponding subproperties are deleted when saving"
-            <?php endif; ?>
-               name="<?php echo $e->key; ?>"
-               value="<?php echo htmlentities($e->value); ?>">
+            <button><i class="fa fa-plus" aria-hidden="true"></i> Show map</button>
+            <input type="hidden"
+                   name="<?php echo $e->key . '[westBoundLongitude]'; ?>"
+                   value="<?php echo htmlentities($e->value['westBoundLongitude']); ?>">
 
-        <?php if ( $e->compoundMultipleAllowed AND   $e->compoundFieldPosition ==($e->compoundFieldCount-1) ) { // present button only when compound is clonable and at end of element range ?>
+            <input type="hidden"
+                   name="<?php echo $e->key . '[eastBoundLongitude]'; ?>"
+                   value="<?php echo htmlentities($e->value['eastBoundLongitude']); ?>">
+
+            <input type="hidden"
+                   name="<?php echo $e->key . '[southBoundLatitude]'; ?>"
+                   value="<?php echo htmlentities($e->value['southBoundLatitude']); ?>">
+
+            <input type="hidden"
+                   name="<?php echo $e->key . '[northBoundLatitude]'; ?>"
+                   value="<?php echo htmlentities($e->value['northBoundLatitude']); ?>">
+
+
+            <?php if ( $e->compoundMultipleAllowed AND   $e->compoundFieldPosition ==($e->compoundFieldCount-1) ) { // present button only when compound is clonable and at end of element range ?>
 
             <span class="input-group-btn">
                 <button class="btn btn-default duplicate-field combined-plus"
@@ -74,23 +82,21 @@
                 <?php if ($e->multipleAllowed()) { ?>
                     <div class="input-group">
                         <button><i class="fa fa-plus" aria-hidden="true"></i> Show map</button>
-                        <input type="text"
+                        <input type="hidden"
                                name="<?php echo $e->key . '[westBoundLongitude]'; ?>"
                                value="<?php echo htmlentities($e->value['westBoundLongitude']); ?>">
 
-                        <input type="text"
+                        <input type="hidden"
                                name="<?php echo $e->key . '[eastBoundLongitude]'; ?>"
                                value="<?php echo htmlentities($e->value['eastBoundLongitude']); ?>">
 
-                        <input type="text"
+                        <input type="hidden"
                                name="<?php echo $e->key . '[southBoundLatitude]'; ?>"
                                value="<?php echo htmlentities($e->value['southBoundLatitude']); ?>">
 
-                        <input type="text"
+                        <input type="hidden"
                                name="<?php echo $e->key . '[northBoundLatitude]'; ?>"
                                value="<?php echo htmlentities($e->value['northBoundLatitude']); ?>">
-
-
 
 
                         <span class="input-group-btn">
@@ -108,19 +114,19 @@
                     </div>
                 <?php } else { ?>
                     <button><i class="fa fa-plus" aria-hidden="true"></i> Show map</button>
-                    <input type="text"
+                    <input type="hidden"
                            name="<?php echo $e->key . '[westBoundLongitude]'; ?>"
                            value="<?php echo htmlentities($e->value['westBoundLongitude']); ?>">
 
-                    <input type="text"
+                    <input type="hidden"
                            name="<?php echo $e->key . '[eastBoundLongitude]'; ?>"
                            value="<?php echo htmlentities($e->value['eastBoundLongitude']); ?>">
 
-                    <input type="text"
+                    <input type="hidden"
                            name="<?php echo $e->key . '[southBoundLatitude]'; ?>"
                            value="<?php echo htmlentities($e->value['southBoundLatitude']); ?>">
 
-                    <input type="text"
+                    <input type="hidden"
                            name="<?php echo $e->key . '[northBoundLatitude]'; ?>"
                            value="<?php echo htmlentities($e->value['northBoundLatitude']); ?>">
 
