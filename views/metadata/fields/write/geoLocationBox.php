@@ -14,8 +14,37 @@
     <?php if ( $e->compoundMultipleAllowed AND   $e->compoundFieldPosition ==($e->compoundFieldCount-1) ) { // present button only when compound is clonable and at end of element range ?>
         <div class="input-group">
     <?php } ?>
+            <script>
+                $(function () {
+                    $('#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal').on('show.bs.modal', function (e) {
 
-            <button><i class="fa fa-plus" aria-hidden="true"></i> Show map 3</button>
+                        var mapId = $(this).data('map');
+                        setTimeout(function() {
+                            var map = loadMap(mapId);
+                            map.invalidateSize();
+                        }, 10, mapId);
+
+                    });
+                });
+            </script>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn" data-toggle="modal" data-target="#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal">
+                <i class="fa fa-plus" aria-hidden="true"></i> Show map 3
+            </button>
+
+            <!-- Modal -->
+            <div class="modal" id="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-map="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div id="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>" data-key="<?php echo $e->key ?>" style="width: 860px; height: 500px;"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+
             <input type="hidden"
                    name="<?php echo $e->key . '[westBoundLongitude]'; ?>"
                    value="<?php echo htmlentities($e->value['westBoundLongitude']); ?>">
@@ -144,7 +173,39 @@
                         </span>
                     </div>
                 <?php } else { ?>
-                    <button><i class="fa fa-plus" aria-hidden="true"></i> Show map 2</button>
+
+                <script>
+                    $(function () {
+                        $('#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal').on('show.bs.modal', function (e) {
+
+                            var mapId = $(this).data('map');
+                            setTimeout(function() {
+                                var map = loadMap(mapId);
+                                map.invalidateSize();
+                            }, 10, mapId);
+
+                        });
+                    });
+                </script>
+                <!-- Button trigger modal -->
+                <button type="button" class="btn" data-toggle="modal" data-target="#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal">
+                    <i class="fa fa-plus" aria-hidden="true"></i> Show map 2
+                </button>
+
+                <!-- Modal -->
+                <div class="modal" id="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-map="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div id="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>" data-key="<?php echo $e->key ?>" style="width: 860px; height: 500px;"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+
+
                     <input type="hidden"
                            name="<?php echo $e->key . '[westBoundLongitude]'; ?>"
                            value="<?php echo htmlentities($e->value['westBoundLongitude']); ?>">
