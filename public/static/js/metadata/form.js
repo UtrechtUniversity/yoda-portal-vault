@@ -504,3 +504,109 @@ function duplicateField(field, cloneType)
 
     disableEnterKeyForInputs();
 }
+
+function loadMap(map_id)
+{
+    var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    var osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+    var osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib });
+
+    var map = L.map(map_id, {
+        center: [48.760, 13.275],
+        zoom: 4
+    });
+
+    var drawnItems = L.featureGroup().addTo(map);
+
+    L.control.layers({
+        'osm': osm.addTo(map),
+        "google": L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
+            attribution: 'google'
+        })
+    }, { 'drawlayer': drawnItems }, { position: 'topright', collapsed: false }).addTo(map);
+
+    var drawControlFull = new L.Control.Draw({
+        edit: {
+            featureGroup: drawnItems
+        },
+        draw: {
+            circle: false,
+            polygon: false,
+            marker: false,
+            circlemarker: false,
+            polyline: false
+        }
+    });
+
+    var drawControlEditOnly = new L.Control.Draw({
+        edit: {
+            featureGroup: drawnItems
+        },
+        draw: false
+    });
+
+    var mapContainer = map.getContainer();
+    var inputKey = $(mapContainer).data('key');
+
+    var data = $( "input[name='"+inputKey+"[northBoundLatitude]']" );
+    if (data.val() != '') {
+        // define rectangle geographical bounds
+        var bounds = [
+            [$( "input[name='"+inputKey+"[northBoundLatitude]']" ).val(), $( "input[name='"+inputKey+"[westBoundLongitude]']" ).val()],
+            [$( "input[name='"+inputKey+"[southBoundLatitude]']" ).val(),  $( "input[name='"+inputKey+"[eastBoundLongitude]']" ).val()]
+        ];
+        // create an orange rectangle
+        var layer = L.rectangle(bounds).addTo(map);
+        drawnItems.addLayer(layer);
+        map.addControl(drawControlEditOnly);
+    } else {
+        map.addControl(drawControlFull);
+    }
+
+
+    map.on(L.Draw.Event.CREATED, function (event) {
+        var layer = event.layer;
+
+        drawnItems.addLayer(layer);
+
+        map.removeControl(drawControlFull);
+        map.addControl(drawControlEditOnly);
+
+        var mapContainer = map.getContainer();
+        var inputKey = $(mapContainer).data('key');
+
+        $( "input[name='"+inputKey+"[northBoundLatitude]']" ).val(layer.getLatLngs()[0][2].lat);
+        $( "input[name='"+inputKey+"[westBoundLongitude]']" ).val(layer.getLatLngs()[0][2].lng);
+        $( "input[name='"+inputKey+"[southBoundLatitude]']" ).val(layer.getLatLngs()[0][0].lat);
+        $( "input[name='"+inputKey+"[eastBoundLongitude]']" ).val(layer.getLatLngs()[0][0].lng);
+    });
+
+    map.on(L.Draw.Event.DELETED, function (event) {
+        map.addControl(drawControlFull);
+        map.removeControl(drawControlEditOnly);
+
+        var mapContainer = map.getContainer();
+        var inputKey = $(mapContainer).data('key');
+
+        $( "input[name='"+inputKey+"[northBoundLatitude]']" ).val('');
+        $( "input[name='"+inputKey+"[westBoundLongitude]']" ).val('');
+        $( "input[name='"+inputKey+"[southBoundLatitude]']" ).val('');
+        $( "input[name='"+inputKey+"[eastBoundLongitude]']" ).val('');
+
+    });
+
+    map.on(L.Draw.Event.EDITED, function (event) {
+        var layers = event.layers;
+        layers.eachLayer(function (layer) {
+            var mapContainer = map.getContainer();
+            var inputKey = $(mapContainer).data('key');
+
+            $( "input[name='"+inputKey+"[northBoundLatitude]']" ).val(layer.getLatLngs()[0][2].lat);
+            $( "input[name='"+inputKey+"[westBoundLongitude]']" ).val(layer.getLatLngs()[0][2].lng);
+            $( "input[name='"+inputKey+"[southBoundLatitude]']" ).val(layer.getLatLngs()[0][0].lat);
+            $( "input[name='"+inputKey+"[eastBoundLongitude]']" ).val(layer.getLatLngs()[0][0].lng);
+        });
+    });
+
+    return map;
+}

@@ -150,12 +150,16 @@ class Metadata extends MY_Controller
             }
         }
 
+
+
         $viewParams = array(
             'styleIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
                 'lib/font-awesome/css/font-awesome.css',
                 'lib/sweetalert/sweetalert.css',
                 'lib/select2/css/select2.min.css',
+                'lib/leaflet/leaflet.css',
+                'lib/leaflet/leaflet.draw.css',
                 'css/metadata/form.css',
             ),
             'scriptIncludes' => array(
@@ -163,6 +167,38 @@ class Metadata extends MY_Controller
                 'lib/sweetalert/sweetalert.min.js',
                 'lib/select2/js/select2.min.js',
                 'lib/jquery-inputmask/jquery.inputmask.bundle.js',
+                // LEAFLET
+                'lib/leaflet/leaflet.js',
+                'lib/leaflet/Leaflet.draw.js',
+                'lib/leaflet/Leaflet.Draw.Event.js',
+                'lib/leaflet/Toolbar.js',
+                'lib/leaflet/Tooltip.js',
+                'lib/leaflet/ext/GeometryUtil.js',
+                'lib/leaflet/ext/LatLngUtil.js',
+                'lib/leaflet/ext/LineUtil.Intersect.js',
+                'lib/leaflet/ext/Polygon.Intersect.js',
+                'lib/leaflet/ext/Polyline.Intersect.js',
+                'lib/leaflet/ext/TouchEvents.js',
+                'lib/leaflet/draw/DrawToolbar.js',
+                'lib/leaflet/draw/handler/Draw.Feature.js',
+                'lib/leaflet/draw/handler/Draw.SimpleShape.js',
+                'lib/leaflet/draw/handler/Draw.Polyline.js',
+                'lib/leaflet/draw/handler/Draw.Marker.js',
+                'lib/leaflet/draw/handler/Draw.Circle.js',
+                'lib/leaflet/draw/handler/Draw.CircleMarker.js',
+                'lib/leaflet/draw/handler/Draw.Polygon.js',
+                'lib/leaflet/draw/handler/Draw.Rectangle.js',
+                'lib/leaflet/edit/EditToolbar.js',
+                'lib/leaflet/edit/handler/EditToolbar.Edit.js',
+                'lib/leaflet/edit/handler/EditToolbar.Delete.js',
+                'lib/leaflet/Control.Draw.js',
+                'lib/leaflet/edit/handler/Edit.Poly.js',
+                'lib/leaflet/edit/handler/Edit.SimpleShape.js',
+                'lib/leaflet/edit/handler/Edit.Rectangle.js',
+                'lib/leaflet/edit/handler/Edit.Marker.js',
+                'lib/leaflet/edit/handler/Edit.CircleMarker.js',
+                'lib/leaflet/edit/handler/Edit.Circle.js',
+
                 'js/metadata/form.js',
             ),
             'activeModule'   => 'research',
