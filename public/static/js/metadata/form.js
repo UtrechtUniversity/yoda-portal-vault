@@ -507,23 +507,30 @@ function duplicateField(field, cloneType)
 
 function loadMap(map_id)
 {
-    var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    var osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-    var osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib });
-
     var map = L.map(map_id, {
         center: [48.760, 13.275],
         zoom: 4
     });
 
-    var drawnItems = L.featureGroup().addTo(map);
-
-    L.control.layers({
-        'osm': osm.addTo(map),
-        "google": L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
+    // Add OSM & Google maps layer control.
+    var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    var osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+    var osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib });
+    var baseLayers = {
+        'OpenStreetMap': osm.addTo(map),
+        "Google Maps": L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
             attribution: 'google'
         })
-    }, { 'drawlayer': drawnItems }, { position: 'topright', collapsed: false }).addTo(map);
+    };
+    var overlays = {};
+    var options = {
+        position: 'topright',
+        collapsed: false
+    };
+
+    var layerscontrol = L.control.layers(baseLayers, overlays, options).addTo(map);
+
+    var drawnItems = L.featureGroup().addTo(map);
 
     var drawControlFull = new L.Control.Draw({
         edit: {
@@ -582,17 +589,26 @@ function loadMap(map_id)
     });
 
     map.on(L.Draw.Event.DELETED, function (event) {
-        map.addControl(drawControlFull);
-        map.removeControl(drawControlEditOnly);
+        // Count rectangles after 'save'
+        var rectangleCount = 0;
+        drawnItems.eachLayer(function (layer) {
+            if (layer instanceof L.Rectangle) {
+                rectangleCount++;
+            }
+        });
 
-        var mapContainer = map.getContainer();
-        var inputKey = $(mapContainer).data('key');
+        if (rectangleCount == 0) {
+            map.addControl(drawControlFull);
+            map.removeControl(drawControlEditOnly);
 
-        $( "input[name='"+inputKey+"[northBoundLatitude]']" ).val('');
-        $( "input[name='"+inputKey+"[westBoundLongitude]']" ).val('');
-        $( "input[name='"+inputKey+"[southBoundLatitude]']" ).val('');
-        $( "input[name='"+inputKey+"[eastBoundLongitude]']" ).val('');
+            var mapContainer = map.getContainer();
+            var inputKey = $(mapContainer).data('key');
 
+            $( "input[name='"+inputKey+"[northBoundLatitude]']" ).val('');
+            $( "input[name='"+inputKey+"[westBoundLongitude]']" ).val('');
+            $( "input[name='"+inputKey+"[southBoundLatitude]']" ).val('');
+            $( "input[name='"+inputKey+"[eastBoundLongitude]']" ).val('');
+        }
     });
 
     map.on(L.Draw.Event.EDITED, function (event) {
