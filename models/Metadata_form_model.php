@@ -238,21 +238,11 @@ class Metadata_form_model extends CI_Model
         $xml = new DOMDocument("1.0", "UTF-8");
         $xml->formatOutput = true;
 
-//        echo '<pre>';
-//        print_r($allFormMetadata);
-//        echo '</pre>';
-//        exit;
-
         $xml_metadata = $xml->createElement("metadata");
 
         // Step through all fields
         // $this->formMainFields is filled in loadFormElements
         foreach($this->formMainFields  as $mainField=>$mainFieldData) { //formMainFields
-
-//            echo '<hr>';
-//            echo '<h1>' . $mainField . '</h1>';
-//            print_r($mainFieldData);
-//            echo '<hr>';
 
             $isSubPropertyStructure = false;
             if (!$this->_isCompoundElement($mainFieldData) AND $this->_isSubpropertyStructure($mainFieldData)) {
@@ -271,14 +261,10 @@ class Metadata_form_model extends CI_Model
             if (isset($mainFieldData['Properties'])) {
                 $Properties = $mainFieldData['Properties'];
 
-//                echo '<pre>';
-//                print_r($Properties);
-//                echo '</pre>';
-
                 foreach ($Properties as $pkey => $pval) { // For this moment think of only one compound present in subproperty-struct
                     $tempArray = array();
-                    foreach ($pval as $itemName => $itemVal) {
-                        if (substr($itemName, 0, 5) == '@attr') {
+                    foreach ($pval as $itemName => $itemVal) {  //
+                        if (substr($itemName, 0, 5) == '@attr' and isset($itemVal['class']) AND $itemVal['class']=='compound') {
                             $isCompoundInStruct = true;
                         } elseif ($isCompoundInStruct) {
                             $tempArray[] = $itemName;
@@ -298,17 +284,7 @@ class Metadata_form_model extends CI_Model
                 $topLevelData = $elementData;
             }
 
-//            if ($mainField == 'geoLocation') {
-//                echo '<h1>' . $mainField . '</h1>';
-//                echo '<pre>';
-//                //print_r($mainFieldData);
-//                print_r($topLevelData);
-//                echo '</pre>';
-//                echo '<hr>';
-//            }
-//
 
-        //    echo '<br>Element name: ' . $mainField;
             foreach ($topLevelData as $key => $val) { // per $val => entire structure to be added to $elementName
                 $temp = array();
                 if (!(is_array($val) AND is_numeric(key($val)))) {
@@ -319,8 +295,10 @@ class Metadata_form_model extends CI_Model
                 }
 
                 foreach ($temp as $elementInfo) { // step through each instance of each element
+
                     // Test for and remove fully empty structures as they intervene with saving the xml structure
                     if ($isSubPropertyStructure AND $arEmptyCompoundTestNames) { // can we test compound values in the subproperty-struct?
+
                         foreach ($arEmptyCompoundTestNames as $compoundKeyName => $compoundFieldNames) { // shoould be either 0 or 1 loop
 
                             $isEnumerated = is_numeric(key($elementInfo['Properties'][$compoundKeyName]));
@@ -368,7 +346,6 @@ class Metadata_form_model extends CI_Model
                 }
             }
         }
-//        exit;
 
         $xml->appendChild($xml_metadata);
 
@@ -493,11 +470,18 @@ class Metadata_form_model extends CI_Model
     {
         $allFormMetadata = $this->CI->input->post();
 
+//        echo '<pre>';
+//        print_r($allFormMetadata);
+//        echo '</pre>';
+
+
         if (isset($allFormMetadata['vault_submission'])) { // clean up: this is extra input in the posted data that should not be handled as being metadata
             unset($allFormMetadata['vault_submission']);
         }
 
         $xmlString = $this->_metadataToXmlString($allFormMetadata, $rodsaccount, $config);
+
+//        exit;
 
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
@@ -838,11 +822,27 @@ class Metadata_form_model extends CI_Model
                                 $multiPostFix = '[]'; // Create array as variable can have multiple values, hier mag [] - volgorde is niet belangrijk
                             }
 
+                            $geoBoxCounter = 0;
                             foreach ($frontendValue as $fek => $fev) {
+
+                                if ($this->_isGeoLocation($propertyElement)) {
+                                 //   echo '<pre>';
+                                 //       print_r($propertyElement);
+                                 //   echo '</pre>';
+                                    $elementKey = $key . $keyCounterInfix . '[' . $id . '][' . $propertyKey . ']';
+                                    if ($multipleAllowed) {
+                                        $elementKey .= '[' . $geoBoxCounter. ']';
+                                    }
+                                    $geoBoxCounter++;
+                                }
+                                else {
+                                    $elementKey = $key . $keyCounterInfix . '[' . $id . '][' . $propertyKey . ']' . $multiPostFix;
+                                }
+
                                 $this->presentationElements[$groupName][] =
                                     $this->_addPresentationElement(
                                         $config, $xsdElements[$subKey], $propertyElement,
-                                        $key . $keyCounterInfix . '[' . $id . '][' . $propertyKey . ']' . $multiPostFix,
+                                        $elementKey, //$key . $keyCounterInfix . '[' . $id . '][' . $propertyKey . ']' . $multiPostFix,
                                         $fev, $multipleAllowed, $subPropArray);
                             }
                         }
@@ -887,8 +887,6 @@ class Metadata_form_model extends CI_Model
                                        $formData, $xsdElements, $elementOffsetFrontEnd = '', $subPropArray = array()) // presentation elements will be extended -> make it class variable
     {
         // A combined element from 2017/10/25 on has a title & help text
-
-
         if (isset($xsdElements[$key])) {
 
             // Extend the passed array with compound specific data for the frontend
@@ -967,20 +965,67 @@ class Metadata_form_model extends CI_Model
                             // => dus hier lopen if so en keyname for front end aanpassen
                             $subCombiMultipleAllowed = $this->_isElementMultipleAllowed($xsdElements[$subKey]);
 
-//                            $allSubCombiValues = array();
-//                            $allSubCombiValues[] = $arValues[$subKey];
                             unset($subPropArrayExtended['compoundFieldPosition']);
                             $subPropArrayExtended['compoundFieldPosition'] = $fieldPosition;
 
-                            if (isset($xsdElements[$subKey])) {
-                                $this->presentationElements[$groupName][] =
-                                    $this->_addPresentationElement($config, $xsdElements[$subKey], $em,
-                                        $combiElementName . '[' . $id . ']' . ($subCombiMultipleAllowed ? '[]' : ''),
-                                        $arValues[$id], false, $subPropArrayExtended);
-                                $subCombiCounter++;
+                            if ($this->_isGeoLocation($em)) {
+                                $locationAttributeArray = array();
 
-                                $fieldPosition++;
+                                // Special case for geolocation - always should have keys westBoundLongitude, eastBoundLongitude, southBoundLatitude, northBoundLatitude
+                                if (!is_numeric(key($arValues[$id]))) { // each index contains a one dimensional array with lat/longitude as key
+                                    $locationAttributeArray[] = $arValues[$id]; //$formData[$key];
+                                } else {
+                                    $locationAttributeArray = $arValues[$id]; //$formData[$key];
+                                }
+                                //$multiPostFix = ''; // Addition to element name when mupliple instances can occur
+                                if (!$subCombiMultipleAllowed) {
+                                    if (count($locationAttributeArray) > 1) {
+                                        return false; // break it off as this does not comply with xml
+                                    }
+                                } else {
+                                    //    $multiPostFix = '[]'; // Create array as variable can have multiple values, hier mag [] - volgorde is niet belangrijk
+                                }
+
+                                $boxCounter = 0; // For correct processing of posted form data add identifier for location information PER BOX
+
+                                foreach ($locationAttributeArray as $keyValue) {
+                                    // each keyValue contains an array with keys: westBoundLongitude, eastBoundLongitude, southBoundLatitude, northBoundLatitude
+                                    // And its actual value
+                                    // The geoLocationBox view file will take care of handling each seperate box
+
+                                    $geoKey = $combiElementName . '[' . $id . ']' . ($subCombiMultipleAllowed ? '[' . $boxCounter . ']' : '');
+                                    $this->presentationElements[$groupName][] =
+                                        $this->_addPresentationElement($config,
+                                            $xsdElements[$subKey],
+                                            $em,
+                                            $geoKey,
+                                            $keyValue,
+                                            false,
+                                            $subPropArrayExtended
+                                            );
+
+                                    $boxCounter++;
+
+                                    $fieldPosition++; //klopt deze hier omdat er N elementen inputs worden toegevoegd HIDDEN
+                                }
+                            } else {
+//                            $allSubCombiValues = array();
+//                            $allSubCombiValues[] = $arValues[$subKey];
+                                if (isset($xsdElements[$subKey])) {
+                                    $this->presentationElements[$groupName][] =
+                                        $this->_addPresentationElement($config,
+                                            $xsdElements[$subKey],
+                                            $em,
+                                            $combiElementName . '[' . $id . ']' . ($subCombiMultipleAllowed ? '[]' : ''),
+                                            $arValues[$id],
+                                            false,
+                                            $subPropArrayExtended);
+                                    $subCombiCounter++;
+
+                                    $fieldPosition++;
+                                }
                             }
+
                         }
                     }
                     // 3) Add stop tag derived from the start tag
