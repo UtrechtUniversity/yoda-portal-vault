@@ -626,3 +626,48 @@ function loadMap(map_id)
 
     return map;
 }
+
+function loadReadOnlyMap(map_id)
+{
+    var map = L.map(map_id, {
+        center: [48.760, 13.275],
+        zoom: 4
+    });
+
+    // Add OSM & Google maps layer control.
+    var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    var osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+    var osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib });
+    var baseLayers = {
+        'OpenStreetMap': osm.addTo(map),
+        "Google Maps": L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
+            attribution: 'google'
+        })
+    };
+    var overlays = {};
+    var options = {
+        position: 'topright',
+        collapsed: false
+    };
+
+    var layerscontrol = L.control.layers(baseLayers, overlays, options).addTo(map);
+
+    var drawControlEditOnly = new L.Control.Draw({
+        draw: false
+    });
+
+    var mapContainer = map.getContainer();
+    var inputKey = $(mapContainer).data('key');
+
+    // define rectangle geographical bounds
+    var bounds = [
+        [$( "input[name='"+inputKey+"[northBoundLatitude]']" ).val(), $( "input[name='"+inputKey+"[westBoundLongitude]']" ).val()],
+        [$( "input[name='"+inputKey+"[southBoundLatitude]']" ).val(),  $( "input[name='"+inputKey+"[eastBoundLongitude]']" ).val()]
+    ];
+    // create an orange rectangle
+    var layer = L.rectangle(bounds).addTo(map);
+    drawnItems.addLayer(layer);
+    map.addControl(drawControlEditOnly);
+
+    return map;
+}
