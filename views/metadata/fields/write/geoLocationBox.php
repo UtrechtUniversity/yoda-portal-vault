@@ -29,7 +29,7 @@
             </script>
             <!-- Button trigger modal -->
             <button type="button" class="btn" data-toggle="modal" data-target="#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal">
-                <i class="fa fa-plus" aria-hidden="true"></i> Show map 3
+                <i class="fa fa-plus" aria-hidden="true"></i> Show map
             </button>
 
             <!-- Modal -->
@@ -125,7 +125,7 @@
                         </script>
                         <!-- Button trigger modal -->
                         <button type="button" class="btn" data-toggle="modal" data-target="#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal">
-                            <i class="fa fa-plus" aria-hidden="true"></i> Show map 1
+                            <i class="fa fa-plus" aria-hidden="true"></i> Show map
                         </button>
 
                         <!-- Modal -->
@@ -189,7 +189,7 @@
                 </script>
                 <!-- Button trigger modal -->
                 <button type="button" class="btn" data-toggle="modal" data-target="#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal">
-                    <i class="fa fa-plus" aria-hidden="true"></i> Show map 2
+                    <i class="fa fa-plus" aria-hidden="true"></i> Show map
                 </button>
 
                 <!-- Modal -->
@@ -204,6 +204,7 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
 
                     <input type="hidden"
