@@ -517,8 +517,11 @@ function loadMap(map_id)
     var osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
     var osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib });
     var baseLayers = {
-        'OpenStreetMap': osm.addTo(map),
-        "Google Maps": L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
+        "OpenStreetMap": osm.addTo(map),
+        "Google Maps": L.tileLayer('https://www.google.cn/maps/vt?lyrs=r@189&gl=cn&x={x}&y={y}&z={z}', {
+            attribution: 'google'
+        }),
+        "Google Maps Satellite": L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
             attribution: 'google'
         })
     };
@@ -566,6 +569,7 @@ function loadMap(map_id)
         var layer = L.rectangle(bounds).addTo(map);
         drawnItems.addLayer(layer);
         map.addControl(drawControlEditOnly);
+        map.fitBounds(bounds, {'padding': [150, 150]});
     } else {
         map.addControl(drawControlFull);
     }
@@ -638,11 +642,16 @@ function loadReadOnlyMap(map_id)
     var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     var osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
     var osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib });
+    //var googleLayer = new L.Google('ROADMAP');
     var baseLayers = {
-        'OpenStreetMap': osm.addTo(map),
-        "Google Maps": L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
+        "OpenStreetMap": osm.addTo(map),
+        "Google Maps": L.tileLayer('https://www.google.cn/maps/vt?lyrs=r@189&gl=cn&x={x}&y={y}&z={z}', {
+            attribution: 'google'
+        }),
+        "Google Maps Satellite": L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
             attribution: 'google'
         })
+        //"Google": googleLayer.addTo(map)
     };
     var overlays = {};
     var options = {
@@ -659,15 +668,18 @@ function loadReadOnlyMap(map_id)
     var mapContainer = map.getContainer();
     var inputKey = $(mapContainer).data('key');
 
-    // define rectangle geographical bounds
-    var bounds = [
-        [$( "input[name='"+inputKey+"[northBoundLatitude]']" ).val(), $( "input[name='"+inputKey+"[westBoundLongitude]']" ).val()],
-        [$( "input[name='"+inputKey+"[southBoundLatitude]']" ).val(),  $( "input[name='"+inputKey+"[eastBoundLongitude]']" ).val()]
-    ];
-    // create an orange rectangle
-    var layer = L.rectangle(bounds).addTo(map);
-    drawnItems.addLayer(layer);
-    map.addControl(drawControlEditOnly);
+    var data = $( "input[name='"+inputKey+"[northBoundLatitude]']" );
+    if (data.val() != '') {
+        // define rectangle geographical bounds
+        var bounds = [
+            [$("input[name='" + inputKey + "[northBoundLatitude]']").val(), $("input[name='" + inputKey + "[westBoundLongitude]']").val()],
+            [$("input[name='" + inputKey + "[southBoundLatitude]']").val(), $("input[name='" + inputKey + "[eastBoundLongitude]']").val()]
+        ];
+        // create an orange rectangle
+        var layer = L.rectangle(bounds).addTo(map);
+        map.addControl(drawControlEditOnly);
+        map.fitBounds(bounds, {'padding': [150, 150]});
+    }
 
     return map;
 }
