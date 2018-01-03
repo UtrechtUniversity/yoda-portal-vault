@@ -518,7 +518,7 @@ function loadMap(map_id)
     var osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib });
     var baseLayers = {
         "OpenStreetMap": osm.addTo(map),
-        "Google Maps": L.tileLayer('https://www.google.cn/maps/vt?lyrs=r@189&gl=cn&x={x}&y={y}&z={z}', {
+        "Google Maps": L.tileLayer('https://www.google.cn/maps/vt?lyrs=r@189&gl=cn&x={x}&y={y}&z={z}&hl=en', {
             attribution: 'google'
         }),
         "Google Maps Satellite": L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
@@ -645,7 +645,7 @@ function loadReadOnlyMap(map_id)
     //var googleLayer = new L.Google('ROADMAP');
     var baseLayers = {
         "OpenStreetMap": osm.addTo(map),
-        "Google Maps": L.tileLayer('https://www.google.cn/maps/vt?lyrs=r@189&gl=cn&x={x}&y={y}&z={z}', {
+        "Google Maps": L.tileLayer('https://www.google.cn/maps/vt?lyrs=r@189&gl=cn&x={x}&y={y}&z={z}&hl=en', {
             attribution: 'google'
         }),
         "Google Maps Satellite": L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
