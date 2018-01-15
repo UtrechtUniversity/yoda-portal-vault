@@ -200,6 +200,22 @@ $(function () {
             $(this).parents('.form-group').next().toggle();
         }
     });
+
+    // Geo location
+    // modal btn
+    $(document).on('click', ".geo-location-modal-btn", function () {
+        $(this).next(".geo-location-modal").modal('show');
+    });
+
+    //modal
+    $(document).on('show.bs.modal','.geo-location-modal', function () {
+        // Get map (HTML)element in modal.
+        var mapHtmlElement = $(this).find('.modal-dialog .modal-content .modal-body .geo-location-map').get(0);
+        setTimeout(function() {
+            var map = loadMap(mapHtmlElement);
+            map.invalidateSize();
+        }, 10, mapHtmlElement);
+    });
 });
 
 function validateNumber(event) {
@@ -226,12 +242,38 @@ function duplicateField(field, cloneType)
 
     var newFieldGroup = field.clone();
 
-
     var newField = newFieldGroup.find('.form-control');
     newField.val('');
-    newFieldGroup.find('button').bind( "click", function() {
+
+    if (field.hasClass('geo-location')) {
+        // multiple (hidden) fields for geo location.
+        var fields = newFieldGroup.find('input[type=hidden]');
+        fields.val('');
+
+        // find current array key structure from the name attr.
+        var name = fields.eq(0).attr('name');
+        var nameParts = name.match(/\[(.*?)\]/g);
+        var structureId = nameParts[0].slice(1, -1);
+        console.log(structureId);
+
+        // Find new structure id
+        for (i = structureId; i < 1000; i++) {
+            var tmpName = name.replace('[' + structureId + ']', '[' + i + ']');
+            if ($("input[name='" + tmpName + "']").length == 0) {
+                newStructureId = i;
+                break;
+            }
+        }
+        $.each(fields, function() {
+            var name = $(this).attr('name');
+            $(this).attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']'));
+        });
+    }
+
+    newFieldGroup.find('button.clone-btn').bind( "click", function() {
         duplicateField(newFieldGroup, cloneType);
     });
+
     newFieldGroup.find('[data-toggle="tooltip"]').tooltip();
 
     if (newField.hasClass('numeric-field')) {
@@ -505,9 +547,9 @@ function duplicateField(field, cloneType)
     disableEnterKeyForInputs();
 }
 
-function loadMap(map_id)
+function loadMap(map_element)
 {
-    var map = L.map(map_id, {
+    var map = L.map(map_element, {
         center: [48.760, 13.275],
         zoom: 4
     });
@@ -556,14 +598,14 @@ function loadMap(map_id)
     });
 
     var mapContainer = map.getContainer();
-    var inputKey = $(mapContainer).data('key');
+    var inputs = $(mapContainer).closest('.input-group').find('input[type=hidden]');
+    console.log($(inputs));
 
-    var data = $( "input[name='"+inputKey+"[northBoundLatitude]']" );
-    if (data.val() != '') {
+    if ($(inputs).eq(0).val() != '') {
         // define rectangle geographical bounds
         var bounds = [
-            [$( "input[name='"+inputKey+"[northBoundLatitude]']" ).val(), $( "input[name='"+inputKey+"[westBoundLongitude]']" ).val()],
-            [$( "input[name='"+inputKey+"[southBoundLatitude]']" ).val(),  $( "input[name='"+inputKey+"[eastBoundLongitude]']" ).val()]
+            [$(inputs).eq(3).val(), $(inputs).eq(0).val()],
+            [$(inputs).eq(2).val(), $(inputs).eq(1).val()]
         ];
         // create an orange rectangle
         var layer = L.rectangle(bounds).addTo(map);
@@ -584,12 +626,12 @@ function loadMap(map_id)
         map.addControl(drawControlEditOnly);
 
         var mapContainer = map.getContainer();
-        var inputKey = $(mapContainer).data('key');
+        var inputs = $(mapContainer).closest('.input-group').find('input[type=hidden]');
 
-        $( "input[name='"+inputKey+"[northBoundLatitude]']" ).val(layer.getLatLngs()[0][2].lat);
-        $( "input[name='"+inputKey+"[westBoundLongitude]']" ).val(layer.getLatLngs()[0][2].lng);
-        $( "input[name='"+inputKey+"[southBoundLatitude]']" ).val(layer.getLatLngs()[0][0].lat);
-        $( "input[name='"+inputKey+"[eastBoundLongitude]']" ).val(layer.getLatLngs()[0][0].lng);
+        $(inputs).eq(3).val(layer.getLatLngs()[0][2].lat); //north
+        $(inputs).eq(0).val(layer.getLatLngs()[0][2].lng); //west
+        $(inputs).eq(2).val(layer.getLatLngs()[0][0].lat); //south
+        $(inputs).eq(1).val(layer.getLatLngs()[0][0].lng); //east
     });
 
     map.on(L.Draw.Event.DELETED, function (event) {
@@ -606,12 +648,12 @@ function loadMap(map_id)
             map.removeControl(drawControlEditOnly);
 
             var mapContainer = map.getContainer();
-            var inputKey = $(mapContainer).data('key');
+            var inputs = $(mapContainer).closest('.input-group').find('input[type=hidden]');
 
-            $( "input[name='"+inputKey+"[northBoundLatitude]']" ).val('');
-            $( "input[name='"+inputKey+"[westBoundLongitude]']" ).val('');
-            $( "input[name='"+inputKey+"[southBoundLatitude]']" ).val('');
-            $( "input[name='"+inputKey+"[eastBoundLongitude]']" ).val('');
+            $(inputs).eq(3).val(''); //north
+            $(inputs).eq(0).val(''); //west
+            $(inputs).eq(2).val(''); //south
+            $(inputs).eq(1).val(''); //east
         }
     });
 
@@ -619,12 +661,12 @@ function loadMap(map_id)
         var layers = event.layers;
         layers.eachLayer(function (layer) {
             var mapContainer = map.getContainer();
-            var inputKey = $(mapContainer).data('key');
+            var inputs = $(mapContainer).closest('.input-group').find('input[type=hidden]');
 
-            $( "input[name='"+inputKey+"[northBoundLatitude]']" ).val(layer.getLatLngs()[0][2].lat);
-            $( "input[name='"+inputKey+"[westBoundLongitude]']" ).val(layer.getLatLngs()[0][2].lng);
-            $( "input[name='"+inputKey+"[southBoundLatitude]']" ).val(layer.getLatLngs()[0][0].lat);
-            $( "input[name='"+inputKey+"[eastBoundLongitude]']" ).val(layer.getLatLngs()[0][0].lng);
+            $(inputs).eq(3).val(layer.getLatLngs()[0][2].lat); //north
+            $(inputs).eq(0).val(layer.getLatLngs()[0][2].lng); //west
+            $(inputs).eq(2).val(layer.getLatLngs()[0][0].lat); //south
+            $(inputs).eq(1).val(layer.getLatLngs()[0][0].lng); //east
         });
     });
 

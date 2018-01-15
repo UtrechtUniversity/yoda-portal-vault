@@ -14,30 +14,17 @@
     <?php if ( $e->compoundMultipleAllowed AND   $e->compoundFieldPosition ==($e->compoundFieldCount-1) ) { // present button only when compound is clonable and at end of element range ?>
         <div class="input-group">
     <?php } ?>
-            <script>
-                $(function () {
-                    $('#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal').on('show.bs.modal', function (e) {
-
-                        var mapId = $(this).data('map');
-                        setTimeout(function() {
-                            var map = loadMap(mapId);
-                            map.invalidateSize();
-                        }, 10, mapId);
-
-                    });
-                });
-            </script>
             <!-- Button trigger modal -->
-            <button type="button" class="btn" data-toggle="modal" data-target="#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal">
+            <button type="button" class="btn geo-location-modal-btn" data-toggle="modal">
                 <i class="fa fa-plus" aria-hidden="true"></i> Show map
             </button>
 
             <!-- Modal -->
-            <div class="modal" id="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-map="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>">
+            <div class="modal geo-location-modal" tabindex="-1" role="dialog">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
                         <div class="modal-body">
-                            <div id="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>" data-key="<?php echo $e->key ?>" style="width: 860px; height: 500px;"></div>
+                            <div class="geo-location-map" data-key="<?php echo $e->key ?>" style="width: 860px; height: 500px;"></div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -65,7 +52,7 @@
             <?php if ( $e->compoundMultipleAllowed AND   $e->compoundFieldPosition ==($e->compoundFieldCount-1) ) { // present button only when compound is clonable and at end of element range ?>
 
             <span class="input-group-btn">
-                <button class="btn btn-default duplicate-field combined-plus"
+                <button class="btn btn-default clone-btn duplicate-field combined-plus"
                         data-clone="combined"  type="button">
                     <i class="fa fa-plus" aria-hidden="true"></i>
                 </button>
@@ -77,7 +64,7 @@
 
     </div>
 <?php } else { ?>
-<div class="form-group" xmlns="http://www.w3.org/1999/html">
+<div class="form-group geo-location" xmlns="http://www.w3.org/1999/html">
     <label class="col-sm-2 control-label">
         <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
             <i data-structure-id="<?php echo $e->subPropertiesStructID; ?>" class="glyphicon glyphicon-chevron-down subproperties-toggle" data-toggle="tooltip" title="Click to open or close view on subproperties" data-html="true"></i>&nbsp;
@@ -110,30 +97,17 @@
             <div class="col-sm-12">
                 <?php if ($e->multipleAllowed()) { ?>
                     <div class="input-group">
-                        <script>
-                            $(function () {
-                                $('#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal').on('show.bs.modal', function (e) {
-
-                                    var mapId = $(this).data('map');
-                                    setTimeout(function() {
-                                        var map = loadMap(mapId);
-                                        map.invalidateSize();
-                                    }, 10, mapId);
-
-                                });
-                            });
-                        </script>
                         <!-- Button trigger modal -->
-                        <button type="button" class="btn" data-toggle="modal" data-target="#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal">
+                        <button type="button" class="btn geo-location-modal-btn" data-toggle="modal">
                             <i class="fa fa-plus" aria-hidden="true"></i> Show map
                         </button>
 
                         <!-- Modal -->
-                        <div class="modal" id="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-map="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>">
+                        <div class="modal geo-location-modal" tabindex="-1" role="dialog">
                             <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     <div class="modal-body">
-                                        <div id="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>" data-key="<?php echo $e->key ?>" style="width: 860px; height: 500px;"></div>
+                                        <div class="geo-location-map" data-key="<?php echo $e->key ?>" ></div>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -161,7 +135,7 @@
 
                         <span class="input-group-btn">
                             <button
-                                    class="btn btn-default duplicate-field"
+                                    class="btn btn-default clone-btn duplicate-field"
                                 <?php if ($e->subPropertiesRole=='subPropertyStartStructure') { ?>
                                     data-clone="main"
                                 <?php } else if ($e->subPropertiesRole=='subProperty') { ?>
@@ -173,31 +147,17 @@
                         </span>
                     </div>
                 <?php } else { ?>
-
-                <script>
-                    $(function () {
-                        $('#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal').on('show.bs.modal', function (e) {
-
-                            var mapId = $(this).data('map');
-                            setTimeout(function() {
-                                var map = loadMap(mapId);
-                                map.invalidateSize();
-                            }, 10, mapId);
-
-                        });
-                    });
-                </script>
                 <!-- Button trigger modal -->
-                <button type="button" class="btn" data-toggle="modal" data-target="#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal">
+                <button type="button" class="btn geo-location-modal-btn" data-toggle="modal">
                     <i class="fa fa-plus" aria-hidden="true"></i> Show map
                 </button>
 
                 <!-- Modal -->
-                <div class="modal" id="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-map="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>">
+                <div class="modal geo-location-modal" tabindex="-1" role="dialog">
                     <div class="modal-dialog modal-lg" role="document">
                         <div class="modal-content">
                             <div class="modal-body">
-                                <div id="<?php echo str_replace(array('[', ']'), array(), $e->key); ?>" data-key="<?php echo $e->key ?>" style="width: 860px; height: 500px;"></div>
+                                <div class="geo-location-map" data-key="<?php echo $e->key ?>"></div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
