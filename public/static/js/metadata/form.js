@@ -1,3 +1,5 @@
+var currentLeafletMap = null; // https://stackoverflow.com/questions/25627666/how-can-i-get-the-map-object-for-a-leaflet-map-from-the-id-of-the-div-element
+
 var arrayCounterBackEnd = 1000; // is incremented each time used thus securing uniqueness and consistent passing to back end
 
 function encodeToXML(s)
@@ -213,8 +215,13 @@ $(function () {
         var mapHtmlElement = $(this).find('.modal-dialog .modal-content .modal-body .geo-location-map').get(0);
         setTimeout(function() {
             var map = loadMap(mapHtmlElement);
+            currentLeafletMap = map;
             map.invalidateSize();
         }, 10, mapHtmlElement);
+    });
+
+    $(document).on('hide.bs.modal','.geo-location-modal', function () {
+        currentLeafletMap.remove();
     });
 });
 
@@ -240,6 +247,15 @@ function duplicateField(field, cloneType)
         $(field).find('select').select2('destroy');
     }
 
+    if (field.hasClass('geo-location')) {
+        /*
+        var mapHtmlElement = $(field).find('.geo-location-map').get(0);
+        var map = L.map(mapHtmlElement);
+        map.off();
+        map.remove();
+        */
+    }
+
     var newFieldGroup = field.clone();
 
     var newField = newFieldGroup.find('.form-control');
@@ -254,7 +270,6 @@ function duplicateField(field, cloneType)
         var name = fields.eq(0).attr('name');
         var nameParts = name.match(/\[(.*?)\]/g);
         var structureId = nameParts[0].slice(1, -1);
-        console.log(structureId);
 
         // Find new structure id
         for (i = structureId; i < 1000; i++) {
@@ -599,7 +614,6 @@ function loadMap(map_element)
 
     var mapContainer = map.getContainer();
     var inputs = $(mapContainer).closest('.input-group').find('input[type=hidden]');
-    console.log($(inputs));
 
     if ($(inputs).eq(0).val() != '') {
         // define rectangle geographical bounds
