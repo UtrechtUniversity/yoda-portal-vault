@@ -70,6 +70,7 @@ class Browse extends MY_Controller
                 'lib/datatables/js/dataTables.bootstrap.min.js',
                 'js/research.js',
                 'js/search.js',
+                'js/dlgSelectCollection.js'
             ),
             'activeModule'   => 'research',
             'searchHtml' => $searchHtml,
@@ -318,6 +319,150 @@ class Browse extends MY_Controller
 
         return $allowed;
     }
+
+    /**
+     *  Data functionality for selection dialog
+     *  Main difference is that the row class is no longer 'browse' but 'browse-for-selection'
+     *  This to evade collisions of classes when mutliple browsers are on one page
+     *
+     *  Todo: - filter vault when required
+     *
+     * @param int $restrict
+     * @param string $interveneOnMetadataKeys
+     *
+     *
+     *
+     * $restrict offers the possibilty to distinguish collecting folders and / or files
+     *
+     * $interveneOnMetadataKeys is a string holding keys of metadata that must NOT be present. If present in a row, this data is excluded from presentation
+     *
+     */
+    public function selectData( $restrict = 0, $interveneOnMetadataKeys = '')
+    {
+        //return -1; exit;
+
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+
+        $dirPath = $this->input->get('dir');
+        $start = $this->input->get('start');
+        $length = $this->input->get('length');
+        $order = $this->input->get('order');
+        $orderDir = $order[0]['dir'];
+        $orderColumn = $order[0]['column'];
+        $orderColumns = array(
+            0 => 'COLL_NAME',
+            1 => 'COLL_MODIFY_TIME'
+        );
+        $draw = $this->input->get('draw');
+        $itemsPerPage = $this->config->item('browser-items-per-page');
+        $totalItems = 0;
+
+        $path = $pathStart;
+        if (!empty($dirPath)) {
+            $path .= $dirPath;
+        }
+        $rows = array();
+
+        $interveningKeys = explode(',', $interveneOnMetadataKeys);
+
+        // Generic error handling intialisation
+        $status = 'Success';
+        $statusInformation = '';
+
+        $totalItemsLeftInView = $length;
+
+        $totalItems = 0;
+
+        // Collections
+        if ($restrict=='collections' OR !$restrict) {
+            // Get the actual total for the Collections
+            $testCollections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, 0);
+            $status = $testCollections['status'];
+            if ($status=='Success') {
+                $totalItems = $testCollections['summary']['total'];
+
+                $icon = 'fa-folder-o';
+                $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+
+                $status = $collections['status'];
+                $statusInfo = $collections['statusInfo'];
+
+                if ($status == 'Success') {
+                    // @todo: does not always produce a total - more specifically when there is no resulting set of data!
+                    //$totalItems += $collections['summary']['total'];
+                    if ($collections['summary']['returned'] > 0) {
+                        foreach ($collections['rows'] as $row) {
+                            if ($this->_allowRowWhenBrowsing($row, $interveningKeys)) {
+                                $filePath = str_replace($pathStart, '', $row['path']);
+                                if (!strpos(urlencode($filePath),'2Fvault')==1) { // remove vault folders as these are not allowed as destination. To be made optional
+                                    $rows[] = array(
+                                        '<span class="browse-select" data-path="' . urlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                        date('Y-m-d H:i:s', $row['modify_time'])
+                                    );
+
+                                    $totalItemsLeftInView--;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $correctedStartForObjects = 0;
+        if ($start>$totalItems) {
+            // add the shift following the final collection page holding both Collections and Objects.
+            // These objects 'lost' on that combination page must be corrected for regarding the starting point in the dataobject list
+            $correctedStartForObjects = $start - $totalItems;
+        }
+
+        // Objects
+        if( $status=='Success' AND ($restrict=='objects' OR !$restrict)) {
+            // Get the actual total for the dataObjects
+            $testObjects = $this->filesystem->browse($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, 0);
+            $status = $testObjects['status'];
+
+            if ($status=='Success') {
+                $totalItems += $testObjects['summary']['total'];
+
+                // Actual selecting of wanted data for the view
+                $objects = $this->filesystem->browse($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $correctedStartForObjects);
+
+                $status = $objects['status'];
+                $statusInfo = $objects['statusInfo'];
+
+                if ($status == 'Success') {
+//                $totalItems += $objects['summary']['total']; // add the shift that is lost in the total count due to 1 page with both Collections and Objects
+
+                    if ($objects['summary']['returned'] > 0) {
+                        foreach ($objects['rows'] as $row) {
+                            if ($this->_allowRowWhenBrowsing($row, $interveningKeys) AND $totalItemsLeftInView) {
+                                $filePath = str_replace($pathStart, '', $row['path']);
+                                $rows[] = array(
+                                    '<span data-path="' . urlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                    date('Y-m-d H:i:s', $row['modify_time'])
+                                );
+                                $totalItemsLeftInView--;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Situational error handling within generic context
+        if ($status != 'Success') {
+            $totalItems = 0;
+            $rows = array();
+        }
+
+        $output = array('status' => $status, 'statusInfo' => $statusInfo,
+            'draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
+
+        echo json_encode($output);
+    }
+
 
     public function change_folder_status()
     {
