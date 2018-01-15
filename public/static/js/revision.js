@@ -150,7 +150,7 @@ function restoreRevision(overwriteFlag)
                 $('.mode-dlg-exists').addClass('hide');
             }
             else if (data.status == 'PROMPT_Overwrite') {
-		$('#alertBox').addClass('hide');
+        		$('#alertBox').addClass('hide');
                 $('.alert-panel-overwrite').removeClass('hide');
                 $('.cover').removeClass('hide');
                 $('.revision-restore-dialog').addClass('hide');

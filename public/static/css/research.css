@@ -3,7 +3,7 @@
     margin-top:10px;
 }
 
-.browse, .browse-search {
+.browse, .browse-search, .browse-select {
     cursor: pointer;
 }
 
