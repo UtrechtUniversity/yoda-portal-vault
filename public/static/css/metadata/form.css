@@ -114,3 +114,8 @@ button[data-clone*="main"] {
 .combined-main-label {
     padding-top: 30px!important;
 }
+
+.geo-location-map {
+    width: 860px;
+    height: 500px;
+}

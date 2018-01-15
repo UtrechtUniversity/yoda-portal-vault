@@ -28,7 +28,7 @@
         <?php if ( $e->compoundMultipleAllowed AND   $e->compoundFieldPosition ==($e->compoundFieldCount-1) ) { // present button only when compound is clonable and at end of element range ?>
 
             <span class="input-group-btn">
-                <button class="btn btn-default duplicate-field combined-plus"
+                <button class="btn btn-default clone-btn duplicate-field combined-plus"
                         data-clone="combined"  type="button">
                     <i class="fa fa-plus" aria-hidden="true"></i>
                 </button>
@@ -84,7 +84,7 @@
                                value="<?php echo htmlentities($e->value); ?>">
                         <span class="input-group-btn">
                             <button
-                                    class="btn btn-default duplicate-field"
+                                    class="btn btn-default clone-btn duplicate-field"
                                 <?php if ($e->subPropertiesRole=='subPropertyStartStructure') { ?>
                                     data-clone="main"
                                 <?php } else if ($e->subPropertiesRole=='subProperty') { ?>
