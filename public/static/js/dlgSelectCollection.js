@@ -62,7 +62,7 @@ function copyVaultPackageToDynamic(urlEncodedOrigin, urlEncodedTarget)
                 // ErrorVaultCollectionDoesNotExist
                 // irods:
                 // PermissionDenied
-                dlgSelectAlertShow(data.status + ': ' + data.statusInfo);
+                dlgSelectAlertShow(data.statusInfo);
             }
 
         },
