@@ -18,7 +18,7 @@ class Data_Request_model extends CI_Model
             '*target' => $folderTarget);
 
         $this->CI->load->library('irodsrule');
-        $rule = $this->irodsrule->make('iiFORequestCopyVaultPackage', $inputParams, $outputParams);
+        $rule = $this->irodsrule->make('iiFrontRequestCopyVaultPackage', $inputParams, $outputParams);
 
         $result = $rule->execute();
 
