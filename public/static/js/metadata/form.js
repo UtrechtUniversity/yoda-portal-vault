@@ -125,11 +125,8 @@ $(function () {
         });
     });
     $('select').select2();
-    $('.flexdate').inputmask({
-        regex: "[0-9]{4}[-](0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])",
-        showMaskOnHover: false,
-        showMaskOnFocus: false,
-        placeholder: ''
+    $(".flexdate").focusout(function() {
+        validateDate($(this).val(), $(this));
     });
 
     // Delete all metadata btn
@@ -206,7 +203,8 @@ $(function () {
     // Geo location
     // modal btn
     $(document).on('click', ".geo-location-modal-btn", function () {
-        $(this).next(".geo-location-modal").modal('show');
+        console.log($(this).next(".geo-location-modal"));
+        $(this).nextAll(".geo-location-modal").modal('show');
     });
 
     //modal
@@ -236,6 +234,40 @@ function validateNumber(event) {
     }
 }
 
+function validateDate(date, field)
+{
+    //https://stackoverflow.com/questions/36009414/regex-to-validate-date-yyyy-mm-dd-while-typing-on-keyup/36009595
+    var state = 'inValid';
+    var regex = /^\d{0,4}$|^\d{4}-0?$|^\d{4}-(?:0?[1-9]|1[012])(?:-(?:0?[1-9]?|[12]\d|3[01])?)?$/;
+    var isValid = regex.test(date);
+
+    if (isValid) {
+        state = 'valid';
+        // Full date (yyyy-mm-dd)
+        if (date.length == 10) {
+            var parts = date.split('-');
+            var day = parts[2];
+            var month = (parts[1] - 1);
+            var year = parts[0];
+
+            var dateObject = new Date(year, month, day);
+            var result = dateObject.getDate() == day && dateObject.getMonth() == month && dateObject.getFullYear() == year;
+
+            if (!result) {
+                state = 'inValid';
+            }
+        }
+    }
+
+    // Date is not valid
+    if (state == 'inValid') {
+        $(field).val('');
+        return false;
+    }
+
+    return true;
+}
+
 function duplicateField(field, cloneType)
 {
     // Dublicate one single field.
@@ -247,43 +279,10 @@ function duplicateField(field, cloneType)
         $(field).find('select').select2('destroy');
     }
 
-    if (field.hasClass('geo-location')) {
-        /*
-        var mapHtmlElement = $(field).find('.geo-location-map').get(0);
-        var map = L.map(mapHtmlElement);
-        map.off();
-        map.remove();
-        */
-    }
-
     var newFieldGroup = field.clone();
 
     var newField = newFieldGroup.find('.form-control');
     newField.val('');
-
-    if (field.hasClass('geo-location')) {
-        // multiple (hidden) fields for geo location.
-        var fields = newFieldGroup.find('input[type=hidden]');
-        fields.val('');
-
-        // find current array key structure from the name attr.
-        var name = fields.eq(0).attr('name');
-        var nameParts = name.match(/\[(.*?)\]/g);
-        var structureId = nameParts[0].slice(1, -1);
-
-        // Find new structure id
-        for (i = structureId; i < 1000; i++) {
-            var tmpName = name.replace('[' + structureId + ']', '[' + i + ']');
-            if ($("input[name='" + tmpName + "']").length == 0) {
-                newStructureId = i;
-                break;
-            }
-        }
-        $.each(fields, function() {
-            var name = $(this).attr('name');
-            $(this).attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']'));
-        });
-    }
 
     newFieldGroup.find('button.clone-btn').bind( "click", function() {
         duplicateField(newFieldGroup, cloneType);
@@ -314,11 +313,8 @@ function duplicateField(field, cloneType)
     }
 
     if (newField.hasClass('flexdate')) {
-        $('.flexdate').inputmask({
-            regex: "[0-9]{4}[-](0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])",
-            showMaskOnHover: false,
-            showMaskOnFocus: false,
-            placeholder: ''
+        $(newField).focusout(function() {
+            validateDate($(this).val(), $(this));
         });
     }
 
@@ -327,6 +323,8 @@ function duplicateField(field, cloneType)
         newFieldGroup.find('select').select2();
         $(field).find('select').select2();
     }
+
+    console.log(cloneType);
 
     // Main property with properties, clone the whole set.
     if (cloneType == 'main') {
@@ -362,6 +360,33 @@ function duplicateField(field, cloneType)
             }
 
             groupFields.each(function () {
+                // Geo location
+                if ($(this).hasClass('geo-location')) {
+                    // multiple (hidden) fields for geo location.
+                    var fields = $(this).find('input[type=hidden]');
+                    fields.val('');
+                    console.log(fields);
+                    /*
+                    // find current array key structure from the name attr.
+                    var name = fields.eq(0).attr('name');
+                    var nameParts = name.match(/\[(.*?)\]/g);
+                    var structureId = nameParts[0].slice(1, -1);
+
+                    // Find new structure id
+                    for (i = structureId; i < 1000; i++) {
+                        var tmpName = name.replace('[' + structureId + ']', '[' + i + ']');
+                        if ($("input[name='" + tmpName + "']").length == 0) {
+                            newStructureId = i;
+                            break;
+                        }
+                    }
+                    $.each(fields, function () {
+                        var name = $(this).attr('name');
+                        $(this).attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']'));
+                    });
+                    */
+                }
+
                 // Destroy select2 before cloning.
                 var isSelect2 = $(this).hasClass('select2');
                 if (isSelect2) {
@@ -409,12 +434,11 @@ function duplicateField(field, cloneType)
                 }
 
                 if (newField.hasClass('flexdate')) {
-                    $('.flexdate').inputmask({
-                        regex: "[0-9]{4}[-](0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])",
-                        showMaskOnHover: false,
-                        showMaskOnFocus: false,
-                        placeholder: ''
-                    });
+                    if (newField.hasClass('flexdate')) {
+                        $(newField).focusout(function() {
+                            validateDate($(this).val(), $(this));
+                        });
+                    }
                 }
 
                 if (isSelect2) {
@@ -527,12 +551,11 @@ function duplicateField(field, cloneType)
                 }
 
                 if ($(this).hasClass('flexdate')) {
-                    $(this).inputmask({
-                        regex: "[0-9]{4}[-](0[1-9]|1[0-2])[-](0[1-9]|[1-2][0-9]|3[0-1])",
-                        showMaskOnHover: false,
-                        showMaskOnFocus: false,
-                        placeholder: ''
-                    });
+                    if ($(this).hasClass('flexdate')) {
+                        $(newField).focusout(function() {
+                            validateDate($(this).val(), $(this));
+                        });
+                    }
                 }
             }
 
@@ -555,6 +578,32 @@ function duplicateField(field, cloneType)
         $(field).after(newFieldGroup);
 
     } else {
+        if (field.hasClass('geo-location')) {
+            console.log(123);
+
+            // multiple (hidden) fields for geo location.
+            var fields = newFieldGroup.find('input[type=hidden]');
+            fields.val('');
+
+            // find current array key structure from the name attr.
+            var name = fields.eq(0).attr('name');
+            var nameParts = name.match(/\[(.*?)\]/g);
+            var structureId = nameParts[0].slice(1, -1);
+
+            // Find new structure id
+            for (i = structureId; i < 1000; i++) {
+                var tmpName = name.replace('[' + structureId + ']', '[' + i + ']');
+                if ($("input[name='" + tmpName + "']").length == 0) {
+                    newStructureId = i;
+                    break;
+                }
+            }
+            $.each(fields, function() {
+                var name = $(this).attr('name');
+                $(this).attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']'));
+            });
+        }
+
         // Insert field group
         $(field).after(newFieldGroup);
     }
@@ -641,6 +690,8 @@ function loadMap(map_element)
 
         var mapContainer = map.getContainer();
         var inputs = $(mapContainer).closest('.input-group').find('input[type=hidden]');
+        console.log($(mapContainer));
+        console.log($(mapContainer).prev('.modal'));
 
         $(inputs).eq(3).val(layer.getLatLngs()[0][2].lat); //north
         $(inputs).eq(0).val(layer.getLatLngs()[0][2].lng); //west
