@@ -235,7 +235,7 @@ RULE;
 
         $ruleBody = <<<'RULE'
 myRule {
-    iiCollectionDetails(*path, *result, *status, *statusInfo);
+    iiFrontCollectionDetails(*path, *result, *status, *statusInfo);
 }
 RULE;
         try {

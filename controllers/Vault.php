@@ -175,50 +175,6 @@ class Vault extends MY_Controller
         $fullTargetPath = $pathStart . $this->input->get('targetdir');
         $fullOrgPath= $pathStart  . $this->input->get('orgdir');
 
-        // Verifications -> 2b added to iRods rule
-        $collectionDetails = $this->filesystem->collectionDetails($rodsaccount, $fullOrgPath);
-        if ($collectionDetails['status']=='ErrorPathNotExists') {
-            $status = 'ErrorVaultCollectionDoesNotExist';
-            $statusInfo = 'The datapackage does not exist';
-
-            echo json_encode(array('status' => $status, 'statusInfo' => $statusInfo));
-            exit;
-        }
-
-            // Some synchronous testing before starting the ASYNCHRONOUS copying process
-        $collectionDetails = $this->filesystem->collectionDetails($rodsaccount, $fullTargetPath);
-        //print_r($collectionDetails);
-
-        if ($collectionDetails['result']['userType']=='reader') {
-            $status = 'ErrorTargetPermissions';
-            $statusInfo = 'You have insufficient permissions to copy the datapackage to this folder. Please select another folder';
-
-            echo json_encode(array('status' => $status, 'statusInfo' => $statusInfo));
-            exit;
-        }
-
-        if ($collectionDetails['result']['lockCount']!=0) {
-            $status = 'ErrorTargetLocked';
-            $statusInfo = 'The selected folder is locked. Please unlock this folder first.';
-
-            echo json_encode(array('status' => $status, 'statusInfo' => $statusInfo));
-            exit;
-        }
-
-        // Check existance of 2b created copy collection. It should not exist already
-        $parts = explode('/', $fullOrgPath);
-        $newCollectionNameFromOrg = $parts[count($parts)-1];
-
-        $collectionDetails = $this->filesystem->collectionDetails($rodsaccount, $fullTargetPath . '/' . $newCollectionNameFromOrg);
-        if ($collectionDetails['status']!='ErrorPathNotExists') {
-            $status = 'ErrorDataPackageAlreadyExists';
-            $statusInfo = 'This datapackage already exists in the selected folder. Please select another folder';
-
-            echo json_encode(array('status' => $status, 'statusInfo' => $statusInfo));
-            exit;
-        }
-
-        // All ok ... now initiate the asynchronous copying process
         $result = $this->Data_Request_model->copy_package_from_vault($fullOrgPath, $fullTargetPath);
 
         $status = $result['*status'];
