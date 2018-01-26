@@ -125,7 +125,7 @@ $(function () {
         });
     });
     $('select').select2();
-    $(".flexdate").focusout(function() {
+    $(".flexdate").keyup(function() {
         validateDate($(this).val(), $(this));
     });
 
@@ -261,10 +261,11 @@ function validateDate(date, field)
 
     // Date is not valid
     if (state == 'inValid') {
-        $(field).val('');
+        $(field).addClass('invalid');
         return false;
     }
 
+    $(field).removeClass('invalid');
     return true;
 }
 
@@ -313,7 +314,7 @@ function duplicateField(field, cloneType)
     }
 
     if (newField.hasClass('flexdate')) {
-        $(newField).focusout(function() {
+        $(newField).keyup(function() {
             validateDate($(this).val(), $(this));
         });
     }
@@ -435,7 +436,7 @@ function duplicateField(field, cloneType)
 
                 if (newField.hasClass('flexdate')) {
                     if (newField.hasClass('flexdate')) {
-                        $(newField).focusout(function() {
+                        $(newField).keyup(function() {
                             validateDate($(this).val(), $(this));
                         });
                     }
@@ -552,7 +553,7 @@ function duplicateField(field, cloneType)
 
                 if ($(this).hasClass('flexdate')) {
                     if ($(this).hasClass('flexdate')) {
-                        $(newField).focusout(function() {
+                        $(newField).keyup(function() {
                             validateDate($(this).val(), $(this));
                         });
                     }
