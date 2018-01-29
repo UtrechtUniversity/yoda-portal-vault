@@ -256,6 +256,8 @@ function validateDate(date, field)
             if (!result) {
                 state = 'inValid';
             }
+        } else if (date.length != 4 && date.length != 7) { // check if date is yyyy or yyyy-mm
+            state = 'inValid';
         }
     }
 
