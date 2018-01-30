@@ -693,13 +693,18 @@ function loadMap(map_element)
 
         var mapContainer = map.getContainer();
         var inputs = $(mapContainer).closest('.input-group').find('input[type=hidden]');
-        console.log($(mapContainer));
-        console.log($(mapContainer).prev('.modal'));
+        var inputGroup = $(mapContainer).parents('.modal').closest('.input-group');
 
         $(inputs).eq(3).val(layer.getLatLngs()[0][2].lat); //north
         $(inputs).eq(0).val(layer.getLatLngs()[0][2].lng); //west
         $(inputs).eq(2).val(layer.getLatLngs()[0][0].lat); //south
         $(inputs).eq(1).val(layer.getLatLngs()[0][0].lng); //east
+
+        $(inputGroup).find('span.north').text(layer.getLatLngs()[0][2].lat); //north
+        $(inputGroup).find('span.west').text(layer.getLatLngs()[0][2].lng); //west
+        $(inputGroup).find('span.south').text(layer.getLatLngs()[0][0].lat); //south
+        $(inputGroup).find('span.east').text(layer.getLatLngs()[0][0].lng); //east
+
     });
 
     map.on(L.Draw.Event.DELETED, function (event) {
@@ -717,11 +722,17 @@ function loadMap(map_element)
 
             var mapContainer = map.getContainer();
             var inputs = $(mapContainer).closest('.input-group').find('input[type=hidden]');
+            var inputGroup = $(mapContainer).parents('.modal').closest('.input-group');
 
             $(inputs).eq(3).val(''); //north
             $(inputs).eq(0).val(''); //west
             $(inputs).eq(2).val(''); //south
             $(inputs).eq(1).val(''); //east
+
+            $(inputGroup).find('span.north').text(''); //north
+            $(inputGroup).find('span.west').text(''); //west
+            $(inputGroup).find('span.south').text(''); //south
+            $(inputGroup).find('span.east').text(''); //east
         }
     });
 
@@ -730,11 +741,17 @@ function loadMap(map_element)
         layers.eachLayer(function (layer) {
             var mapContainer = map.getContainer();
             var inputs = $(mapContainer).closest('.input-group').find('input[type=hidden]');
+            var inputGroup = $(mapContainer).parents('.modal').closest('.input-group');
 
             $(inputs).eq(3).val(layer.getLatLngs()[0][2].lat); //north
             $(inputs).eq(0).val(layer.getLatLngs()[0][2].lng); //west
             $(inputs).eq(2).val(layer.getLatLngs()[0][0].lat); //south
             $(inputs).eq(1).val(layer.getLatLngs()[0][0].lng); //east
+
+            $(inputGroup).find('span.north').text(layer.getLatLngs()[0][2].lat); //north
+            $(inputGroup).find('span.west').text(layer.getLatLngs()[0][2].lng); //west
+            $(inputGroup).find('span.south').text(layer.getLatLngs()[0][0].lat); //south
+            $(inputGroup).find('span.east').text(layer.getLatLngs()[0][0].lng); //east
         });
     });
 

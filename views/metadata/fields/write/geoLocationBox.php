@@ -18,7 +18,7 @@
             <button type="button" class="btn geo-location-modal-btn" data-toggle="modal">
                 <i class="fa fa-plus" aria-hidden="true"></i> Show map
             </button>
-
+            N: <span class="north"><?php echo htmlentities($e->value['northBoundLatitude']); ?></span> E: <span class="east"><?php echo htmlentities($e->value['eastBoundLongitude']); ?></span> S: <span class="south"><?php echo htmlentities($e->value['southBoundLatitude']); ?></span> W: <span class="west"><?php echo htmlentities($e->value['westBoundLongitude']); ?></span>
             <!-- Modal -->
             <div class="modal geo-location-modal" tabindex="-1" role="dialog">
                 <div class="modal-dialog modal-lg" role="document">
@@ -101,7 +101,8 @@
                         <button type="button" class="btn geo-location-modal-btn" data-toggle="modal">
                             <i class="fa fa-plus" aria-hidden="true"></i> Show map
                         </button>
-
+                        <i class="fa fa-compass" aria-hidden="true"></i>
+                        N: <span class="north"><?php echo htmlentities($e->value['northBoundLatitude']); ?></span> E: <span class="east"><?php echo htmlentities($e->value['eastBoundLongitude']); ?></span> S: <span class="south"><?php echo htmlentities($e->value['southBoundLatitude']); ?></span> W: <span class="west"><?php echo htmlentities($e->value['westBoundLongitude']); ?></span>
                         <!-- Modal -->
                         <div class="modal geo-location-modal" tabindex="-1" role="dialog">
                             <div class="modal-dialog modal-lg" role="document">
