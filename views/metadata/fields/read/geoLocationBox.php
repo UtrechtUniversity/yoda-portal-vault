@@ -6,6 +6,7 @@
         <button type="button" class="btn" data-toggle="modal" data-target="#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal">
             <i class="fa fa-plus" aria-hidden="true"></i> Show map
         </button>
+        N: <span class="north small"><?php echo htmlentities($e->value['northBoundLatitude']); ?></span> E: <span class="east small"><?php echo htmlentities($e->value['eastBoundLongitude']); ?></span> S: <span class="south small"><?php echo htmlentities($e->value['southBoundLatitude']); ?></span> W: <span class="west small"><?php echo htmlentities($e->value['westBoundLongitude']); ?></span>
     </div>
 <?php } else { ?>
     <div class="form-group geo-location">
@@ -15,6 +16,7 @@
             <button type="button" class="btn" data-toggle="modal" data-target="#<?php echo str_replace(array('[', ']'), array(), $e->key); ?>Modal">
                 <i class="fa fa-plus" aria-hidden="true"></i> Show map
             </button>
+            N: <span class="north small"><?php echo htmlentities($e->value['northBoundLatitude']); ?></span> E: <span class="east small"><?php echo htmlentities($e->value['eastBoundLongitude']); ?></span> S: <span class="south small"><?php echo htmlentities($e->value['southBoundLatitude']); ?></span> W: <span class="west small"><?php echo htmlentities($e->value['westBoundLongitude']); ?></span>
         </div>
     </div>
 <?php } ?>
