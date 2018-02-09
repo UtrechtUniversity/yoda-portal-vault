@@ -203,7 +203,6 @@ $(function () {
     // Geo location
     // modal btn
     $(document).on('click', ".geo-location-modal-btn", function () {
-        console.log($(this).next(".geo-location-modal"));
         $(this).nextAll(".geo-location-modal").modal('show');
     });
 
@@ -327,8 +326,6 @@ function duplicateField(field, cloneType)
         $(field).find('select').select2();
     }
 
-    console.log(cloneType);
-
     // Main property with properties, clone the whole set.
     if (cloneType == 'main') {
         var currentFieldSubPropertiesGroup = field.next();
@@ -368,26 +365,6 @@ function duplicateField(field, cloneType)
                     // multiple (hidden) fields for geo location.
                     var fields = $(this).find('input[type=hidden]');
                     fields.val('');
-                    console.log(fields);
-                    /*
-                    // find current array key structure from the name attr.
-                    var name = fields.eq(0).attr('name');
-                    var nameParts = name.match(/\[(.*?)\]/g);
-                    var structureId = nameParts[0].slice(1, -1);
-
-                    // Find new structure id
-                    for (i = structureId; i < 1000; i++) {
-                        var tmpName = name.replace('[' + structureId + ']', '[' + i + ']');
-                        if ($("input[name='" + tmpName + "']").length == 0) {
-                            newStructureId = i;
-                            break;
-                        }
-                    }
-                    $.each(fields, function () {
-                        var name = $(this).attr('name');
-                        $(this).attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']'));
-                    });
-                    */
                 }
 
                 // Destroy select2 before cloning.
@@ -582,8 +559,6 @@ function duplicateField(field, cloneType)
 
     } else {
         if (field.hasClass('geo-location')) {
-            console.log(123);
-
             // multiple (hidden) fields for geo location.
             var fields = newFieldGroup.find('input[type=hidden]');
             fields.val('');
@@ -605,6 +580,8 @@ function duplicateField(field, cloneType)
                 var name = $(this).attr('name');
                 $(this).attr('name', name.replace('[' + structureId + ']', '[' + newStructureId + ']'));
             });
+
+            newFieldGroup.find('span.north,span.east,span.south,span.west').text('');
         }
 
         // Insert field group
