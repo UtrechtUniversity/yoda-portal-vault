@@ -249,6 +249,7 @@ function validateDate(date, field)
             var month = (parts[1] - 1);
             var year = parts[0];
 
+            // Compare date
             var dateObject = new Date(year, month, day);
             var result = dateObject.getDate() == day && dateObject.getMonth() == month && dateObject.getFullYear() == year;
 
@@ -259,18 +260,40 @@ function validateDate(date, field)
             state = 'inValid';
         }
 
-        if (date.substr(0, 4) == '0000') {
+        // Year must be 1600 or higher
+        if (date.substr(0, 4) < 1600) {
             state = 'inValid';
+        }
+
+        // Empty input
+        if (date.length == 0) {
+            state = 'valid'
         }
     }
 
     // Date is not valid
     if (state == 'inValid') {
         $(field).addClass('invalid');
+        validateForm();
         return false;
     }
 
     $(field).removeClass('invalid');
+    validateForm();
+    return true;
+}
+
+function validateForm()
+{
+    var invalidFieldCount = $('form').find('.invalid').length;
+
+    // Disable submit button if field errors.
+    if (invalidFieldCount > 0) {
+        $('form').find('button:submit').prop('disabled', true);
+        return false;
+    }
+
+    $('form').find('button:submit').prop('disabled', false);
     return true;
 }
 
