@@ -237,7 +237,7 @@ function validateDate(date, field)
 {
     //https://stackoverflow.com/questions/36009414/regex-to-validate-date-yyyy-mm-dd-while-typing-on-keyup/36009595
     var state = 'inValid';
-    var regex = /^\d{0,4}$|^\d{4}-0?$|^\d{4}-(?:0?[1-9]|1[012])(?:-(?:0?[1-9]?|[12]\d|3[01])?)?$/;
+    var regex = /^\d{0,4}$|^\d{4}-0?$|^\d{4}-(?:0[1-9]|1[012])(?:-(?:0[1-9]|[12]\d|3[01])?)?$/;
     var isValid = regex.test(date);
 
     if (isValid) {
