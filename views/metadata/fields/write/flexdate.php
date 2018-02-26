@@ -17,7 +17,7 @@
 
             <input
                 type="text"
-                placeholder="yyyy(-mm(dd))"
+                placeholder="yyyy(-mm(-dd))"
                 class="form-control flexdate"
                 <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
                     data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
@@ -89,7 +89,7 @@
                             <input
                                 type="text"
                                 class="form-control flexdate"
-                                placeholder="yyyy(-mm(dd))"
+                                placeholder="yyyy(-mm(-dd))"
                                 <?php if ($e->subPropertiesRole=='subPropertyStartStructure'): ?>
                                     data-structure-id="<?php echo $e->subPropertiesStructID; ?>"
                                     name="<?php echo $e->key; ?>"
@@ -106,7 +106,7 @@
                         </span>
                         </div>
                     <?php } else { ?>
-                        <input type="text" placeholder="yyyy(-mm(dd))" class="form-control flexdate" name="<?php echo $e->key; ?>" value="<?php echo htmlentities($e->value); ?>">
+                        <input type="text" placeholder="yyyy(-mm(-dd))" class="form-control flexdate" name="<?php echo $e->key; ?>" value="<?php echo htmlentities($e->value); ?>">
                     <?php } ?>
                 </div>
             </div>
