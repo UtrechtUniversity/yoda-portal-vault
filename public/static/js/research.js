@@ -572,6 +572,8 @@ function topInformation(dir, showAlert)
                             $('label.folder-status-pending span.pending-msg').text('Submission pending...');
 			            } else if (vaultNewStatus == 'APPROVED_FOR_PUBLICATION') {
                             $('label.folder-status-pending span.pending-msg').text('Approval pending...');
+                        } else if (vaultNewStatus == 'DEPUBLISHED') {
+                            $('label.folder-status-pending span.pending-msg').text('Depublish pending...');
                         }
 		            }
                 }
@@ -919,7 +921,8 @@ function vaultDepublishPublication(folder)
     $.getJSON("vault/depublish_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html(btnText);
-            $('label.folder-status-pending').hide();
+            $('label.folder-status-pending span.pending-msg').html('Depublish pending...');
+            $('label.folder-status-pending').show();
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
