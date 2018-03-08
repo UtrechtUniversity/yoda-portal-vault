@@ -547,7 +547,7 @@ function topInformation(dir, showAlert)
                             } else if (vaultStatus == 'UNPUBLISHED' && inResearchGroup  == 'yes') {
 				                actions['submit-for-publication'] = 'Submit for publication';
 				                $('.btn-group button.folder-status').next().prop("disabled", false);
-			                } else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
+			                } else if (vaultStatus == 'PUBLISHED') {
                                 // Show depublish button.
                                 actions['depublish-publication'] = 'Depublish publication';
                                 $('.btn-group button.folder-status').next().prop("disabled", false);
