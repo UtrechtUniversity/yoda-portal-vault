@@ -163,6 +163,17 @@ class Vault extends MY_Controller
      }
 
 
+     public function depublish_publication()
+     {
+         $this->load->model('Folder_Status_model');
+         $pathStart = $this->pathlibrary->getPathStart($this->config);
+         $path = $this->input->get('path');
+         $fullPath =  $pathStart . $path;
+
+         $result = $this->Folder_Status_model->depublish_publication($fullPath);
+         echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+     }
+
      /// Dit moet naar DataRequst Controller???
      //copyVaultPackageToDynamicArea
     public function copyVaultPackageToDynamicArea()

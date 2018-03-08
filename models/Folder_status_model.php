@@ -119,6 +119,18 @@ class Folder_Status_model extends CI_Model
         return $result;
     }
 
+    function depublish_publication($folder)
+    {
+        $outputParams = array('*status', '*statusInfo');
+        $inputParams = array('*folder' => $folder );
+
+        $this->CI->load->library('irodsrule');
+
+        $rule = $this->irodsrule->make('iiVaultDepublish', $inputParams, $outputParams);
+        $result = $rule->execute();
+        return $result;
+    }
+
     function getTermsText($fullPath)
     {
         $outputParams = array('*result', '*status', '*statusInfo');

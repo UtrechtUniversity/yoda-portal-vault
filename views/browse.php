@@ -145,6 +145,21 @@
     </div>
 </div>
 
+<div class="modal" id="confirmDepublish">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>Please confirm that you agree with depublish this datapackage.</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class='action-confirm-depublish-publication btn btn-default'>Confirm depublish</button>
+                <button class="btn btn-default grey cancel" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
 
     <ol class="breadcrumb">
