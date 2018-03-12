@@ -529,8 +529,8 @@ function topInformation(dir, showAlert)
                         $('.btn-group button.folder-status').text('Approved for publication');
                     } else if (vaultStatus == 'PUBLISHED') {
                         $('.btn-group button.folder-status').text('Published');
-                    } else if (vaultStatus == 'REQUEST_DEPUBLICATION') {
-                        $('.btn-group button.folder-status').text('Requested depublication');
+                    } else if (vaultStatus == 'REQUESTED_FOR_DEPUBLICATION') {
+                        $('.btn-group button.folder-status').text('Requested for depublication');
                     } else if (vaultStatus == 'DEPUBLISHED') {
                         $('.btn-group button.folder-status').text('Depublished');
                     } else {
@@ -574,7 +574,7 @@ function topInformation(dir, showAlert)
                             $('label.folder-status-pending span.pending-msg').text('Submission pending...');
 			            } else if (vaultNewStatus == 'APPROVED_FOR_PUBLICATION') {
                             $('label.folder-status-pending span.pending-msg').text('Approval pending...');
-                        } else if (vaultNewStatus == 'REQUEST_DEPUBLICATION') {
+                        } else if (vaultNewStatus == 'REQUESTED_FOR_DEPUBLICATION') {
                             $('label.folder-status-pending span.pending-msg').text('Depublish pending...');
                         }
 		            }

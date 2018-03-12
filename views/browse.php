@@ -149,7 +149,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
-                <p>Please confirm that you agree with depublish this datapackage.</p>
+                <p>Please confirm that you agree to depublish this datapackage.</p>
             </div>
 
             <div class="modal-footer">
