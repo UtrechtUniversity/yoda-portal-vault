@@ -123,3 +123,8 @@ button[data-clone*="main"] {
 .flexdate.invalid {
     color: red!important;
 }
+
+.hasDatepicker {
+    position: relative;
+    z-index: 9999;
+}
