@@ -153,9 +153,11 @@ function searchSelectChanged(sel)
     if (sel.attr('data-type') == 'status') {
         $('.search-term').hide();
         $('.search-status').removeClass('hide').show();
+	search($('.search-status').val(), 'status', $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     } else {
         $('.search-term').removeClass('hide').show();
         $('.search-status').hide();
+	search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     }
 }
 
