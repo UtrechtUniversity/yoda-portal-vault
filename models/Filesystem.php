@@ -23,7 +23,7 @@ class Filesystem extends CI_Model {
     {
         $metedataFile = new ProdsFile($rodsaccount, $path);
 
-        $metedataFile->open("w+", $rodsaccount->default_resc); //$this->config->item('rodsDefaultResource')
+        $metedataFile->open("w+");
 
 //        $xml = new DOMDocument( "1.0", "UTF-8" );
 //	    $xml->formatOutput = true;
