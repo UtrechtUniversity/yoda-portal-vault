@@ -1,10 +1,3 @@
-// Set empty table message for search.
-$('#search').DataTable({
-    "language": {
-        "emptyTable": "Your search did not match any documents"
-    }
-});
-
 $( document ).ready(function() {
     if ($('#file-browser').length && (view == 'browse' && searchType != 'revision')) {
         // Rememeber search results
@@ -91,6 +84,9 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             "bFilter": false,
             "bInfo": false,
             "bLengthChange": false,
+            "language": {
+                "emptyTable": "Your search did not match any documents"
+            },
             "ajax": {
                 "url": url,
                 "jsonp": false,

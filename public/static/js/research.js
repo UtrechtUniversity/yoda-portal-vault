@@ -1,10 +1,3 @@
-// Set empty table message for file browser.
-$('#file-browser').DataTable({
-    "language": {
-        "emptyTable": "No accessible files/folders present"
-    }
-});
-
 $( document ).ready(function() {
     if ($('#file-browser').length) {
         startBrowsing(browseStartDir, browsePageItems);
@@ -225,7 +218,11 @@ function buildFileBrowser(dir)
         url += "?dir=" +  dir;
     }
 
-    var fileBrowser = $('#file-browser').DataTable();
+    var fileBrowser = $('#file-browser').DataTable({
+	"language": {
+            "emptyTable": "No accessible files/folders present"
+	}
+    });
 
     fileBrowser.ajax.url(url).load();
 
