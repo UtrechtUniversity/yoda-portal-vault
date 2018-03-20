@@ -160,6 +160,21 @@
     </div>
 </div>
 
+<div class="modal" id="confirmRepublish">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>Please confirm that you agree to republish this datapackage.</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class='action-confirm-republish-publication btn btn-default'>Confirm republish</button>
+                <button class="btn btn-default grey cancel" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
 
     <ol class="breadcrumb">
