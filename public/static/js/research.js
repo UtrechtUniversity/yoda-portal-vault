@@ -114,6 +114,18 @@ $( document ).ready(function() {
         $('#confirmDepublish').modal('hide');
         vaultDepublishPublication($(this).attr('data-folder'));
     });
+
+    $("body").on("click", "a.action-republish-publication", function() {
+        // Set the current folder.
+        $('.action-confirm-republish-publication').attr( 'data-folder', $(this).attr('data-folder') );
+        // Show depublish modal.
+        $('#confirmRepublish').modal('show');
+    });
+
+    $("#confirmRepublish").on("click", ".action-confirm-republish-publication", function() {
+        $('#confirmRepublish').modal('hide');
+        vaultRepublishPublication($(this).attr('data-folder'));
+    });
 });
 
 function browse(dir)
@@ -540,6 +552,8 @@ function topInformation(dir, showAlert)
                         $('.btn-group button.folder-status').text('Pending depublication');
                     } else if (vaultStatus == 'DEPUBLISHED') {
                         $('.btn-group button.folder-status').text('Depublished');
+                    } else if (vaultStatus == 'REPUBLISHED') {
+                        $('.btn-group button.folder-status').text('Republished');
                     } else {
                         $('.btn-group button.folder-status').text('Unpublished');
                     }
@@ -559,6 +573,9 @@ function topInformation(dir, showAlert)
 			                } else if (vaultStatus == 'PUBLISHED') {
                                 // Show depublish button.
                                 actions['depublish-publication'] = 'Depublish publication';
+                                $('.btn-group button.folder-status').next().prop("disabled", false);
+                            }  else if (vaultStatus == 'DEPUBLISHED') {
+                                actions['republish-publication'] = 'Republish publication';
                                 $('.btn-group button.folder-status').next().prop("disabled", false);
                             }
 
@@ -583,6 +600,8 @@ function topInformation(dir, showAlert)
                             $('label.folder-status-pending span.pending-msg').text('Approval pending...');
                         } else if (vaultNewStatus == 'PENDING_DEPUBLICATION') {
                             $('label.folder-status-pending span.pending-msg').text('Depublish pending...');
+                        } else if (vaultNewStatus == 'PENDING_REPUBLICATION') {
+                            $('label.folder-status-pending span.pending-msg').text('Republish pending...');
                         }
 		            }
                 }
@@ -653,7 +672,8 @@ function handleActionsList(actions, folder)
     var html = '';
     var possibleActions = ['submit', 'unsubmit', 'accept', 'reject',
                           'submit-for-publication', 'cancel-publication',
-                           'approve-for-publication', 'depublish-publication'];
+                           'approve-for-publication', 'depublish-publication',
+                           'republish-publication'];
 
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
@@ -931,6 +951,27 @@ function vaultDepublishPublication(folder)
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html(btnText);
             $('label.folder-status-pending span.pending-msg').html('Depublish pending...');
+            $('label.folder-status-pending').show();
+        } else {
+            $('.btn-group button.folder-status').html(btnText);
+            setMessage('error', data.statusInfo);
+
+            topInformation(folder, false);
+            return;
+        }
+    });
+}
+
+function vaultRepublishPublication(folder)
+{
+    var btnText = $('.btn-group button.folder-status').html();
+    $('.btn-group button.folder-status').html('Depublish publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').prop("disabled", true);
+    $('.btn-group button.folder-status').next().prop("disabled", true);
+    $.getJSON("vault/republish_publication?path=" + folder, function (data) {
+        if (data.status == 'Success') {
+            $('.btn-group button.folder-status').html(btnText);
+            $('label.folder-status-pending span.pending-msg').html('Republish pending...');
             $('label.folder-status-pending').show();
         } else {
             $('.btn-group button.folder-status').html(btnText);
