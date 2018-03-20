@@ -218,11 +218,7 @@ function buildFileBrowser(dir)
         url += "?dir=" +  dir;
     }
 
-    var fileBrowser = $('#file-browser').DataTable({
-	"language": {
-            "emptyTable": "No accessible files/folders present"
-	}
-    });
+    var fileBrowser = $('#file-browser').DataTable();
 
     fileBrowser.ajax.url(url).load();
 
@@ -235,6 +231,9 @@ function startBrowsing(path, items)
         "bFilter": false,
         "bInfo": false,
         "bLengthChange": false,
+	"language": {
+            "emptyTable": "No accessible files/folders present"
+	},
         "ajax": {
             url: "browse/data",
             dataSrc: function (json) {
