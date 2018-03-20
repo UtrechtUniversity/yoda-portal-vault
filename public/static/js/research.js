@@ -1,10 +1,3 @@
-// Set default DataTables language
-$.extend( true, $.fn.dataTable.defaults, {
-    "language": {
-        "emptyTable": "No accessible files/folders present"
-    }
-});
-
 $( document ).ready(function() {
     if ($('#file-browser').length) {
         startBrowsing(browseStartDir, browsePageItems);
@@ -238,6 +231,9 @@ function startBrowsing(path, items)
         "bFilter": false,
         "bInfo": false,
         "bLengthChange": false,
+	"language": {
+            "emptyTable": "No accessible files/folders present"
+	},
         "ajax": {
             url: "browse/data",
             dataSrc: function (json) {

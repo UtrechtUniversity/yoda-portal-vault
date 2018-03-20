@@ -12,6 +12,9 @@ $( document ).ready(function() {
         "bFilter": false,
         "bInfo": false,
         "bLengthChange": false,
+        "language": {
+            "emptyTable": "Your search did not match any documents"
+        },
         "ajax": { url: url,
             dataSrc: function (json) {
                 jsonString = JSON.stringify(json);
@@ -338,8 +341,11 @@ function buildFileBrowser(dir)
         url += "?dir=" +  dir;
     }
 
-    var folderBrowser = $('#folder-browser').DataTable();
-
+    var folderBrowser = $('#folder-browser').DataTable({
+        "language": {
+            "emptyTable": "No accessible files/folders present"
+        }
+    });
     folderBrowser.ajax.url(url).load();
 
     return true;

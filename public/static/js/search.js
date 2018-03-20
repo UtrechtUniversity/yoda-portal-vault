@@ -84,6 +84,9 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             "bFilter": false,
             "bInfo": false,
             "bLengthChange": false,
+            "language": {
+                "emptyTable": "Your search did not match any documents"
+            },
             "ajax": {
                 "url": url,
                 "jsonp": false,
