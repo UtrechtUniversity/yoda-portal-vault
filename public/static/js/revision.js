@@ -1,3 +1,15 @@
+// Set empty table message for revisions.
+$('#folder-browser').DataTable({
+    "language": {
+        "emptyTable": "No accessible files/folders present"
+    }
+});
+$('#file-browser').DataTable({
+    "language": {
+        "emptyTable": "Your search did not match any documents"
+    }
+});
+
 var urlEncodedPath = '',
     folderBrowser = null;
 

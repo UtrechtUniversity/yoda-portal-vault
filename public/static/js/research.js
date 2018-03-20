@@ -1,5 +1,5 @@
-// Set default DataTables language
-$.extend( true, $.fn.dataTable.defaults, {
+// Set empty table message for file browser.
+$('#file-browser').DataTable({
     "language": {
         "emptyTable": "No accessible files/folders present"
     }
