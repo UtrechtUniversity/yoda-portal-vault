@@ -50,7 +50,6 @@
                 <option value="vault:SUBMITTED_FOR_PUBLICATION">Submitted for publication</option>
                 <option value="vault:APPROVED_FOR_PUBLICATION">Approved for publication</option>
                 <option value="vault:PUBLISHED">Published</option>
-                <option value="vault:REPUBLISHED">Republished</option>
                 <option value="vault:DEPUBLISHED">Depublished</option>
             </optgroup>
         </select>
