@@ -544,62 +544,56 @@ function topInformation(dir, showAlert)
                         $('.btn-group button.folder-status').text('Approved for publication');
                     } else if (vaultStatus == 'PUBLISHED') {
                         $('.btn-group button.folder-status').text('Published');
-                    } else if (vaultStatus == 'PENDING_DEPUBLICATION') {
-                        $('.btn-group button.folder-status').text('Pending depublication');
                     } else if (vaultStatus == 'DEPUBLISHED') {
                         $('.btn-group button.folder-status').text('Depublished');
-                    } else if (vaultStatus == 'REPUBLISHED') {
-                        $('.btn-group button.folder-status').text('Republished');
                     } else {
                         $('.btn-group button.folder-status').text('Unpublished');
                     }
 
                     // Set actions for datamanager and researcher.
-		            if (vaultActionPending == 'no') {
-			            $('label.folder-status-pending').hide();
+		    if (vaultActionPending == 'no') {
+                        $('label.folder-status-pending').hide();
 
-			            if (isDatamanager == 'yes') {
-			                if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
-				                actions['cancel-publication'] = 'Cancel publication';
-				                actions['approve-for-publication'] = 'Approve for publication';
-				                $('.btn-group button.folder-status').next().prop("disabled", false);
+		        if (isDatamanager == 'yes') {
+		            if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
+			        actions['cancel-publication'] = 'Cancel publication';
+				actions['approve-for-publication'] = 'Approve for publication';
+			        $('.btn-group button.folder-status').next().prop("disabled", false);
                             } else if (vaultStatus == 'UNPUBLISHED' && inResearchGroup  == 'yes') {
-				                actions['submit-for-publication'] = 'Submit for publication';
-				                $('.btn-group button.folder-status').next().prop("disabled", false);
-			                } else if (vaultStatus == 'PUBLISHED') {
-                                // Show depublish button.
+			        actions['submit-for-publication'] = 'Submit for publication';
+			        $('.btn-group button.folder-status').next().prop("disabled", false);
+		            } else if (vaultStatus == 'PUBLISHED') {
                                 actions['depublish-publication'] = 'Depublish publication';
                                 $('.btn-group button.folder-status').next().prop("disabled", false);
                             }  else if (vaultStatus == 'DEPUBLISHED') {
                                 actions['republish-publication'] = 'Republish publication';
                                 $('.btn-group button.folder-status').next().prop("disabled", false);
                             }
-
-
                         } else if (hasDatamanager == 'yes') {
                             if (vaultStatus == 'UNPUBLISHED') {
-				                actions['submit-for-publication'] = 'Submit for publication';
-				                $('.btn-group button.folder-status').next().prop("disabled", false);
+			        actions['submit-for-publication'] = 'Submit for publication';
+			        $('.btn-group button.folder-status').next().prop("disabled", false);
                             } else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
-				                actions['cancel-publication'] = 'Cancel publication';
-				                $('.btn-group button.folder-status').next().prop("disabled", false);
-                            }
-			            }
-                    } else {
-			            $('label.folder-status-pending').show();
+			        actions['cancel-publication'] = 'Cancel publication';
+			        $('.btn-group button.folder-status').next().prop("disabled", false);                                    }
+			    }
+                        } else {
+		            $('label.folder-status-pending').show();
 
-			            if (vaultNewStatus == 'UNPUBLISHED') {
-                            $('label.folder-status-pending span.pending-msg').text('Cancellation pending...');
-			            } else if (vaultNewStatus == 'SUBMITTED_FOR_PUBLICATION') {
-                            $('label.folder-status-pending span.pending-msg').text('Submission pending...');
-			            } else if (vaultNewStatus == 'APPROVED_FOR_PUBLICATION') {
-                            $('label.folder-status-pending span.pending-msg').text('Approval pending...');
-                        } else if (vaultNewStatus == 'PENDING_DEPUBLICATION') {
-                            $('label.folder-status-pending span.pending-msg').text('Depublish pending...');
-                        } else if (vaultNewStatus == 'PENDING_REPUBLICATION') {
-                            $('label.folder-status-pending span.pending-msg').text('Republish pending...');
-                        }
-		            }
+		            if (vaultNewStatus == 'UNPUBLISHED') {
+				$('label.folder-status-pending span.pending-msg').text('Cancellation pending...');
+			    } else if (vaultNewStatus == 'SUBMITTED_FOR_PUBLICATION') {
+				$('label.folder-status-pending span.pending-msg').text('Submission pending...');
+			    } else if (vaultNewStatus == 'APPROVED_FOR_PUBLICATION') {
+				$('label.folder-status-pending span.pending-msg').text('Approval pending...');
+			    } else if (vaultNewStatus == 'PUBLISHED') {
+				$('label.folder-status-pending span.pending-msg').text('Publication pending...');
+                            } else if (vaultNewStatus == 'PENDING_DEPUBLICATION') {
+				$('label.folder-status-pending span.pending-msg').text('Depublication pending...');
+                            } else if (vaultNewStatus == 'PENDING_REPUBLICATION') {
+				$('label.folder-status-pending span.pending-msg').text('Republication pending...');
+                            }
+		        }
                 }
 
                 // Datamanager sees all buttons in vault, researcher only folder status.
@@ -926,7 +920,8 @@ function vaultApproveForPublication(folder)
     $.getJSON("vault/approve_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html(btnText);
-            $('label.folder-status-pending').hide();
+            $('label.folder-status-pending span.pending-msg').html('Publication pending...');
+            $('label.folder-status-pending').show();
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
@@ -946,7 +941,7 @@ function vaultDepublishPublication(folder)
     $.getJSON("vault/depublish_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html(btnText);
-            $('label.folder-status-pending span.pending-msg').html('Depublish pending...');
+            $('label.folder-status-pending span.pending-msg').html('Depublication pending...');
             $('label.folder-status-pending').show();
         } else {
             $('.btn-group button.folder-status').html(btnText);
@@ -967,7 +962,7 @@ function vaultRepublishPublication(folder)
     $.getJSON("vault/republish_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html(btnText);
-            $('label.folder-status-pending span.pending-msg').html('Republish pending...');
+            $('label.folder-status-pending span.pending-msg').html('Republication pending...');
             $('label.folder-status-pending').show();
         } else {
             $('.btn-group button.folder-status').html(btnText);
