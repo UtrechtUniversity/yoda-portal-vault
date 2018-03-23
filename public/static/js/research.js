@@ -920,7 +920,7 @@ function vaultApproveForPublication(folder)
     $.getJSON("vault/approve_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html(btnText);
-            $('label.folder-status-pending span.pending-msg').html('Publication pending...');
+            $('label.folder-status-pending span.pending-msg').html('Approval pending...');
             $('label.folder-status-pending').show();
         } else {
             $('.btn-group button.folder-status').html(btnText);
