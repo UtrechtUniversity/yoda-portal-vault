@@ -542,9 +542,9 @@ function topInformation(dir, showAlert)
                         $('.btn-group button.folder-status').text('Submitted for publication');
                     } else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
                         $('.btn-group button.folder-status').text('Approved for publication');
-                    } else if (vaultStatus == 'PUBLISHED') {
+                    } else if (vaultStatus == 'PUBLISHED' || vaultStatus == 'PENDING_DEPUBLICATION') {
                         $('.btn-group button.folder-status').text('Published');
-                    } else if (vaultStatus == 'DEPUBLISHED') {
+                    } else if (vaultStatus == 'DEPUBLISHED' || vaultStatus == 'PENDING_REPUBLICATION') {
                         $('.btn-group button.folder-status').text('Depublished');
                     } else {
                         $('.btn-group button.folder-status').text('Unpublished');
