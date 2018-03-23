@@ -255,6 +255,9 @@ function startBrowsing(path, items)
             "serverSide": true,
             "iDeferLoading": 0,
             "ordering": false,
+            "language": {
+		"emptyTable": "No accessible files/folders present"
+            },
             "pageLength": browseDlgPageItems,
             "drawCallback": function (settings) {
                 $(".browse").on("click", function () {
@@ -341,11 +344,7 @@ function buildFileBrowser(dir)
         url += "?dir=" +  dir;
     }
 
-    var folderBrowser = $('#folder-browser').DataTable({
-        "language": {
-            "emptyTable": "No accessible files/folders present"
-        }
-    });
+    var folderBrowser = $('#folder-browser').DataTable();
     folderBrowser.ajax.url(url).load();
 
     return true;
