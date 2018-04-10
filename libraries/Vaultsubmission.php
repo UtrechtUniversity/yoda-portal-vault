@@ -306,6 +306,6 @@ class Vaultsubmission
                 $fieldLabels[] = $field;
             }
         }
-        return 'The following fields are invalid for vault submission: ' . implode(', ', $fieldLabels);
+        return 'The following fields are invalid: ' . implode(', ', $fieldLabels);
     }
 }
