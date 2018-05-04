@@ -580,13 +580,7 @@ function topInformation(dir, showAlert)
                         } else {
 		            $('label.folder-status-pending').show();
 
-		            if (vaultNewStatus == 'UNPUBLISHED') {
-				$('label.folder-status-pending span.pending-msg').text('Cancellation pending...');
-			    } else if (vaultNewStatus == 'SUBMITTED_FOR_PUBLICATION') {
-				$('label.folder-status-pending span.pending-msg').text('Submission pending...');
-			    } else if (vaultNewStatus == 'APPROVED_FOR_PUBLICATION') {
-				$('label.folder-status-pending span.pending-msg').text('Approval pending...');
-			    } else if (vaultStatus == 'PUBLISHED') {
+			    if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
 				$('label.folder-status-pending span.pending-msg').text('Publication pending...');
                             } else if (vaultNewStatus == 'PENDING_DEPUBLICATION') {
 				$('label.folder-status-pending span.pending-msg').text('Depublication pending...');
@@ -898,9 +892,7 @@ function vaultSubmitForPublication(folder)
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/submit_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status').html(btnText);
-            $('label.folder-status-pending span.pending-msg').html('Submission pending...');
-            $('label.folder-status-pending').show();
+            $('.btn-group button.folder-status').html('Submitted for publication');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
@@ -919,9 +911,7 @@ function vaultApproveForPublication(folder)
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/approve_for_publication?path=" + folder, function (data) {
         if (data.status == 'Success') {
-            $('.btn-group button.folder-status').html(btnText);
-            $('label.folder-status-pending span.pending-msg').html('Approval pending...');
-            $('label.folder-status-pending').show();
+            $('.btn-group button.folder-status').html('Approved for publication');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
