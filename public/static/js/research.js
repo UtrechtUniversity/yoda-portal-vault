@@ -899,10 +899,8 @@ function vaultSubmitForPublication(folder)
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
-
-            topInformation(folder, false);
-            return;
         }
+        topInformation(folder, false);
     });
 }
 
@@ -918,10 +916,8 @@ function vaultApproveForPublication(folder)
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
-
-            topInformation(folder, false);
-            return;
         }
+        topInformation(folder, false);	
     });
 }
 
