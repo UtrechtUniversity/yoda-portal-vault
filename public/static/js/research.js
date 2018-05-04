@@ -575,19 +575,22 @@ function topInformation(dir, showAlert)
 			        $('.btn-group button.folder-status').next().prop("disabled", false);
                             } else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
 			        actions['cancel-publication'] = 'Cancel publication';
-			        $('.btn-group button.folder-status').next().prop("disabled", false);                                    }
-			    }
-                        } else {
-		            $('label.folder-status-pending').show();
-
-			    if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
-				$('label.folder-status-pending span.pending-msg').text('Publication pending...');
-                            } else if (vaultNewStatus == 'PENDING_DEPUBLICATION') {
-				$('label.folder-status-pending span.pending-msg').text('Depublication pending...');
-                            } else if (vaultNewStatus == 'PENDING_REPUBLICATION') {
-				$('label.folder-status-pending span.pending-msg').text('Republication pending...');
+			        $('.btn-group button.folder-status').next().prop("disabled", false);
                             }
 		        }
+
+			if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
+			    $('label.folder-status-pending span.pending-msg').text('Publication pending...');
+                        }
+                    } else {
+		        $('label.folder-status-pending').show();
+
+			if (vaultNewStatus == 'PENDING_DEPUBLICATION') {
+			    $('label.folder-status-pending span.pending-msg').text('Depublication pending...');
+                        } else if (vaultNewStatus == 'PENDING_REPUBLICATION') {
+			    $('label.folder-status-pending span.pending-msg').text('Republication pending...');
+                        }
+		    }
                 }
 
                 // Datamanager sees all buttons in vault, researcher only folder status.
