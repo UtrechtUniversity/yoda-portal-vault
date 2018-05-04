@@ -537,23 +537,32 @@ function topInformation(dir, showAlert)
                 if (typeof vaultStatus != 'undefined' && typeof vaultActionPending != 'undefined') {
                     $('.btn-group button.folder-status').next().prop("disabled", true);
                     $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
+		    $('label.folder-status-pending').hide();
 
                     if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
                         $('.btn-group button.folder-status').text('Submitted for publication');
                     } else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
                         $('.btn-group button.folder-status').text('Approved for publication');
-                    } else if (vaultStatus == 'PUBLISHED' || vaultStatus == 'PENDING_DEPUBLICATION') {
+                        $('label.folder-status-pending').show();
+                        $('label.folder-status-pending span.pending-msg').text('Publication pending...');
+                    } else if (vaultStatus == 'PUBLISHED') {
                         $('.btn-group button.folder-status').text('Published');
-                    } else if (vaultStatus == 'DEPUBLISHED' || vaultStatus == 'PENDING_REPUBLICATION') {
+                    } else if (vaultStatus == 'DEPUBLISHED') {
                         $('.btn-group button.folder-status').text('Depublished');
+                    } else if (vaultStatus == 'PENDING_DEPUBLICATION') {
+                        $('.btn-group button.folder-status').text('Published');
+                        $('label.folder-status-pending').show();
+                        $('label.folder-status-pending span.pending-msg').text('Depublication pending...');
+                    } else if (vaultStatus == 'PENDING_REPUBLICATION') {
+                        $('.btn-group button.folder-status').text('Depublished');
+                        $('label.folder-status-pending').show();
+                        $('label.folder-status-pending span.pending-msg').text('Republication pending...');
                     } else {
                         $('.btn-group button.folder-status').text('Unpublished');
                     }
 
                     // Set actions for datamanager and researcher.
 		    if (vaultActionPending == 'no') {
-                        $('label.folder-status-pending').hide();
-
 		        if (isDatamanager == 'yes') {
 		            if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
 			        actions['cancel-publication'] = 'Cancel publication';
@@ -578,19 +587,7 @@ function topInformation(dir, showAlert)
 			        $('.btn-group button.folder-status').next().prop("disabled", false);
                             }
 		        }
-
-			if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
-			    $('label.folder-status-pending span.pending-msg').text('Publication pending...');
-                        }
-                    } else {
-		        $('label.folder-status-pending').show();
-
-			if (vaultNewStatus == 'PENDING_DEPUBLICATION') {
-			    $('label.folder-status-pending span.pending-msg').text('Depublication pending...');
-                        } else if (vaultNewStatus == 'PENDING_REPUBLICATION') {
-			    $('label.folder-status-pending span.pending-msg').text('Republication pending...');
-                        }
-		    }
+                    }
                 }
 
                 // Datamanager sees all buttons in vault, researcher only folder status.
