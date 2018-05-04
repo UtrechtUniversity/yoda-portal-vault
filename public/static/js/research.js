@@ -917,7 +917,24 @@ function vaultApproveForPublication(folder)
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
         }
-        topInformation(folder, false);	
+        topInformation(folder, false);
+    });
+}
+
+function vaultCancelPublication(folder)
+{
+    var btnText = $('.btn-group button.folder-status').html();
+    $('.btn-group button.folder-status').html('Cancel publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').prop("disabled", true);
+    $('.btn-group button.folder-status').next().prop("disabled", true);
+    $.getJSON("vault/cancel_publication?path=" + folder, function (data) {
+        if (data.status == 'Success') {
+            $('.btn-group button.folder-status').html('Unpublished');
+        } else {
+            $('.btn-group button.folder-status').html(btnText);
+            setMessage('error', data.statusInfo);
+        }
+        topInformation(folder, false);
     });
 }
 
@@ -952,27 +969,6 @@ function vaultRepublishPublication(folder)
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html(btnText);
             $('label.folder-status-pending span.pending-msg').html('Republication pending...');
-            $('label.folder-status-pending').show();
-        } else {
-            $('.btn-group button.folder-status').html(btnText);
-            setMessage('error', data.statusInfo);
-
-            topInformation(folder, false);
-            return;
-        }
-    });
-}
-
-function vaultCancelPublication(folder)
-{
-    var btnText = $('.btn-group button.folder-status').html();
-    $('.btn-group button.folder-status').html('Cancel publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
-    $('.btn-group button.folder-status').prop("disabled", true);
-    $('.btn-group button.folder-status').next().prop("disabled", true);
-    $.getJSON("vault/cancel_publication?path=" + folder, function (data) {
-        if (data.status == 'Success') {
-            $('.btn-group button.folder-status').html(btnText);
-            $('label.folder-status-pending span.pending-msg').html('Cancellation pending...');
             $('label.folder-status-pending').show();
         } else {
             $('.btn-group button.folder-status').html(btnText);
