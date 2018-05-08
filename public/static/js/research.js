@@ -530,7 +530,6 @@ function topInformation(dir, showAlert)
                 $('.btn-group button.copy-vault-package-to-research').attr('data-path', dir);
                 $('.btn-group button.copy-vault-package-to-research').show();
 
-
                 // explicitely hide top info buttons related to research - this wasn't always the case
                 $('.top-info-buttons .research').hide();
                 // folder status (vault folder)
@@ -568,23 +567,29 @@ function topInformation(dir, showAlert)
 			        actions['cancel-publication'] = 'Cancel publication';
 				actions['approve-for-publication'] = 'Approve for publication';
 			        $('.btn-group button.folder-status').next().prop("disabled", false);
+				$('.btn-group button.folder-status').prop("disabled", false);
                             } else if (vaultStatus == 'UNPUBLISHED' && inResearchGroup  == 'yes') {
 			        actions['submit-for-publication'] = 'Submit for publication';
 			        $('.btn-group button.folder-status').next().prop("disabled", false);
+				$('.btn-group button.folder-status').prop("disabled", false);
 		            } else if (vaultStatus == 'PUBLISHED') {
                                 actions['depublish-publication'] = 'Depublish publication';
                                 $('.btn-group button.folder-status').next().prop("disabled", false);
+				$('.btn-group button.folder-status').prop("disabled", false);
                             }  else if (vaultStatus == 'DEPUBLISHED') {
                                 actions['republish-publication'] = 'Republish publication';
                                 $('.btn-group button.folder-status').next().prop("disabled", false);
+				$('.btn-group button.folder-status').prop("disabled", false);
                             }
                         } else if (hasDatamanager == 'yes') {
                             if (vaultStatus == 'UNPUBLISHED') {
 			        actions['submit-for-publication'] = 'Submit for publication';
 			        $('.btn-group button.folder-status').next().prop("disabled", false);
+				$('.btn-group button.folder-status').prop("disabled", false);
                             } else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
 			        actions['cancel-publication'] = 'Cancel publication';
 			        $('.btn-group button.folder-status').next().prop("disabled", false);
+				$('.btn-group button.folder-status').prop("disabled", false);
                             }
 		        }
                     }
@@ -845,7 +850,6 @@ function acceptFolder(folder)
     $.getJSON("vault/accept?path=" + folder, function (data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html('Accepted');
-
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
