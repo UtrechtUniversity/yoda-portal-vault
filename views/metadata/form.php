@@ -1,4 +1,4 @@
-<?php if (empty($form)) { ?>
+<?php /* if (empty($form)) { ?>
 <div class="row">
     <div class="col-md-12">
         <div class="panel panel-default">
@@ -177,4 +177,13 @@
         <script language="javascript">
             setMessage('success', '<?php echo $messageDatamanagerAfterSaveInVault; ?>');
         </script>
-<?php } ?>
+<?php } */ ?>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div id="form"></div>
+    </div>
+</div>
+
+<script src="/research/static/js/metadata/bundle.js" type="text/javascript"></script>

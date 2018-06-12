@@ -200,6 +200,7 @@ class Metadata extends MY_Controller
                 'lib/leaflet/edit/handler/Edit.Circle.js',
 
                 'js/metadata/form.js',
+                //'js/metadata/bundle.js',
             ),
             'activeModule'   => 'research',
             'form' => $form,

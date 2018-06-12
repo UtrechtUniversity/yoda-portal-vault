@@ -42,13 +42,14 @@
     min-width: 100px;
     max-width: 100%;
 }
-
+/*
 .metadata-form fieldset{
     border: solid 1px #DDD !important;
     padding: 0 10px 10px 10px;
     border-bottom: 10px;
     margin-bottom: 10px;
 }
+*/
 
 legend {
     width: auto !important;
@@ -127,4 +128,12 @@ button[data-clone*="main"] {
 .hasDatepicker {
     position: relative;
     z-index: 9999;
+}
+
+.subproperties {
+    margin-left: 9%;
+}
+
+.subproperties legend {
+    display: none;
 }
