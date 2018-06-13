@@ -441,14 +441,24 @@ function topInformation(dir, showAlert)
                     $('.btn-group button.folder-status').next().prop("disabled", true);
                 } else if (status == 'SECURED') {
                     $('.btn-group button.folder-status').text('Secured');
+                    /*
                     $('.btn-group button.toggle-folder-status').text('Unlock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
                     $('.btn-group button.folder-status').next().prop("disabled", true);
+                    */
+                    $('.btn-group button.toggle-folder-status').text('Lock');
+                    $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
+                    actions['submit'] = 'Submit';
                 } else if (status == 'REJECTED') {
                     $('.btn-group button.folder-status').text('Rejected');
+                    /*
                     $('.btn-group button.toggle-folder-status').text('Unlock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
                     $('.btn-group button.folder-status').next().prop("disabled", true);
+                    */
+                    $('.btn-group button.toggle-folder-status').text('Lock');
+                    $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
+                    actions['submit'] = 'Submit';
                 }
                 var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
                 $('.btn-group button.toggle-folder-status').attr('data-path', dir);
@@ -756,10 +766,14 @@ function submitToVault(folder)
                 if (data.folderStatus == 'SUBMITTED') {
                     $('.btn-group button.folder-status').html('Submitted');
 
+                    /*
                     // Set folder status -> Locked
                     $('.btn-group button.toggle-folder-status').text('Unlock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
                     $('.btn-group button.toggle-folder-status').prop("disabled", true);
+                    */
+                    $('.btn-group button.toggle-folder-status').text('Lock');
+                    $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
 
                     // Set ubsibmit action
                     var actions = [];
@@ -810,11 +824,17 @@ function unsubmitToVault(folder) {
         $('.btn-group button.folder-status').next().prop("disabled", true);
         $.getJSON("vault/unsubmit?path=" + folder, function (data) {
             if (data.status == 'Success') {
+                /*
                 // Set folder status -> Locked
                 $('.btn-group button.toggle-folder-status').text('Unlock');
                 $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
                 $('.btn-group button.folder-status').html('Locked');
                 $('.btn-group button.toggle-folder-status').removeAttr("disabled");
+                */
+
+                $('.btn-group button.toggle-folder-status').text('Lock');
+                $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
+                $('.btn-group button.folder-status').html('Actions');
 
                 // Set submit action
                 var actions = [];
