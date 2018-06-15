@@ -441,11 +441,6 @@ function topInformation(dir, showAlert)
                     $('.btn-group button.folder-status').next().prop("disabled", true);
                 } else if (status == 'SECURED') {
                     $('.btn-group button.folder-status').text('Secured');
-                    /*
-                    $('.btn-group button.toggle-folder-status').text('Unlock');
-                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
-                    $('.btn-group button.folder-status').next().prop("disabled", true);
-                    */
                     $('.btn-group button.toggle-folder-status').text('Lock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
                     actions['submit'] = 'Submit';
