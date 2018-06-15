@@ -30,6 +30,41 @@ const schema = {
                 "DP 2",
                 "DP 3"
             ]
+        },
+        "Data_Classification": {
+            "type": "string",
+            "enum": [
+                "Public",
+                "Basic",
+                "Sensitive",
+                "Critical"
+            ]
+        },
+        "Contributor_Type": {
+            "type": "string",
+            "enum": [
+                "ContactPerson",
+                "DataCollector",
+                "DataCurator",
+                "DataManager"
+            ]
+        },
+        "License": {
+            "type": "string",
+            "enum": [
+                "Creative Commons Attribution 4.0 International Public License",
+                "Creative Commons Attribution-ShareAlike 4.0 International Public License",
+                "Open Data Commons Attribution License (ODC-By) v1.0",
+                "Custom"
+            ]
+        },
+        "Data_Package_Access": {
+            "type": "string",
+            "enum": [
+                "Open - freely retrievable",
+                "Restricted - available upon request",
+                "Closed"
+            ]
         }
     },
     "title": "",
@@ -38,7 +73,7 @@ const schema = {
         "descriptive": {
             "type": "object",
             "title": "Descriptive",
-            "required": ["title", "description", "version"],
+            "required": ["title", "description", "version", "pldate"],
             "properties": {
                 "title": {
                     "type": "string",
@@ -53,6 +88,11 @@ const schema = {
                     "title": "Discipline",
                     "$ref": "#/definitions/Discipline",
                 },
+                /*
+                "geo_location": {
+                    "type": "number"
+                },
+                */
                 "version": {
                     "type": "string",
                     "title": "Version"
@@ -61,6 +101,23 @@ const schema = {
                     "type": "string",
                     "title": "Language of the Data",
                     "$ref": "#/definitions/Language",
+                },
+                "Collected": {
+                    "type": "array",
+                    "title": "Collection process",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "Start_Date": {
+                                "type": "string",
+                                "title": "Start Date"
+                            },
+                            "End_Date": {
+                                "type": "string",
+                                "title": "End Date"
+                            }
+                        }
+                    }
                 },
                 "Covered_Geolocation_Place": {
                     "type": "string",
@@ -90,51 +147,14 @@ const schema = {
                                 "title": "Related Datapackage",
                                 "$ref": "#/definitions/Related_Datapackage",
                             },
-                            "test1": {
-                                "type": "string",
-                                "title": "test1"
-                            },
-                            "test2": {
-                                "type": "string",
-                                "title": "Test2"
-                            },
                             "SubProperties": {
                                 "type": "object",
                                 "properties": {
-                                    "test": {
-                                        "type": "string",
-                                        "title": "Test"
-                                    },
                                     "title": {
                                         "type": "string",
                                         "title": "Title"
-                                    },
-                                    "test3": {
-                                        "type": "string",
-                                        "title": "Test3"
-                                    },
-                                    "test4": {
-                                        "type": "string",
-                                        "title": "Test4"
                                     }
                                 },
-                                "dependencies": {
-                                    "test3": {
-                                        "required": ["test4", "title"]
-                                    }
-                                }
-                            }
-                        },
-                        "dependencies": {
-                            "test1": {
-                                "required": ["test2"]
-                            },
-                            "Related_Datapackage": {
-                                "BlaProperties": {
-                                    "properties": {
-                                        "required": ["test4"]
-                                    }
-                                }
                             }
                         }
                     }
@@ -148,13 +168,174 @@ const schema = {
             "properties": {
                 "retention_period": {
                     "type": "integer",
-                    "title": "Retention Period"
+                    "title": "Retention Period (years)"
+                },
+                "Retention_Information": {
+                    "type": "string",
+                    "title": "Retention Information"
+                },
+                "Embargo_End_Date": {
+                    "type": "string",
+                    "format": "date",
+                    "title": "Embargo End Date"
+                },
+                "Data_Classification": {
+                    "type": "string",
+                    "title": "Data Classification",
+                    "$ref": "#/definitions/Data_Classification"
+                },
+                "Collection_Name": {
+                    "type": "string",
+                    "title": "Name of Collection"
+                },
+                "Funding_Reference": {
+                    "type": "array",
+                    "title": "Funders",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "Funder_Name": {
+                                "type": "string",
+                                "title": "Funder",
+                            },
+                            "SubProperties": {
+                                "type": "object",
+                                "properties": {
+                                    "Award_Number": {
+                                        "type": "string",
+                                        "title": "Award Number"
+                                    }
+                                },
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "rights": {
+            "type": "object",
+            "title": "Rights",
+            "required": [],
+            "properties": {
+                "Creator": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "Name": {
+                                "type": "string",
+                                "title": "Creator of Data Package",
+                            },
+                            "SubProperties": {
+                                "type": "object",
+                                "properties": {
+                                    "Affiliation": {
+                                        "type": "string",
+                                        "title": "Affiliation"
+                                    }
+                                },
+                            }
+                        }
+                    }
+                },
+                "Contributor": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "Name": {
+                                "type": "string",
+                                "title": "Contributor(s) to Data Package",
+                            },
+                            "SubProperties": {
+                                "type": "object",
+                                "properties": {
+                                    "Contributor_Type": {
+                                        "type": "string",
+                                        "title": "Contributor Type",
+                                        "$ref": "#/definitions/Contributor_Type"
+                                    },
+                                    "Affiliation": {
+                                        "type": "string",
+                                        "title": "Affiliation"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "License": {
+                    "type": "string",
+                    "$ref": "#/definitions/License"
+                },
+                "Data_Package_Access": {
+                    "type": "string",
+                    "title": "Data Package Access",
+                    "$ref": "#/definitions/Data_Package_Access"
                 }
             }
         }
     }
 };
 
+// Define a custom component for handling the root position object
+class GeoPosition extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {...props.formData};
+    }
+
+    onChange(name) {
+        console.log(name);
+
+        return (event) => {
+            this.setState({
+                [name]: event.target.value
+            }, () => this.props.onChange(this.state));
+        };
+    }
+
+    render() {
+        const {geo_location} = this.state;
+
+        return (
+            <div>
+                <input type="string" value={geo_location} onChange={this.onChange(this.props.name)} />
+            </div>
+        );
+    }
+}
+
+const DatepickerWidget = (props) => {
+    return (
+        <input type="text"
+               className="form-control datepicker"
+               value={props.value}
+               required={props.required}
+               onChange={(event) => props.onChange(event.target.value)} />
+    );
+};
+
+const FlexdateWidget = (props) => {
+    return (
+        <input type="text"
+               className="form-control"
+               placeholder="yyyy(-mm(-dd))"
+               value={props.value}
+               required={props.required}
+               onChange={(event) => props.onChange(event.target.value)} />
+    );
+};
+
+// Custom widgets
+const widgets = {
+    DatepickerWidget: DatepickerWidget,
+    FlexdateWidget: FlexdateWidget
+};
+
+// Custom fields
+const fields = {geo: GeoPosition};
 
 const uiSchema = {
     "descriptive": {
@@ -162,8 +343,17 @@ const uiSchema = {
             "ui:widget": "textarea",
             //"ui:readonly": true
         },
+        "date": {
+            "ui:widget": "DatepickerWidget"
+        },
+        "flexdate": {
+            "ui:widget": "FlexdateWidget"
+        },
         "discipline": {
             "ui:widget": "select"
+        },
+        "geo_location": {
+            "ui:field": "geo"
         },
         "Related_Datapackages": {
             items: {
@@ -171,12 +361,40 @@ const uiSchema = {
                     "ui:subproperties": true
                 }
             }
-
+        },
+        "Collected": {
+            "ui:compound": true,
+            items: {
+                "ui:compound-items": true
+            }
         }
     },
     "administrative": {
         "retention_period": {
             "ui:widget": "updown"
+        },
+        "Funding_Reference": {
+            items: {
+                "SubProperties": {
+                    "ui:subproperties": true
+                }
+            }
+        }
+    },
+    "rights": {
+        "Creator": {
+            items: {
+                "SubProperties": {
+                    "ui:subproperties": true
+                }
+            }
+        },
+        "Contributor": {
+            items: {
+                "SubProperties": {
+                    "ui:subproperties": true
+                }
+            }
         }
     }
 };
@@ -188,6 +406,31 @@ const formData = {
             {}
         ],
         "Related_Datapackages": [
+            {
+                "Properties": {
+
+                }
+            }
+        ]
+    },
+    "administrative": {
+        "Funding_Reference": [
+            {
+                "Properties": {
+
+                }
+            }
+        ]
+    },
+    "rights": {
+        "Creator": [
+            {
+                "Properties": {
+
+                }
+            }
+        ],
+        "Contributor": [
             {
                 "Properties": {
 
@@ -220,6 +463,7 @@ class YodaForm extends Form {
     }
 }
 
+
 render((
     <YodaForm className="form form-horizontal metadata-form"
               schema={schema}
@@ -227,7 +471,8 @@ render((
               uiSchema={uiSchema}
               formData={formData}
               formContext={{env: 'research'}}
-
+              fields={fields}
+              widgets={widgets}
               ArrayFieldTemplate={ArrayFieldTemplate}
               ObjectFieldTemplate={ObjectFieldTemplate}
               FieldTemplate={CustomFieldTemplate}
@@ -306,33 +551,71 @@ function CustomFieldTemplate(props) {
 function ObjectFieldTemplate(props) {
     const { TitleField, DescriptionField } = props;
 
-    return (
-        <fieldset className={props.uiSchema["ui:subproperties"] ? 'subproperties' : ''}>
-            {(props.uiSchema["ui:title"] || props.title) && (
-                <TitleField
-                    id={`${props.idSchema.$id}__title`}
-                    title={props.title || props.uiSchema["ui:title"]}
-                    required={props.required}
-                    formContext={props.formContext}
-                />
-            )}
-            {props.description && (
-                <DescriptionField
-                    id={`${props.idSchema.$id}__description`}
-                    description={props.description}
-                    formContext={props.formContext}
-                />
-            )}
-            {props.properties.map(prop => prop.content)}
-        </fieldset>
-    );
+    const isCompoundItem = props.uiSchema["ui:compound-items"];
+    if (isCompoundField) {
+        return (
+            <fieldset>
+                {(props.uiSchema["ui:title"] || props.title) && (
+                    <TitleField
+                        id={`${props.idSchema.$id}__title`}
+                        title={props.title || props.uiSchema["ui:title"]}
+                        required={props.required}
+                        formContext={props.formContext}
+                    />
+                )}
+                {props.description && (
+                    <DescriptionField
+                        id={`${props.idSchema.$id}__description`}
+                        description={props.description}
+                        formContext={props.formContext}
+                    />
+                )}
+                {props.properties.map(prop => prop.content)}
+            </fieldset>
+        );
+
+    } else {
+        return (
+            <fieldset className={props.uiSchema["ui:subproperties"] ? 'subproperties' : ''}>
+                {(props.uiSchema["ui:title"] || props.title) && (
+                    <TitleField
+                        id={`${props.idSchema.$id}__title`}
+                        title={props.title || props.uiSchema["ui:title"]}
+                        required={props.required}
+                        formContext={props.formContext}
+                    />
+                )}
+                {props.description && (
+                    <DescriptionField
+                        id={`${props.idSchema.$id}__description`}
+                        description={props.description}
+                        formContext={props.formContext}
+                    />
+                )}
+                {props.properties.map(prop => prop.content)}
+            </fieldset>
+        );
+    }
 }
 
 function ArrayFieldTemplate(props) {
-    return (
-        <div>
-            {props.canAdd && <button type="button" onClick={props.onAddClick}>+</button>}
-            {props.items.map(element => element.children)}
-        </div>
-    );
+    // Compound field wrapper
+    const isCompoundField = props.uiSchema["ui:compound"];
+    if (isCompoundField) {
+        return (
+            <div>
+                <div class="compound-field">
+                    {props.canAdd && <button type="button" onClick={props.onAddClick}>+</button>}
+                    {props.items.map(element => element.children)}
+                </div>
+            </div>
+        );
+    } else {
+        return (
+            <div>
+                {props.canAdd && <button type="button" onClick={props.onAddClick}>+</button>}
+                {props.items.map(element => element.children)}
+            </div>
+        );
+    }
 }

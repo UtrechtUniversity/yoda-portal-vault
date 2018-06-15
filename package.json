@@ -13,7 +13,7 @@
     "babel-preset-react": "^6.24.1",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
-    "react-jsonschema-form": "^1.0.3",
+    "react-jsonschema-form": "git+https://github.com/Royve90/react-jsonschema-form.git#semver:^1.0.3",
     "webpack": "^4.6.0",
     "webpack-cli": "^2.0.15"
   }
