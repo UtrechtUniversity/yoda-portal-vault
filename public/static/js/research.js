@@ -451,11 +451,6 @@ function topInformation(dir, showAlert)
                     actions['submit'] = 'Submit';
                 } else if (status == 'REJECTED') {
                     $('.btn-group button.folder-status').text('Rejected');
-                    /*
-                    $('.btn-group button.toggle-folder-status').text('Unlock');
-                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
-                    $('.btn-group button.folder-status').next().prop("disabled", true);
-                    */
                     $('.btn-group button.toggle-folder-status').text('Lock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
                     actions['submit'] = 'Submit';
@@ -766,14 +761,10 @@ function submitToVault(folder)
                 if (data.folderStatus == 'SUBMITTED') {
                     $('.btn-group button.folder-status').html('Submitted');
 
-                    /*
                     // Set folder status -> Locked
                     $('.btn-group button.toggle-folder-status').text('Unlock');
                     $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
                     $('.btn-group button.toggle-folder-status').prop("disabled", true);
-                    */
-                    $('.btn-group button.toggle-folder-status').text('Lock');
-                    $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
 
                     // Set ubsibmit action
                     var actions = [];
@@ -834,6 +825,7 @@ function unsubmitToVault(folder) {
 
                 $('.btn-group button.toggle-folder-status').text('Lock');
                 $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
+                $('.btn-group button.toggle-folder-status').removeAttr("disabled");
                 $('.btn-group button.folder-status').html('Actions');
 
                 // Set submit action
@@ -886,6 +878,8 @@ function rejectFolder(folder)
     $.getJSON("vault/reject?path=" + folder, function (data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html('Rejected');
+            $('.btn-group button.toggle-folder-status').text('Lock');
+            $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
