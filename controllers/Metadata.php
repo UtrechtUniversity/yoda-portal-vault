@@ -119,7 +119,7 @@ class Metadata extends MY_Controller
             $submitToVaultBtn = false;
             $lockStatus = $formConfig['lockFound'];
             $folderStatus = $formConfig['folderStatus'];
-            if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == '')
+            if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == ''  || $folderStatus == 'REJECTED'  || $folderStatus == 'SECURED')
                 && ($userType == 'normal' || $userType == 'manager')) { // written this way as the
                 $submitToVaultBtn = true;
             }
