@@ -5,278 +5,171 @@ import Form from "react-jsonschema-form";
 
 const schema = {
     "definitions": {
-        "Discipline": {
+        "stringNormal": {
             "type": "string",
-            "enum": [
-                "Natural Sciences - Mathematics (1.1)",
-                "Natural Sciences - Mathematics (1.2)"
-            ]
+            "maxLength": 255
         },
-        "Language": {
+        "stringLong": {
             "type": "string",
-            "enum": [
-                "EN",
-                "NL"
-            ],
-            "enumNames": [
-                "English",
-                "Dutch"
-            ]
-        },
-        "Related_Datapackage": {
-            "type": "string",
-            "enum": [
-                "DP 1",
-                "DP 2",
-                "DP 3"
-            ]
-        },
-        "Data_Classification": {
-            "type": "string",
-            "enum": [
-                "Public",
-                "Basic",
-                "Sensitive",
-                "Critical"
-            ]
-        },
-        "Contributor_Type": {
-            "type": "string",
-            "enum": [
-                "ContactPerson",
-                "DataCollector",
-                "DataCurator",
-                "DataManager"
-            ]
-        },
-        "License": {
-            "type": "string",
-            "enum": [
-                "Creative Commons Attribution 4.0 International Public License",
-                "Creative Commons Attribution-ShareAlike 4.0 International Public License",
-                "Open Data Commons Attribution License (ODC-By) v1.0",
-                "Custom"
-            ]
-        },
-        "Data_Package_Access": {
-            "type": "string",
-            "enum": [
-                "Open - freely retrievable",
-                "Restricted - available upon request",
-                "Closed"
-            ]
+            "maxLength": 2700
         }
     },
     "title": "",
     "type": "object",
     "properties": {
-        "descriptive": {
+        "Descriptive-group": {
             "type": "object",
+            "comment": "group",
             "title": "Descriptive",
-            "required": ["title", "description", "version", "pldate"],
             "properties": {
-                "title": {
-                    "type": "string",
+                "title" : {
+                    "type" : "string",
                     "title": "Title"
                 },
-                "description": {
-                    "type": "string",
+                "description" : {
+                    "$ref": "#/definitions/stringLong",
                     "title": "Description"
                 },
-                "discipline": {
-                    "type": "string",
-                    "title": "Discipline",
-                    "$ref": "#/definitions/Discipline",
+                "Rdiscipline" : {
+                    "type" : "array",
+                    "comment" : "repeat",
+                    "items": {
+                        "type" : "string",
+                        "title": "Discipline",
+                        "enum" : ["science","humanities","gamma"]
+                    }
                 },
-                /*
-                "geo_location": {
-                    "type": "number"
-                },
-                */
                 "version": {
                     "type": "string",
                     "title": "Version"
                 },
                 "language": {
                     "type": "string",
-                    "title": "Language of the Data",
-                    "$ref": "#/definitions/Language",
+                    "title": "Language of the data",
+                    "enum": ["NL", "EN", "ES"]
                 },
-                "Collected": {
-                    "type": "array",
+                "collect": {
+                    "type": "object",
+                    "comment": "composite",
                     "title": "Collection process",
+                    "properties": {
+                        "start": {
+                            "type": "string",
+                            "title": "Start date"
+                        },
+                        "end": {
+                            "type": "string",
+                            "title": "End date"
+                        }
+                    },
+                    "yoda:structure": "compound"
+                },
+                "Rlocation": {
+                    "type": "array",
+                    "comment": "repeat",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "Start_Date": {
-                                "type": "string",
-                                "title": "Start Date"
-                            },
-                            "End_Date": {
-                                "type": "string",
-                                "title": "End Date"
-                            }
+                        "type": "string",
+                        "title": "Location(s) covered"
+                    }
+                },
+                "period": {
+                    "type": "object",
+                    "comment": "composite",
+                    "title": "Period covered",
+                    "properties": {
+                        "start": {
+                            "type": "string",
+                            "title": "Start date"
+                        },
+                        "end": {
+                            "type": "string",
+                            "title": "End date"
                         }
                     }
                 },
-                "Covered_Geolocation_Place": {
-                    "type": "string",
-                    "title": "Location(s) covered",
-                },
-                "Tags": {
+
+                "tag": {
                     "type": "array",
-                    "title": "Tags",
+                    "comment": "repeat",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "tag": {
-                                "type": "string",
-                                "title": "Tag"
-                            }
-                        }
+                        "type": "string",
+                        "title": "Tag"
                     }
                 },
-                "Related_Datapackages": {
+
+                "Rrelated": {
                     "type": "array",
-                    "title": "Related_Datapackages",
+                    "comment": "repeat",
                     "items": {
                         "type": "object",
+                        "comment": "subprops",
                         "properties": {
-                            "Related_Datapackage": {
+                            "main": {
                                 "type": "string",
-                                "title": "Related Datapackage",
-                                "$ref": "#/definitions/Related_Datapackage",
+                                "title": "Related data package"
                             },
-                            "SubProperties": {
+                            "sub": {
                                 "type": "object",
+                                "comment": "sub",
                                 "properties": {
                                     "title": {
                                         "type": "string",
                                         "title": "Title"
-                                    }
-                                },
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "administrative": {
-            "type": "object",
-            "title": "Administrative",
-            "required": ["retention_period"],
-            "properties": {
-                "retention_period": {
-                    "type": "integer",
-                    "title": "Retention Period (years)"
-                },
-                "Retention_Information": {
-                    "type": "string",
-                    "title": "Retention Information"
-                },
-                "Embargo_End_Date": {
-                    "type": "string",
-                    "format": "date",
-                    "title": "Embargo End Date"
-                },
-                "Data_Classification": {
-                    "type": "string",
-                    "title": "Data Classification",
-                    "$ref": "#/definitions/Data_Classification"
-                },
-                "Collection_Name": {
-                    "type": "string",
-                    "title": "Name of Collection"
-                },
-                "Funding_Reference": {
-                    "type": "array",
-                    "title": "Funders",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "Funder_Name": {
-                                "type": "string",
-                                "title": "Funder",
-                            },
-                            "SubProperties": {
-                                "type": "object",
-                                "properties": {
-                                    "Award_Number": {
-                                        "type": "string",
-                                        "title": "Award Number"
-                                    }
-                                },
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "rights": {
-            "type": "object",
-            "title": "Rights",
-            "required": [],
-            "properties": {
-                "Creator": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "Name": {
-                                "type": "string",
-                                "title": "Creator of Data Package",
-                            },
-                            "SubProperties": {
-                                "type": "object",
-                                "properties": {
-                                    "Affiliation": {
-                                        "type": "string",
-                                        "title": "Affiliation"
-                                    }
-                                },
-                            }
-                        }
-                    }
-                },
-                "Contributor": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "Name": {
-                                "type": "string",
-                                "title": "Contributor(s) to Data Package",
-                            },
-                            "SubProperties": {
-                                "type": "object",
-                                "properties": {
-                                    "Contributor_Type": {
-                                        "type": "string",
-                                        "title": "Contributor Type",
-                                        "$ref": "#/definitions/Contributor_Type"
                                     },
-                                    "Affiliation": {
-                                        "type": "string",
-                                        "title": "Affiliation"
+                                    "Rid": {
+                                        "type": "object",
+                                        "comment": "composite",
+                                        "properties": {
+                                            "pers": {
+                                                "type": "string",
+                                                "title": "Persistent identifier"
+                                            },
+                                            "identifier": {
+                                                "type": "string",
+                                                "title": "Identifier",
+                                                "enum": ["DOI", "EPIC"]
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                },
-                "License": {
-                    "type": "string",
-                    "$ref": "#/definitions/License"
-                },
-                "Data_Package_Access": {
-                    "type": "string",
-                    "title": "Data Package Access",
-                    "$ref": "#/definitions/Data_Package_Access"
+                }
+            }
+        },
+        "Rights" : {
+            "type": "object",
+            "comment": "group",
+            "title": "Rights group",
+            "properties": {
+                "suppie": {
+                    "type" : "object",
+                    "comment" : "subprops type 2",
+                    "title": "my suppie",
+                    "properties" : {
+                        "main" : {
+                            "type" : "string",
+                            "title": "Main prop"
+                        },
+                        "sub1" : {
+                            "type" : "string",
+                            "title": "Sub prop1"
+                        },
+                        "sub2" : {
+                            "type" : "string",
+                            "title": "Sub prop2"
+                        }
+                    },
+                    "required": ["main"],
+                    "yoda:structure": "subproperties"
                 }
             }
         }
     }
 };
+
+
 
 // Define a custom component for handling the root position object
 class GeoPosition extends React.Component {
@@ -329,116 +222,20 @@ const FlexdateWidget = (props) => {
 };
 
 // Custom widgets
-const widgets = {
-    DatepickerWidget: DatepickerWidget,
-    FlexdateWidget: FlexdateWidget
-};
+const widgets = {};
 
 // Custom fields
-const fields = {geo: GeoPosition};
+const fields = {};
 
 const uiSchema = {
-    "descriptive": {
+    "Descriptive-group": {
         "description": {
-            "ui:widget": "textarea",
-            //"ui:readonly": true
-        },
-        "date": {
-            "ui:widget": "DatepickerWidget"
-        },
-        "flexdate": {
-            "ui:widget": "FlexdateWidget"
-        },
-        "discipline": {
-            "ui:widget": "select"
-        },
-        "geo_location": {
-            "ui:field": "geo"
-        },
-        "Related_Datapackages": {
-            items: {
-                "SubProperties": {
-                    "ui:subproperties": true
-                }
-            }
-        },
-        "Collected": {
-            "ui:compound": true,
-            items: {
-                "ui:compound-items": true
-            }
-        }
-    },
-    "administrative": {
-        "retention_period": {
-            "ui:widget": "updown"
-        },
-        "Funding_Reference": {
-            items: {
-                "SubProperties": {
-                    "ui:subproperties": true
-                }
-            }
-        }
-    },
-    "rights": {
-        "Creator": {
-            items: {
-                "SubProperties": {
-                    "ui:subproperties": true
-                }
-            }
-        },
-        "Contributor": {
-            items: {
-                "SubProperties": {
-                    "ui:subproperties": true
-                }
-            }
+            "ui:widget": "textarea"
         }
     }
 };
 
-const formData = {
-    "descriptive": {
-        "title": "Datapackage Title",
-        "Tags": [
-            {}
-        ],
-        "Related_Datapackages": [
-            {
-                "Properties": {
-
-                }
-            }
-        ]
-    },
-    "administrative": {
-        "Funding_Reference": [
-            {
-                "Properties": {
-
-                }
-            }
-        ]
-    },
-    "rights": {
-        "Creator": [
-            {
-                "Properties": {
-
-                }
-            }
-        ],
-        "Contributor": [
-            {
-                "Properties": {
-
-                }
-            }
-        ]
-    }
-};
+const formData = {};
 
 const log = (type) => console.log.bind(console, type);
 const onSubmit = ({formData}) => submitData(formData)
@@ -467,7 +264,7 @@ class YodaForm extends Form {
 render((
     <YodaForm className="form form-horizontal metadata-form"
               schema={schema}
-              idPrefix={"yoda"}
+              idPrefix={"yoda2"}
               uiSchema={uiSchema}
               formData={formData}
               formContext={{env: 'research'}}
@@ -506,6 +303,9 @@ function submitData(data)
 }
 
 function CustomFieldTemplate(props) {
+    //console.log('Field');
+    //console.log(props);
+
     const {id, classNames, label, help, hidden, required, description, errors, rawErrors, children, displayLabel} = props;
 
     if (hidden || !displayLabel) {
@@ -550,7 +350,36 @@ function CustomFieldTemplate(props) {
 
 function ObjectFieldTemplate(props) {
     const { TitleField, DescriptionField } = props;
+    // Sub properties object?
+    //if (props.properties.length > 1 && props.properties[0]['name'] == 'main') {
+    var structure;
+    if ('yoda:structure' in props.schema) {
+        var structure = props.schema['yoda:structure'];
+        /*
+        var obj = {};
+        obj['ui:widget'] = "textarea";
+        obj['classNames'] = "sdsddsds";
 
+        props.properties.forEach(function(properties, index) {
+            if (index == 0) {
+                return;
+            }
+
+
+            var name = properties.content.props.name;
+            props.uiSchema[name] = obj;
+            props.properties[index].content.props.uiSchema = obj;
+
+        });
+        */
+    }
+
+    console.log(props.properties);
+    console.log('fff')
+    console.log(props.properties.map(prop => prop.content));
+
+
+    /*
     const isCompoundItem = props.uiSchema["ui:compound-items"];
     if (isCompoundField) {
         return (
@@ -596,10 +425,34 @@ function ObjectFieldTemplate(props) {
             </fieldset>
         );
     }
+    */
+
+    return (
+        <fieldset className={structure}>
+            {(props.uiSchema["ui:title"] || props.title) && (
+                <TitleField
+                    id={`${props.idSchema.$id}__title`}
+                    title={props.title || props.uiSchema["ui:title"]}
+                    required={props.required}
+                    formContext={props.formContext}
+                />
+            )}
+            {props.description && (
+                <DescriptionField
+                    id={`${props.idSchema.$id}__description`}
+                    description={props.description}
+                    formContext={props.formContext}
+                />
+            )}
+            {props.properties.map(prop => prop.content)}
+        </fieldset>
+    );
+
 }
 
 function ArrayFieldTemplate(props) {
     // Compound field wrapper
+    /*
     const isCompoundField = props.uiSchema["ui:compound"];
     if (isCompoundField) {
         return (
@@ -618,4 +471,12 @@ function ArrayFieldTemplate(props) {
             </div>
         );
     }
+    */
+
+    return (
+        <div>
+            {props.canAdd && <button type="button" onClick={props.onAddClick}>+</button>}
+            {props.items.map(element => element.children)}
+        </div>
+    );
 }
