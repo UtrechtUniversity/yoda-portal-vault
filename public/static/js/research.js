@@ -285,7 +285,7 @@ function toggleLocksList(folder)
                 var html = '<li class="list-group-item disabled">Locks:</li>';
                 var locks = data.result;
                 $.each(locks, function (index, value) {
-                    html += '<li class="list-group-item"><span class="browse" data-path="' + encodeURIComponent(value) + '">' + value + '</span></li>';
+                    html += '<li class="list-group-item"><span class="browse" data-path="' + encodeURIComponent(value) + '">' + htmlEncode(value) + '</span></li>';
                 });
                 $('.lock-items').html(html);
                 $('.lock-items').show();
@@ -323,7 +323,13 @@ function buildActionLog(folder)
             var logItems = data.result;
             if (logItems.length) {
                 $.each(logItems, function (index, value) {
-                    html += '<li class="list-group-item"><span>' + value[2] + ' - <strong>' + value[1] + '</strong> - ' + value[0] + '</span></li>';
+                    html += '<li class="list-group-item"><span>'
+			+ htmlEncode(value[2])
+			+ ' - <strong>'
+			+ htmlEncode(value[1])
+			+ '</strong> - '
+			+ htmlEncode(value[0])
+			+ '</span></li>';
                 });
             }
             else {
@@ -354,7 +360,11 @@ function toggleSystemMetadata(folder)
                 var logItems = data.result;
                 if (logItems.length) {
                     $.each(logItems, function (index, value) {
-                        html += '<li class="list-group-item"><span><strong>' + value[0] + '</strong>: ' + value[1] + '</span></li>';
+                        html += '<li class="list-group-item"><span><strong>'
+			    + htmlEncode(value[0])
+			    + '</strong>: '
+			    + htmlEncode(value[1])
+			    + '</span></li>';
                     });
                 }
                 else {
@@ -959,7 +969,7 @@ function vaultDepublishPublication(folder)
 function vaultRepublishPublication(folder)
 {
     var btnText = $('.btn-group button.folder-status').html();
-    $('.btn-group button.folder-status').html('Depublish publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').html('Republish publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true);
     $('.btn-group button.folder-status').next().prop("disabled", true);
     $.getJSON("vault/republish_publication?path=" + folder, function (data) {
