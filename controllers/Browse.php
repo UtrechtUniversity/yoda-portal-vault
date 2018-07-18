@@ -88,7 +88,9 @@ class Browse extends MY_Controller
 
         $output = $this->filesystem->collectionDetails($rodsaccount, $pathStart . $dirPath);
 
-        echo json_encode($output);
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     public function list_locks()
@@ -112,7 +114,13 @@ class Browse extends MY_Controller
             }
         }
 
-        echo json_encode(array('result' => $locks, 'status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+        $output = array('result' => $locks,
+	                'status' => $result['*status'],
+			'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     public function list_actionLog()
@@ -141,7 +149,13 @@ class Browse extends MY_Controller
             }
         }
 
-        echo json_encode(array('result' => $logItems, 'status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+        $output = array('result' => $logItems,
+	                'status' => $result['*status'],
+			'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     /**
@@ -164,7 +178,13 @@ class Browse extends MY_Controller
             }
         }
 
-        echo json_encode(array('result' => $systemMetadata, 'status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+        $output = array('result' => $systemMetadata,
+	                'status' => $result['*status'],
+			'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     /**
@@ -294,10 +314,16 @@ class Browse extends MY_Controller
             $rows = array();
         }
 
-        $output = array('status' => $status, 'statusInfo' => $statusInfo,
-            'draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
+        $output = array('status' => $status,
+	                'statusInfo' => $statusInfo,
+                        'draw' => $draw,
+			'recordsTotal' => $totalItems,
+			'recordsFiltered' => $totalItems,
+			'data' => $rows);
 
-        echo json_encode($output);
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     /**
@@ -457,10 +483,16 @@ class Browse extends MY_Controller
             $rows = array();
         }
 
-        $output = array('status' => $status, 'statusInfo' => $statusInfo,
-            'draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
+        $output = array('status' => $status,
+	                'statusInfo' => $statusInfo,
+                        'draw' => $draw,
+			'recordsTotal' => $totalItems,
+			'recordsFiltered' => $totalItems,
+			'data' => $rows);
 
-        echo json_encode($output);
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
 
@@ -483,8 +515,11 @@ class Browse extends MY_Controller
             $result = $this->Folder_Status_model->unlock($pathStart . $path);
         }
 
-        $output = array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']);
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo']);
 
-        echo json_encode($output);
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 }
