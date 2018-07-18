@@ -218,11 +218,16 @@ class Search extends MY_Controller
             $rows = array();
         }
 
-        $output = array('status' => $status, 'statusInfo' => $statusInfo,
-            'draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
+        $output = array('status' => $status,
+	                'statusInfo' => $statusInfo,
+                        'draw' => $draw,
+			'recordsTotal' => $totalItems,
+			'recordsFiltered' => $totalItems,
+			'data' => $rows);
 
-        echo json_encode($output);
-
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     public function unset_session()
