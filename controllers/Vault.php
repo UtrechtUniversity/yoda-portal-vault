@@ -52,7 +52,10 @@ class Vault extends MY_Controller
                 $message = array('status' => 'error', 'statusInfo' => implode("<br><br>", $result));
             }
         }
-        echo json_encode($message);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($message));
     }
 
     public function unsubmit()
@@ -68,10 +71,12 @@ class Vault extends MY_Controller
         $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
 
         $result = $this->vaultsubmission->clearSubmitFlag();
-        $status = $result['*status'];
-        $statusInfo = $result['*statusInfo'];
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo']);
 
-        echo json_encode(array('status' => $status, 'statusInfo' => $statusInfo));
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     public function accept()
@@ -82,7 +87,12 @@ class Vault extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->accept($fullPath);
-        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     public function reject()
@@ -93,7 +103,12 @@ class Vault extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->reject($fullPath);
-        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     public function access()
@@ -109,7 +124,12 @@ class Vault extends MY_Controller
             $result = $this->Folder_Status_model->revoke($fullPath);
         }
 
-        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     // Get the text of the terms a researcher has to confirm
@@ -123,10 +143,13 @@ class Vault extends MY_Controller
         $result = $this->Folder_Status_model->getTermsText($fullPath);
 
         // welk model moet license komen??
-        echo json_encode(array('status' => $result['*status'],
-            'statusInfo' => $result['*statusInfo'],
-            'result' => $result['*result']
-            ));
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo'],
+                        'result' => $result['*result']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     public function submit_for_publication()
@@ -137,7 +160,12 @@ class Vault extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->submit_for_publication($fullPath);
-        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     public function approve_for_publication()
@@ -148,7 +176,12 @@ class Vault extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->approve_for_publication($fullPath);
-        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     public function cancel_publication()
@@ -159,19 +192,29 @@ class Vault extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->cancel_publication($fullPath);
-        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
-     public function depublish_publication()
-     {
-         $this->load->model('Folder_Status_model');
-         $pathStart = $this->pathlibrary->getPathStart($this->config);
-         $path = $this->input->get('path');
-         $fullPath =  $pathStart . $path;
+    public function depublish_publication()
+    {
+        $this->load->model('Folder_Status_model');
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $path = $this->input->get('path');
+        $fullPath =  $pathStart . $path;
 
-         $result = $this->Folder_Status_model->depublish_publication($fullPath);
-         echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
-     }
+        $result = $this->Folder_Status_model->depublish_publication($fullPath);
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
 
     public function republish_publication()
     {
@@ -181,7 +224,12 @@ class Vault extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->republish_publication($fullPath);
-        echo json_encode(array('status' => $result['*status'], 'statusInfo' => $result['*statusInfo']));
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
      /// Dit moet naar DataRequst Controller???
@@ -197,10 +245,11 @@ class Vault extends MY_Controller
         $fullOrgPath= $pathStart  . $this->input->get('orgdir');
 
         $result = $this->Data_Request_model->copy_package_from_vault($fullOrgPath, $fullTargetPath);
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo']);
 
-        $status = $result['*status'];
-        $statusInfo = $result['*statusInfo'];
-
-        echo json_encode(array('status' => $status, 'statusInfo' => $statusInfo));
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 }
