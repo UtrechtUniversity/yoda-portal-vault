@@ -363,7 +363,7 @@ function toggleSystemMetadata(folder)
                         html += '<li class="list-group-item"><span><strong>'
 			    + htmlEncode(value[0])
 			    + '</strong>: '
-			    + htmlEncode(value[1])
+			    + value[1]
 			    + '</span></li>';
                     });
                 }
