@@ -1,3 +1,12 @@
+$(document).ajaxSend(function(e, request, settings) {
+    // Append a CSRF token to all AJAX POST requests.
+    if (settings.type === 'POST' && settings.data.length) {
+         settings.data
+             += '&' + encodeURIComponent(YodaPortal.csrf.tokenName)
+              + '=' + encodeURIComponent(YodaPortal.csrf.tokenValue);
+    }
+});
+
 $( document ).ready(function() {
     if ($('#file-browser').length && (view == 'browse' && searchType != 'revision')) {
         // Rememeber search results
@@ -166,31 +175,26 @@ function searchSelectChanged(sel)
 
 function saveSearchRequest(value, type)
 {
-    var url = "search/set_session?value=" + encodeURIComponent(value) + "&type=" + type;
-    $.ajax({
-        url: url,
-        async: false, //blocks window close
-        success: function() {
-            if (type == 'revision' && view == 'revision') {
-                $('#search').hide();
-                $('.search-results').hide();
-                return false;
-            }
-
-            if (type == 'revision' && view == 'browse') {
-                $('#search').hide();
-                $('.search-results').hide();
-
-                window.location.href = "revision?filter=" + encodeURIComponent(value);
-                return false;
-            }
-
-            if (type != 'revision' && view == 'revision') {
-                window.location.href = "browse";
-                return false;
-            }
-
-            showSearchResults();
+    $.post( "search/set_session", { "value" : value, "type" : type }, function(data) {
+        if (type == 'revision' && view == 'revision') {
+            $('#search').hide();
+            $('.search-results').hide();
+            return false;
         }
-    });
+
+        if (type == 'revision' && view == 'browse') {
+            $('#search').hide();
+            $('.search-results').hide();
+
+            window.location.href = "revision?filter=" + encodeURIComponent(value);
+            return false;
+        }
+
+	if (type != 'revision' && view == 'revision') {
+           window.location.href = "browse";
+           return false;
+        }
+
+        showSearchResults();
+    }, "json");
 }
