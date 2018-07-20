@@ -500,8 +500,8 @@ class Browse extends MY_Controller
     {
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $this->load->model('Folder_Status_model');
-        $status = $this->input->get('status');
-        $path = $this->input->get('path');
+        $status = $this->input->post('status');
+        $path = $this->input->post('path');
         $output = array();
 
         $beforeAction = 'LOCKED';

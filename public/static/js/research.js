@@ -697,7 +697,7 @@ function toggleFolderStatus(newStatus, path)
     $('.btn-group button.toggle-folder-status').prop("disabled", true);
 
     // Change folder status call
-    $.getJSON("browse/change_folder_status?path=" + path + "&status=" + newStatus, function(data) {
+    $.post( "browse/change_folder_status", { "path" : decodeURIComponent(path), "status" : newStatus }, function(data) {
         if(data.status == 'Success') {
             // Set actions
             var actions = [];
@@ -752,7 +752,7 @@ function toggleFolderStatus(newStatus, path)
         // Remove disable attribute
         $('.btn-group button.toggle-folder-status').removeAttr("disabled");
         $('.btn-group button.folder-status').next().prop("disabled", false);
-    });
+    }, "json");
 }
 
 function showMetadataForm(path)
