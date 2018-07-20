@@ -240,8 +240,8 @@ class Vault extends MY_Controller
 
         $pathStart = $this->pathlibrary->getPathStart($this->config);
 
-        $fullTargetPath = $pathStart . $this->input->get('targetdir');
-        $fullOrgPath= $pathStart  . $this->input->get('orgdir');
+        $fullTargetPath = $pathStart . $this->input->post('targetdir');
+        $fullOrgPath= $pathStart  . $this->input->post('orgdir');
 
         $result = $this->Data_Request_model->copy_package_from_vault($fullOrgPath, $fullTargetPath);
         $output = array('status' => $result['*status'],
