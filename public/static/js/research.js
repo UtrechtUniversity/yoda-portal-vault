@@ -1,3 +1,12 @@
+$(document).ajaxSend(function(e, request, settings) {
+     // Append a CSRF token to all AJAX POST requests.
+    if (settings.type === 'POST' && settings.data.length) {
+         settings.data
+             += '&' + encodeURIComponent(YodaPortal.csrf.tokenName)
+              + '=' + encodeURIComponent(YodaPortal.csrf.tokenValue);
+    }
+});
+
 $( document ).ready(function() {
     if ($('#file-browser').length) {
         startBrowsing(browseStartDir, browsePageItems);
@@ -761,7 +770,7 @@ function submitToVault(folder)
         $('.btn-group button.folder-status').prop("disabled", true);
         $('.btn-group button.folder-status').next().prop("disabled", true);
 
-        $.getJSON("vault/submit?path=" + folder, function (data) {
+	$.post( "vault/submit", { "path" : decodeURIComponent(folder) }, function(data) {
             if (data.status == 'Success') {
                 if (data.folderStatus == 'SUBMITTED') {
                     $('.btn-group button.folder-status').html('Submitted');
@@ -808,7 +817,7 @@ function submitToVault(folder)
                 // requires refactoring!
                 topInformation(folder,false);
             }
-        });
+	}, "json");
     }
 }
 
@@ -818,7 +827,8 @@ function unsubmitToVault(folder) {
         $('.btn-group button.folder-status').html('Unsubmit <i class="fa fa-spinner fa-spin fa-fw"></i>');
         $('.btn-group button.folder-status').prop("disabled", true);
         $('.btn-group button.folder-status').next().prop("disabled", true);
-        $.getJSON("vault/unsubmit?path=" + folder, function (data) {
+
+	$.post( "vault/unsubmit", { "path" : decodeURIComponent(folder) }, function(data) {
             if (data.status == 'Success') {
                 /*
                 // Set folder status -> Locked
@@ -848,8 +858,7 @@ function unsubmitToVault(folder) {
             }
 
             $('.btn-group button.folder-status').next().removeAttr("disabled");
-        });
-
+	}, "json");
     }
 }
 
@@ -859,10 +868,10 @@ function acceptFolder(folder)
     $('.btn-group button.folder-status').html('Accept <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true);
     $('.btn-group button.folder-status').next().prop("disabled", true);
-    $.getJSON("vault/accept?path=" + folder, function (data) {
+
+    $.post( "vault/accept", { "path" : decodeURIComponent(folder) }, function(data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html('Accepted');
-
         } else {
             $('.btn-group button.folder-status').html(btnText);
             setMessage('error', data.statusInfo);
@@ -871,7 +880,7 @@ function acceptFolder(folder)
             // requires refactoring!
             topInformation(folder, false);
         }
-    });
+    }, "json");
 }
 
 function rejectFolder(folder)
@@ -880,7 +889,8 @@ function rejectFolder(folder)
     $('.btn-group button.folder-status').html('Reject <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true);
     $('.btn-group button.folder-status').next().prop("disabled", true);
-    $.getJSON("vault/reject?path=" + folder, function (data) {
+
+    $.post( "vault/reject", { "path" : decodeURIComponent(folder) }, function(data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html('Rejected');
             $('.btn-group button.toggle-folder-status').text('Lock');
@@ -900,7 +910,7 @@ function rejectFolder(folder)
         if (hasWriteRights == 'yes') {
             $('.btn-group button.toggle-folder-status').prop("disabled", false);
         }
-    });
+    }, "json");
 }
 
 function vaultSubmitForPublication(folder)
@@ -909,7 +919,8 @@ function vaultSubmitForPublication(folder)
     $('.btn-group button.folder-status').html('Submit for publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true);
     $('.btn-group button.folder-status').next().prop("disabled", true);
-    $.getJSON("vault/submit_for_publication?path=" + folder, function (data) {
+
+    $.post( "vault/submit_for_publication", { "path" : decodeURIComponent(folder) }, function(data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html('Submitted for publication');
         } else {
@@ -917,7 +928,7 @@ function vaultSubmitForPublication(folder)
             setMessage('error', data.statusInfo);
         }
         topInformation(folder, false);
-    });
+    }, "json");
 }
 
 function vaultApproveForPublication(folder)
@@ -926,7 +937,8 @@ function vaultApproveForPublication(folder)
     $('.btn-group button.folder-status').html('Approve for publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true);
     $('.btn-group button.folder-status').next().prop("disabled", true);
-    $.getJSON("vault/approve_for_publication?path=" + folder, function (data) {
+
+    $.post( "vault/approve_for_publication", { "path" : decodeURIComponent(folder) }, function(data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html('Approved for publication');
         } else {
@@ -934,7 +946,7 @@ function vaultApproveForPublication(folder)
             setMessage('error', data.statusInfo);
         }
         topInformation(folder, false);
-    });
+    }, "json");
 }
 
 function vaultCancelPublication(folder)
@@ -943,7 +955,8 @@ function vaultCancelPublication(folder)
     $('.btn-group button.folder-status').html('Cancel publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true);
     $('.btn-group button.folder-status').next().prop("disabled", true);
-    $.getJSON("vault/cancel_publication?path=" + folder, function (data) {
+
+    $.post( "vault/cancel_publication", { "path" : decodeURIComponent(folder) }, function(data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html('Unpublished');
         } else {
@@ -960,7 +973,8 @@ function vaultDepublishPublication(folder)
     $('.btn-group button.folder-status').html('Depublish publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true);
     $('.btn-group button.folder-status').next().prop("disabled", true);
-    $.getJSON("vault/depublish_publication?path=" + folder, function (data) {
+
+    $.post( "vault/depublish_publication", { "path" : decodeURIComponent(folder) }, function(data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html(btnText);
             $('label.folder-status-pending span.pending-msg').html('Depublication pending...');
@@ -972,7 +986,7 @@ function vaultDepublishPublication(folder)
             topInformation(folder, false);
             return;
         }
-    });
+    }, "json");
 }
 
 function vaultRepublishPublication(folder)
@@ -981,7 +995,8 @@ function vaultRepublishPublication(folder)
     $('.btn-group button.folder-status').html('Republish publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true);
     $('.btn-group button.folder-status').next().prop("disabled", true);
-    $.getJSON("vault/republish_publication?path=" + folder, function (data) {
+
+    $.post( "vault/republish_publication", { "path" : decodeURIComponent(folder) }, function(data) {
         if (data.status == 'Success') {
             $('.btn-group button.folder-status').html(btnText);
             $('label.folder-status-pending span.pending-msg').html('Republication pending...');
@@ -993,7 +1008,7 @@ function vaultRepublishPublication(folder)
             topInformation(folder, false);
             return;
         }
-    });
+    }, "json");
 }
 
 function vaultAccess(action, folder)
@@ -1001,7 +1016,8 @@ function vaultAccess(action, folder)
     var btnText = $('button.vault-access').html();
     $('button.vault-access').html(btnText + '<i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('button.vault-access').prop("disabled", true);
-    $.getJSON("vault/access?path=" + folder + "&action=" + action, function (data) {
+
+    $.post( "vault/access", { "path" : decodeURIComponent(folder), "action" : action }, function(data) {
         if (data.status == 'Success') {
             if (action == 'grant') {
                 $('button.vault-access').text('Revoke read access to research group');
@@ -1016,5 +1032,5 @@ function vaultAccess(action, folder)
         }
 
         $('button.vault-access').prop("disabled", false);
-    });
+    }, "json");
 }

@@ -18,13 +18,11 @@ class Vault extends MY_Controller
     {
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $path = $this->input->get('path');
+        $path = $this->input->post('path');
+        $fullPath =  $pathStart . $path;
 
         $this->load->model('Metadata_form_model');
         $this->load->model('Folder_Status_model');
-
-        $path = $this->input->get('path');
-        $fullPath =  $pathStart . $path;
 
         $message = array();
 
@@ -63,7 +61,7 @@ class Vault extends MY_Controller
         $this->load->model('Folder_Status_model');
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $path = $this->input->get('path');
+        $path = $this->input->post('path');
         $fullPath =  $pathStart . $path;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
@@ -83,7 +81,7 @@ class Vault extends MY_Controller
     {
         $this->load->model('Folder_Status_model');
         $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $path = $this->input->get('path');
+        $path = $this->input->post('path');
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->accept($fullPath);
@@ -99,7 +97,7 @@ class Vault extends MY_Controller
     {
         $this->load->model('Folder_Status_model');
         $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $path = $this->input->get('path');
+        $path = $this->input->post('path');
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->reject($fullPath);
@@ -111,52 +109,11 @@ class Vault extends MY_Controller
             ->set_output(json_encode($output));
     }
 
-    public function access()
-    {
-        $path = $this->input->get('path');
-        $action = $this->input->get('action');
-        $this->load->model('Folder_Status_model');
-        $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $fullPath =  $pathStart . $path;
-        if ($action == 'grant') {
-            $result = $this->Folder_Status_model->grant($fullPath);
-        } else {
-            $result = $this->Folder_Status_model->revoke($fullPath);
-        }
-
-        $output = array('status' => $result['*status'],
-	                'statusInfo' => $result['*statusInfo']);
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
-    }
-
-    // Get the text of the terms a researcher has to confirm
-    public function terms()
-    {
-        $path = $this->input->get('path');
-        $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $fullPath =  $pathStart . $path;
-
-        $this->load->model('Folder_Status_model');
-        $result = $this->Folder_Status_model->getTermsText($fullPath);
-
-        // welk model moet license komen??
-        $output = array('status' => $result['*status'],
-	                'statusInfo' => $result['*statusInfo'],
-                        'result' => $result['*result']);
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
-    }
-
     public function submit_for_publication()
     {
         $this->load->model('Folder_Status_model');
         $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $path = $this->input->get('path');
+        $path = $this->input->post('path');
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->submit_for_publication($fullPath);
@@ -172,7 +129,7 @@ class Vault extends MY_Controller
     {
         $this->load->model('Folder_Status_model');
         $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $path = $this->input->get('path');
+        $path = $this->input->post('path');
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->approve_for_publication($fullPath);
@@ -188,7 +145,7 @@ class Vault extends MY_Controller
     {
         $this->load->model('Folder_Status_model');
         $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $path = $this->input->get('path');
+        $path = $this->input->post('path');
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->cancel_publication($fullPath);
@@ -220,12 +177,54 @@ class Vault extends MY_Controller
     {
         $this->load->model('Folder_Status_model');
         $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $path = $this->input->get('path');
+        $path = $this->input->post('path');
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->republish_publication($fullPath);
         $output = array('status' => $result['*status'],
 	                'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
+
+    public function access()
+    {
+        $path = $this->input->post('path');
+        $action = $this->input->post('action');
+
+        $this->load->model('Folder_Status_model');
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $fullPath =  $pathStart . $path;
+        if ($action == 'grant') {
+            $result = $this->Folder_Status_model->grant($fullPath);
+        } else {
+            $result = $this->Folder_Status_model->revoke($fullPath);
+        }
+
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
+
+    // Get the text of the terms a researcher has to confirm
+    public function terms()
+    {
+        $path = $this->input->get('path');
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $fullPath =  $pathStart . $path;
+
+        $this->load->model('Folder_Status_model');
+        $result = $this->Folder_Status_model->getTermsText($fullPath);
+
+        // welk model moet license komen??
+        $output = array('status' => $result['*status'],
+	                'statusInfo' => $result['*statusInfo'],
+                        'result' => $result['*result']);
 
         $this->output
             ->set_content_type('application/json')
