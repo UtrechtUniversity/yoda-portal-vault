@@ -1,3 +1,12 @@
+$(document).ajaxSend(function(e, request, settings) {
+    // Append a CSRF token to all AJAX POST requests.
+    if (settings.type === 'POST' && settings.data.length) {
+         settings.data
+             += '&' + encodeURIComponent(YodaPortal.csrf.tokenName)
+              + '=' + encodeURIComponent(YodaPortal.csrf.tokenValue);
+    }
+});
+
 $( document ).ready(function() {
     if ($('#file-browser').length && (view == 'browse' && searchType != 'revision')) {
         // Rememeber search results
@@ -166,8 +175,7 @@ function searchSelectChanged(sel)
 
 function saveSearchRequest(value, type)
 {
-    var tokenValue = YodaPortal.csrf.tokenValue;
-    $.post( "search/set_session", { "value" : value, "type" : type, "csrf_yoda": tokenValue }, function(data) {
+    $.post( "search/set_session", { "value" : value, "type" : type }, function(data) {
         if (type == 'revision' && view == 'revision') {
             $('#search').hide();
             $('.search-results').hide();
