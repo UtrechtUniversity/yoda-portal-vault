@@ -161,7 +161,7 @@ class Vault extends MY_Controller
     {
         $this->load->model('Folder_Status_model');
         $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $path = $this->input->get('path');
+        $path = $this->input->post('path');
         $fullPath =  $pathStart . $path;
 
         $result = $this->Folder_Status_model->depublish_publication($fullPath);
