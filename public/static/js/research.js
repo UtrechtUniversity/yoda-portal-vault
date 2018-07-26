@@ -1,3 +1,13 @@
+$(document).ajaxSend(function(e, request, settings) {
+    // Append a CSRF token to all AJAX POST requests.
+    if (settings.type === 'POST' && settings.data.length) {
+         settings.data
+             += '&' + encodeURIComponent(YodaPortal.csrf.tokenName)
+              + '=' + encodeURIComponent(YodaPortal.csrf.tokenValue);
+    }
+});
+
+
 $( document ).ready(function() {
     if ($('#file-browser').length) {
         startBrowsing(browseStartDir, browsePageItems);
@@ -119,6 +129,39 @@ $( document ).ready(function() {
         $('#confirmRepublish').modal('hide');
         vaultRepublishPublication($(this).attr('data-folder'));
     });
+
+    // search
+    if ($('#file-browser').length && (view == 'browse' && searchType != 'revision')) {
+        // Rememeber search results
+        if (searchStatusValue.length > 0) {
+            $('[name=status]').val(searchStatusValue);
+            search(searchStatusValue, 'status', browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+         } else if (searchTerm.length > 0) {
+            search(decodeURIComponent(searchTerm), searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+        }
+    }
+
+    $(".search-panel .dropdown-menu li a").click(function(){
+        searchSelectChanged($(this));
+    });
+
+    $(".search-btn").click(function(){
+        search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+    });
+
+    $("#search-filter").bind('keypress', function(e) {
+        if(e.keyCode==13) {
+            search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+        }
+    });
+
+    $(".search-status").change(function() {
+        search($(this).val(), 'status', $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+    });
+
+    $(".close-search-results").click(function() {
+        closeSearchResults();
+    });    
 });
 
 function browse(dir)
