@@ -54,6 +54,7 @@ class Revision extends MY_Controller
             'scriptIncludes' => array(
                 'lib/datatables/js/jquery.dataTables.min.js',
                 'lib/datatables/js/dataTables.bootstrap.min.js',
+                'js/post.js',
                 'js/revision.js',
                 'js/search.js',
             ),

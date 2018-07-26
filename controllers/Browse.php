@@ -68,7 +68,9 @@ class Browse extends MY_Controller
             'scriptIncludes' => array(
                 'lib/datatables/js/jquery.dataTables.min.js',
                 'lib/datatables/js/dataTables.bootstrap.min.js',
+                'js/post.js',
                 'js/research.js',
+                'js/search.js',
                 'js/dlgSelectCollection.js'
             ),
             'activeModule'   => 'research',
