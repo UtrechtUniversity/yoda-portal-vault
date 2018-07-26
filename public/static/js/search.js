@@ -166,8 +166,11 @@ function searchSelectChanged(sel)
 
 function saveSearchRequest(value, type)
 {
-    $.post( "search/set_session", { "value" : encodeURIComponent(value), "type" : type }, function(data) {
-        if(data.status == 'Success') {
+    var url = "search/set_session?value=" + encodeURIComponent(value) + "&type=" + type;
+    $.ajax({
+        url: url,
+        async: false, //blocks window close
+        success: function() {
             if (type == 'revision' && view == 'revision') {
                 $('#search').hide();
                 $('.search-results').hide();
