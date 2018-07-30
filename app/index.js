@@ -1,241 +1,14 @@
 import React, { Component } from "react";
+import axios from 'axios';
 import { render } from "react-dom";
 
 import Form from "react-jsonschema-form";
-
-const schema = {
-    "definitions": {
-        "stringNormal": {
-            "type": "string",
-            "maxLength": 255
-        },
-        "stringLong": {
-            "type": "string",
-            "maxLength": 2700
-        }
-    },
-    "title": "",
-    "type": "object",
-    "properties": {
-        "Descriptive-group": {
-            "type": "object",
-            "comment": "group",
-            "title": "Descriptive",
-            "properties": {
-                "title" : {
-                    "type" : "string",
-                    "title": "Title"
-                },
-                "description" : {
-                    "$ref": "#/definitions/stringLong",
-                    "title": "Description"
-                },
-                "Rdiscipline" : {
-                    "type" : "array",
-                    "comment" : "repeat",
-                    "items": {
-                        "type" : "string",
-                        "title": "Discipline",
-                        "enum" : ["science","humanities","gamma"]
-                    }
-                },
-                "version": {
-                    "type": "string",
-                    "title": "Version"
-                },
-                "language": {
-                    "type": "string",
-                    "title": "Language of the data",
-                    "enum": ["NL", "EN", "ES"]
-                },
-                "collect": {
-                    "type": "object",
-                    "comment": "composite",
-                    "title": "Collection process",
-                    "properties": {
-                        "start": {
-                            "type": "string",
-                            "title": "Start date"
-                        },
-                        "end": {
-                            "type": "string",
-                            "title": "End date"
-                        }
-                    },
-                    "yoda:structure": "compound"
-                },
-                "Rlocation": {
-                    "type": "array",
-                    "comment": "repeat",
-                    "items": {
-                        "type": "string",
-                        "title": "Location(s) covered"
-                    }
-                },
-                "period": {
-                    "type": "object",
-                    "comment": "composite",
-                    "title": "Period covered",
-                    "properties": {
-                        "start": {
-                            "type": "string",
-                            "title": "Start date"
-                        },
-                        "end": {
-                            "type": "string",
-                            "title": "End date"
-                        }
-                    }
-                },
-
-                "tag": {
-                    "type": "array",
-                    "comment": "repeat",
-                    "items": {
-                        "type": "string",
-                        "title": "Tag"
-                    }
-                },
-
-                "Rrelated": {
-                    "type": "array",
-                    "comment": "repeat",
-                    "items": {
-                        "type": "object",
-                        "comment": "subprops",
-                        "properties": {
-                            "main": {
-                                "type": "string",
-                                "title": "Related data package"
-                            },
-                            "sub": {
-                                "type": "object",
-                                "comment": "sub",
-                                "properties": {
-                                    "title": {
-                                        "type": "string",
-                                        "title": "Title"
-                                    },
-                                    "Rid": {
-                                        "type": "object",
-                                        "comment": "composite",
-                                        "properties": {
-                                            "pers": {
-                                                "type": "string",
-                                                "title": "Persistent identifier"
-                                            },
-                                            "identifier": {
-                                                "type": "string",
-                                                "title": "Identifier",
-                                                "enum": ["DOI", "EPIC"]
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "Rights" : {
-            "type": "object",
-            "comment": "group",
-            "title": "Rights group",
-            "properties": {
-                "suppie": {
-                    "type" : "object",
-                    "comment" : "subprops type 2",
-                    "title": "my suppie",
-                    "properties" : {
-                        "main" : {
-                            "type" : "string",
-                            "title": "Main prop"
-                        },
-                        "sub1" : {
-                            "type" : "string",
-                            "title": "Sub prop1"
-                        },
-                        "sub2" : {
-                            "type" : "string",
-                            "title": "Sub prop2"
-                        }
-                    },
-                    "required": ["main"],
-                    "yoda:structure": "subproperties"
-                }
-            }
-        }
-    }
-};
-
-
-
-// Define a custom component for handling the root position object
-class GeoPosition extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {...props.formData};
-    }
-
-    onChange(name) {
-        console.log(name);
-
-        return (event) => {
-            this.setState({
-                [name]: event.target.value
-            }, () => this.props.onChange(this.state));
-        };
-    }
-
-    render() {
-        const {geo_location} = this.state;
-
-        return (
-            <div>
-                <input type="string" value={geo_location} onChange={this.onChange(this.props.name)} />
-            </div>
-        );
-    }
-}
-
-const DatepickerWidget = (props) => {
-    return (
-        <input type="text"
-               className="form-control datepicker"
-               value={props.value}
-               required={props.required}
-               onChange={(event) => props.onChange(event.target.value)} />
-    );
-};
-
-const FlexdateWidget = (props) => {
-    return (
-        <input type="text"
-               className="form-control"
-               placeholder="yyyy(-mm(-dd))"
-               value={props.value}
-               required={props.required}
-               onChange={(event) => props.onChange(event.target.value)} />
-    );
-};
 
 // Custom widgets
 const widgets = {};
 
 // Custom fields
 const fields = {};
-
-const uiSchema = {
-    "Descriptive-group": {
-        "description": {
-            "ui:widget": "textarea"
-        }
-    }
-};
-
-const formData = {};
 
 const log = (type) => console.log.bind(console, type);
 const onSubmit = ({formData}) => submitData(formData)
@@ -260,27 +33,41 @@ class YodaForm extends Form {
     }
 }
 
+var form = document.getElementById('form');
+var path = form.dataset.path;
 
-render((
-    <YodaForm className="form form-horizontal metadata-form"
-              schema={schema}
-              idPrefix={"yoda2"}
-              uiSchema={uiSchema}
-              formData={formData}
-              formContext={{env: 'research'}}
-              fields={fields}
-              widgets={widgets}
-              ArrayFieldTemplate={ArrayFieldTemplate}
-              ObjectFieldTemplate={ObjectFieldTemplate}
-              FieldTemplate={CustomFieldTemplate}
-              liveValidate={true}
-              noValidate={false}
-              noHtml5Validate={true}
-              showErrorList={false}
-              onChange={onChange}
-              onSubmit={onSubmit}
-              onError={log("errors")} />
-), document.getElementById("form"));
+axios.get("/research/metadata/data?path=" + path)
+    .then(function (response) {
+        // handle success
+        const schema = JSON.parse(response.data.schema);
+        const uiSchema = JSON.parse(response.data.uiSchema);
+        const formData = JSON.parse(response.data.formData);
+
+        render((
+            <YodaForm className="form form-horizontal metadata-form"
+                      schema={schema}
+                      idPrefix={"yoda2"}
+                      uiSchema={uiSchema}
+                      formData={formData}
+                      formContext={{env: 'research'}}
+                      fields={fields}
+                      widgets={widgets}
+                      ArrayFieldTemplate={ArrayFieldTemplate}
+                      ObjectFieldTemplate={ObjectFieldTemplate}
+                      FieldTemplate={CustomFieldTemplate}
+                      liveValidate={true}
+                      noValidate={false}
+                      noHtml5Validate={true}
+                      showErrorList={false}
+                      onChange={onChange}
+                      onSubmit={onSubmit}
+                      onError={log("errors")} />
+        ), document.getElementById("form"));
+    })
+    .catch(function (error) {
+        // handle error
+        console.log(error);
+    });
 
 function submitData(data)
 {
@@ -373,11 +160,6 @@ function ObjectFieldTemplate(props) {
         });
         */
     }
-
-    console.log(props.properties);
-    console.log('fff')
-    console.log(props.properties.map(prop => prop.content));
-
 
     /*
     const isCompoundItem = props.uiSchema["ui:compound-items"];

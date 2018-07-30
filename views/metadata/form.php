@@ -182,7 +182,7 @@
 
 <div class="row">
     <div class="col-md-12">
-        <div id="form"></div>
+        <div id="form" data-path="<?php echo urlencode($path); ?>"></div>
     </div>
 </div>
 

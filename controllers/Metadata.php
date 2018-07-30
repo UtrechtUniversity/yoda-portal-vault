@@ -228,6 +228,258 @@ class Metadata extends MY_Controller
         loadView('metadata/form', $viewParams);
     }
 
+    public function data()
+    {
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+
+        $this->load->model('Metadata_form_model');
+        $this->load->model('Metadata_model');
+        $this->load->model('Folder_Status_model');
+        $this->load->model('Filesystem');
+
+        $path = $this->input->get('path');
+        $fullPath = $pathStart . $path;
+
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
+        $XmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
+
+        $jsonSchema = <<<'JSON'
+        {
+    "definitions": {
+        "stringNormal": {
+            "type": "string",
+            "maxLength": 255
+        },
+        "stringLong": {
+            "type": "string",
+            "maxLength": 2700
+        }
+    },
+    "title": "",
+    "type": "object",
+    "properties": {
+        "Descriptive-group": {
+            "type": "object",
+            "comment": "group",
+            "title": "Descriptive",
+            "properties": {
+                "title" : {
+                    "type" : "string",
+                    "title": "Title"
+                },
+                "description" : {
+                    "$ref": "#/definitions/stringLong",
+                    "title": "Description"
+                },
+                "Rdiscipline" : {
+                    "type" : "array",
+                    "comment" : "repeat",
+                    "items": {
+                        "type" : "string",
+                        "title": "Discipline",
+                        "enum" : ["science","humanities","gamma"]
+                    }
+                },
+                "Version": {
+                    "type": "string",
+                    "title": "Version"
+                },
+                "Language": {
+                    "type": "string",
+                    "title": "Language of the data",
+                    "enum": ["NL", "EN", "ES"]
+                },
+                "collect": {
+                    "type": "object",
+                    "comment": "composite",
+                    "title": "Collection process",
+                    "properties": {
+                        "start": {
+                            "type": "string",
+                            "title": "Start date"
+                        },
+                        "end": {
+                            "type": "string",
+                            "title": "End date"
+                        }
+                    },
+                    "yoda:structure": "compound"
+                },
+                "Rlocation": {
+                    "type": "array",
+                    "comment": "repeat",
+                    "items": {
+                        "type": "string",
+                        "title": "Location(s) covered"
+                    }
+                },
+                "period": {
+                    "type": "object",
+                    "comment": "composite",
+                    "title": "Period covered",
+                    "properties": {
+                        "start": {
+                            "type": "string",
+                            "title": "Start date"
+                        },
+                        "end": {
+                            "type": "string",
+                            "title": "End date"
+                        }
+                    }
+                },
+
+                "tag": {
+                    "type": "array",
+                    "comment": "repeat",
+                    "items": {
+                        "type": "string",
+                        "title": "Tag"
+                    }
+                },
+
+                "Rrelated": {
+                    "type": "array",
+                    "comment": "repeat",
+                    "items": {
+                        "type": "object",
+                        "comment": "subprops",
+                        "properties": {
+                            "main": {
+                                "type": "string",
+                                "title": "Related data package"
+                            },
+                            "sub": {
+                                "type": "object",
+                                "comment": "sub",
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "title": "Title"
+                                    },
+                                    "Rid": {
+                                        "type": "object",
+                                        "comment": "composite",
+                                        "properties": {
+                                            "pers": {
+                                                "type": "string",
+                                                "title": "Persistent identifier"
+                                            },
+                                            "identifier": {
+                                                "type": "string",
+                                                "title": "Identifier",
+                                                "enum": ["DOI", "EPIC"]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "Rights" : {
+            "type": "object",
+            "comment": "group",
+            "title": "Rights group",
+            "properties": {
+                "suppie": {
+                    "type" : "object",
+                    "comment" : "subprops type 2",
+                    "title": "my suppie",
+                    "properties" : {
+                        "main" : {
+                            "type" : "string",
+                            "title": "Main prop"
+                        },
+                        "sub1" : {
+                            "type" : "string",
+                            "title": "Sub prop1"
+                        },
+                        "sub2" : {
+                            "type" : "string",
+                            "title": "Sub prop2"
+                        }
+                    },
+                    "required": ["main"],
+                    "yoda:structure": "subproperties"
+                }
+            }
+        }
+    }
+}
+JSON;
+
+        $uiSchema = <<<'JSON'
+    {
+        "Descriptive-group": {
+            "description": {
+                "ui:widget": "textarea"
+            }
+        }
+    }
+JSON;
+
+        $result = json_decode($jsonSchema, true);
+        $formData = array();
+        foreach ($result['properties'] as $groupKey => $group) {
+            //Group
+            foreach($group['properties'] as $fieldKey => $field) {
+                // Field
+                if (array_key_exists('type', $field)) {
+                    if ($field['type'] == 'string') { // string
+                        if (isset($XmlFormData[$fieldKey])) {
+                            $formData[$groupKey][$fieldKey] = $XmlFormData[$fieldKey];
+                        }
+                    } else if ($field['type'] == 'array') { // array
+                        if ($field['items']['type'] == 'string') {
+                            $formData[$groupKey][$fieldKey] = array($fieldKey);
+                        } else if ($field['items']['type'] == 'object') {
+                            $formData[$groupKey][$fieldKey] = array();
+                            $emptyObjectField = array();
+                            foreach ($field['items']['properties'] as $objectKey => $objectField) {
+                                if ($objectField['type'] == 'string') {
+                                    $emptyObjectField[$objectKey] = $objectKey;
+                                } else if ($objectField['type'] == 'object') { //subproperties
+                                    foreach ($objectField['properties'] as $subObjectKey => $subObjectField) {
+                                        if ($subObjectField['type'] == 'string') {
+                                            $emptyObjectField[$objectKey][$subObjectKey] = $objectKey;
+                                        } else if ($subObjectField['type'] == 'object') {// Composite
+                                            $compositeField = array();
+                                            foreach ($subObjectField['properties'] as $subCompositeKey => $subCompositeField) {
+                                                $compositeField[$subCompositeKey] = $subCompositeKey;
+                                            }
+
+                                            $emptyObjectField[$objectKey][$subObjectKey] = $compositeField;
+                                        }
+                                    }
+                                }
+                            }
+                            $formData[$groupKey][$fieldKey][] = $emptyObjectField;
+                        }
+                    } else if ($field['type'] == 'object') {
+                        foreach ($field['properties'] as $objectKey => $objectField) {
+                            $formData[$groupKey][$fieldKey][$objectKey] = $objectKey;
+                        }
+                    }
+                } else {
+                    $formData[$groupKey][$fieldKey] = $fieldKey;
+                }
+            }
+        }
+
+        $output = array();
+        $output['path'] = $path;
+        $output['schema'] = $jsonSchema;
+        $output['uiSchema'] = $uiSchema;
+        $output['formData'] = json_encode($formData);
+
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($output));
+    }
+
     /**
      * Serves storing of:
      *
