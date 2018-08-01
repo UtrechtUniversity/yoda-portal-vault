@@ -264,21 +264,21 @@ class Metadata extends MY_Controller
             "comment": "group",
             "title": "Descriptive",
             "properties": {
-                "title" : {
+                "Title" : {
                     "type" : "string",
                     "title": "Title"
                 },
-                "description" : {
+                "Description" : {
                     "$ref": "#/definitions/stringLong",
                     "title": "Description"
                 },
-                "Rdiscipline" : {
+                "Discipline" : {
                     "type" : "array",
                     "comment" : "repeat",
                     "items": {
                         "type" : "string",
                         "title": "Discipline",
-                        "enum" : ["science","humanities","gamma"]
+                        "enum" : ["science","humanities","gamma", "Natural Sciences - Computer and information sciences (1.2)"]
                     }
                 },
                 "Version": {
@@ -290,23 +290,23 @@ class Metadata extends MY_Controller
                     "title": "Language of the data",
                     "enum": ["NL", "EN", "ES"]
                 },
-                "collect": {
+                "Collected": {
                     "type": "object",
                     "comment": "composite",
                     "title": "Collection process",
                     "properties": {
-                        "start": {
+                        "Start_Date": {
                             "type": "string",
                             "title": "Start date"
                         },
-                        "end": {
+                        "End_Date": {
                             "type": "string",
                             "title": "End date"
                         }
                     },
                     "yoda:structure": "compound"
                 },
-                "Rlocation": {
+                "Covered_Geolocation_Place": {
                     "type": "array",
                     "comment": "repeat",
                     "items": {
@@ -314,16 +314,16 @@ class Metadata extends MY_Controller
                         "title": "Location(s) covered"
                     }
                 },
-                "period": {
+                "Covered_Period": {
                     "type": "object",
                     "comment": "composite",
                     "title": "Period covered",
                     "properties": {
-                        "start": {
+                        "Start_Date": {
                             "type": "string",
                             "title": "Start date"
                         },
-                        "end": {
+                        "End_Date": {
                             "type": "string",
                             "title": "End date"
                         }
@@ -435,9 +435,10 @@ JSON;
                         }
                     } else if ($field['type'] == 'array') { // array
                         if ($field['items']['type'] == 'string') {
-                            $formData[$groupKey][$fieldKey] = array($fieldKey);
+                            //$formData[$groupKey][$fieldKey] = array($fieldKey);
+                            $formData[$groupKey][$fieldKey] = array($XmlFormData[$fieldKey]);
                         } else if ($field['items']['type'] == 'object') {
-                            $formData[$groupKey][$fieldKey] = array();
+                            //$formData[$groupKey][$fieldKey] = array();
                             $emptyObjectField = array();
                             foreach ($field['items']['properties'] as $objectKey => $objectField) {
                                 if ($objectField['type'] == 'string') {
@@ -457,15 +458,19 @@ JSON;
                                     }
                                 }
                             }
-                            $formData[$groupKey][$fieldKey][] = $emptyObjectField;
+                            //$formData[$groupKey][$fieldKey][] = $emptyObjectField;
                         }
                     } else if ($field['type'] == 'object') {
                         foreach ($field['properties'] as $objectKey => $objectField) {
-                            $formData[$groupKey][$fieldKey][$objectKey] = $objectKey;
+                            if (isset($XmlFormData[$fieldKey][$objectKey])) {
+                                $formData[$groupKey][$fieldKey][$objectKey] = $XmlFormData[$fieldKey][$objectKey];
+                            }
                         }
                     }
                 } else {
-                    $formData[$groupKey][$fieldKey] = $fieldKey;
+                    if (isset($XmlFormData[$fieldKey])) {
+                        $formData[$groupKey][$fieldKey] = $XmlFormData[$fieldKey];
+                    }
                 }
             }
         }
