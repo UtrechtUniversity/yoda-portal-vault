@@ -400,10 +400,12 @@ JSON;
                         }
                     } else if ($field['type'] == 'array') { // array
                         if ($field['items']['type'] == 'string') {
-                            if (count($xmlFormData[$fieldKey]) == 1) {
-                                $formData[$groupKey][$fieldKey] = array($xmlFormData[$fieldKey]);
-                            } else {
-                                $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
+                            if (isset($xmlFormData[$fieldKey])) {
+                                if (count($xmlFormData[$fieldKey]) == 1) {
+                                    $formData[$groupKey][$fieldKey] = array($xmlFormData[$fieldKey]);
+                                } else {
+                                    $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
+                                }
                             }
                         } else if ($field['items']['type'] == 'object') {
                             //$formData[$groupKey][$fieldKey] = array();
@@ -449,10 +451,6 @@ JSON;
                         }
 
                         foreach ($field['properties'] as $objectKey => $objectField) {
-                            //print_r($objectField);
-                            if (isset($field['properties']['yoda:structure'])) {
-                                print_r($field);
-                            }
                             if (isset($xmlFormData[$fieldKey][$objectKey])) {
                                 $formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey][$objectKey];
                             }
