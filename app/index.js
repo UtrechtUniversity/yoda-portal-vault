@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import axios from 'axios';
 import { render } from "react-dom";
 
+
 import Form from "react-jsonschema-form";
 
 // Custom widgets
@@ -39,9 +40,9 @@ var path = form.dataset.path;
 axios.get("/research/metadata/data?path=" + path)
     .then(function (response) {
         // handle success
-        const schema = JSON.parse(response.data.schema);
-        const uiSchema = JSON.parse(response.data.uiSchema);
-        const formData = JSON.parse(response.data.formData);
+        const schema = response.data.schema;
+        const uiSchema = response.data.uiSchema;
+        const formData = response.data.formData;
 
         render((
             <YodaForm className="form form-horizontal metadata-form"

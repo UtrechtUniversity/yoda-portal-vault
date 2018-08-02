@@ -242,7 +242,7 @@ class Metadata extends MY_Controller
         $fullPath = $pathStart . $path;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-        $XmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
+        $xmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
 
         $jsonSchema = <<<'JSON'
         {
@@ -330,7 +330,7 @@ class Metadata extends MY_Controller
                     }
                 },
 
-                "tag": {
+                "Tag": {
                     "type": "array",
                     "comment": "repeat",
                     "items": {
@@ -338,72 +338,37 @@ class Metadata extends MY_Controller
                         "title": "Tag"
                     }
                 },
-
-                "Rrelated": {
-                    "type": "array",
-                    "comment": "repeat",
-                    "items": {
-                        "type": "object",
-                        "comment": "subprops",
-                        "properties": {
-                            "main": {
-                                "type": "string",
-                                "title": "Related data package"
-                            },
-                            "sub": {
-                                "type": "object",
-                                "comment": "sub",
-                                "properties": {
-                                    "title": {
-                                        "type": "string",
-                                        "title": "Title"
-                                    },
-                                    "Rid": {
-                                        "type": "object",
-                                        "comment": "composite",
-                                        "properties": {
-                                            "pers": {
-                                                "type": "string",
-                                                "title": "Persistent identifier"
-                                            },
-                                            "identifier": {
-                                                "type": "string",
-                                                "title": "Identifier",
-                                                "enum": ["DOI", "EPIC"]
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "Rights" : {
-            "type": "object",
-            "comment": "group",
-            "title": "Rights group",
-            "properties": {
-                "suppie": {
+                
+                "Related_Datapackage": {
                     "type" : "object",
                     "comment" : "subprops type 2",
                     "title": "my suppie",
                     "properties" : {
-                        "main" : {
+                        "Relation_Type" : {
                             "type" : "string",
-                            "title": "Main prop"
+                            "title": "Related Datapackage"
                         },
-                        "sub1" : {
+                        "Title" : {
                             "type" : "string",
-                            "title": "Sub prop1"
+                            "title": "Title"
                         },
-                        "sub2" : {
-                            "type" : "string",
-                            "title": "Sub prop2"
-                        }
+                        "Persistent_Identifier": {
+                            "type": "object",
+                            "comment": "composite",
+                            "title": "Persistent Identifier",
+                            "properties": {
+                                "Identifier_Scheme": {
+                                    "type": "string",
+                                    "title": "Type"
+                                },
+                                "Identifier": {
+                                    "type": "string",
+                                    "title": "Identifier"
+                                }
+                            },
+                            "yoda:structure": "compound"
+                        }                        
                     },
-                    "required": ["main"],
                     "yoda:structure": "subproperties"
                 }
             }
@@ -411,7 +376,6 @@ class Metadata extends MY_Controller
     }
 }
 JSON;
-
         $uiSchema = <<<'JSON'
     {
         "Descriptive-group": {
@@ -422,6 +386,7 @@ JSON;
     }
 JSON;
 
+
         $result = json_decode($jsonSchema, true);
         $formData = array();
         foreach ($result['properties'] as $groupKey => $group) {
@@ -430,13 +395,16 @@ JSON;
                 // Field
                 if (array_key_exists('type', $field)) {
                     if ($field['type'] == 'string') { // string
-                        if (isset($XmlFormData[$fieldKey])) {
-                            $formData[$groupKey][$fieldKey] = $XmlFormData[$fieldKey];
+                        if (isset($xmlFormData[$fieldKey])) {
+                            $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
                         }
                     } else if ($field['type'] == 'array') { // array
                         if ($field['items']['type'] == 'string') {
-                            //$formData[$groupKey][$fieldKey] = array($fieldKey);
-                            $formData[$groupKey][$fieldKey] = array($XmlFormData[$fieldKey]);
+                            if (count($xmlFormData[$fieldKey]) == 1) {
+                                $formData[$groupKey][$fieldKey] = array($xmlFormData[$fieldKey]);
+                            } else {
+                                $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
+                            }
                         } else if ($field['items']['type'] == 'object') {
                             //$formData[$groupKey][$fieldKey] = array();
                             $emptyObjectField = array();
@@ -445,6 +413,7 @@ JSON;
                                     $emptyObjectField[$objectKey] = $objectKey;
                                 } else if ($objectField['type'] == 'object') { //subproperties
                                     foreach ($objectField['properties'] as $subObjectKey => $subObjectField) {
+                                        print_r(123);
                                         if ($subObjectField['type'] == 'string') {
                                             $emptyObjectField[$objectKey][$subObjectKey] = $objectKey;
                                         } else if ($subObjectField['type'] == 'object') {// Composite
@@ -461,15 +430,37 @@ JSON;
                             //$formData[$groupKey][$fieldKey][] = $emptyObjectField;
                         }
                     } else if ($field['type'] == 'object') {
+                        $structure = $field['yoda:structure'];
+                        // Subproperties
+                        if (isset($structure) && $structure == 'subproperties') {
+                            $mainProp = true;
+                            foreach ($field['properties'] as $objectKey => $objectField) {
+                                if ($mainProp) {
+                                    if (isset($xmlFormData[$fieldKey][$objectKey])) {
+                                        $formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey][$objectKey];
+                                    }
+                                    $mainProp = false;
+                                } else {
+                                    if (isset($xmlFormData[$fieldKey]['Properties'][$objectKey])) {
+                                        $formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
+                                    }
+                                }
+                            }
+                        }
+
                         foreach ($field['properties'] as $objectKey => $objectField) {
-                            if (isset($XmlFormData[$fieldKey][$objectKey])) {
-                                $formData[$groupKey][$fieldKey][$objectKey] = $XmlFormData[$fieldKey][$objectKey];
+                            //print_r($objectField);
+                            if (isset($field['properties']['yoda:structure'])) {
+                                print_r($field);
+                            }
+                            if (isset($xmlFormData[$fieldKey][$objectKey])) {
+                                $formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey][$objectKey];
                             }
                         }
                     }
                 } else {
-                    if (isset($XmlFormData[$fieldKey])) {
-                        $formData[$groupKey][$fieldKey] = $XmlFormData[$fieldKey];
+                    if (isset($xmlFormData[$fieldKey])) {
+                        $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
                     }
                 }
             }
@@ -477,10 +468,9 @@ JSON;
 
         $output = array();
         $output['path'] = $path;
-        $output['schema'] = $jsonSchema;
-        $output['uiSchema'] = $uiSchema;
-        $output['formData'] = json_encode($formData);
-
+        $output['schema'] = json_decode($jsonSchema);
+        $output['uiSchema'] = json_decode($uiSchema);
+        $output['formData'] = $formData;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }
