@@ -327,7 +327,8 @@ class Metadata extends MY_Controller
                             "type": "string",
                             "title": "End date"
                         }
-                    }
+                    },
+                    "yoda:structure": "compound"
                 },
 
                 "Tag": {
@@ -354,8 +355,8 @@ class Metadata extends MY_Controller
                         },
                         "Persistent_Identifier": {
                             "type": "object",
-                            "comment": "composite",
                             "title": "Persistent Identifier",
+                            "comment": "composite",
                             "properties": {
                                 "Identifier_Scheme": {
                                     "type": "string",

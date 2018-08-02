@@ -122,7 +122,7 @@ function CustomFieldTemplate(props) {
             ) : (
                 <span className={'fa-stack col-sm-1'}></span>
             )}
-            <div className={'col-sm-9'}>
+            <div className={'col-sm-9 field-wrapper'}>
                 <div className={'row'}>
                     <div className={'col-sm-12'}>
                         {description}
@@ -138,77 +138,11 @@ function CustomFieldTemplate(props) {
 
 function ObjectFieldTemplate(props) {
     const { TitleField, DescriptionField } = props;
-    // Sub properties object?
-    //if (props.properties.length > 1 && props.properties[0]['name'] == 'main') {
+
     var structure;
     if ('yoda:structure' in props.schema) {
         var structure = props.schema['yoda:structure'];
-        /*
-        var obj = {};
-        obj['ui:widget'] = "textarea";
-        obj['classNames'] = "sdsddsds";
-
-        props.properties.forEach(function(properties, index) {
-            if (index == 0) {
-                return;
-            }
-
-
-            var name = properties.content.props.name;
-            props.uiSchema[name] = obj;
-            props.properties[index].content.props.uiSchema = obj;
-
-        });
-        */
     }
-
-    /*
-    const isCompoundItem = props.uiSchema["ui:compound-items"];
-    if (isCompoundField) {
-        return (
-            <fieldset>
-                {(props.uiSchema["ui:title"] || props.title) && (
-                    <TitleField
-                        id={`${props.idSchema.$id}__title`}
-                        title={props.title || props.uiSchema["ui:title"]}
-                        required={props.required}
-                        formContext={props.formContext}
-                    />
-                )}
-                {props.description && (
-                    <DescriptionField
-                        id={`${props.idSchema.$id}__description`}
-                        description={props.description}
-                        formContext={props.formContext}
-                    />
-                )}
-                {props.properties.map(prop => prop.content)}
-            </fieldset>
-        );
-
-    } else {
-        return (
-            <fieldset className={props.uiSchema["ui:subproperties"] ? 'subproperties' : ''}>
-                {(props.uiSchema["ui:title"] || props.title) && (
-                    <TitleField
-                        id={`${props.idSchema.$id}__title`}
-                        title={props.title || props.uiSchema["ui:title"]}
-                        required={props.required}
-                        formContext={props.formContext}
-                    />
-                )}
-                {props.description && (
-                    <DescriptionField
-                        id={`${props.idSchema.$id}__description`}
-                        description={props.description}
-                        formContext={props.formContext}
-                    />
-                )}
-                {props.properties.map(prop => prop.content)}
-            </fieldset>
-        );
-    }
-    */
 
     return (
         <fieldset className={structure}>
