@@ -12,7 +12,7 @@ const widgets = {};
 const fields = {};
 
 const log = (type) => console.log.bind(console, type);
-const onSubmit = ({formData}) => submitData(formData)
+const onSubmit = ({formData}) => submitData(formData);
 const onChange = ({formData}) => console.log("Data changed: ",  formData);
 
 
@@ -35,6 +35,14 @@ class YodaForm extends Form {
 }
 
 var form = document.getElementById('form');
+var tokenName = form.dataset.csrf_token_name;
+var tokenHash = form.dataset.csrf_token_hash;
+axios.defaults.headers.common = {
+    'X-Requested-With': 'XMLHttpRequest',
+    'X-CSRF-TOKEN' : tokenHash
+};
+axios.defaults.xsrfCookieName = tokenName;
+axios.defaults.xsrfHeaderName = tokenHash;
 var path = form.dataset.path;
 
 axios.get("/research/metadata/data?path=" + path)
@@ -72,22 +80,34 @@ axios.get("/research/metadata/data?path=" + path)
 
 function submitData(data)
 {
-    console.log(data);
+    var path = form.dataset.path;
+    var tokenName = form.dataset.csrf_token_name;
+    var tokenHash = form.dataset.csrf_token_hash;
 
-    $.ajax({
-        type: "POST",
-        url: "server.php",
-        data: {
-            'data': data
-        },
-        dataType: "json",
-        success: function(data) {
-            alert('SAVED');
-        },
-        failure: function(errMsg) {
-            alert(errMsg);
-        }
-    });
+    // Create form data
+    var bodyFormData = new FormData();
+    bodyFormData.set(tokenName, tokenHash);
+    bodyFormData.set('formData', JSON.stringify(data));
+
+    // Save
+    axios({
+        method: 'post',
+        url: "/research/metadata/store?path=" + path,
+        data: bodyFormData,
+        config: { headers: {'Content-Type': 'multipart/form-data' }}
+        })
+        .then(function (response) {
+            //handle success
+            console.log('SUCCESS:');
+            console.log(response);
+            console.log(response.data);
+        })
+        .catch(function (error) {
+            //handle error
+            console.log('ERROR:');
+            console.log(error);
+            console.log(error.response);
+        });
 }
 
 function CustomFieldTemplate(props) {

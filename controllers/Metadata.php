@@ -150,7 +150,9 @@ class Metadata extends MY_Controller
             }
         }
 
-
+        // Load CSRF token
+        $tokenName = $this->security->get_csrf_token_name();
+        $tokenHash = $this->security->get_csrf_hash();
 
         $viewParams = array(
             'styleIncludes' => array(
@@ -206,6 +208,8 @@ class Metadata extends MY_Controller
             'form' => $form,
             'path' => $path,
             'fullPath' => $fullPath,
+            'tokenName' => $tokenName,
+            'tokenHash' => $tokenHash,
             'userType' => $userType,
             'metadataExists' => $metadataExists, // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
             'cloneMetadata' => $cloneMetadata,
@@ -486,6 +490,12 @@ JSON;
      */
     function store()
     {
+        $arrayPost = $this->input->post();
+        $formData = json_decode($arrayPost['formData'], true);
+        print_r($formData);
+        exit;
+
+        // OLD!
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $rodsaccount = $this->rodsuser->getRodsAccount();
 

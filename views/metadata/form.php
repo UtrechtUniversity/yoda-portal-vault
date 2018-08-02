@@ -182,7 +182,11 @@
 
 <div class="row">
     <div class="col-md-12">
-        <div id="form" data-path="<?php echo urlencode($path); ?>"></div>
+        <div id="form"
+             data-path="<?php echo urlencode($path); ?>"
+             data-csrf_token_name="<?php echo urlencode($tokenName); ?>"
+             data-csrf_token_hash="<?php echo urlencode($tokenHash); ?>">
+        </div>
     </div>
 </div>
 
