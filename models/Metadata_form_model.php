@@ -468,11 +468,135 @@ class Metadata_form_model extends CI_Model
      */
     public function processPost($rodsaccount, $config)
     {
-        $allFormMetadata = $this->CI->input->post();
+//        $allFormMetadata = $this->CI->input->post();
 
 //        echo '<pre>';
 //        print_r($allFormMetadata);
 //        echo '</pre>';
+
+        // NIEUW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        $arrayPost = $this->CI->input->post();
+        $formData = json_decode($arrayPost['formData'], true);
+
+//        print_r($formData);
+//        echo '-------';
+
+        # $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+        $xsdPath = $config['xsdPath'];
+        $xsdElements = $this->Metadata_form_model->loadXsd($rodsaccount, $xsdPath);
+
+        // XML initialization
+        $xml = new DOMDocument("1.0", "UTF-8");
+        $xml->formatOutput = true;
+
+        $xml_metadata = $xml->createElement("metadata");
+
+        foreach($formData as $group=>$realFormData) {
+            #first level to be skipped as is descriptive
+            foreach($realFormData as $key => $val  ) {
+                # Determine whether this field is a subproperty structure
+                $isSubPropStructure = isset($xsdElements[$key . '_Properties']);
+
+                $addCompoundStructure = false;
+                $addSubPropertyStruct = false;
+
+                $xmlBaseElement = $xml->createElement($key);
+                if (!is_array($val)) {
+                    $xmlBaseElement->appendChild($xml->createTextNode($val));
+                    $xml_metadata->appendChild($xmlBaseElement);
+                }
+                if (is_array($val)){
+                    # Structure can either be:
+                    # Repetition of same element
+                    # Structure of elements
+                    $loopCounterSubProperties = 0;
+                    foreach($val as $keyLevel_1=>$valLevel_1) {
+                        if (is_numeric($keyLevel_1)) {   //VAL moet string zijn, niet array dus
+                            $xmlElement = $xml->createElement($key);
+                            $xmlElement->appendChild($xml->createTextNode($valLevel_1));
+                            $xml_metadata->appendChild($xmlElement);
+
+                            #$xmlBaseElement->appendChild($xml->createTextNode($valLevel_1));
+
+                            // Naar onderen
+                            #$xml_metadata->appendChild($xmlBaseElement);
+                        }
+                        else { // Structures - either SUBPROPERTY structure OR COMPOUND
+                            if ($isSubPropStructure) {
+                                $addSubPropertyStruct = true;
+                                if (!$loopCounterSubProperties) {
+                                    #$xmlStruct = $xml->createElement($key);
+
+                                    $xmlElementTop = $xml->createElement($keyLevel_1);
+                                    $xmlElementTop->appendChild($xml->createTextNode($valLevel_1));
+                                    $xmlBaseElement->appendChild($xmlElementTop);
+
+                                    // now create Properties node for the actual subproperties
+                                    $xmlElementProperties = $xml->createElement('Properties');
+                                    $loopCounterSubProperties++;
+                                }
+                                else {
+                                    if ($loopCounterSubProperties == 1 ){
+                                        $xmlElement = $xml->createElement($keyLevel_1);
+                                        $xmlElement->appendChild($xml->createTextNode($valLevel_1));
+                                        $xmlElementProperties->appendChild($xmlElement);
+                                        $loopCounterSubProperties++;
+                                    }
+                                    // What are the requisites!?
+                                    // Counter==2 is only because I know that at second place a compound is starting for this example.
+                                    //
+                                    else if ($loopCounterSubProperties==2){
+                                        $xmlElementCompound = $xml->createElement($keyLevel_1);
+                                        //$xmlElementProperties->appendChild($xmlElementCompound); # hier moet nog aan worden toegevoegd
+                                        $loopCounterSubProperties++;
+                                    }
+
+                                    foreach ($valLevel_1 as $keyLevel_2 => $valLevel_2) {
+                                        if (!is_array($valLevel_2)) {
+                                            $xmlElement = $xml->createElement($keyLevel_2);
+                                            $xmlElement->appendChild($xml->createTextNode($valLevel_2));
+                                            $xmlElementCompound->appendChild($xmlElement);
+                                        }
+                                    }
+                                }
+                                $xmlElementProperties->appendChild($xmlElementCompound);
+
+                                $xmlBaseElement->appendChild($xmlElementProperties);
+                            }
+                            else { ## COMPOUND structure - highest level
+                                $addCompoundStructure = true;
+                                $xmlElement = $xml->createElement($keyLevel_1);
+                                $xmlElement->appendChild($xml->createTextNode($valLevel_1));
+
+                                $xmlBaseElement->appendChild($xmlElement);
+                            }
+                        }
+
+                        if ($addSubPropertyStruct
+                            OR $addCompoundStructure) {
+                            $xml_metadata->appendChild($xmlBaseElement);
+                        }
+                    }
+                }
+            }
+        }
+
+        $xml->appendChild($xml_metadata);
+
+        $xmlString = $xml->saveXML();
+
+        //print_r($xmlString);
+        $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
+
+        return true;
+
+
+        //exit;
+
+        // OLD
+        $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
+
+        // OLD
 
 
         if (isset($allFormMetadata['vault_submission'])) { // clean up: this is extra input in the posted data that should not be handled as being metadata

@@ -490,10 +490,6 @@ JSON;
      */
     function store()
     {
-        $arrayPost = $this->input->post();
-        $formData = json_decode($arrayPost['formData'], true);
-        print_r($formData);
-        exit;
 
         // OLD!
         $pathStart = $this->pathlibrary->getPathStart($this->config);
