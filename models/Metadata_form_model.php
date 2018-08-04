@@ -457,77 +457,53 @@ class Metadata_form_model extends CI_Model
     }
 
 // --------------------- NEW STUFF
-    private function _constructSubPropertyStruct($xml, $parentNode, $val)
+    private function _constructSubPropertyStruct($xml, $xmlBaseElement, $val)
     {
-        $loopCounterSubProperties = 0; //  To keep track of expected structure
-        foreach($val as $keyLevel_1=>$valLevel_1) {
-            if (is_numeric($keyLevel_1)) {   //VAL moet string zijn, niet array dus
-                $xmlMainNode = $xml->createElement($key);
 
-                if(!is_array($valLevel_1)) { // NORMAL TOPLEVEL FIELD
-                    $xmlMainNode->appendChild($xml->createTextNode($valLevel_1));
+        echo ' ---- SUBPROPERTY HIER99999 ----' . $key .'-----';
+
+        $loopCounterSubProperties = 0;
+        foreach($val as $keyLevel_1 => $valLevel_1) {
+            if (!$loopCounterSubProperties) {
+                #$xmlStruct = $xml->createElement($key);
+
+                $xmlElementTop = $xml->createElement($keyLevel_1);
+                $xmlElementTop->appendChild($xml->createTextNode($valLevel_1));
+                $xmlBaseElement->appendChild($xmlElementTop);
+
+                // now create Properties node for the actual subproperties
+                $xmlElementProperties = $xml->createElement('Properties');
+                $loopCounterSubProperties++;
+            } else {
+                if ($loopCounterSubProperties == 1) {
+                    $xmlElement = $xml->createElement($keyLevel_1);
+                    $xmlElement->appendChild($xml->createTextNode($valLevel_1));
+                    $xmlElementProperties->appendChild($xmlElement);
+                    $loopCounterSubProperties++;
                 }
-                else { // COMPOUND-COMPOSITE FIELD - build structure
-                    // Is this a field with subproperty structure?
-                    if (!$isSubPropStructure) {
-                        $xmlMainNode = $this->_constructCompoundStruct($xml, $xmlMainNode, $valLevel_1);
-
-//                                    foreach ($valLevel_1 as $nodeLevel_2 => $valLevel_2) {
-//                                        $xmlNode2 = $xml->createElement($nodeLevel_2);
-//                                        $xmlNode2->appendChild($xml->createTextNode($valLevel_2));
-//                                        $xmlMainNode->appendChild($xmlNode2);
-//                                    }
-                    }
-                    else { // Subproperty struct
-                        $xmlMainNode = $this->_constructSubPropertyStruct($xml, $xmlMainNode);
-                    }
+                // What are the requisites!?
+                // Counter==2 is only because I know that at second place a compound is starting for this example.
+                //
+                else if ($loopCounterSubProperties == 2) {
+                    $xmlElementCompound = $xml->createElement($keyLevel_1);
+                    //$xmlElementProperties->appendChild($xmlElementCompound); # hier moet nog aan worden toegevoegd
+                    $loopCounterSubProperties++;
                 }
-                $xml_metadata->appendChild($xmlMainNode);
-            }
-            else { // Structures - either SUBPROPERTY structure OR COMPOUND
-                if ($isSubPropStructure) {
-                    $addSubPropertyStruct = true;
-                    if (!$loopCounterSubProperties) {
-                        #$xmlStruct = $xml->createElement($key);
 
-                        $xmlElementTop = $xml->createElement($keyLevel_1);
-                        $xmlElementTop->appendChild($xml->createTextNode($valLevel_1));
-                        $xmlBaseElement->appendChild($xmlElementTop);
-
-                        // now create Properties node for the actual subproperties
-                        $xmlElementProperties = $xml->createElement('Properties');
-                        $loopCounterSubProperties++;
+                foreach ($valLevel_1 as $keyLevel_2 => $valLevel_2) {
+                    if (!is_array($valLevel_2)) {
+                        $xmlElement = $xml->createElement($keyLevel_2);
+                        $xmlElement->appendChild($xml->createTextNode($valLevel_2));
+                        $xmlElementCompound->appendChild($xmlElement);
                     }
-                    else {
-                        if ($loopCounterSubProperties == 1 ){
-                            $xmlElement = $xml->createElement($keyLevel_1);
-                            $xmlElement->appendChild($xml->createTextNode($valLevel_1));
-                            $xmlElementProperties->appendChild($xmlElement);
-                            $loopCounterSubProperties++;
-                        }
-                        // What are the requisites!?
-                        // Counter==2 is only because I know that at second place a compound is starting for this example.
-                        //
-                        else if ($loopCounterSubProperties==2){
-                            $xmlElementCompound = $xml->createElement($keyLevel_1);
-                            //$xmlElementProperties->appendChild($xmlElementCompound); # hier moet nog aan worden toegevoegd
-                            $loopCounterSubProperties++;
-                        }
-
-                        foreach ($valLevel_1 as $keyLevel_2 => $valLevel_2) {
-                            if (!is_array($valLevel_2)) {
-                                $xmlElement = $xml->createElement($keyLevel_2);
-                                $xmlElement->appendChild($xml->createTextNode($valLevel_2));
-                                $xmlElementCompound->appendChild($xmlElement);
-                            }
-                        }
-                    }
-                    $xmlElementProperties->appendChild($xmlElementCompound);
-
-                    $xmlBaseElement->appendChild($xmlElementProperties);
                 }
             }
+            $xmlElementProperties->appendChild($xmlElementCompound);
         }
+
+        $xmlBaseElement->appendChild($xmlElementProperties);
+
+        return $xmlBaseElement;
     }
 
     /*
@@ -546,7 +522,6 @@ class Metadata_form_model extends CI_Model
         // Return the adjust parent node
         return $xmlParentNode;
     }
-
 
 
     /**
@@ -593,16 +568,15 @@ class Metadata_form_model extends CI_Model
                 $isSubPropStructure = isset($xsdElements[$key . '_Properties']);
 
                 $addCompoundStructure = false;
-                $addSubPropertyStruct = false;
 
                 $xmlBaseElement = $xml->createElement($key);
 
-//                if ($isSubPropStructure AND is_array($val)) {
-//                    echo 'SUBPROP-key: '.$key;
-//                    $newNode = $this->_constructSubPropertyStruct($xml, $xmlBaseElement, $val);
-//                    $xml_metadata->appendChild($newNode);
-//                }
-                if (!is_array($val)) {
+                if ($isSubPropStructure AND is_array($val)) {
+                    echo 'SUBPROP-key: '.$key;
+                    $newNode = $this->_constructSubPropertyStruct($xml, $xmlBaseElement, $val);
+                    $xml_metadata->appendChild($newNode);
+                }
+                elseif (!is_array($val)) {
                     $xmlBaseElement->appendChild($xml->createTextNode($val));
                     $xml_metadata->appendChild($xmlBaseElement);
                 }
@@ -610,7 +584,7 @@ class Metadata_form_model extends CI_Model
                     # Structure can either be:
                     # Repetition of same element
                     # Structure of elements
-                    $loopCounterSubProperties = 0;
+                    //$loopCounterSubProperties = 0;
                     foreach($val as $keyLevel_1=>$valLevel_1) {
                         if (is_numeric($keyLevel_1)) {   //VAL moet string zijn, niet array dus
                             $xmlMainNode = $xml->createElement($key);
@@ -625,7 +599,7 @@ class Metadata_form_model extends CI_Model
                                     echo '----MULTIPLE COMPOUND: ' . $key . '-----';
                                     $xmlMainNode = $this->_constructCompoundStruct($xml, $xmlMainNode, $valLevel_1);
                                 }
-                                else { // Subproperty struct
+                                else { // SUBPROPERTY STRUCT - MULTIPLE
                                     echo ' ---- MULTIPLE SUBPROPERTY HIER ----' . $key . '------';
 
                                     $xmlMainNode = $this->_constructSubPropertyStruct($xml, $xmlMainNode);
@@ -634,7 +608,8 @@ class Metadata_form_model extends CI_Model
                             $xml_metadata->appendChild($xmlMainNode);
                         }
                         else { // Structures - HIER DE ENKELVOUDIGE STRUCTS
-                            if ($isSubPropStructure ) {
+                            /*
+                            if ($isSubPropStructure AND FALSE) {
                                 $addSubPropertyStruct = true;
                                 echo ' ---- SUBPROPERTY HIER22222 ----' . $key .'-----';
                                 if (!$loopCounterSubProperties) {
@@ -676,16 +651,16 @@ class Metadata_form_model extends CI_Model
 
                                 $xmlBaseElement->appendChild($xmlElementProperties);
                             }
-                            else { // COMPOUND structure - DIT IS OP TOPLEVEL.
-                                $addCompoundStructure = true;
-                                $xmlElement = $xml->createElement($keyLevel_1);
-                                $xmlElement->appendChild($xml->createTextNode($valLevel_1));
-                                $xmlBaseElement->appendChild($xmlElement);
-                            }
+                            */
+                            //else { // COMPOUND structure - DIT IS OP TOPLEVEL.
+                            $addCompoundStructure = true;
+                            $xmlElement = $xml->createElement($keyLevel_1);
+                            $xmlElement->appendChild($xml->createTextNode($valLevel_1));
+                            $xmlBaseElement->appendChild($xmlElement);
+                            //}
                         }
 
-                        if ($addSubPropertyStruct
-                            OR $addCompoundStructure) {
+                        if ($addCompoundStructure) {
                             $xml_metadata->appendChild($xmlBaseElement);
                         }
                     }
