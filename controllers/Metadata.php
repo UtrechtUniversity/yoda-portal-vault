@@ -308,6 +308,17 @@ class Metadata extends MY_Controller
                             "title": "End date"
                         }
                     },
+                    "items": {
+                        "type": "object",
+                        "Start_Date": {
+                            "type": "string",
+                            "title": "Start date"
+                        },
+                        "End_Date": {
+                            "type": "string",
+                            "title": "End date"
+                        }
+                    },
                     "yoda:structure": "compound"
                 },
                 "Covered_Geolocation_Place": {
@@ -319,20 +330,24 @@ class Metadata extends MY_Controller
                     }
                 },
                 "Covered_Period": {
-                    "type": "object",
+                    "type": "array",
                     "comment": "composite",
                     "title": "Period covered",
-                    "properties": {
-                        "Start_Date": {
-                            "type": "string",
-                            "title": "Start date"
+                    "items": {
+                        "type": "object",
+                        "title": "Period covered2",
+                        "properties": {
+                            "Start_Date": {
+                                "type": "string",
+                                "title": "Start date"
+                            },
+                            "End_Date": {
+                                "type": "string",
+                                "title": "End date"
+                            }
                         },
-                        "End_Date": {
-                            "type": "string",
-                            "title": "End date"
-                        }
-                    },
-                    "yoda:structure": "compound"
+                        "yoda:structure": "compound"
+                    }
                 },
 
                 "Tag": {
