@@ -44,12 +44,12 @@ $( document ).ready(function() {
 function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchOrderColumn)
 {
     if (typeof value != 'undefined' && value.length > 0 ) {
-        // Display start for first page load
+        // Display start for first page load.
         if (typeof displayStart === 'undefined') {
             displayStart = 0;
         }
 
-        // Table columns definition
+        // Table columns definition.
         var disableSorting = {};
         var columns = [];
         if (type == 'filename') {
@@ -61,7 +61,7 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             columns = ['Location'];
         }
 
-        // Destroy current Datatable
+        // Destroy current Datatable.
         var datatable = $('#search').DataTable();
         datatable.destroy();
 
@@ -102,7 +102,6 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
 
                     resp = JSON.parse(jsonString);
 
-                    //console.log(resp.draw);
                     if (resp.status == 'Success' ) {
                         return resp.data;
                     }
@@ -129,7 +128,6 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             ],
             "ordering": false
         });
-        //"order": [[ searchOrderColumn, searchOrderDir ]]  // save for future purposes - it intervenes with newly added "ordering": false
 
         if (type == 'status') {
             searchStatus = $(".search-status option:selected").text();
@@ -169,9 +167,9 @@ function searchSelectChanged(sel)
     } else {
         $('.search-term').removeClass('hide').show();
         $('.search-status').hide();
-	value = "#search-filter").val();
+	value = $("#search-filter").val();
 	type = $("#search_concept").attr('data-type');
-	search($(value, type, $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	search(value, type, $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     }
     saveSearchRequest(value, type);
 }
