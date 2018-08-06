@@ -4,8 +4,10 @@ $( document ).ready(function() {
         if (searchStatusValue.length > 0) {
             $('[name=status]').val(searchStatusValue);
             search(searchStatusValue, 'status', browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+	    showSearchResults();
          } else if (searchTerm.length > 0) {
-            search(decodeURIComponent(searchTerm), searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+             search(decodeURIComponent(searchTerm), searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+	     showSearchResults();
         }
     }
 
@@ -14,17 +16,24 @@ $( document ).ready(function() {
     });
 
     $(".search-btn").click(function(){
-        search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	value = $("#search-filter").val();
+	type = $("#search_concept").attr('data-type');
+        search(value, type, $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	saveSearchRequest(value, type);
     });
 
     $("#search-filter").bind('keypress', function(e) {
         if(e.keyCode==13) {
-            search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+            value = $("#search-filter").val();
+            type = $("#search_concept").attr('data-type');
+            search(value, type, $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	    saveSearchRequest(value, type);
         }
     });
 
     $(".search-status").change(function() {
         search($(this).val(), 'status', $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	saveSearchRequest($(this).val(), 'status');
     });
 
     $(".close-search-results").click(function() {
@@ -39,8 +48,6 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
         if (typeof displayStart === 'undefined') {
             displayStart = 0;
         }
-
-        saveSearchRequest(value, type);
 
         // Table columns definition
         var disableSorting = {};
@@ -156,20 +163,30 @@ function searchSelectChanged(sel)
     if (sel.attr('data-type') == 'status') {
         $('.search-term').hide();
         $('.search-status').removeClass('hide').show();
-	search($('.search-status').val(), 'status', $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	value = $('.search-status').val();
+	type = "status";
+	search(value, type, $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     } else {
         $('.search-term').removeClass('hide').show();
         $('.search-status').hide();
-	search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	value = "#search-filter").val();
+	type = $("#search_concept").attr('data-type');
+	search($(value, type, $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     }
+    saveSearchRequest(value, type);
 }
 
 function saveSearchRequest(value, type)
 {
-    var url = "search/set_session?value=" + encodeURIComponent(value) + "&type=" + type;
+    var url = "search/set_session";
     $.ajax({
         url: url,
+        method: "POST",
         async: false, //blocks window close
+        data: {
+            value: value,
+            type: type
+        },
         success: function() {
             if (type == 'revision' && view == 'revision') {
                 $('#search').hide();
