@@ -119,7 +119,7 @@ class Metadata extends MY_Controller
             $submitToVaultBtn = false;
             $lockStatus = $formConfig['lockFound'];
             $folderStatus = $formConfig['folderStatus'];
-            if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == '')
+            if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == ''  || $folderStatus == 'REJECTED'  || $folderStatus == 'SECURED')
                 && ($userType == 'normal' || $userType == 'manager')) { // written this way as the
                 $submitToVaultBtn = true;
             }
@@ -652,34 +652,4 @@ JSON;
 
         return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
     }
-
-    /*
-    public function index()
-    {
-        $this->load->view('common-start', array(
-            'styleIncludes' => array(
-                'css/research.css',
-                'lib/datatables/css/dataTables.bootstrap.min.css',
-                //'lib/materialdesignicons/css/materialdesignicons.min.css'
-                'lib/font-awesome/css/font-awesome.css'
-            ),
-            'scriptIncludes' => array(
-                'lib/datatables/js/jquery.dataTables.min.js',
-                'lib/datatables/js/dataTables.bootstrap.min.js',
-                'js/research.js',
-            ),
-            'activeModule'   => $this->module->name(),
-            'user' => array(
-                'username' => $this->rodsuser->getUsername(),
-            ),
-        ));
-
-        $this->data['items'] = $this->config->item('browser-items-per-page');
-
-        $this->load->view('browse', $this->data);
-        $this->load->view('common-end');
-    }
-    */
-
-
 }

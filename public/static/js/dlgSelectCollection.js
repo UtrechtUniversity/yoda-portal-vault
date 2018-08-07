@@ -17,8 +17,6 @@ $( document ).ready(function() {
 function copyVaultPackageToDynamic(urlEncodedOrigin, urlEncodedTarget)
 {
     dlgSelectAlertHide();
-    console.log('Origin: ' + urlEncodedOrigin);
-    console.log('Destination' + urlEncodedTarget);
 
     if (typeof urlEncodedOrigin == 'undefined') {
         errorMessage = 'PLease select a package from the vault';
@@ -44,30 +42,22 @@ function copyVaultPackageToDynamic(urlEncodedOrigin, urlEncodedTarget)
         return;
     }
 
-    $.ajax({
-        url: 'vault/copyVaultPackageToDynamicArea' + '?targetdir=' + urlEncodedPath + '&orgdir=' +  urlEncodedOrigin,
-        type: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            if (data.status == 'SUCCESS') {
-                // @todo: SUccess handling has to become generic.
-                // Now it is setup to handle the sitation of copying data datapackge to research .
-                window.location.href = '/research/?dir=' + urlEncodedPath;
-            }
-            else {
-                // Errors handled so far. Maybe differentiate the handling:
-                // ErrorDataPackageAlreadyExists
-                // ErrorTargetPermissions
-                // ErrorTargetLocked
-                // ErrorVaultCollectionDoesNotExist
-                // irods:
-                // PermissionDenied
-                dlgSelectAlertShow(data.statusInfo);
-            }
-
-        },
-        error: function(data) {
-            dlgSelectAlertShow('Something went wrong. Please check your internet connection');
+    $.post( "vault/copyVaultPackageToDynamicArea",
+	    { "targetdir" : decodeURIComponent(urlEncodedPath), "orgdir" : decodeURIComponent(urlEncodedOrigin) },
+	    function(data) {
+        if (data.status == 'SUCCESS') {
+            // @todo: Success handling has to become generic.
+            // Now it is setup to handle the sitation of copying data datapackge to research .
+            window.location.href = '/research/?dir=' + urlEncodedPath;
+        } else {
+            // Errors handled so far. Maybe differentiate the handling:
+            // ErrorDataPackageAlreadyExists
+            // ErrorTargetPermissions
+            // ErrorTargetLocked
+            // ErrorVaultCollectionDoesNotExist
+            // irods:
+            // PermissionDenied
+            dlgSelectAlertShow(data.statusInfo);
         }
     });
 }
@@ -159,8 +149,6 @@ function dlgBuildFileBrowser(dir)
     if (typeof dir != 'undefined') {
         url += "?dir=" +  dir;
     }
-
-    //var folderSelectBrowser = $('#folder-select-browser').DataTable();
 
     folderSelectBrowser.ajax.url(url).load();
 

@@ -255,7 +255,7 @@ class Vaultsubmission
         $lockStatus = $this->formConfig['lockFound'];
         $folderStatus = $this->formConfig['folderStatus'];
 
-        if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'LOCKED' || $folderStatus == '')) {
+        if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'LOCKED' || $folderStatus == '' || $folderStatus == 'REJECTED' || $folderStatus == "SECURED")) {
             return true;
         }
 
@@ -265,7 +265,7 @@ class Vaultsubmission
     public function checkFolderStatus()
     {
         $folderStatus = $this->formConfig['folderStatus'];
-        if ($folderStatus == 'LOCKED' || $folderStatus == '') {
+        if ($folderStatus == 'LOCKED' || $folderStatus == '' || $folderStatus == 'REJECTED' || $folderStatus == "SECURED") {
             return true;
         }
 
