@@ -176,36 +176,38 @@ function searchSelectChanged(sel)
 
 function saveSearchRequest(value, type)
 {
-    var url = "search/set_session";
-    $.ajax({
-        url: url,
-        method: "POST",
-        async: false, //blocks window close
-        data: {
-            value: value,
-            type: type
-        },
-        success: function() {
-            if (type == 'revision' && view == 'revision') {
-                $('#search').hide();
-                $('.search-results').hide();
-                return false;
+    if (typeof value != 'undefined' && value.length > 0 ) {
+	var url = "search/set_session";
+	$.ajax({
+            url: url,
+            method: "POST",
+            async: false, //blocks window close
+            data: {
+		value: value,
+		type: type
+            },
+            success: function() {
+		if (type == 'revision' && view == 'revision') {
+                    $('#search').hide();
+                    $('.search-results').hide();
+                    return false;
+		}
+
+		if (type == 'revision' && view == 'browse') {
+                    $('#search').hide();
+                    $('.search-results').hide();
+
+                    window.location.href = "revision?filter=" + encodeURIComponent(value);
+                    return false;
+		}
+
+		if (type != 'revision' && view == 'revision') {
+                    window.location.href = "browse";
+                    return false;
+		}
+
+		showSearchResults();
             }
-
-            if (type == 'revision' && view == 'browse') {
-                $('#search').hide();
-                $('.search-results').hide();
-
-                window.location.href = "revision?filter=" + encodeURIComponent(value);
-                return false;
-            }
-
-            if (type != 'revision' && view == 'revision') {
-                window.location.href = "browse";
-                return false;
-            }
-
-            showSearchResults();
-        }
-    });
+	});
+    }
 }
