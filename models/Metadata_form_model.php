@@ -536,11 +536,15 @@ class Metadata_form_model extends CI_Model
         $arrayPost = $this->CI->input->post();
         $formData = json_decode($arrayPost['formData'], true);
 
-//        print_r($formData);
+        print_r($formData);
+ //       exit;
 
         # $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
         $xsdPath = $config['xsdPath'];
         $xsdElements = $this->Metadata_form_model->loadXsd($rodsaccount, $xsdPath);
+
+//        print_r($xsdElements);
+//        exit;
 
         // XML initialization
         $xml = new DOMDocument("1.0", "UTF-8");

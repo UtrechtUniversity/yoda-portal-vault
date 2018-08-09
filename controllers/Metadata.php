@@ -248,6 +248,7 @@ class Metadata extends MY_Controller
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
         $xmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
 
+        // with Related Datapackage - multiple (doesn't work)
         $jsonSchema = <<<'JSON'
         {
     "definitions": {
@@ -308,17 +309,6 @@ class Metadata extends MY_Controller
                             "title": "End date"
                         }
                     },
-                    "items": {
-                        "type": "object",
-                        "Start_Date": {
-                            "type": "string",
-                            "title": "Start date"
-                        },
-                        "End_Date": {
-                            "type": "string",
-                            "title": "End date"
-                        }
-                    },
                     "yoda:structure": "compound"
                 },
                 "Covered_Geolocation_Place": {
@@ -330,26 +320,22 @@ class Metadata extends MY_Controller
                     }
                 },
                 "Covered_Period": {
-                    "type": "array",
+                    "type": "object",
                     "comment": "composite",
                     "title": "Period covered",
-                    "items": {
-                        "type": "object",
-                        "title": "Period covered2",
-                        "properties": {
-                            "Start_Date": {
-                                "type": "string",
-                                "title": "Start date"
-                            },
-                            "End_Date": {
-                                "type": "string",
-                                "title": "End date"
-                            }
+                    "properties": {
+                        "Start_Date": {
+                            "type": "string",
+                            "title": "Start date"
                         },
-                        "yoda:structure": "compound"
-                    }
+                        "End_Date": {
+                            "type": "string",
+                            "title": "End date"
+                        }
+                    },
+                    "yoda:structure": "compound"
                 },
-
+                
                 "Tag": {
                     "type": "array",
                     "comment": "repeat",
@@ -360,6 +346,7 @@ class Metadata extends MY_Controller
                 },
                 
                 "Related_Datapackage": {
+                
                     "type" : "object",
                     "comment" : "subprops type 2",
                     "title": "my suppie",
@@ -390,12 +377,143 @@ class Metadata extends MY_Controller
                         }                        
                     },
                     "yoda:structure": "subproperties"
+                },
+                
+                "Retention_Period": {
+                    "type": "string", 
+                    "title": "Retention period (years)"
+                },
+                "Retention_Information": {
+                    "type": "string", 
+                    "title": "Retention information"
+                },
+                "Embargo_End_Date":{
+                    "type": "string", 
+                    "title": "Embargo end date"                
+                },
+                "Data_Classification": {
+                    "type": "string", 
+                    "title": "Data classification",
+                    "enum": ["Public","Basic","Sensitive","Critical"]
+                },
+                "Collection_Name": {
+                    "type": "string", 
+                    "title": "Name of collection" 
+                },
+                
+                "Funding_Reference": {
+                    "type" : "array",
+                    "comment" : "subprops type 2",
+                    "title": "Funder",
+                    "items": {
+                        "type" : "object",
+                        "comment": "subprops type 2",
+                        "title" : "Funder",
+                        "properties" : {
+                            "Funder_Name" : {
+                                "type" : "string",
+                                "title": "Funder"
+                            },
+                            "Award_Number" : {
+                                "type" : "string",
+                                "title": "Award number"
+                            }                        
+                        }, 
+                        "yoda:structure": "subproperties"
+                    }
+                },
+                
+                "Creator": {
+                    "type" : "object",
+                    "comment" : "subprops type 2",
+                    "title": "my suppie",
+                    "properties" : {
+                        "Name" : {
+                            "type" : "string",
+                            "title": "Creator of datapackage"
+                        },
+                        "Affiliation" : {
+                            "type" : "string",
+                            "title": "Affiliation"
+                        },
+                        "Person_Identifier": {
+                            "type": "object",
+                            "title": "Persistent Identifier",
+                            "comment": "composite",
+                            "properties": {
+                                "Name_Identifier_Scheme": {
+                                    "type": "string",
+                                    "title": "Type",
+                                    "enum": ["ORCID", "DAI", "Author identifier (Scopus)", "ResearcherID (Web of Science)", "ISNI"]
+                                },
+                                "Name_Identifier": {
+                                    "type": "string",
+                                    "title": "Identifier"
+                                }
+                            },
+                            "yoda:structure": "compound"
+                        }                        
+                    },
+                    "yoda:structure": "subproperties"
+                },                
+                
+                "Contributor": {
+                    "type" : "object",
+                    "comment" : "subprops type 2",
+                    "title": "my suppie",
+                    "properties" : {
+                        "Name" : {
+                            "type" : "string",
+                            "title": "Contributor of datapackage"
+                        },
+                        "Affiliation" : {
+                            "type" : "string",
+                            "title": "Affiliation"
+                        },
+                        "Persistent_Identifier": {
+                            "type": "object",
+                            "title": "Person Identifier",
+                            "comment": "composite",
+                            "properties": {
+                                "Name_Identifier_Scheme": {
+                                    "type": "string",
+                                    "title": "Type",
+                                    "enum": ["ORCID", "DAI", "Author identifier (Scopus)", "ResearcherID (Web of Science)", "ISNI"]
+                                },
+                                "Name_Identifier": {
+                                    "type": "string",
+                                    "title": "Identifier"
+                                }
+                            },
+                            "yoda:structure": "compound"
+                        }                        
+                    },
+                    "yoda:structure": "subproperties"
+                },                
+
+                
+                "License": {
+                    "type": "string", 
+                    "title": "License",
+                    "enum": ["Creative Commons Attribution 4.0 International Public License",
+                        "Creative Commons Attribution-ShareAlike 4.0 International Public License",
+                        "Open Data Commons Attribution License (ODC-By) v1.0"]
+                },
+                "Data_Access_Restriction": {
+                    "type": "string", 
+                    "title": "Data package access",
+                    "enum": ["Open - freely retrievable",
+                        "Restricted - available upon request",
+                        "Closed"]
                 }
             }
         }
     }
 }
 JSON;
+
+
+
         $uiSchema = <<<'JSON'
     {
         "Descriptive-group": {
