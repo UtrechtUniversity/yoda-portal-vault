@@ -70,7 +70,16 @@ axios.get("/research/metadata/data?path=" + path)
                       showErrorList={false}
                       onChange={onChange}
                       onSubmit={onSubmit}
-                      onError={log("errors")} />
+                      onError={log("errors")}>
+
+
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <button type="submit" className="btn btn-primary">Save</button>
+                        <button type="button" className="btn btn-danger delete-all-metadata-btn pull-right" data-path="">Delete all metadata</button>
+                    </div>
+                </div>
+            </YodaForm>
         ), document.getElementById("form"));
     })
     .catch(function (error) {
@@ -161,7 +170,7 @@ function ObjectFieldTemplate(props) {
 
     var structure;
     if ('yoda:structure' in props.schema) {
-        var structure = props.schema['yoda:structure'];
+        var structure = 'yoda-structure ' + props.schema['yoda:structure'];
     }
 
     return (
