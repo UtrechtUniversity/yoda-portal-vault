@@ -4,8 +4,10 @@ $( document ).ready(function() {
         if (searchStatusValue.length > 0) {
             $('[name=status]').val(searchStatusValue);
             search(searchStatusValue, 'status', browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+	    showSearchResults();
          } else if (searchTerm.length > 0) {
-            search(decodeURIComponent(searchTerm), searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+             search(decodeURIComponent(searchTerm), searchType, browsePageItems, searchStart, searchOrderDir, searchOrderColumn);
+	     showSearchResults();
         }
     }
 
@@ -14,17 +16,24 @@ $( document ).ready(function() {
     });
 
     $(".search-btn").click(function(){
-        search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	value = $("#search-filter").val();
+	type = $("#search_concept").attr('data-type');
+        search(value, type, $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	saveSearchRequest(value, type);
     });
 
     $("#search-filter").bind('keypress', function(e) {
         if(e.keyCode==13) {
-            search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+            value = $("#search-filter").val();
+            type = $("#search_concept").attr('data-type');
+            search(value, type, $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	    saveSearchRequest(value, type);
         }
     });
 
     $(".search-status").change(function() {
         search($(this).val(), 'status', $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	saveSearchRequest($(this).val(), 'status');
     });
 
     $(".close-search-results").click(function() {
@@ -35,14 +44,12 @@ $( document ).ready(function() {
 function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchOrderColumn)
 {
     if (typeof value != 'undefined' && value.length > 0 ) {
-        // Display start for first page load
+        // Display start for first page load.
         if (typeof displayStart === 'undefined') {
             displayStart = 0;
         }
 
-        saveSearchRequest(value, type);
-
-        // Table columns definition
+        // Table columns definition.
         var disableSorting = {};
         var columns = [];
         if (type == 'filename') {
@@ -54,7 +61,7 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             columns = ['Location'];
         }
 
-        // Destroy current Datatable
+        // Destroy current Datatable.
         var datatable = $('#search').DataTable();
         datatable.destroy();
 
@@ -95,7 +102,6 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
 
                     resp = JSON.parse(jsonString);
 
-                    //console.log(resp.draw);
                     if (resp.status == 'Success' ) {
                         return resp.data;
                     }
@@ -122,7 +128,6 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             ],
             "ordering": false
         });
-        //"order": [[ searchOrderColumn, searchOrderDir ]]  // save for future purposes - it intervenes with newly added "ordering": false
 
         if (type == 'status') {
             searchStatus = $(".search-status option:selected").text();
@@ -156,41 +161,53 @@ function searchSelectChanged(sel)
     if (sel.attr('data-type') == 'status') {
         $('.search-term').hide();
         $('.search-status').removeClass('hide').show();
-	search($('.search-status').val(), 'status', $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	value = $('.search-status').val();
+	type = "status";
+	search(value, type, $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     } else {
         $('.search-term').removeClass('hide').show();
         $('.search-status').hide();
-	search($("#search-filter").val(), $("#search_concept").attr('data-type'), $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
+	value = $("#search-filter").val();
+	type = $("#search_concept").attr('data-type');
+	search(value, type, $(".search-btn").attr('data-items-per-page'), 0, 'asc', 0);
     }
+    saveSearchRequest(value, type);
 }
 
 function saveSearchRequest(value, type)
 {
-    var url = "search/set_session?value=" + encodeURIComponent(value) + "&type=" + type;
-    $.ajax({
-        url: url,
-        async: false, //blocks window close
-        success: function() {
-            if (type == 'revision' && view == 'revision') {
-                $('#search').hide();
-                $('.search-results').hide();
-                return false;
+    if (typeof value != 'undefined' && value.length > 0 ) {
+	var url = "search/set_session";
+	$.ajax({
+            url: url,
+            method: "POST",
+            async: false, //blocks window close
+            data: {
+		value: value,
+		type: type
+            },
+            success: function() {
+		if (type == 'revision' && view == 'revision') {
+                    $('#search').hide();
+                    $('.search-results').hide();
+                    return false;
+		}
+
+		if (type == 'revision' && view == 'browse') {
+                    $('#search').hide();
+                    $('.search-results').hide();
+
+                    window.location.href = "revision?filter=" + encodeURIComponent(value);
+                    return false;
+		}
+
+		if (type != 'revision' && view == 'revision') {
+                    window.location.href = "browse";
+                    return false;
+		}
+
+		showSearchResults();
             }
-
-            if (type == 'revision' && view == 'browse') {
-                $('#search').hide();
-                $('.search-results').hide();
-
-                window.location.href = "revision?filter=" + encodeURIComponent(value);
-                return false;
-            }
-
-            if (type != 'revision' && view == 'revision') {
-                window.location.href = "browse";
-                return false;
-            }
-
-            showSearchResults();
-        }
-    });
+	});
+    }
 }

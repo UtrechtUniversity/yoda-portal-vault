@@ -456,6 +456,71 @@ class Metadata_form_model extends CI_Model
         );
     }
 
+// --------------------- NEW STUFF
+    private function _constructSubPropertyStruct($xml, $xmlBaseElement, $val)
+    {
+        $loopCounterSubProperties = 0;
+        // Create Properties node for the actual subproperties
+        $xmlElementProperties = $xml->createElement('Properties');
+
+        foreach($val as $keyLevel_1 => $valLevel_1) {
+            if (!$loopCounterSubProperties) {
+                #$xmlStruct = $xml->createElement($key);
+
+                $xmlElementTop = $xml->createElement($keyLevel_1);
+                $xmlElementTop->appendChild($xml->createTextNode($valLevel_1));
+                $xmlBaseElement->appendChild($xmlElementTop);
+
+                $loopCounterSubProperties++;
+            } else {
+                if ($loopCounterSubProperties == 1) {
+                    $xmlElement = $xml->createElement($keyLevel_1);
+                    $xmlElement->appendChild($xml->createTextNode($valLevel_1));
+                    $xmlElementProperties->appendChild($xmlElement);
+                    $loopCounterSubProperties++;
+                }
+                // What are the requisites!?
+                // Counter==2 is only because I know that at second place a compound is starting for this example.
+                //
+                else if ($loopCounterSubProperties == 2) {
+                    $xmlElementCompound = $xml->createElement($keyLevel_1);
+                    //$xmlElementProperties->appendChild($xmlElementCompound); # hier moet nog aan worden toegevoegd
+                    $loopCounterSubProperties++;
+                }
+
+                foreach ($valLevel_1 as $keyLevel_2 => $valLevel_2) {
+                    if (!is_array($valLevel_2)) {
+                        $xmlElement = $xml->createElement($keyLevel_2);
+                        $xmlElement->appendChild($xml->createTextNode($valLevel_2));
+                        $xmlElementCompound->appendChild($xmlElement);
+                    }
+                }
+            }
+            $xmlElementProperties->appendChild($xmlElementCompound);
+        }
+
+        $xmlBaseElement->appendChild($xmlElementProperties);
+
+        return $xmlBaseElement;
+    }
+
+    /*
+     * Add all subnodes to compound structure
+     * <parentNode>
+     *    <var>bla</var>
+     * </parentNode>
+     */
+    private function _constructCompoundStruct($xml, $xmlParentNode, $arrayCompoundItems)
+    {
+        foreach($arrayCompoundItems as $subNode=>$subNodeValue) {
+            $xmlNode = $xml->createElement($subNode);
+            $xmlNode->appendChild($xml->createTextNode($subNodeValue));
+            $xmlParentNode->appendChild($xmlNode);
+        }
+        // Return the adjust parent node
+        return $xmlParentNode;
+    }
+
 
     /**
      * @param $rodsaccount
@@ -468,11 +533,113 @@ class Metadata_form_model extends CI_Model
      */
     public function processPost($rodsaccount, $config)
     {
-        $allFormMetadata = $this->CI->input->post();
+        $arrayPost = $this->CI->input->post();
+        $formData = json_decode($arrayPost['formData'], true);
 
-//        echo '<pre>';
-//        print_r($allFormMetadata);
-//        echo '</pre>';
+        print_r($formData);
+ //       exit;
+
+        # $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+        $xsdPath = $config['xsdPath'];
+        $xsdElements = $this->Metadata_form_model->loadXsd($rodsaccount, $xsdPath);
+
+//        print_r($xsdElements);
+//        exit;
+
+        // XML initialization
+        $xml = new DOMDocument("1.0", "UTF-8");
+        $xml->formatOutput = true;
+
+        $xml_metadata = $xml->createElement("metadata");
+
+        foreach($formData as $group=>$realFormData) {
+            #first level to be skipped as is descriptive
+            foreach($realFormData as $key => $val  ) {
+                # Determine whether this field is a subproperty structure - only on highes level
+                $isSubPropStructure = isset($xsdElements[$key . '_Properties']);
+
+                $addCompoundStructure = false;
+
+                $xmlBaseElement = $xml->createElement($key);
+
+                if ($isSubPropStructure AND is_array($val)) {
+                    echo 'SUBPROP-key: '.$key;
+
+                    // Single or multiple presence?
+                     $subPropStructs = (!isset($val[0]) ? array(0=>$val): $val );
+
+                    // Add 1 or many Sub property structs to xml
+                    foreach($subPropStructs as $valSingle) {
+                        $xmlBaseElement = $xml->createElement($key);
+                        $newNode = $this->_constructSubPropertyStruct($xml, $xmlBaseElement, $valSingle);
+                        $xml_metadata->appendChild($newNode);
+                    }
+                }
+                elseif (!is_array($val)) {
+                    $xmlBaseElement->appendChild($xml->createTextNode($val));
+                    $xml_metadata->appendChild($xmlBaseElement);
+                }
+                else { //if (is_array($val)){
+                    # Structure can either be:
+                    # Repetition of same element
+                    # Structure of elements
+                    foreach($val as $keyLevel_1=>$valLevel_1) {
+                        if (is_numeric($keyLevel_1)) {   //VAL moet string zijn, niet array dus
+                            $xmlMainNode = $xml->createElement($key);
+
+                            if(!is_array($valLevel_1)) { // NORMAL TOPLEVEL FIELD
+                                $xmlMainNode->appendChild($xml->createTextNode($valLevel_1));
+                            }
+                            else { // COMPOUND-COMPOSITE FIELD - build structure  HIER KOMEN DE MULTPLIE STRUCTS
+                                // Is this a field with subproperty structure?
+                                //if (!$isSubPropStructure) {
+                                    // COMPOUND structure - DIT IS MULTIPLE COMPOUND OP TOPLEVEL.
+                                echo '----MULTIPLE COMPOUND: ' . $key . '-----';
+                                $xmlMainNode = $this->_constructCompoundStruct($xml, $xmlMainNode, $valLevel_1);
+                                //}
+//                                else { // SUBPROPERTY STRUCT - MULTIPLE
+//                                    echo ' ---- MULTIPLE SUBPROPERTY HIER ----' . $key . '------';
+//
+//                                    $xmlMainNode = $this->_constructSubPropertyStruct($xml, $xmlMainNode);
+//                                }
+                            }
+                            $xml_metadata->appendChild($xmlMainNode);
+                        }
+                        else {
+                            // COMPOUND structure - DIT IS OP TOPLEVEL. Elke loop stap wordt er een subnode toegevoegd.
+                            // @todo dit kan ook een subproperty zijn!
+                            // @todo of een een compound in een compound
+                            // Hier wordt nog geen rekening mee gehouden
+                            $addCompoundStructure = true;
+                            $xmlElement = $xml->createElement($keyLevel_1);
+                            $xmlElement->appendChild($xml->createTextNode($valLevel_1));
+                            $xmlBaseElement->appendChild($xmlElement);
+                        }
+
+                        if ($addCompoundStructure) {
+                            $xml_metadata->appendChild($xmlBaseElement);
+                        }
+                    }
+                }
+            }
+        }
+
+        $xml->appendChild($xml_metadata);
+
+        $xmlString = $xml->saveXML();
+
+        print_r($xmlString);
+        $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
+
+        return true;
+
+
+        //exit;
+
+        // OLD
+        $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
+
+        // OLD
 
 
         if (isset($allFormMetadata['vault_submission'])) { // clean up: this is extra input in the posted data that should not be handled as being metadata

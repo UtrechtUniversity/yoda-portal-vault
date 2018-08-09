@@ -119,7 +119,7 @@ class Metadata extends MY_Controller
             $submitToVaultBtn = false;
             $lockStatus = $formConfig['lockFound'];
             $folderStatus = $formConfig['folderStatus'];
-            if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == '')
+            if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == ''  || $folderStatus == 'REJECTED'  || $folderStatus == 'SECURED')
                 && ($userType == 'normal' || $userType == 'manager')) { // written this way as the
                 $submitToVaultBtn = true;
             }
@@ -248,6 +248,7 @@ class Metadata extends MY_Controller
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
         $xmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
 
+        // with Related Datapackage - multiple (doesn't work)
         $jsonSchema = <<<'JSON'
         {
     "definitions": {
@@ -334,7 +335,7 @@ class Metadata extends MY_Controller
                     },
                     "yoda:structure": "compound"
                 },
-
+                
                 "Tag": {
                     "type": "array",
                     "comment": "repeat",
@@ -345,6 +346,7 @@ class Metadata extends MY_Controller
                 },
                 
                 "Related_Datapackage": {
+                
                     "type" : "object",
                     "comment" : "subprops type 2",
                     "title": "my suppie",
@@ -375,12 +377,143 @@ class Metadata extends MY_Controller
                         }                        
                     },
                     "yoda:structure": "subproperties"
+                },
+                
+                "Retention_Period": {
+                    "type": "string", 
+                    "title": "Retention period (years)"
+                },
+                "Retention_Information": {
+                    "type": "string", 
+                    "title": "Retention information"
+                },
+                "Embargo_End_Date":{
+                    "type": "string", 
+                    "title": "Embargo end date"                
+                },
+                "Data_Classification": {
+                    "type": "string", 
+                    "title": "Data classification",
+                    "enum": ["Public","Basic","Sensitive","Critical"]
+                },
+                "Collection_Name": {
+                    "type": "string", 
+                    "title": "Name of collection" 
+                },
+                
+                "Funding_Reference": {
+                    "type" : "array",
+                    "comment" : "subprops type 2",
+                    "title": "Funder",
+                    "items": {
+                        "type" : "object",
+                        "comment": "subprops type 2",
+                        "title" : "Funder",
+                        "properties" : {
+                            "Funder_Name" : {
+                                "type" : "string",
+                                "title": "Funder"
+                            },
+                            "Award_Number" : {
+                                "type" : "string",
+                                "title": "Award number"
+                            }                        
+                        }, 
+                        "yoda:structure": "subproperties"
+                    }
+                },
+                
+                "Creator": {
+                    "type" : "object",
+                    "comment" : "subprops type 2",
+                    "title": "my suppie",
+                    "properties" : {
+                        "Name" : {
+                            "type" : "string",
+                            "title": "Creator of datapackage"
+                        },
+                        "Affiliation" : {
+                            "type" : "string",
+                            "title": "Affiliation"
+                        },
+                        "Person_Identifier": {
+                            "type": "object",
+                            "title": "Persistent Identifier",
+                            "comment": "composite",
+                            "properties": {
+                                "Name_Identifier_Scheme": {
+                                    "type": "string",
+                                    "title": "Type",
+                                    "enum": ["ORCID", "DAI", "Author identifier (Scopus)", "ResearcherID (Web of Science)", "ISNI"]
+                                },
+                                "Name_Identifier": {
+                                    "type": "string",
+                                    "title": "Identifier"
+                                }
+                            },
+                            "yoda:structure": "compound"
+                        }                        
+                    },
+                    "yoda:structure": "subproperties"
+                },                
+                
+                "Contributor": {
+                    "type" : "object",
+                    "comment" : "subprops type 2",
+                    "title": "my suppie",
+                    "properties" : {
+                        "Name" : {
+                            "type" : "string",
+                            "title": "Contributor of datapackage"
+                        },
+                        "Affiliation" : {
+                            "type" : "string",
+                            "title": "Affiliation"
+                        },
+                        "Persistent_Identifier": {
+                            "type": "object",
+                            "title": "Person Identifier",
+                            "comment": "composite",
+                            "properties": {
+                                "Name_Identifier_Scheme": {
+                                    "type": "string",
+                                    "title": "Type",
+                                    "enum": ["ORCID", "DAI", "Author identifier (Scopus)", "ResearcherID (Web of Science)", "ISNI"]
+                                },
+                                "Name_Identifier": {
+                                    "type": "string",
+                                    "title": "Identifier"
+                                }
+                            },
+                            "yoda:structure": "compound"
+                        }                        
+                    },
+                    "yoda:structure": "subproperties"
+                },                
+
+                
+                "License": {
+                    "type": "string", 
+                    "title": "License",
+                    "enum": ["Creative Commons Attribution 4.0 International Public License",
+                        "Creative Commons Attribution-ShareAlike 4.0 International Public License",
+                        "Open Data Commons Attribution License (ODC-By) v1.0"]
+                },
+                "Data_Access_Restriction": {
+                    "type": "string", 
+                    "title": "Data package access",
+                    "enum": ["Open - freely retrievable",
+                        "Restricted - available upon request",
+                        "Closed"]
                 }
             }
         }
     }
 }
 JSON;
+
+
+
         $uiSchema = <<<'JSON'
     {
         "Descriptive-group": {
@@ -490,10 +623,6 @@ JSON;
      */
     function store()
     {
-        $arrayPost = $this->input->post();
-        $formData = json_decode($arrayPost['formData'], true);
-        print_r($formData);
-        exit;
 
         // OLD!
         $pathStart = $this->pathlibrary->getPathStart($this->config);
@@ -656,34 +785,4 @@ JSON;
 
         return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
     }
-
-    /*
-    public function index()
-    {
-        $this->load->view('common-start', array(
-            'styleIncludes' => array(
-                'css/research.css',
-                'lib/datatables/css/dataTables.bootstrap.min.css',
-                //'lib/materialdesignicons/css/materialdesignicons.min.css'
-                'lib/font-awesome/css/font-awesome.css'
-            ),
-            'scriptIncludes' => array(
-                'lib/datatables/js/jquery.dataTables.min.js',
-                'lib/datatables/js/dataTables.bootstrap.min.js',
-                'js/research.js',
-            ),
-            'activeModule'   => $this->module->name(),
-            'user' => array(
-                'username' => $this->rodsuser->getUsername(),
-            ),
-        ));
-
-        $this->data['items'] = $this->config->item('browser-items-per-page');
-
-        $this->load->view('browse', $this->data);
-        $this->load->view('common-end');
-    }
-    */
-
-
 }
