@@ -98,8 +98,9 @@ class Revision extends MY_Controller
                 'statusInfo' => ''
             );
 
-            echo json_encode($output);
-            return;
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode($output));
         }
 
 
@@ -157,7 +158,9 @@ class Revision extends MY_Controller
             'statusInfo' => $statusInfo
         );
 
-        echo json_encode($output);
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     public function data()
@@ -209,10 +212,16 @@ class Revision extends MY_Controller
             }
         }
 
-        $output = array('status' => $status, 'statusInfo' => $statusInfo,
-            'draw' => $draw, 'recordsTotal' => $totalItems, 'recordsFiltered' => $totalItems, 'data' => $rows);
+        $output = array('status' => $status,
+	                'statusInfo' => $statusInfo,
+                        'draw' => $draw,
+			'recordsTotal' => $totalItems,
+			'recordsFiltered' => $totalItems,
+			'data' => $rows);
 
-        echo json_encode($output);
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 
     /**
@@ -257,10 +266,12 @@ class Revision extends MY_Controller
             true);
 
 
-        echo json_encode(array(
+       $output = array(
                 'hasError' => FALSE,
-                'output' => $htmlDetail
-            )
-        );
+                'output' => $htmlDetail);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
     }
 }
