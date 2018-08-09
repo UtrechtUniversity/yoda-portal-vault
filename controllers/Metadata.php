@@ -119,7 +119,7 @@ class Metadata extends MY_Controller
             $submitToVaultBtn = false;
             $lockStatus = $formConfig['lockFound'];
             $folderStatus = $formConfig['folderStatus'];
-            if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == ''  || $folderStatus == 'REJECTED'  || $folderStatus == 'SECURED')
+            if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == '')
                 && ($userType == 'normal' || $userType == 'manager')) { // written this way as the
                 $submitToVaultBtn = true;
             }
@@ -246,6 +246,7 @@ class Metadata extends MY_Controller
         $fullPath = $pathStart . $path;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
+
         $xmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
 
         // with Related Datapackage - multiple (doesn't work)
@@ -438,7 +439,7 @@ class Metadata extends MY_Controller
                         },
                         "Person_Identifier": {
                             "type": "object",
-                            "title": "Persistent Identifier",
+                            "title": "Person Identifier",
                             "comment": "composite",
                             "properties": {
                                 "Name_Identifier_Scheme": {
@@ -470,7 +471,7 @@ class Metadata extends MY_Controller
                             "type" : "string",
                             "title": "Affiliation"
                         },
-                        "Persistent_Identifier": {
+                        "Person_Identifier": {
                             "type": "object",
                             "title": "Person Identifier",
                             "comment": "composite",
@@ -785,4 +786,34 @@ JSON;
 
         return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
     }
+
+    /*
+    public function index()
+    {
+        $this->load->view('common-start', array(
+            'styleIncludes' => array(
+                'css/research.css',
+                'lib/datatables/css/dataTables.bootstrap.min.css',
+                //'lib/materialdesignicons/css/materialdesignicons.min.css'
+                'lib/font-awesome/css/font-awesome.css'
+            ),
+            'scriptIncludes' => array(
+                'lib/datatables/js/jquery.dataTables.min.js',
+                'lib/datatables/js/dataTables.bootstrap.min.js',
+                'js/research.js',
+            ),
+            'activeModule'   => $this->module->name(),
+            'user' => array(
+                'username' => $this->rodsuser->getUsername(),
+            ),
+        ));
+
+        $this->data['items'] = $this->config->item('browser-items-per-page');
+
+        $this->load->view('browse', $this->data);
+        $this->load->view('common-end');
+    }
+    */
+
+
 }
