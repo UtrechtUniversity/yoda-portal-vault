@@ -460,93 +460,55 @@ class Metadata_form_model extends CI_Model
     // enkelvoudige afwikkeling
     private function _constructSubPropertyStruct($xml, $xsdElements, $key, $val)
     {
-        if(true) { //$key == 'Contributor' OR $key=='Funding_Reference' OR $key == 'Related_Datapackage') {
-            $valueArray = $val; // specifically to be able to retrieve values based on nodeName
+        $valueArray = $val; // specifically to be able to retrieve values based on nodeName
 
-            $structElement = array();
-            $level = 0;
-            // Trick to gather the engtire structure for a given subperoperty structure
-            foreach ($xsdElements as $keyElement => $element) {
+        $structElement = array();
+        $level = 0;
+        $structHasValues = false;
+        // Trick to gather the engtire structure for a given subperoperty structure
+        foreach ($xsdElements as $keyElement => $element) {
 
-                if ($element['tagNameRouting'][0] == $key ) {
-                    $nodeName = $element['tagNameRouting'][count($element['tagNameRouting'])-1];
+            if ($element['tagNameRouting'][0] == $key ) {
+                $nodeName = $element['tagNameRouting'][count($element['tagNameRouting'])-1];
 
-                    if ($element['type']=='openTag') { //structure element.
-                        $structElement[$level] = $xml->createElement($nodeName);
+                if ($element['type']=='openTag') { //structure element.
+                    $structElement[$level] = $xml->createElement($nodeName);
 
-                        if( $nodeName != 'Properties' AND $level>0) {
-                            $valueArray = $val[$nodeName];
+                    if( $nodeName != 'Properties' AND $level>0) {
+                        $valueArray = $val[$nodeName];
 //                            echo '-----------valueArray voor: ' . $nodeName . '-----------------------';
 //                            print_r($valueArray);
-                        }
-                        $level++;
                     }
-                    else {
-                        $valueElement = $xml->createElement($nodeName);
+                    $level++;
+                }
+                else {
+                    $valueElement = $xml->createElement($nodeName);
 
-                        // het zoeken in de val moet niveau afhankelijk worden.
-                        $valueElement->appendChild($xml->createTextNode(  $valueArray[$nodeName] ));
+                    // het zoeken in de val moet niveau afhankelijk worden.
+                    $valueElement->appendChild($xml->createTextNode(  $valueArray[$nodeName] ));
 
-                        $structElement[$level-1]->appendChild($valueElement);
+                    $structElement[$level-1]->appendChild($valueElement);
+
+                    if (isset($valueArray[$nodeName]) AND $valueArray[$nodeName]!='' AND !is_array($valueArray[$nodeName])) {
+                        $structHasValues = true;
                     }
                 }
             }
-
-            // Build one element structure out of its constructing sub nodes
-            $index = $level-1;
-            while($index>0) {
-                $structElement[$index-1]->appendChild($structElement[$index]);
-                $index--;
-            }
-
-            return $structElement[0];  // return entire structure to be added
         }
-//        elseif(false) {
-//            $xmlBaseElement = $xml->createElement($key);
-//
-//            $loopCounterSubProperties = 0;
-//            // Create Properties node for the actual subproperties
-//            $xmlElementProperties = $xml->createElement('Properties');
-//
-//            foreach ($val as $keyLevel_1 => $valLevel_1) {
-//                if (!$loopCounterSubProperties) {
-//                    #$xmlStruct = $xml->createElement($key);
-//
-//                    $xmlElementTop = $xml->createElement($keyLevel_1);
-//                    $xmlElementTop->appendChild($xml->createTextNode($valLevel_1));
-//                    $xmlBaseElement->appendChild($xmlElementTop);
-//
-//                    $loopCounterSubProperties++;
-//                } else {
-//                    if ($loopCounterSubProperties == 1) {
-//                        $xmlElement = $xml->createElement($keyLevel_1);
-//                        $xmlElement->appendChild($xml->createTextNode($valLevel_1));
-//                        $xmlElementProperties->appendChild($xmlElement);
-//                        $loopCounterSubProperties++;
-//                    }
-//                    // What are the requisites!?
-//                    // Counter==2 is only because I know that at second place a compound is starting for this example.
-//                    //
-//                    else if ($loopCounterSubProperties == 2) {
-//                        $xmlElementCompound = $xml->createElement($keyLevel_1);
-//                        //$xmlElementProperties->appendChild($xmlElementCompound); # hier moet nog aan worden toegevoegd
-//                        $loopCounterSubProperties++;
-//                    }
-//
-//                    foreach ($valLevel_1 as $keyLevel_2 => $valLevel_2) {
-//                        if (!is_array($valLevel_2)) {
-//                            $xmlElement = $xml->createElement($keyLevel_2);
-//                            $xmlElement->appendChild($xml->createTextNode($valLevel_2));
-//                            $xmlElementCompound->appendChild($xmlElement);
-//                        }
-//                    }
-//                }
-//                $xmlElementProperties->appendChild($xmlElementCompound);
-//            }
-//
-//            $xmlBaseElement->appendChild($xmlElementProperties);
-//        }
-//        return $xmlBaseElement;
+
+        // Build one element structure out of its constructing sub nodes
+
+        if (!$structHasValues) { // no data present, no struct will be added
+            return false;
+        }
+
+        $index = $level-1;
+        while($index>0) {
+            $structElement[$index-1]->appendChild($structElement[$index]);
+            $index--;
+        }
+
+        return $structElement[0];  // return entire structure to be added
     }
 
     /*
@@ -608,15 +570,15 @@ class Metadata_form_model extends CI_Model
                 $xmlBaseElement = $xml->createElement($key);
 
                 if ($isSubPropStructure AND is_array($val)) {
-                    //echo 'SUBPROP-key: '.$key;
-
                     // Single or multiple presence?
                      $subPropStructs = (!isset($val[0]) ? array(0=>$val): $val );
 
                     // Add 1 or many Sub property structs to main xml node
                     foreach($subPropStructs as $valSingle) {
                         $newNode = $this->_constructSubPropertyStruct($xml, $xsdElements, $key, $valSingle);
-                        $xml_metadata->appendChild($newNode);
+                        if ($newNode!==false) {
+                            $xml_metadata->appendChild($newNode);
+                        }
                     }
                 }
                 elseif (!is_array($val)) {
