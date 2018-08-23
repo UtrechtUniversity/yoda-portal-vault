@@ -253,10 +253,6 @@ class Metadata extends MY_Controller
         $jsonSchema = <<<'JSON'
 {
 	"definitions": {
-		"stringURI": {
-			"type": "uri",
-			"maxLength": 1024
-		},
 		"stringNormal": {
 			"type": "string",
 			"maxLength": 255
@@ -1010,7 +1006,7 @@ JSON;
         $output['path'] = $path;
         $output['schema'] = json_decode($jsonSchema);
         $output['uiSchema'] = json_decode($uiSchema);
-        $output['formData'] = $formData;
+        $output['formData'] = (object) $formData;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }
