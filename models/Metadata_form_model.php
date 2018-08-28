@@ -457,7 +457,30 @@ class Metadata_form_model extends CI_Model
     }
 
 // --------------------- NEW STUFF
-    // enkelvoudige afwikkeling
+
+    private function _isCompoundStructure($xsdElements, $parentFullRoute, $arrayParentRoute)
+    {
+        // find the element in the XSD and check whether next field is structurally deeper.
+        // if so, current element is a compound structure.
+        $found = false;
+
+        foreach ($xsdElements as $keyElement => $element) {
+            if (!$found) {
+                $found = ($element['tagNameRouting'] === $arrayParentRoute);
+            }
+            else {
+                // check whether current element in loop is a child of the item passed as a parameter
+                $possibleChildRoute = implode('-', $element['tagNameRouting']);
+//                echo 'possibleChild: '. $possibleChildRoute;
+//                echo 'POS: ' . strpos($parentFullRoute, $possibleChildRoute);
+//                echo ' --- ';
+                return (strpos($parentFullRoute, $possibleChildRoute) == 0);
+            }
+        }
+        return false;
+    }
+
+    // Afwikkeling van 1 gehele subproperty structuur.
     private function _constructSubPropertyStruct($xml, $xsdElements, $key, $val)
     {
         $valueArray = $val; // specifically to be able to retrieve values based on nodeName
@@ -465,32 +488,91 @@ class Metadata_form_model extends CI_Model
         $structElement = array();
         $level = 0;
         $structHasValues = false;
+        $loopToNextOnSameLevel = false;
+        $baseStructureRoute = '';
+
         // Trick to gather the engtire structure for a given subperoperty structure
         foreach ($xsdElements as $keyElement => $element) {
 
-            if ($element['tagNameRouting'][0] == $key ) {
-                $nodeName = $element['tagNameRouting'][count($element['tagNameRouting'])-1];
+            // Step through all elements of a structure with $key at highest level
+            if ($element['tagNameRouting'][0] == $key) { // alleen hier zitten we onder de goede key !!! NOG UITSLUITEN DE DIEPERE VELDEN DIE AL ZIJN AFGEWIKKELD
 
-                if ($element['type']=='openTag') { //structure element.
-                    $structElement[$level] = $xml->createElement($nodeName);
+                $currentFullRoute = implode('-',$element['tagNameRouting']); // eg Creator-Properties-Person_Identifier
 
-                    if( $nodeName != 'Properties' AND $level>0) {
-                        $valueArray = $val[$nodeName];
-//                            echo '-----------valueArray voor: ' . $nodeName . '-----------------------';
+                // Deze moet, INDIEN loopToNext aanstaat, worden vergeleken
+
+                if (!$loopToNextOnSameLevel OR ($currentFullRoute==$baseStructureRoute)) { // als doorgestapt moet worden naar zelfde of lager level omdat compound al bepaalde velden heeft afgewikkeld.
+
+                    $nodeName = $element['tagNameRouting'][count($element['tagNameRouting']) - 1];
+//                    echo '--nodeName--' . $nodeName . '----';
+
+                    if ($element['type'] == 'openTag') {                           // we stappen een structuur in
+                        // eigenlijk baseRoute PER openTag.
+
+                        $structElement[$level] = $xml->createElement($nodeName);
+
+                        if ($nodeName != 'Properties' AND $level > 0) {
+                            $valueArray = $val[$nodeName];
+
+                            $baseStructureRoute = $currentFullRoute;
+//                            echo '---> LEVEL = ' . $level;
+//                            echo '---> baseRoute = ' . $baseStructureRoute;
 //                            print_r($valueArray);
-                    }
-                    $level++;
-                }
-                else {
-                    $valueElement = $xml->createElement($nodeName);
 
-                    // het zoeken in de val moet niveau afhankelijk worden.
-                    $valueElement->appendChild($xml->createTextNode(  $valueArray[$nodeName] ));
+                            /// Are there deeper levels???? how to know????
+                            if ($this->_isCompoundStructure($xsdElements, $currentFullRoute, $element['tagNameRouting'])) {
 
-                    $structElement[$level-1]->appendChild($valueElement);
+                            // HOE WEET IK DAT DIT COMPOUND FIELD IS??????? OMDAT HET 'OPEN TAG' is, kan niet anders dus!!!!!!!!
+                                // Dit is nu compound - leg dit vast zodat in de verdere loop de langskomende elementen kunnen worden geskipped
 
-                    if (isset($valueArray[$nodeName]) AND $valueArray[$nodeName]!='' AND !is_array($valueArray[$nodeName])) {
-                        $structHasValues = true;
+                                foreach ($valueArray as $nodeValueCombination) {
+                                    $xmlCompound = $xml->createElement($nodeName);
+                                    $xmlCompound = $this->_constructCompoundStruct($xml, $xmlCompound, $nodeValueCombination);
+                                    $structElement[$level - 1]->appendChild($xmlCompound);
+                                }
+                                // als je hier bent geweest, moet je net zolang loopen via foreach
+                                // tot je weer bij een element op zelfde niveau komt.
+                                // Of lager
+
+                                $loopToNextOnSameLevel = true;
+                                $baseStructureRoute = $currentFullRoute;
+
+                                $level--;  // KLOPT DIT?? to prevent the level from actually going up. This element (including subs) has been fully completed
+                                //break;
+                            }
+                        }
+                        $level++; /// ALLEEN als level nog niet complete is!!!! DIt dus als niet echt een Compound maar Single multiple element betreft
+
+                    } else { // hier wordt text toegevoegd aan node
+
+//                        print_r($valueArray[$nodeName]);
+
+                        if (is_array($valueArray[$nodeName])) {
+                            // add each value as a separate node
+                            foreach ($valueArray[$nodeName] as $nodeValue) {
+                                $valueElement = $xml->createElement($nodeName);
+
+                                // het zoeken in de val moet niveau afhankelijk worden.
+                                $valueElement->appendChild($xml->createTextNode($nodeValue));
+
+                                $structElement[$level - 1]->appendChild($valueElement);
+
+                                if (isset($valueArray[$nodeName]) AND $valueArray[$nodeName] != '' AND !is_array($valueArray[$nodeName])) {
+                                    $structHasValues = true;
+                                }
+                            }
+                        } else {
+                            $valueElement = $xml->createElement($nodeName);
+
+                            // het zoeken in de val moet niveau afhankelijk worden.
+                            $valueElement->appendChild($xml->createTextNode($valueArray[$nodeName]));
+
+                            $structElement[$level - 1]->appendChild($valueElement);
+
+                            if (isset($valueArray[$nodeName]) AND $valueArray[$nodeName] != '' AND !is_array($valueArray[$nodeName])) {
+                                $structHasValues = true;
+                            }
+                        }
                     }
                 }
             }
@@ -543,14 +625,14 @@ class Metadata_form_model extends CI_Model
         $arrayPost = $this->CI->input->post();
         $formData = json_decode($arrayPost['formData'], true);
 
-//        print_r($formData);
- //       exit;
+        print_r($formData);
 
         # $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
         $xsdPath = $config['xsdPath'];
         $xsdElements = $this->Metadata_form_model->loadXsd($rodsaccount, $xsdPath);
 
-        //print_r($xsdElements);
+//        echo '---------------------------<br>';
+//        print_r($xsdElements);
 //        exit;
 
         // XML initialization
@@ -597,16 +679,12 @@ class Metadata_form_model extends CI_Model
                                 $xmlMainNode->appendChild($xml->createTextNode($valLevel_1));
                             }
                             else { // COMPOUND-COMPOSITE FIELD - build structure  HIER KOMEN DE MULTPLIE STRUCTS
-                                //echo '----MULTIPLE COMPOUND: ' . $key . '-----';
                                 $xmlMainNode = $this->_constructCompoundStruct($xml, $xmlMainNode, $valLevel_1);
                             }
                             $xml_metadata->appendChild($xmlMainNode);
                         }
                         else {
                             // COMPOUND structure - DIT IS OP TOPLEVEL. Elke loop stap wordt er een subnode toegevoegd.
-                            // @todo dit kan ook een subproperty zijn!
-                            // @todo of een een compound in een compound
-                            // Hier wordt nog geen rekening mee gehouden
                             $addCompoundStructure = true;
                             $xmlElement = $xml->createElement($keyLevel_1);
                             $xmlElement->appendChild($xml->createTextNode($valLevel_1));
