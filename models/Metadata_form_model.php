@@ -471,9 +471,6 @@ class Metadata_form_model extends CI_Model
             else {
                 // check whether current element in loop is a child of the item passed as a parameter
                 $possibleChildRoute = implode('-', $element['tagNameRouting']);
-//                echo 'possibleChild: '. $possibleChildRoute;
-//                echo 'POS: ' . strpos($parentFullRoute, $possibleChildRoute);
-//                echo ' --- ';
                 return (strpos($parentFullRoute, $possibleChildRoute) == 0);
             }
         }
@@ -495,35 +492,24 @@ class Metadata_form_model extends CI_Model
         foreach ($xsdElements as $keyElement => $element) {
 
             // Step through all elements of a structure with $key at highest level
-            if ($element['tagNameRouting'][0] == $key) { // alleen hier zitten we onder de goede key !!! NOG UITSLUITEN DE DIEPERE VELDEN DIE AL ZIJN AFGEWIKKELD
+            if ($element['tagNameRouting'][0] == $key) { // Rule out other fields
 
                 $currentFullRoute = implode('-',$element['tagNameRouting']); // eg Creator-Properties-Person_Identifier
 
-                // Deze moet, INDIEN loopToNext aanstaat, worden vergeleken
-
-                if (!$loopToNextOnSameLevel OR ($currentFullRoute==$baseStructureRoute)) { // als doorgestapt moet worden naar zelfde of lager level omdat compound al bepaalde velden heeft afgewikkeld.
+                if (!$loopToNextOnSameLevel OR ($currentFullRoute==$baseStructureRoute)) {
+                    // als doorgestapt moet worden naar zelfde of lager level omdat compound al bepaalde velden heeft afgewikkeld.
 
                     $nodeName = $element['tagNameRouting'][count($element['tagNameRouting']) - 1];
-//                    echo '--nodeName--' . $nodeName . '----';
 
-                    if ($element['type'] == 'openTag') {                           // we stappen een structuur in
-                        // eigenlijk baseRoute PER openTag.
-
+                    if ($element['type'] == 'openTag') {                           // Step into a structure
                         $structElement[$level] = $xml->createElement($nodeName);
 
                         if ($nodeName != 'Properties' AND $level > 0) {
                             $valueArray = $val[$nodeName];
 
                             $baseStructureRoute = $currentFullRoute;
-//                            echo '---> LEVEL = ' . $level;
-//                            echo '---> baseRoute = ' . $baseStructureRoute;
-//                            print_r($valueArray);
-
                             /// Are there deeper levels???? how to know????
                             if ($this->_isCompoundStructure($xsdElements, $currentFullRoute, $element['tagNameRouting'])) {
-
-                            // HOE WEET IK DAT DIT COMPOUND FIELD IS??????? OMDAT HET 'OPEN TAG' is, kan niet anders dus!!!!!!!!
-                                // Dit is nu compound - leg dit vast zodat in de verdere loop de langskomende elementen kunnen worden geskipped
 
                                 foreach ($valueArray as $nodeValueCombination) {
                                     $xmlCompound = $xml->createElement($nodeName);
