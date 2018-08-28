@@ -2,3 +2,4 @@ config/*_local.php
 /metadata/**
 !/metadata/example.xml
 node_modules
+vendor

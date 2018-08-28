@@ -55,7 +55,7 @@ axios.get("/research/metadata/data?path=" + path)
         render((
             <YodaForm className="form form-horizontal metadata-form"
                       schema={schema}
-                      idPrefix={"yoda2"}
+                      idPrefix={"yoda"}
                       uiSchema={uiSchema}
                       formData={formData}
                       formContext={{env: 'research'}}
@@ -67,7 +67,7 @@ axios.get("/research/metadata/data?path=" + path)
                       liveValidate={true}
                       noValidate={false}
                       noHtml5Validate={true}
-                      showErrorList={false}
+                      showErrorList={true}
                       onChange={onChange}
                       onSubmit={onSubmit}
                       onError={log("errors")}>
