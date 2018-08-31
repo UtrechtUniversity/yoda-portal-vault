@@ -38,11 +38,9 @@ class Vaultsubmission
 
         $invalidFields = $this->validateXsd($xsdFilePath, $metadataFilePath);
 
-        $mandatoryFields = $this->checkMandatoryFields();
-
         // Validate update Vault Package
         if ($isVaultPackage == 'yes') {
-            $fieldErrors = array_unique(array_merge($invalidFields, $mandatoryFields));
+            $fieldErrors = array_unique($invalidFields);
             if (count($fieldErrors)) {
                 $messages[] = $this->formatFieldErrors($fieldErrors);
             }
@@ -123,130 +121,6 @@ class Vaultsubmission
             libxml_clear_errors();
         }
 
-        return $invalidFields;
-    }
-
-    private function checkMandatoryFields()
-    {
-        $invalidFields = array();
-        $this->CI->load->model('Metadata_form_model');
-
-        // $xsdElements = $this->CI->Metadata_form_model->loadXsd($this->account, $this->formConfig['xsdPath']);
-
-        $formElements = $this->CI->Metadata_form_model->getFormElements($this->account, $this->formConfig);
-
-
-        //Iinvalid yodametadat.xml file caused getFormElements to return false instead of full representation of all elements.
-        // There can therefore be no conclusion on all mandatory data being present or not.
-        // The cause for this is always invalid structured xml OR entry of multiple data where this is not allowed.
-        // This is trapped when an xsd check is executed
-        // That is why this check always has to be combined with an XSD check as that will tell where the problem lies
-        if ($formElements===false) {
-            return array();
-        }
-
-        // Get the actual yoda-metadata.xml to be able to do inventory
-        $formData = $this->CI->Metadata_form_model->loadFormData($this->account, $this->formConfig['metadataXmlPath']);
-
-        if ($formData === false) {
-            return array();
-        }
-
-        // @todo: this now steps trhough all visible and indiciation elements.
-        // Maybe refactored in looping through the mainfields only
-        // And have extra software dig deeper per element depending on the type of element.
-        // This loop is caused by the fact that initially there were only mainfields. Now there are subproperties and compound structures
-
-        // For now do a discovery in this loop regarding mandatory or present subproperties
-        // formElements has ALL elements, including subs, flattened in an array
-        // Therefore, all this needs to be properly investigated as empty lead elements of structs do not have to be reported when NO subprop data is present
-        // Only in the next steps this is possible to be determined
-
-        $structs = array('structCombinationOpen', 'structCombinationClose', 'structSubPropertiesOpen','structSubPropertiesClose');
-
-        $compoundMode = false; // when stepping through a compound the loop can continue
-
-        $mainLevelProperties = array();
-
-        foreach ($formElements as $group => $elements) {
-            foreach ($elements as $name => $properties) {
-
-                $base = $properties['subPropertiesBase'];
-                if ($base AND !isset($mainLevelProperties[$base]) AND !in_array($properties['type'], $structs)) {
-                    $mainLevelProperties[$base] = $properties;
-                }
-
-                if (!$compoundMode) {
-                    if ($properties['mandatory'] AND !in_array($properties['type'], $structs)) {
-                        // Subproperty element set as mandatory - is only possible if parent level has value
-                        if ($properties['subPropertiesRole']=='subProperty') { // is subproperty element
-                            // mandatoriness for subproperties only counts if parent level has value
-                            $parentValue = $mainLevelProperties[$base]['value'];
-                            if ($parentValue) {
-                                if (!$properties['value']) {
-                                    if (!in_array($properties['key'], $invalidFields)) {
-                                        $invalidFields[] = $properties['key'];
-                                    }
-                                }
-                            }
-                        }
-                        else { // normal element - that must be present
-                            if (!$properties['value']) {
-                                if (!in_array($properties['key'], $invalidFields)) {
-                                    $invalidFields[] = $properties['key'];
-                                }
-                            }
-                        }
-                    }
-
-                    // add check for empty lead elements in a lead/subproperty structure.
-                    // Even if not mandatory, if subprops exist but no main => cancel submission to vault
-                    if ($properties['subPropertiesRole'] == 'subPropertyStartStructure'
-                        AND $properties['type'] != 'structSubPropertiesOpen'
-                        AND !$properties['value']
-                    ) {
-                        // only add to when there actually is something in the subproperties
-                        // Mandatory present in subproperties??
-                        // Subproperties
-
-                        if (isset($formData[$properties['subPropertiesBase']])) { // only add to array if main field is present in actual data in yoda-metadata.xml
-                            $invalidFields[] = $properties['key'];
-                        }
-                    }
-
-                    // trap the opening of a compound which requires specific handling
-                    if($properties['type']== 'structCombinationOpen') {
-
-                        $compoundMode = 'true';
-                        $compoundMissing = array();
-                        $compoundCounter = 0;
-                        // Next coming items are part of the same compound.
-                        // These must all be present (as defined now in user stories).
-                    }
-                }
-                else { // the actual handling regarding compound elements
-                    if ($properties['type'] == 'structCombinationClose') { // compound closing tag found => draw conclusions
-                        $compoundMode = false; // end of cycling through
-                        // Add completeness conclusions to $invalidFields[]
-
-                        $countedMissing = count($compoundMissing);
-                        if ($countedMissing AND $compoundCounter != $countedMissing ) { // all missing is allowed as well
-                            foreach($compoundMissing as $keyCompound) {
-                                if (!in_array($keyCompound, $invalidFields)) {
-                                    $invalidFields[] = $keyCompound;
-                                }
-                            }
-                        }
-                    }
-                    else { // check for completeness of values
-                        $compoundCounter++;
-                        if(!$properties['value']) {
-                            $compoundMissing[] = $properties['key'];
-                        }
-                    }
-                }
-            }
-        }
         return $invalidFields;
     }
 
