@@ -55,62 +55,21 @@ class Metadata extends MY_Controller
             }
         }
 
-
-        $elements = $this->Metadata_form_model->getFormElements($rodsaccount, $formConfig);
-        if ($elements) {
-            $this->load->library('metadataform');
-
-            //$form = $this->metadataform->load($elements, $metadata);
-            $form = $this->metadataform->load($elements);
-            if ($userType == 'normal' || $userType == 'manager') {  //userTypes {normal, manager} get write -access (dus ook submit etc)
-                $form->setPermission('write');
-            } else {
-                $form->setPermission('read');
-            }
-
-            // First perform validation if yoda-metadata is present
-            if ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
-                $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath)); // folder is not relevant for the application here
-
-                $validationErrors = $this->vaultsubmission->validateMetaAgainstXsdOnly();
-                if (count($validationErrors )) {
-                    $validationResult = $validationErrors;
-                }
-            }
-
-            if( $validationResult===true) { // skip calculation if info is not required in frontend.
-                // figure out the number of mandatory fields and how many actually hold data
-                $form->calculateMandatoryCompleteness($elements);
-
-                // calculate metadataCompleteness with
-                $mandatoryTotal = $form->getCountMandatoryTotal();
-                $mandatoryFilled = $form->getCountMandatoryFilled();
-                if ($mandatoryTotal == 0) {
-                    $metadataCompleteness = 100;
-                } else {
-                    $metadataCompleteness = ceil(100 * $mandatoryFilled / $mandatoryTotal);
-                }
-            }
-
-            $metadataExists = false;
-            $cloneMetadata = false;
-            if ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
-                $metadataExists = true;
-            }
-
-            if ($formConfig['parentHasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
-                $cloneMetadata = true;
-            }
-        } else {
-            $form = null;
-            $metadataExists = false;
-            $cloneMetadata = false;
+        $metadataExists = false;
+        $cloneMetadata = false;
+        if ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
+            $metadataExists = true;
         }
+
+        if ($formConfig['parentHasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
+            $cloneMetadata = true;
+        }
+
         $realMetadataExists = $metadataExists; // keep it as this is the true state of metadata being present or not.
 
         // Check locks
         if ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor" || $formConfig['folderStatus']=='SUBMITTED' || $formConfig['folderStatus']=='LOCKED') {
-            $form->setPermission('read');
+            //$form->setPermission('read');
             $cloneMetadata = false;
             $metadataExists = false;
         }
@@ -119,7 +78,6 @@ class Metadata extends MY_Controller
         // Corrupt metadata causes no $form to be created.
         // The following code (before adding 'if ($form) ' crashes ($form->getPermission() ) the application http error 500
         $ShowUnsubmitBtn = false;
-        if ($form) {
             // Submit To Vault btn
             $submitToVaultBtn = false;
             $lockStatus = $formConfig['lockFound'];
@@ -132,8 +90,6 @@ class Metadata extends MY_Controller
             if (($userType == 'normal' OR $userType == 'manager')  AND $folderStatus == 'SUBMITTED') {
                 $showUnsubmitBtn = true;
             }
-        }
-
 
         $flashMessage = $this->session->flashdata('flashMessage');
         $flashMessageType = $this->session->flashdata('flashMessageType');
@@ -144,7 +100,7 @@ class Metadata extends MY_Controller
         if ($isDatamanager == 'yes' && $isVaultPackage == 'yes') {
 	    if ($formConfig['hasShadowMetadataXml'] == 'no') {
                 if ($mode == 'edit_in_vault') {
-                    $form->setPermission('write'); // Set write permissions for editing metadata in the vault.
+                    //$form->setPermission('write'); // Set write permissions for editing metadata in the vault.
                 } else {
                     $showEditBtn = true; // show edit button
                 }
@@ -210,7 +166,6 @@ class Metadata extends MY_Controller
                 //'js/metadata/bundle.js',
             ),
             'activeModule'   => 'research',
-            'form' => $form,
             'path' => $path,
             'fullPath' => $fullPath,
             'tokenName' => $tokenName,
