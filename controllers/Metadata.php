@@ -227,8 +227,12 @@ JSON;
                         if (isset($xmlFormData[$fieldKey])) {
                             $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
                         }
+                    } else if ($field['type'] == 'integer') { // integer
+                        if (isset($xmlFormData[$fieldKey])) {
+                            $formData[$groupKey][$fieldKey] = (integer) $xmlFormData[$fieldKey];
+                        }
                     } else if ($field['type'] == 'array') { // array
-                        if ($field['items']['type'] == 'string') {
+                        if ($field['items']['type'] == 'string' || !isset($field['items']['type'])) {
                             if (isset($xmlFormData[$fieldKey])) {
                                 if (count($xmlFormData[$fieldKey]) == 1) {
                                     $formData[$groupKey][$fieldKey] = array($xmlFormData[$fieldKey]);
