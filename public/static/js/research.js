@@ -467,8 +467,8 @@ function topInformation(dir, showAlert)
                     } else {
                         $('.btn-group button.toggle-folder-status').text('Lock');
                         $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
-                        actions['submit'] = 'Submit';
 		    }
+		    actions['submit'] = 'Submit';
                 } else if (status == 'REJECTED') {
                     $('.btn-group button.folder-status').text('Rejected');
                     $('.btn-group button.toggle-folder-status').text('Lock');
