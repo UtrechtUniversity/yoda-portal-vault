@@ -595,7 +595,8 @@ class Metadata_form_model extends CI_Model
         // Return the adjust parent node
         return $xmlParentNode;
     }
-
+// ------------------- EOF supporting functions XSD based post processing
+// ----------------    SOF supporting functions JSONS based post processing
 
     /**
      * @param $rodsaccount
@@ -607,6 +608,214 @@ class Metadata_form_model extends CI_Model
      * NO VALIDATION OF DATA IS PERFORMED IN ANY WAY
      */
     public function processPost($rodsaccount, $config)
+    {
+        $arrayPost = $this->CI->input->post();
+        $formReceivedData = json_decode($arrayPost['formData'], true);
+
+        // formData now contains info of descriptive groups.
+        // These must be excluded first for ease of use within code
+        $formData = array();
+        foreach($formReceivedData as $group=>$realFormData) {
+            #first level to be skipped as is descriptive
+            foreach($realFormData as $key => $val  ) {
+                $formData[$key] = $val;
+            }
+        }
+
+        # $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+        $xsdPath = $config['xsdPath'];
+        $jsonsElements = $this->_loadJSONS($rodsaccount, $xsdPath);
+
+        $xml = new DOMDocument("1.0", "UTF-8");
+        $xml->formatOutput = true;
+
+        $xml_metadata = $xml->createElement("metadata");
+
+        foreach ($jsonsElements['properties'] as $groupName => $formElements) {
+            foreach ($formElements['properties'] as $mainElement => $element) {
+                if (isset($formData[$mainElement])) {
+                    if (!isset($element['type'])) {  //No structure single element
+                        $xmlMainElement = $xml->createElement($mainElement);
+                        $xmlMainElement->appendChild($xml->createTextNode($formData[$mainElement]));
+
+                        $xml_metadata->appendChild($xmlMainElement);
+                    }
+                    else {
+                        $structObject = array();
+                        $extraInfo = '';
+
+                        if ($element['type'] == 'object') {   // SINGLGE STRUCT OP FIRST LEVEL
+                            $structObject = $element;
+
+                            if ($structObject['yoda:structure'] == 'compound') { // heeft altijd een compound signifying element nodig
+                                $xmlMainElement = $xml->createElement($mainElement);
+                                $anyValueFound = false;
+                                foreach ($structObject['properties'] as $compoundElementKey => $compoundElementInfo) {
+                                    $compoundValue = '';
+                                    if (isset($formData[$mainElement][$compoundElementKey])) {
+                                        $compoundValue = $formData[$mainElement][$compoundElementKey];
+                                        $anyValueFound = true;
+                                    }
+
+                                    $xmlCompoundElement = $xml->createElement($compoundElementKey);
+                                    $xmlCompoundElement->appendChild($xml->createTextNode($compoundValue));
+                                    $xmlMainElement->appendChild($xmlCompoundElement);
+                                }
+                                if ($anyValueFound) {
+                                    $xml_metadata->appendChild($xmlMainElement);
+                                }
+                            }
+                            elseif($structObject['yoda:structure'] == 'subproperties'){  // SINGLE subproperty struct is not present at the moment in the schema
+
+                            }
+                        }
+                        // MULTIPLE
+                        elseif ($element['type'] == 'array') {
+                            if (!(isset($element['items']['type']) and $element['items']['type'] == 'object')) {
+                                // multiple non structured element
+                                // So loop through data now
+
+                                foreach($formData[$mainElement] as $value) {
+                                    if ($value) {
+                                        $xmlMainElement = $xml->createElement($mainElement);
+                                        $xmlMainElement->appendChild($xml->createTextNode($value));
+
+                                        $xml_metadata->appendChild($xmlMainElement);
+                                    }
+                                }
+                            }
+                            // multiple structures
+                            else {
+                                $structObject = $element['items'];
+                                if ($structObject['yoda:structure'] == 'subproperties') {
+                                    foreach ($formData[$mainElement] as $subPropertyStructData) {
+                                        $xmlMainElement = $xml->createElement($mainElement);
+                                        $index = 0; // to distinguish between lead and sub
+                                        foreach ($structObject['properties'] as $subPropertyElementKey => $subPropertyElementInfo) {
+
+                                            // Step through object structure
+                                            if ($index==0) { // Lead part of structure - ALWAYS SINGLE VALUE!!
+                                                $xmlLeadElement = $xml->createElement($subPropertyElementKey);
+                                                $leadData = isset($subPropertyStructData[$subPropertyElementKey])? $subPropertyStructData[$subPropertyElementKey] : '';
+                                                $xmlLeadElement->appendChild($xml->createTextNode($leadData));  // @TODO - get correct lead value
+
+                                                $xmlMainElement->appendChild($xmlLeadElement);
+                                            }
+                                            elseif($index==1) { // Start of subproperty part.
+
+                                                $xmlProperties = $xml->createElement('Properties');
+
+                                                // Subproperty part of structure --
+                                                // This is the first line
+                                                // NEVER compound on first subprop line so take shortcut here.
+
+                                                $values = array();
+                                                if (!isset($subPropertyElementInfo['type'])) {
+                                                    $values[0] = isset($subPropertyStructData[$subPropertyElementKey])? $subPropertyStructData[$subPropertyElementKey] : '';
+                                                }
+                                                else if ($subPropertyElementInfo['type']=='array') {
+                                                    $values = $subPropertyStructData[$subPropertyElementKey];
+                                                }
+
+                                                foreach($values as $value) {
+                                                    $xmlSubElement = $xml->createElement($subPropertyElementKey);
+
+                                                    //$subData = isset($subPropertyStructData[$subPropertyElementKey])? $subPropertyStructData[$subPropertyElementKey] : '';
+                                                    $xmlSubElement->appendChild($xml->createTextNode($value));  // @TODO - get correct lead value
+
+                                                    $xmlProperties->appendChild($xmlSubElement);
+                                                }
+                                            }
+                                            else {  // next lines after first in subproperty part
+                                                if (!isset($subPropertyElementInfo['type'])) {
+                                                    echo 'SINGLE ITEM';  ///KOMT  NU NIET VOOR VOOR SUBPROPERTIES
+                                                }
+                                                elseif ($subPropertyElementInfo['type']=='array') {
+                                                    if (!isset($subPropertyElementInfo['items']['type'])) {
+                                                        foreach($subPropertyStructData[$subPropertyElementKey] as $value) {
+                                                            $xmlSubElement = $xml->createElement($subPropertyElementKey);
+                                                            $xmlSubElement->appendChild($xml->createTextNode($value));
+                                                            $xmlProperties->appendChild($xmlSubElement);
+                                                        }
+                                                    }
+                                                    else {
+                                                        foreach($subPropertyStructData[$subPropertyElementKey] as $data) {
+                                                            $xmlSubElement = $xml->createElement($subPropertyElementKey);
+                                                            foreach ($subPropertyElementInfo['items']['properties'] as $subCompoundKey => $subVal) {
+                                                                $subData = isset($data[$subCompoundKey]) ? $data[$subCompoundKey] : '';
+
+                                                                //$xmlSubElement->appendChild($xml->createTextNode($subData));
+                                                                $xmlSubCompound = $xml->createElement($subCompoundKey);
+                                                                $xmlSubCompound->appendChild($xml->createTextNode($subData));
+                                                                $xmlSubElement->appendChild($xmlSubCompound);
+                                                            }
+
+                                                            $xmlProperties->appendChild($xmlSubElement);  // xmlProperties wordt geinitieerd in vorige stap
+                                                        }
+                                                    }
+                                                }
+                                                elseif ($subPropertyElementInfo['yoda:structure']=='compound'){
+                                                    $xmlSubElement = $xml->createElement($subPropertyElementKey);
+
+                                                    foreach($subPropertyElementInfo['properties'] as $subCompoundKey => $subVal) {
+                                                        $subData = isset($subPropertyStructData[$subPropertyElementKey][$subCompoundKey])?
+                                                                            $subPropertyStructData[$subPropertyElementKey][$subCompoundKey] : '';
+
+                                                        $xmlSubCompound = $xml->createElement($subCompoundKey);
+                                                        $xmlSubCompound->appendChild($xml->createTextNode($subData));
+                                                        $xmlSubElement->appendChild($xmlSubCompound);
+                                                    }
+
+                                                    $xmlProperties->appendChild($xmlSubElement);  // xmlProperties wordt geinitieerd in vorige stap
+                                                }
+                                            }
+
+                                            $index++;
+                                        }
+                                        // add the entire structure to the main element
+                                        $xmlMainElement->appendChild($xmlProperties);
+                                        $xml_metadata->appendChild($xmlMainElement);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        $xml->appendChild($xml_metadata);
+
+        $xmlString = $xml->saveXML();
+
+        print_r($xmlString);
+
+        $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
+
+        exit;
+
+
+//        echo '---------------------------<br>';
+//        print_r($xsdElements);
+//        exit;
+
+        // XML initialization
+
+    }
+
+
+
+    /**
+     * @param $rodsaccount
+     * @param $config
+     *
+     * Handles the posted information of a yoda form and puts the values, after escaping, in .yoda-metadata.xml
+     * The config holds the correct paths to form definitions and .yoda-metadata.xml
+     *
+     * NO VALIDATION OF DATA IS PERFORMED IN ANY WAY
+     */
+    public function processPostXsdBased($rodsaccount, $config)
     {
         $arrayPost = $this->CI->input->post();
         $formData = json_decode($arrayPost['formData'], true);
@@ -1451,295 +1660,17 @@ class Metadata_form_model extends CI_Model
         return $valueArray;
     }
 
-    /**
-     * @param $rodsaccount
-     * @param $path
-     * @return array|bool
-     *
-     * Load XSD schema and reorganize in such a way that it coincides with formelements
-     *
-     * XSD can hold hierarchical complex types now that must match formelements definitions
-     */
-    public function loadXsd($rodsaccount, $path)
+
+    private function _loadJSONS($rodsaccount, $xsdPath)
     {
-        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-
-        $xml = simplexml_load_string($fileContent, "SimpleXMLElement", 0, 'xs', true);
-
-        if (empty($xml)) {
-            return false;
-        }
-
-        // At first simpleType handling - gathering limitations/restrictions/requirements
-        $simpleTypeData = array();
-
-//        echo '<pre>';
-//        print_r($xml);
-//        echo '</pre>';
-//        echo '<hr>';
-
-        foreach ($xml->simpleType as $key => $stype) {
-            // simpleTye names
-            $simpleTypeAttributes = (array)$stype->attributes();
-
-            $simpleTypeName = $simpleTypeAttributes['@attributes']['name'];
-
-            $restriction = (array)$stype->restriction;
-
-            // typical handling here
-            if (isset($restriction['maxLength'])) {
-                $lengthArray = (array)$stype->restriction->maxLength->attributes();
-                $length = $lengthArray['@attributes']['value'];
-                $simpleTypeData[$simpleTypeName]['maxLength'] = $length;
-            }
-            if (isset($restriction['enumeration'])) {
-                $options = array();
-                foreach ($stype->restriction->enumeration as $enum) {
-                    $optionsArray = (array)$enum->attributes();
-                    $options[] = $optionsArray['@attributes']['value'];
-                }
-                $simpleTypeData[$simpleTypeName]['options'] = $options;
-            }
-        }
-
-        $supportedSimpleTypes = array_keys($simpleTypeData);
-        $supportedSimpleTypes[] = 'xs:date'; // add some standard xsd simpleTypes that should be working as well
-        $supportedSimpleTypes[] = 'xs:gYear';
-        $supportedSimpleTypes[] = 'xs:gYearMonth';
-        $supportedSimpleTypes[] = 'xs:anyURI';
-        $supportedSimpleTypes[] = 'xs:integer';
-        // Basic information is complete
-
-        // NOW collect stuff regarding fields
-
-        $xsdElements = array();
-
-        // Hier moet eigenlijk op getest worden of dit info bevat. Dit is de kern van informatie die je bij alle zaken brengt.
-        // DIt is zelfs hierarchisch dus zou
-        $elements = $xml->element->complexType->sequence->element;
-        // @todo: maybe add choice as possible complexType. This like under _addXsdElements()
-
-        $this->_addXsdElements($xsdElements, $elements, $supportedSimpleTypes, $simpleTypeData);
-
-//        echo '<pre>xsdElements: <br>';
-//        print_r($xsdElements);
-//        echo '</pre>';
-//        exit;
-
-        return $xsdElements;
-    }
-
-    /**
-     * @param $xsdElements
-     * @param $elements
-     * @param $supportedSimpleTypes
-     * @param $simpleTypeData
-     * @param string $prefixHigherLevel
-
-    Handling of hierarchical elements
-     */
-    private function _addXsdElements(&$xsdElements, $elements, $supportedSimpleTypes, $simpleTypeData, $prefixHigherLevel = '')
-    {
-        foreach ($elements as $element) {
-            $attributes = $element->attributes();
-
-            $elementName = '';
-            $elementType = '';
-            $minOccurs = 0;
-            $maxOccurs = 1;
-
-            foreach ($attributes as $attribute => $simpleXMLvalue) {
-                $arrayValue = (array)$simpleXMLvalue;
-                $value = $arrayValue[0];
-                switch ($attribute) {
-                    case 'name':
-                        $elementName = $value;
-                        break;
-                    case 'type':
-                        $elementType = $value;
-                        break;
-                    case 'minOccurs':
-                        $minOccurs = $value;
-                        break;
-                    case 'maxOccurs':
-                        $maxOccurs = $value;
-                        break;
-                }
-            }
-
-//            echo '<br> PrefixHigherLevel: ' . $prefixHigherLevel;
-//            echo '<br> Element name: '.$elementName.'<br>';
-
-            $sequenceType = 'sequence';
-            $isDeeperLevel = false;
-
-            $sequenceTypes = array('sequence', 'choice');
-            foreach ($sequenceTypes as $seqType) {
-                if (@property_exists($element->complexType->$seqType, 'element')) {  // Starting tag Deeper level
-                    $isDeeperLevel = true;
-                    $sequenceType = $seqType;
-                    break;
-                }
-            }
-
-            // with parentElement the routing to this element can be set
-            // Routing is required to address directly in formData-array or formElements-array when processing
-            $parentElementName = substr($prefixHigherLevel, 0, strlen($prefixHigherLevel) - 1);
-
-            $routing = array();
-            if (isset($xsdElements[$parentElementName]['tagNameRouting'])) {
-                $routing = $xsdElements[$parentElementName]['tagNameRouting'];
-                $routing[] = $elementName;
-            } else {
-                $routing[] = $elementName;
-            }
-            // each relevant attribute has been processed.
-            if (in_array($elementType, $supportedSimpleTypes) OR $isDeeperLevel) {
-                $xsdElements[$prefixHigherLevel . $elementName] = array(
-                    'type' => ($isDeeperLevel ? 'openTag' : $elementType),
-                    'minOccurs' => $minOccurs,
-                    'maxOccurs' => $maxOccurs,
-                    'simpleTypeData' => isset($simpleTypeData[$elementType]) ? $simpleTypeData[$elementType] : array(),
-                    'tagNameRouting' => $routing
-                );
-            }
-
-            if ($isDeeperLevel) { // Add new level and extend the prefix-identifier ->sequence type is determined above (can be 'sequence' or 'choice')
-                $elementSubLevel = $element->complexType->$sequenceType->element;
-
-                //$prefixHigherLevel = $elementName . '_'; // to be used to identify elements
-
-                $prefixHigherLevelKeep = $prefixHigherLevel;
-                if (!$prefixHigherLevel) {
-                    $prefixHigherLevel = $elementName . '_';
-                } else {
-                    $prefixHigherLevel = $prefixHigherLevel . $elementName . '_';
-                }
-
-
-                // dieper niveau uitvoeren op basis an de gestelde prefix.
-                $this->_addXsdElements($xsdElements, $elementSubLevel, $supportedSimpleTypes, $simpleTypeData, $prefixHigherLevel);
-
-                $prefixHigherLevel = $prefixHigherLevelKeep; //''; //reset it again
-
-                // Closing tag - Deeper level
-                $xsdElements[$prefixHigherLevel . $elementName . '_close'] = array(
-                    'type' => 'closeTag',
-                    'minOccurs' => $minOccurs,
-                    'maxOccurs' => $maxOccurs,
-                    'simpleTypeData' => isset($simpleTypeData[$elementType]) ? $simpleTypeData[$elementType] : array()
-                );
-            }
-        }
-    }
-
-    /**
-     * @param $rodsaccount
-     * @param $path
-     * @return array|bool
-     *
-     * Load the yoda-metadata.xml file ($path) in an array structure
-     *
-     * Reorganise this this in such a way that hierarchy is lost but indexing is possible by eg 'Author_Property_Role'
-     */
-    public function loadFormData($rodsaccount, $path)
-    {
-        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-        libxml_use_internal_errors(true);
-        $xmlData = simplexml_load_string($fileContent);
-        $errors = libxml_get_errors();
-        libxml_clear_errors();
-
-        if (count($errors)) {
-            return false;
-        }
-
-        $json = json_encode($xmlData);
-
-        $formData = json_decode($json, TRUE);
-
-        return $formData;
-    }
-
-    /**
-     * @param $rodsaccount
-     * @param $path
-     * @return bool|mixed
-     *
-     * Load the required xml file with formelements description and return as an array
-     */
-    public function loadFormElements($rodsaccount, $path)
-    {
-        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
-
-        if (empty($fileContent)) {
-            return false;
-        }
-        $xmlFormElements = simplexml_load_string($fileContent);
-
-        $json = json_encode($xmlFormElements);
-
-        $data = json_decode($json, TRUE);
-
-        // Single presence of a group requires extra handling
-        if (!isset($data['Group'][0])) {
-            $keepGroupData = $data['Group'];
-            unset($data['Group']);
-            $data['Group'][0] = $keepGroupData;
-        }
-
-        if ($data) {  // make the descriptive data for the actual form fields (i.e. not grouping info) accessible globally in class
-            $this->formMainFields  = $this->_getFormElementsMainFieldList($data);
-        }
-
-        return $data;
-    }
-
-    private function _getFormElementsMainFieldList($formGroupedElements)
-    {
-        $elements = array();
-
-        $formAllGroupedElements = array();
-        foreach ($formGroupedElements['Group'] as $index => $array) {
-            if ($index == '0') {
-                // is the index of an array. So we have multiple groups.
-                $formAllGroupedElements = $formGroupedElements['Group'];
-            } else {
-                $formAllGroupedElements[] = $formGroupedElements['Group']; // rewrite it as an indexable array as input for coming foreach
-            }
-            break;
-        }
-
-        // Form elements is hierarchical too.
-        // Bring it back to one level with
-        // 1) parent indication
-        // 2) fully qualified name (unique!)
-        // 3) Add start end tags for combination fields
-
-        // HIER ALLEEN DE HOOFD ELEMENTEN
-        foreach ($formAllGroupedElements as $formElements) {
-            foreach ($formElements as $key => $element) {
-                // Find group definition
-                // Find hierarchies of elements regarding subproperties.
-                if ($key != '@attributes') { // GROUP handling
-//                    echo '<pre>';
-//                    echo 'Key = ' . $key;
-//                    echo '<br>';
-//                    print_r($element);
-//                    echo '</pre>';
-
-                    $elements[$key] = $element;
-                }
-            }
-        }
-        return $elements;
-    }
-
-    public function jsonSchema()
-    {
-        return <<<'JSON'
+        // with Related Datapackage - multiple (doesn't work)
+        $jsonSchema = <<<'JSON'
 {
 	"definitions": {
+		"stringURI": {
+			"type": "uri",
+			"maxLength": 1024
+		},
 		"stringNormal": {
 			"type": "string",
 			"maxLength": 255
@@ -2404,5 +2335,294 @@ class Metadata_form_model extends CI_Model
 	}
 }
 JSON;
+
+        return json_decode($jsonSchema, true);
+    }
+
+
+    /**
+     * @param $rodsaccount
+     * @param $path
+     * @return array|bool
+     *
+     * Load XSD schema and reorganize in such a way that it coincides with formelements
+     *
+     * XSD can hold hierarchical complex types now that must match formelements definitions
+     */
+    public function loadXsd($rodsaccount, $path)
+    {
+        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+
+        $xml = simplexml_load_string($fileContent, "SimpleXMLElement", 0, 'xs', true);
+
+        if (empty($xml)) {
+            return false;
+        }
+
+        // At first simpleType handling - gathering limitations/restrictions/requirements
+        $simpleTypeData = array();
+
+//        echo '<pre>';
+//        print_r($xml);
+//        echo '</pre>';
+//        echo '<hr>';
+
+        foreach ($xml->simpleType as $key => $stype) {
+            // simpleTye names
+            $simpleTypeAttributes = (array)$stype->attributes();
+
+            $simpleTypeName = $simpleTypeAttributes['@attributes']['name'];
+
+            $restriction = (array)$stype->restriction;
+
+            // typical handling here
+            if (isset($restriction['maxLength'])) {
+                $lengthArray = (array)$stype->restriction->maxLength->attributes();
+                $length = $lengthArray['@attributes']['value'];
+                $simpleTypeData[$simpleTypeName]['maxLength'] = $length;
+            }
+            if (isset($restriction['enumeration'])) {
+                $options = array();
+                foreach ($stype->restriction->enumeration as $enum) {
+                    $optionsArray = (array)$enum->attributes();
+                    $options[] = $optionsArray['@attributes']['value'];
+                }
+                $simpleTypeData[$simpleTypeName]['options'] = $options;
+            }
+        }
+
+        $supportedSimpleTypes = array_keys($simpleTypeData);
+        $supportedSimpleTypes[] = 'xs:date'; // add some standard xsd simpleTypes that should be working as well
+        $supportedSimpleTypes[] = 'xs:gYear';
+        $supportedSimpleTypes[] = 'xs:gYearMonth';
+        $supportedSimpleTypes[] = 'xs:anyURI';
+        $supportedSimpleTypes[] = 'xs:integer';
+        // Basic information is complete
+
+        // NOW collect stuff regarding fields
+
+        $xsdElements = array();
+
+        // Hier moet eigenlijk op getest worden of dit info bevat. Dit is de kern van informatie die je bij alle zaken brengt.
+        // DIt is zelfs hierarchisch dus zou
+        $elements = $xml->element->complexType->sequence->element;
+        // @todo: maybe add choice as possible complexType. This like under _addXsdElements()
+
+        $this->_addXsdElements($xsdElements, $elements, $supportedSimpleTypes, $simpleTypeData);
+
+//        echo '<pre>xsdElements: <br>';
+//        print_r($xsdElements);
+//        echo '</pre>';
+//        exit;
+
+        return $xsdElements;
+    }
+
+    /**
+     * @param $xsdElements
+     * @param $elements
+     * @param $supportedSimpleTypes
+     * @param $simpleTypeData
+     * @param string $prefixHigherLevel
+
+    Handling of hierarchical elements
+     */
+    private function _addXsdElements(&$xsdElements, $elements, $supportedSimpleTypes, $simpleTypeData, $prefixHigherLevel = '')
+    {
+        foreach ($elements as $element) {
+            $attributes = $element->attributes();
+
+            $elementName = '';
+            $elementType = '';
+            $minOccurs = 0;
+            $maxOccurs = 1;
+
+            foreach ($attributes as $attribute => $simpleXMLvalue) {
+                $arrayValue = (array)$simpleXMLvalue;
+                $value = $arrayValue[0];
+                switch ($attribute) {
+                    case 'name':
+                        $elementName = $value;
+                        break;
+                    case 'type':
+                        $elementType = $value;
+                        break;
+                    case 'minOccurs':
+                        $minOccurs = $value;
+                        break;
+                    case 'maxOccurs':
+                        $maxOccurs = $value;
+                        break;
+                }
+            }
+
+//            echo '<br> PrefixHigherLevel: ' . $prefixHigherLevel;
+//            echo '<br> Element name: '.$elementName.'<br>';
+
+            $sequenceType = 'sequence';
+            $isDeeperLevel = false;
+
+            $sequenceTypes = array('sequence', 'choice');
+            foreach ($sequenceTypes as $seqType) {
+                if (@property_exists($element->complexType->$seqType, 'element')) {  // Starting tag Deeper level
+                    $isDeeperLevel = true;
+                    $sequenceType = $seqType;
+                    break;
+                }
+            }
+
+            // with parentElement the routing to this element can be set
+            // Routing is required to address directly in formData-array or formElements-array when processing
+            $parentElementName = substr($prefixHigherLevel, 0, strlen($prefixHigherLevel) - 1);
+
+            $routing = array();
+            if (isset($xsdElements[$parentElementName]['tagNameRouting'])) {
+                $routing = $xsdElements[$parentElementName]['tagNameRouting'];
+                $routing[] = $elementName;
+            } else {
+                $routing[] = $elementName;
+            }
+            // each relevant attribute has been processed.
+            if (in_array($elementType, $supportedSimpleTypes) OR $isDeeperLevel) {
+                $xsdElements[$prefixHigherLevel . $elementName] = array(
+                    'type' => ($isDeeperLevel ? 'openTag' : $elementType),
+                    'minOccurs' => $minOccurs,
+                    'maxOccurs' => $maxOccurs,
+                    'simpleTypeData' => isset($simpleTypeData[$elementType]) ? $simpleTypeData[$elementType] : array(),
+                    'tagNameRouting' => $routing
+                );
+            }
+
+            if ($isDeeperLevel) { // Add new level and extend the prefix-identifier ->sequence type is determined above (can be 'sequence' or 'choice')
+                $elementSubLevel = $element->complexType->$sequenceType->element;
+
+                //$prefixHigherLevel = $elementName . '_'; // to be used to identify elements
+
+                $prefixHigherLevelKeep = $prefixHigherLevel;
+                if (!$prefixHigherLevel) {
+                    $prefixHigherLevel = $elementName . '_';
+                } else {
+                    $prefixHigherLevel = $prefixHigherLevel . $elementName . '_';
+                }
+
+
+                // dieper niveau uitvoeren op basis an de gestelde prefix.
+                $this->_addXsdElements($xsdElements, $elementSubLevel, $supportedSimpleTypes, $simpleTypeData, $prefixHigherLevel);
+
+                $prefixHigherLevel = $prefixHigherLevelKeep; //''; //reset it again
+
+                // Closing tag - Deeper level
+                $xsdElements[$prefixHigherLevel . $elementName . '_close'] = array(
+                    'type' => 'closeTag',
+                    'minOccurs' => $minOccurs,
+                    'maxOccurs' => $maxOccurs,
+                    'simpleTypeData' => isset($simpleTypeData[$elementType]) ? $simpleTypeData[$elementType] : array()
+                );
+            }
+        }
+    }
+
+    /**
+     * @param $rodsaccount
+     * @param $path
+     * @return array|bool
+     *
+     * Load the yoda-metadata.xml file ($path) in an array structure
+     *
+     * Reorganise this this in such a way that hierarchy is lost but indexing is possible by eg 'Author_Property_Role'
+     */
+
+    /** USER IN NEW SITUATION */
+    public function loadFormData($rodsaccount, $path)
+    {
+        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+        libxml_use_internal_errors(true);
+        $xmlData = simplexml_load_string($fileContent);
+        $errors = libxml_get_errors();
+        libxml_clear_errors();
+
+        if (count($errors)) {
+            return false;
+        }
+
+        $json = json_encode($xmlData);
+
+        $formData = json_decode($json, TRUE);
+
+        return $formData;
+    }
+
+    /**
+     * @param $rodsaccount
+     * @param $path
+     * @return bool|mixed
+     *
+     * Load the required xml file with formelements description and return as an array
+     */
+    public function loadFormElements($rodsaccount, $path)
+    {
+        $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
+
+        if (empty($fileContent)) {
+            return false;
+        }
+        $xmlFormElements = simplexml_load_string($fileContent);
+
+        $json = json_encode($xmlFormElements);
+
+        $data = json_decode($json, TRUE);
+
+        // Single presence of a group requires extra handling
+        if (!isset($data['Group'][0])) {
+            $keepGroupData = $data['Group'];
+            unset($data['Group']);
+            $data['Group'][0] = $keepGroupData;
+        }
+
+        if ($data) {  // make the descriptive data for the actual form fields (i.e. not grouping info) accessible globally in class
+            $this->formMainFields  = $this->_getFormElementsMainFieldList($data);
+        }
+
+        return $data;
+    }
+
+    private function _getFormElementsMainFieldList($formGroupedElements)
+    {
+        $elements = array();
+
+        $formAllGroupedElements = array();
+        foreach ($formGroupedElements['Group'] as $index => $array) {
+            if ($index == '0') {
+                // is the index of an array. So we have multiple groups.
+                $formAllGroupedElements = $formGroupedElements['Group'];
+            } else {
+                $formAllGroupedElements[] = $formGroupedElements['Group']; // rewrite it as an indexable array as input for coming foreach
+            }
+            break;
+        }
+
+        // Form elements is hierarchical too.
+        // Bring it back to one level with
+        // 1) parent indication
+        // 2) fully qualified name (unique!)
+        // 3) Add start end tags for combination fields
+
+        // HIER ALLEEN DE HOOFD ELEMENTEN
+        foreach ($formAllGroupedElements as $formElements) {
+            foreach ($formElements as $key => $element) {
+                // Find group definition
+                // Find hierarchies of elements regarding subproperties.
+                if ($key != '@attributes') { // GROUP handling
+//                    echo '<pre>';
+//                    echo 'Key = ' . $key;
+//                    echo '<br>';
+//                    print_r($element);
+//                    echo '</pre>';
+
+                    $elements[$key] = $element;
+                }
+            }
+        }
+        return $elements;
     }
 }
