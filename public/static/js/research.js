@@ -421,6 +421,7 @@ function topInformation(dir, showAlert)
             var isVaultPackage = data.result.isVaultPackage;
             var researchGroupAccess = data.result.researchGroupAccess;
 	    var inResearchGroup = data.result.inResearchGroup;
+            var lockFound = data.result.lockFound;
             var lockCount = data.result.lockCount;
             var showStatusBtn = false;
             var actions = [];
@@ -460,9 +461,14 @@ function topInformation(dir, showAlert)
                     $('.btn-group button.folder-status').next().prop("disabled", true);
                 } else if (status == 'SECURED') {
                     $('.btn-group button.folder-status').text('Secured');
-                    $('.btn-group button.toggle-folder-status').text('Lock');
-                    $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
-                    actions['submit'] = 'Submit';
+		    if (lockFound == "here") {
+                        $('.btn-group button.toggle-folder-status').text('Unlock');
+                        $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    } else {
+                        $('.btn-group button.toggle-folder-status').text('Lock');
+                        $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
+                        actions['submit'] = 'Submit';
+		    }
                 } else if (status == 'REJECTED') {
                     $('.btn-group button.folder-status').text('Rejected');
                     $('.btn-group button.toggle-folder-status').text('Lock');
@@ -481,7 +487,6 @@ function topInformation(dir, showAlert)
             }
 
             // Lock position check
-            var lockFound = data.result.lockFound;
             var path = data.result.path;
             if (lockFound != "no") {
                 if (lockFound == "here") {
