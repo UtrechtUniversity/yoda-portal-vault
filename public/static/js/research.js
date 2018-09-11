@@ -461,6 +461,7 @@ function topInformation(dir, showAlert)
                     $('.btn-group button.folder-status').next().prop("disabled", true);
                 } else if (status == 'SECURED') {
                     $('.btn-group button.folder-status').text('Secured');
+		    // Check for locks is here for backwards compatibility with release v1.2.
 		    if (lockFound == "here") {
                         $('.btn-group button.toggle-folder-status').text('Unlock');
                         $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
@@ -471,8 +472,14 @@ function topInformation(dir, showAlert)
 		    actions['submit'] = 'Submit';
                 } else if (status == 'REJECTED') {
                     $('.btn-group button.folder-status').text('Rejected');
-                    $('.btn-group button.toggle-folder-status').text('Lock');
-                    $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
+                    // Check for locks is here for backwards compatibility with release v1.2.
+                    if (lockFound == "here") {
+                        $('.btn-group button.toggle-folder-status').text('Unlock');
+                        $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    } else {
+                        $('.btn-group button.toggle-folder-status').text('Lock');
+                        $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
+		    }
                     actions['submit'] = 'Submit';
                 }
                 var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
