@@ -243,25 +243,48 @@ JSON;
                         } else if ($field['items']['type'] == 'object') {
                             //$formData[$groupKey][$fieldKey] = array();
                             $emptyObjectField = array();
+                            $mainProp = true;
                             foreach ($field['items']['properties'] as $objectKey => $objectField) {
-                                if ($objectField['type'] == 'string') {
-                                    $emptyObjectField[$objectKey] = $objectKey;
-                                } else if ($objectField['type'] == 'object') { //subproperties
-                                    foreach ($objectField['properties'] as $subObjectKey => $subObjectField) {
-                                        if ($subObjectField['type'] == 'string') {
-                                            $emptyObjectField[$objectKey][$subObjectKey] = $objectKey;
-                                        } else if ($subObjectField['type'] == 'object') {// Composite
-                                            $compositeField = array();
-                                            foreach ($subObjectField['properties'] as $subCompositeKey => $subCompositeField) {
-                                                $compositeField[$subCompositeKey] = $subCompositeKey;
+                                if ($field['items']['yoda:structure'] == 'subproperties') {
+                                    if ($mainProp) {
+                                        if (isset($xmlFormData[$fieldKey][$objectKey])) {
+                                            //$formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey][$objectKey];
+                                            $emptyObjectField[$objectKey] = $xmlFormData[$fieldKey][$objectKey];
+                                        }
+                                        $mainProp = false;
+                                    } else {
+                                        if (isset($xmlFormData[$fieldKey]['Properties'][$objectKey])) {
+                                            //$formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
+                                            if ($objectField['type'] == 'array') {
+                                                $emptyObjectField[$objectKey] = array($xmlFormData[$fieldKey]['Properties'][$objectKey]);
+                                            } else {
+                                                $emptyObjectField[$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
                                             }
 
-                                            $emptyObjectField[$objectKey][$subObjectKey] = $compositeField;
+                                        }
+                                    }
+                                } else {
+                                    if ($objectField['type'] == 'string') {
+                                        $emptyObjectField[$objectKey] = $objectKey;
+                                    } else if ($objectField['type'] == 'object') { //subproperties (OLD)
+                                        foreach ($objectField['properties'] as $subObjectKey => $subObjectField) {
+                                            if ($subObjectField['type'] == 'string') {
+                                                $emptyObjectField[$objectKey][$subObjectKey] = $objectKey;
+                                            } else if ($subObjectField['type'] == 'object') {// Composite
+                                                $compositeField = array();
+                                                foreach ($subObjectField['properties'] as $subCompositeKey => $subCompositeField) {
+                                                    $compositeField[$subCompositeKey] = $subCompositeKey;
+                                                }
+
+                                                $emptyObjectField[$objectKey][$subObjectKey] = $compositeField;
+                                            }
                                         }
                                     }
                                 }
                             }
-                            //$formData[$groupKey][$fieldKey][] = $emptyObjectField;
+                            if (count($emptyObjectField)) {
+                                $formData[$groupKey][$fieldKey][] = $emptyObjectField;
+                            }
                         }
                     } else if ($field['type'] == 'object') {
                         $structure = $field['yoda:structure'];
@@ -295,6 +318,8 @@ JSON;
                 }
             }
         }
+
+        //print_r($formData);
 
         $output = array();
         $output['path'] = $path;
