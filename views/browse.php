@@ -1,6 +1,6 @@
 <script>
     var browsePageItems = <?php echo $items; ?>;
-    var browseStartDir = '<?php echo urlencode($dir); ?>';
+    var browseStartDir = '<?php echo rawurlencode($dir); ?>';
     var view = 'browse';
 </script>
 
