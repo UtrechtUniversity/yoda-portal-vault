@@ -91,7 +91,7 @@ class Search extends MY_Controller
                         $filePath = str_replace($pathStart, '', $row['parent']);
                         $rows[] = array(
                             '<i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename']))),
-                            '<span class="browse-search" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>'
+                            '<span class="browse-search" data-path="' . rawurlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>'
                         );
                     }
                 }
@@ -117,7 +117,7 @@ class Search extends MY_Controller
 
                         //str_replace(' ', '&nbsp;', htmlentities( trim( $row['basename'], '/')))
                         $rows[] = array(
-                            '<span class="browse-search" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>'
+                            '<span class="browse-search" data-path="' . rawurlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>'
                         );
                     }
                 }
@@ -172,7 +172,7 @@ class Search extends MY_Controller
                         }
 
                         $rows[] = array(
-                            '<span class="browse-search" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>',
+                            '<span class="browse-search" data-path="' . rawurlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>',
                             '<span class="matches" data-toggle="tooltip" title="' . htmlentities(implode(', ', $matchParts)) . ($i == 5 ? '...' : '') . '">' . count($row['matches']) . ' field(s)</span>'
                         );
                     }
@@ -205,7 +205,7 @@ class Search extends MY_Controller
                     foreach ($result['rows'] as $row) {
                         $filePath = str_replace($pathStart, '', $row['path']);
                         $rows[] = array(
-                            '<span class="browse-search" data-path="' . urlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>'
+                            '<span class="browse-search" data-path="' . rawurlencode($filePath) . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>'
                         );
                     }
                 }

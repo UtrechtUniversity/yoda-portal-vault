@@ -28,14 +28,14 @@
 <?php } else { ?>
     <div class="row">
         <div class="col-md-12">
-            <?php echo $form->open('research/metadata/store?path=' . urlencode($path), 'form-horizontal metadata-form'); ?>
+            <?php echo $form->open('research/metadata/store?path=' . rawurlencode($path), 'form-horizontal metadata-form'); ?>
             <div class="panel panel-default">
                 <div class="panel-heading clearfix">
                     <h3 class="panel-title pull-left">
                         Metadata form - <?php echo str_replace(' ', '&nbsp;', htmlentities( trim( $path ))); ?>
                     </h3>
                     <div class="input-group-sm has-feedback pull-right">
-                        <a class="btn btn-default" href="/research/browse?dir=<?php echo urlencode($path); ?>">Close</a>
+                        <a class="btn btn-default" href="/research/browse?dir=<?php echo rawurlencode($path); ?>">Close</a>
                     </div>
                 </div>
                 <div class="panel-body">
@@ -57,7 +57,7 @@
                                 <br>
                                 When using the 'Delete all metadata' button beware that you will lose all data!
 
-                                <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Delete all metadata</button>
+                                <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo rawurlencode($path); ?>">Delete all metadata</button>
                             <?php } ?>
                         </p>
                     <?php } else { ?>
@@ -75,7 +75,7 @@
                                 <?php } ?>
 
                                 <?php if ($showEditBtn) { ?>
-                                    <a href="<?php echo base_url('research/metadata/form?path=' . urlencode($path) . '&mode=edit_in_vault'); ?>" class="btn btn-primary">Update metadata</a>
+                                    <a href="<?php echo base_url('research/metadata/form?path=' . rawurlencode($path) . '&mode=edit_in_vault'); ?>" class="btn btn-primary">Update metadata</a>
                                 <?php } ?>
 
                                 <?php if ($form->getPermission() == 'write') { ?>
@@ -96,11 +96,11 @@
                                 <?php } ?>
 
                                 <?php if ($form->getPermission() == 'write' && $metadataExists && $isVaultPackage != 'yes') { ?>
-                                    <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Delete all metadata</button>
+                                    <button type="button" class="btn btn-danger delete-all-metadata-btn pull-right" data-path="<?php echo rawurlencode($path); ?>">Delete all metadata</button>
                                 <?php } ?>
 
                                 <?php if (($form->getPermission() == 'write' && $metadataExists === false) && $cloneMetadata) { ?>
-                                    <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Clone from parent folder</button>
+                                    <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo rawurlencode($path); ?>">Clone from parent folder</button>
                                 <?php } ?>
 
                             </div>

@@ -205,7 +205,7 @@ class Revision extends MY_Controller
                     $filePath = str_replace($pathStart, '', $row['originalPath']);
 
                     $rows[] = array(
-                        '<span data-path="' . urlencode($filePath) . '" data-collection-exists="' . $row['collectionExists'] . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>',
+                        '<span data-path="' . rawurlencode($filePath) . '" data-collection-exists="' . $row['collectionExists'] . '">' . str_replace(' ', '&nbsp;', htmlentities(trim($filePath, '/'))) . '</span>',
                         $row['numberOfRevisions']
                     );
                 }

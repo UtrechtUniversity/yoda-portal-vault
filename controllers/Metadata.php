@@ -284,13 +284,13 @@ class Metadata extends MY_Controller
                 setMessage('error', implode('<br>', $result));
             }
 
-            return redirect('research/metadata/form?path=' . urlencode($path) . '&mode=edit_in_vault', 'refresh');
+            return redirect('research/metadata/form?path=' . rawurlencode($path) . '&mode=edit_in_vault', 'refresh');
         }
 
         if (!($userType=='normal' || $userType=='manager')) { // superseeds userType!= reader - which comes too late for permissions for vault submission
             $this->session->set_flashdata('flashMessage', 'Insufficient rights to perform this action.'); // wat is een locking error?
             $this->session->set_flashdata('flashMessageType', 'danger');
-            return redirect('research/browse?dir=' . urlencode($path), 'refresh');
+            return redirect('research/browse?dir=' . rawurlencode($path), 'refresh');
         }
 
         $status = '';
@@ -338,11 +338,11 @@ class Metadata extends MY_Controller
             // save metadata xml.  Check for correct conditions
             if ($folderStatus == 'SUBMITTED') {
                 setMessage('error', 'The form has already been submitted');
-                return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+                return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
             }
             if ($folderStatus == 'LOCKED' || $lockStatus == 'ancestor') {
                 setMessage('error', 'The metadata form is locked possibly by the action of another user.');
-                return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+                return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
             }
 
             if ($this->input->server('REQUEST_METHOD') == 'POST') {
@@ -350,7 +350,7 @@ class Metadata extends MY_Controller
             }
         }
 
-        return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+        return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
     }
 
     function delete()
@@ -369,14 +369,14 @@ class Metadata extends MY_Controller
         if($userType != 'reader') {
             $result = $this->filesystem->removeAllMetadata($rodsaccount, $fullPath);
             if ($result) {
-                return redirect('research/browse?dir=' . urlencode($path), 'refresh');
+                return redirect('research/browse?dir=' . rawurlencode($path), 'refresh');
             } else {
-                return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+                return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
             }
         }
         else {
             //get away from the form, user is (no longer) entitled to view it
-            return redirect('research/browse?dir=' . urlencode($path), 'refresh');
+            return redirect('research/browse?dir=' . rawurlencode($path), 'refresh');
         }
     }
 
@@ -397,6 +397,6 @@ class Metadata extends MY_Controller
             $result = $this->filesystem->cloneMetadata($rodsaccount, $xmlPath, $xmlParentPath);
         }
 
-        return redirect('research/metadata/form?path=' . urlencode($path), 'refresh');
+        return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
     }
 }
