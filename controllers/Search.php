@@ -150,20 +150,15 @@ class Search extends MY_Controller
 
                         $pathCategory = $formConfig['category'];
 
-                        if (!isset($categoryFormLabels[$pathCategory])) { // forms (and its labels) are category dependant. Fetch it only once for efficiency purposes
-                            $formLabels = $this->Metadata_form_model->getFormElementLabels($rodsaccount, $formConfig);
-                            $categoryFormLabels[$pathCategory] = $formLabels;
-                        }
+                        // Was used when formElements was still in use.
+                        // Left the path for possible later use when labels are taken from JSONS
+                        // Labels are category dependent
 
                         foreach ($row['matches'] as $match) {
                             foreach ($match as $k => $value) {
 
-                                // convert $k to an index as known within formelements.xml
-                                $labelIndex = str_replace( array(' '), '_', $k);
-                                $labelIndex = preg_replace("/_[0-9]_/", "_", $labelIndex);
-                                $label = isset($categoryFormLabels[$pathCategory][$labelIndex]) ? $categoryFormLabels[$pathCategory][$labelIndex] : $k;
-
-                                $matchParts[] = $label . ': ' . $value;
+                                // @TODO: $k needs to be translated to a proper label (as when using formelements)
+                                $matchParts[] = $k . ': ' . $value;
                                 if ($i == 5) {
                                     break 2;
                                 }

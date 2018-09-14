@@ -1,1 +1,0 @@
-<div class="subproperties col-sm-offset-2 col-sm-10">

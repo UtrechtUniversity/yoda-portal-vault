@@ -25,28 +25,10 @@ class Filesystem extends CI_Model {
 
         $metedataFile->open("w+");
 
-//        $xml = new DOMDocument( "1.0", "UTF-8" );
-//	    $xml->formatOutput = true;
-//
-//        $xml_metadata = $xml->createElement( "metadata" );
-//
-//        foreach($metadata as $fields) {
-//            foreach ($fields as $key => $value) {
-//                $xml_item = $xml->createElement( $key);
-//                $xml_item->appendChild($xml->createTextNode($value));
-//                $xml_metadata->appendChild( $xml_item );
-//            }
-//        }
-//
-//        $xml->appendChild($xml_metadata);
-//
-//        $xmlString = $xml->saveXML();
-
         $metedataFile->write($xmlString);
 
         $metedataFile->close();
 
-//        return $metadata;
     }
 
     function read($rodsaccount, $file)
@@ -647,5 +629,48 @@ RULE;
         }
         return array();
     }
+
+
+    /**
+     * Get the category dependent JSON schema from irods
+     * @param $iRodsAccount
+     * @param $folder
+     * @return array
+     */
+    function getJsonSchema($iRodsAccount, $folder)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    iiFrontGetJsonSchema(*folder, *result, *status, *statusInfo);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*folder" => $folder
+                ),
+                array("*result", "*status", "*statusInfo")
+            );
+
+            $ruleResult = $rule->execute();
+            $output['*result'] = json_decode($ruleResult['*result'], true);  // @TODO: Moet dit gedecodeerd worden? of juist niet?
+
+            $output['*status'] = $ruleResult['*status'];
+            $output['*statusInfo'] = $ruleResult['*statusInfo'];
+
+            return $output;
+
+        } catch(RODSException $e) {
+            return array();
+        }
+
+        return array();
+    }
+
+
 }
 
