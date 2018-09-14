@@ -255,7 +255,7 @@ class Browse extends MY_Controller
                             if ($this->_allowRowWhenBrowsing($row, $interveningKeys)) {
                                 $filePath = str_replace($pathStart, '', $row['path']);
                                 $rows[] = array(
-                                    '<span class="browse" data-path="' . urlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                    '<span class="browse" data-path="' . rawurlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
                                     date('Y-m-d H:i:s', $row['modify_time'])
                                 );
 
@@ -297,7 +297,7 @@ class Browse extends MY_Controller
                             if ($this->_allowRowWhenBrowsing($row, $interveningKeys) AND $totalItemsLeftInView) {
                                 $filePath = str_replace($pathStart, '', $row['path']);
                                 $rows[] = array(
-                                    '<span data-path="' . urlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                    '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
                                     date('Y-m-d H:i:s', $row['modify_time'])
                                 );
                                 $totalItemsLeftInView--;
@@ -421,9 +421,9 @@ class Browse extends MY_Controller
                         foreach ($collections['rows'] as $row) {
                             if ($this->_allowRowWhenBrowsing($row, $interveningKeys)) {
                                 $filePath = str_replace($pathStart, '', $row['path']);
-                                if (!strpos(urlencode($filePath),'2Fvault')==1) { // remove vault folders as these are not allowed as destination. To be made optional
+                                if (!strpos(rawurlencode($filePath),'2Fvault')==1) { // remove vault folders as these are not allowed as destination. To be made optional
                                     $rows[] = array(
-                                        '<span class="browse-select" data-path="' . urlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                        '<span class="browse-select" data-path="' . rawurlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
                                         date('Y-m-d H:i:s', $row['modify_time'])
                                     );
 
@@ -466,7 +466,7 @@ class Browse extends MY_Controller
                             if ($this->_allowRowWhenBrowsing($row, $interveningKeys) AND $totalItemsLeftInView) {
                                 $filePath = str_replace($pathStart, '', $row['path']);
                                 $rows[] = array(
-                                    '<span data-path="' . urlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                    '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
                                     date('Y-m-d H:i:s', $row['modify_time'])
                                 );
                                 $totalItemsLeftInView--;

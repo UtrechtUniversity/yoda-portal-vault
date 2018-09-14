@@ -6,7 +6,7 @@
                         Metadata form - <?php echo str_replace(' ', '&nbsp;', htmlentities( trim( $path ))); ?>
                     </h3>
                     <div class="input-group-sm has-feedback pull-right">
-                        <a class="btn btn-default" href="/research/browse?dir=<?php echo urlencode($path); ?>">Close</a>
+                        <a class="btn btn-default" href="/research/browse?dir=<?php echo rawurlencode($path); ?>">Close</a>
                     </div>
                 </div>
                 <div class="panel-body">
@@ -18,7 +18,7 @@
                                 <?php } ?>
 
                                 <?php if ($showEditBtn) { ?>
-                                    <a href="<?php echo base_url('research/metadata/form?path=' . urlencode($path) . '&mode=edit_in_vault'); ?>" class="btn btn-primary">Update metadata</a>
+                                    <a href="<?php echo base_url('research/metadata/form?path=' . rawurlencode($path) . '&mode=edit_in_vault'); ?>" class="btn btn-primary">Update metadata</a>
                                 <?php } ?>
 
                                 <?php if (($metadataExists === false) && $cloneMetadata) { ?>
@@ -29,9 +29,9 @@
                         </div>
 
                         <div id="form" class="metadata-form"
-                             data-path="<?php echo urlencode($path); ?>"
-                             data-csrf_token_name="<?php echo urlencode($tokenName); ?>"
-                             data-csrf_token_hash="<?php echo urlencode($tokenHash); ?>">
+                             data-path="<?php echo rawurlencode($path); ?>"
+                             data-csrf_token_name="<?php echo rawurlencode($tokenName); ?>"
+                             data-csrf_token_hash="<?php echo rawurlencode($tokenHash); ?>">
                         </div>
 
                         <div class="form-group">
