@@ -28,9 +28,6 @@ class Metadata extends MY_Controller
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
-        // not required here? This was in source already (hardcoded JSONS), probable can be taken out??? @TODO
-        $jsonSchema = $this->Metadata_form_model->loadJSONS($rodsaccount, $fullPath);
-
         $isDatamanager = $formConfig['isDatamanager'];
         $isVaultPackage = $formConfig['isVaultPackage'];
 
@@ -67,7 +64,6 @@ class Metadata extends MY_Controller
             $cloneMetadata = false;
             $metadataExists = false;
         }
-
 
         // Corrupt metadata causes no $form to be created.
         // The following code (before adding 'if ($form) ' crashes ($form->getPermission() ) the application http error 500
@@ -206,14 +202,11 @@ class Metadata extends MY_Controller
     }
 JSON;
 
-
         $result = $jsonSchema;
-//        $result = json_decode($jsonSchema, true);
 
         $formData = array();
         foreach ($result['properties'] as $groupKey => $group) {
             //Group
-
             foreach($group['properties'] as $fieldKey => $field) {
                 // Field
                 if (array_key_exists('type', $field)) {

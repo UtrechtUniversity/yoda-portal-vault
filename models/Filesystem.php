@@ -12,25 +12,27 @@ class Filesystem extends CI_Model {
     }
 
     /**
+     * Write XML string to yoda-metadata.xml in iRODS.
+     *
      * @param $rodsaccount
      * @param $path
      * @param $xmlString
-     *
-     * key value pairs to be written to .yoda-metadata.xml
-     *
      */
     function writeXml($rodsaccount, $path, $xmlString)
     {
         $metedataFile = new ProdsFile($rodsaccount, $path);
-
         $metedataFile->open("w+");
-
         $metedataFile->write($xmlString);
-
         $metedataFile->close();
-
     }
 
+    /**
+     * Read a file from iRODS.
+     *
+     * @param $rodsaccount
+     * @param $path
+     * @return mixed
+     */
     function read($rodsaccount, $file)
     {
         $fileContent = '';
@@ -39,11 +41,12 @@ class Filesystem extends CI_Model {
             $file = new ProdsFile($rodsaccount, $file);
             $file->open("r");
 
-            // Grab the file content
+            // Grab the file content.
             while ($str = $file->read(4096)) {
                 $fileContent .= $str;
             }
-            //close the file pointer
+
+            // Close the file pointer.
             $file->close();
 
             return $fileContent;
@@ -53,19 +56,30 @@ class Filesystem extends CI_Model {
         }
     }
 
+    /**
+     * Write a file to iRODS.
+     *
+     * @param $rodsaccount
+     * @param $path
+     * @param $content
+     */
     function write($rodsaccount, $path, $content)
     {
         $file = new ProdsFile($rodsaccount, $path);
-
-        $file->open("w+", $rodsaccount->default_resc); //$this->config->item('rodsDefaultResource')
-
+        $file->open("w+", $rodsaccount->default_resc);
         $file->write($content);
-
         $file->close();
-
         return true;
     }
 
+    /**
+     * Delete a file from iRODS.
+     *
+     * @param $rodsaccount
+     * @param $path
+     * @param $force
+     * @return boolean
+     */
     function delete($rodsaccount, $path, $force = false)
     {
         $file = new ProdsFile($rodsaccount, $path);
@@ -78,8 +92,6 @@ class Filesystem extends CI_Model {
 myRule {
     iiPrepareMetadataForm(*path, *result);
 }
-
-
 RULE;
         try {
             $rule = new ProdsRule(
@@ -95,9 +107,7 @@ RULE;
             $output = json_decode($ruleResult['*result'], true);
 
             return $output;
-
         } catch(RODSException $e) {
-
             return false;
         }
 
@@ -125,10 +135,7 @@ RULE;
 
             $rule->execute();
             return true;
-
         } catch(RODSException $e) {
-            print_r($e);
-            exit;
             return false;
         }
     }
@@ -155,56 +162,11 @@ RULE;
 
             $rule->execute();
             return true;
-
         } catch(RODSException $e) {
             print_r($e);
             exit;
             return false;
         }
-    }
-
-
-    // Obsolete
-    static public function searchRevisions($iRodsAccount, $path, $type, $orderBy, $orderSort, $limit, $offset = 0) {
-        $output = array();
-        $ruleBody = <<<'RULE'
-myRule {
-    *l = int(*limit);
-    *o = int(*offset);
-    iiBrowse(*path, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result);
-}
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*path" => $path,
-                    "*collectionOrDataObject" => $type,
-                    "*orderby" => $orderBy,
-                    "*ascdesc" => $orderSort,
-                    "*limit" => $limit,
-                    "*offset" => $offset
-                ),
-                array("*result")
-            );
-            $ruleResult = $rule->execute();
-            $results = json_decode($ruleResult['*result'], true);
-            $summary = $results[0];
-            unset($results[0]);
-            $rows = $results;
-            $output = array(
-                'summary' => $summary,
-                'rows' => $rows
-            );
-            return $output;
-        } catch(RODSException $e) {
-            print_r($e->rodsErrAbbrToCode($e->getCodeAbbr()));
-            exit;
-            echo $e->showStacktrace();
-            return array();
-        }
-        return array();
     }
 
     static public function collectionDetails($iRodsAccount, $path)
@@ -521,6 +483,15 @@ RULE;
         }
     }
 
+    /**
+     * List the locks on a folder.
+     *
+     * @param $iRodsAccount
+     * @param $folder
+     * @param $offset
+     * @param $limit
+     * @return array
+     */
     function listLocks($iRodsAccount, $folder, $offset = 0, $limit = 10)
     {
         $output = array();
@@ -560,13 +531,20 @@ RULE;
         return array();
     }
 
-    function listActionLog($iRodsAccount, $folder, $offset = 0, $limit = 10)
+    /**
+     * List the action log of a folder.
+     *
+     * @param $iRodsAccount
+     * @param $folder
+     * @return array
+     */
+    function listActionLog($iRodsAccount, $folder)
     {
         $output = array();
 
         $ruleBody = <<<'RULE'
 myRule {
-    iiFrontEndActionLog(*folder, *result, *status, *statusInfo);    
+    iiFrontEndActionLog(*folder, *result, *status, *statusInfo);
 }
 RULE;
         try {
@@ -593,7 +571,14 @@ RULE;
         return array();
     }
 
-    function listSystemMetadata($iRodsAccount, $folder, $offset = 0, $limit = 10)
+    /**
+     * List the system metadata of a folder.
+     *
+     * @param $iRodsAccount
+     * @param $folder
+     * @return array
+     */
+    function listSystemMetadata($iRodsAccount, $folder)
     {
         $output = array();
 
@@ -628,7 +613,8 @@ RULE;
 
 
     /**
-     * Get the category dependent JSON schema from irods
+     * Get the category dependent JSON schema from iRODS.
+     *
      * @param $iRodsAccount
      * @param $folder
      * @return array
@@ -666,4 +652,3 @@ RULE;
         return array();
     }
 }
-
