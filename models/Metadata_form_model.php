@@ -237,7 +237,7 @@ class Metadata_form_model extends CI_Model
         $result = $this->CI->filesystem->getJsonSchema($rodsaccount, $xsdPath);
 
         if ($result['*status'] == 'Success') {
-            return json_decode($result['*result'], true);    
+            return $result['*result'];
         } else {
             return '';
         } 
