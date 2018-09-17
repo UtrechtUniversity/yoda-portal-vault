@@ -93,8 +93,6 @@ RULE;
 
             $ruleResult = $rule->execute();
             $output = json_decode($ruleResult['*result'], true);
-            //var_dump($ruleResult);
-            //exit;
 
             return $output;
 
@@ -234,8 +232,6 @@ RULE;
             );
 
             $ruleResult = $rule->execute();
-
-            //print_r($ruleResult['*result']);exit;
 
             $status = $ruleResult['*status'];
             $statusInfo = $ruleResult['*statusInfo'];
@@ -657,8 +653,7 @@ RULE;
             );
 
             $ruleResult = $rule->execute();
-            $output['*result'] = json_decode($ruleResult['*result'], true);  // @TODO: Moet dit gedecodeerd worden? of juist niet?
-
+            $output['*result'] = json_decode($ruleResult['*result'], true);
             $output['*status'] = $ruleResult['*status'];
             $output['*statusInfo'] = $ruleResult['*statusInfo'];
 
@@ -670,7 +665,5 @@ RULE;
 
         return array();
     }
-
-
 }
 
