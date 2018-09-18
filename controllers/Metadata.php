@@ -204,11 +204,16 @@ class Metadata extends MY_Controller
 
         $uiSchema = json_decode ("{}");
 
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
+
         $output = array();
-        $output['path'] = $path;
-        $output['schema'] = $jsonSchema;
-        $output['uiSchema'] = $uiSchema;
-        $output['formData'] = $formData;
+        $output['path']                 = $path;
+        $output['schema']               = $jsonSchema;
+        $output['uiSchema']             = $uiSchema;
+        $output['formData']             = $formData;
+        $output['isDatamanager']        = ($formConfig['isDatamanager'] == 'yes') ? true: false;
+        $output['isVaultPackage']       = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
+        $output['parentHasMetadataXml'] = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }
