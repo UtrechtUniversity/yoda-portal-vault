@@ -198,16 +198,16 @@ class Metadata extends MY_Controller
         $jsonSchema = $this->Metadata_form_model->loadJSONS($rodsaccount, $fullPath);
 
         $formData = $this->Metadata_form_model->prepareJSONSFormData($jsonSchema, $xmlFormData);
+        if (empty($formData)) {
+             $formData = json_decode ("{}");
+        }
 
-        $uiSchema = <<<'JSON'
-    {
-    }
-JSON;
+        $uiSchema = json_decode ("{}");
 
         $output = array();
         $output['path'] = $path;
-        $output['schema'] = $jsonSchema; //json_decode($jsonSchema); already decoded
-        $output['uiSchema'] = json_decode($uiSchema);
+        $output['schema'] = $jsonSchema;
+        $output['uiSchema'] = $uiSchema;
         $output['formData'] = $formData;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
