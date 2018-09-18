@@ -9,6 +9,11 @@ var schema = {};
 var uiSchema = {};
 var formData = {};
 
+var isDatamanager = false;
+var isVaultPackage = false;
+var parentHasMetadata = false;
+var metadataExists = false;
+
 var form = document.getElementById('form');
 var path = form.dataset.path;
 
@@ -68,7 +73,7 @@ class YodaButtons extends React.Component {
 
     render() {
         // Check if metadata form is empty.
-        if (Object.keys(formData).length === 0 && formData.constructor === Object) {
+        if (metadataExists && parentHasMetadata) {
 	  // Show 'Save' and 'Clone from parent folder' buttons.
           return (
             <div className="row">
@@ -161,9 +166,13 @@ axios.defaults.xsrfHeaderName = tokenHash;
 
 axios.get("/research/metadata/data?path=" + path)
     .then(function (response) {
-        schema = response.data.schema;
-        uiSchema = response.data.uiSchema;
-        formData = response.data.formData;
+        schema            = response.data.schema;
+        uiSchema          = response.data.uiSchema;
+        formData          = response.data.formData;
+        isDatamanager     = response.data.isDatamanager
+        isVaultPackage    = response.data.isVaultPackage
+        parentHasMetadata = response.data.parentHasMetadata
+        metadataExists    = response.data.metadataExists
 
         render( <Container /> ,
             document.getElementById("form")

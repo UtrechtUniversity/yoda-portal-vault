@@ -213,7 +213,8 @@ class Metadata extends MY_Controller
         $output['formData']             = $formData;
         $output['isDatamanager']        = ($formConfig['isDatamanager'] == 'yes') ? true: false;
         $output['isVaultPackage']       = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
-        $output['parentHasMetadataXml'] = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
+        $output['parentHasMetadata']    = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
+        $output['metadataExists']       = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }
