@@ -69,6 +69,7 @@ class YodaButtons extends React.Component {
     render() {
         // Check if metadata form is empty.
         if (Object.keys(formData).length === 0 && formData.constructor === Object) {
+	  // Show 'Save' and 'Clone from parent folder' buttons.
           return (
             <div className="row">
               <div className="col-sm-12">
@@ -78,6 +79,7 @@ class YodaButtons extends React.Component {
             </div>
           );
         } else {
+	  // Show 'Save' and 'Delete all metadata' buttons.
           return (
             <div className="row">
               <div className="col-sm-12">
