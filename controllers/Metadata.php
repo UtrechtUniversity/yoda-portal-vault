@@ -47,13 +47,8 @@ class Metadata extends MY_Controller
         }
 
         $metadataExists = false;
-        $cloneMetadata = false;
         if ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
             $metadataExists = true;
-        }
-
-        if ($formConfig['parentHasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
-            $cloneMetadata = true;
         }
 
         $realMetadataExists = $metadataExists; // keep it as this is the true state of metadata being present or not.
@@ -61,7 +56,6 @@ class Metadata extends MY_Controller
         // Check locks
         if ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor" || $formConfig['folderStatus']=='SUBMITTED' || $formConfig['folderStatus']=='LOCKED') {
             //$form->setPermission('read');
-            $cloneMetadata = false;
             $metadataExists = false;
         }
 
@@ -162,7 +156,6 @@ class Metadata extends MY_Controller
             'tokenHash' => $tokenHash,
             'userType' => $userType,
             'metadataExists' => $metadataExists, // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
-            'cloneMetadata' => $cloneMetadata,
             'isVaultPackage' => $isVaultPackage,
             'showEditBtn' => $showEditBtn,
             'messageDatamanagerAfterSaveInVault' => $messageDatamanagerAfterSaveInVault,
@@ -198,17 +191,23 @@ class Metadata extends MY_Controller
         $jsonSchema = $this->Metadata_form_model->loadJSONS($rodsaccount, $fullPath);
 
         $formData = $this->Metadata_form_model->prepareJSONSFormData($jsonSchema, $xmlFormData);
+        if (empty($formData)) {
+             $formData = json_decode ("{}");
+        }
 
-        $uiSchema = <<<'JSON'
-    {
-    }
-JSON;
+        $uiSchema = json_decode ("{}");
+
+        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
         $output = array();
-        $output['path'] = $path;
-        $output['schema'] = $jsonSchema; //json_decode($jsonSchema); already decoded
-        $output['uiSchema'] = json_decode($uiSchema);
-        $output['formData'] = $formData;
+        $output['path']                 = $path;
+        $output['schema']               = $jsonSchema;
+        $output['uiSchema']             = $uiSchema;
+        $output['formData']             = $formData;
+        $output['isDatamanager']        = ($formConfig['isDatamanager'] == 'yes') ? true: false;
+        $output['isVaultPackage']       = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
+        $output['parentHasMetadata']    = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
+        $output['metadataExists']       = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }

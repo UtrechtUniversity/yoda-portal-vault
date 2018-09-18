@@ -12,7 +12,6 @@
                 <div class="panel-body">
                         <div class="form-group">
                             <div class="col-sm-12">
-
                                 <?php if ($showUnsubmitBtn) { ?>
                                     <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit</button>
                                 <?php } ?>
@@ -20,11 +19,6 @@
                                 <?php if ($showEditBtn) { ?>
                                     <a href="<?php echo base_url('research/metadata/form?path=' . rawurlencode($path) . '&mode=edit_in_vault'); ?>" class="btn btn-primary">Update metadata</a>
                                 <?php } ?>
-
-                                <?php if (($metadataExists === false) && $cloneMetadata) { ?>
-                                    <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo urlencode($path); ?>">Clone from parent folder</button>
-                                <?php } ?>
-
                             </div>
                         </div>
 
@@ -42,10 +36,6 @@
 
                                 <?php if ($metadataCompleteness == 100 && $submitToVaultBtn) { ?>
                                     <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit</button>
-                                <?php } ?>
-
-                                <?php if (($metadataExists === false) && $cloneMetadata && $isVaultPackage != 'yes') { ?>
-                                    <button type="button" class="btn btn-primary clone-metadata-btn pull-right" data-path="<?php echo $path; ?>">Clone from parent folder</button>
                                 <?php } ?>
                             </div>
                         </div>

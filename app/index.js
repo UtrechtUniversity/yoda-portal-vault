@@ -1,40 +1,160 @@
 import React, { Component } from "react";
 import axios from 'axios';
 import { render } from "react-dom";
-
-
 import Form from "react-jsonschema-form";
 
-// Custom widgets
-const widgets = {};
-
-// Custom fields
-const fields = {};
-
-const log = (type) => console.log.bind(console, type);
 const onSubmit = ({formData}) => submitData(formData);
-const onChange = ({formData}) => console.log("Data changed: ",  formData);
 
+var schema = {};
+var uiSchema = {};
+var formData = {};
 
-class YodaForm extends Form {
+var isDatamanager = false;
+var isVaultPackage = false;
+var parentHasMetadata = false;
+var metadataExists = false;
+
+var form = document.getElementById('form');
+var path = form.dataset.path;
+
+class YodaForm extends React.Component {
     constructor(props) {
         super(props);
-        const superOnSubmit = this.onSubmit;
-        this.onSubmit = (event) => {
-            event.preventDefault();
+      }
 
-            {this.props.formContext.env == 'research' ? (
-                this.props.onSubmit(this.state, { status: "submitted" })
-            ) : (
-                this.setState(this.state, ()=>superOnSubmit(event))
-            )}
+    onError() {
+        alert('error!');
+    }
+
+    transformErrors(errors) {
+        console.log("Errors before transform: " + errors.length);
+
+        var i = errors.length
+        while (i--) {
+            if (errors[i].name === "required") {
+                console.log("Strip required error:" + i);
+                errors.splice(i,1);
+            }
         }
 
+        console.log("Errors after transform: " + errors.length);
 
+        return errors;
+    }
+
+    render () {
+        return (
+        <Form className="form form-horizontal metadata-form"
+              schema={schema}
+              idPrefix={"yoda"}
+              uiSchema={uiSchema}
+              formData={formData}
+              formContext={{env: 'research'}}
+              ArrayFieldTemplate={ArrayFieldTemplate}
+              ObjectFieldTemplate={ObjectFieldTemplate}
+              FieldTemplate={CustomFieldTemplate}
+              liveValidate={true}
+              noValidate={false}
+              noHtml5Validate={true}
+              showErrorList={true}
+              onSubmit={onSubmit}
+              onError={this.onError}
+              transformErrors={this.transformErrors}>
+      <button ref={(btn) => {this.submitButton=btn;}} className="hidden" />
+    </Form>
+    );
+  }
+}
+
+class YodaButtons extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        // Check if metadata form is empty.
+        if (!metadataExists && parentHasMetadata) {
+	  // Show 'Save' and 'Clone from parent folder' buttons.
+          return (
+            <div className="row">
+              <div className="col-sm-12">
+                <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>
+                <button onClick={this.props.cloneMetadata} type="button" className="btn btn-primary clone-metadata-btn pull-right">Clone from parent folder</button>
+              </div>
+            </div>
+          );
+        } else {
+	  // Show 'Save' and 'Delete all metadata' buttons.
+          return (
+            <div className="row">
+              <div className="col-sm-12">
+                <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>
+                <button onClick={this.props.deleteMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right">Delete all metadata</button>
+              </div>
+            </div>
+          );
+        }
     }
 }
 
-var form = document.getElementById('form');
+class Container extends React.Component {
+    constructor(props) {
+        super(props);
+        this.saveMetadata = this.saveMetadata.bind(this);
+    }
+
+    saveMetadata() {
+        this.form.submitButton.click();
+    }
+
+    deleteMetadata() {
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this action!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete all metadata!",
+            closeOnConfirm: false,
+            animation: false
+        },
+        function(isConfirm){
+            if (isConfirm) {
+                window.location.href = '/research/metadata/delete?path=' + path;
+            }
+        });
+    }
+
+    cloneMetadata() {
+        swal({
+            title: "Are you sure?",
+            text: "Entered metadata will be overwritten by cloning.",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ffcd00",
+            confirmButtonText: "Yes, clone metadata!",
+            closeOnConfirm: false,
+            animation: false
+        },
+        function(isConfirm){
+            if (isConfirm) {
+                window.location.href = '/research/metadata/clone_metadata?path=' + path;
+            }
+        });
+    }
+
+    render() {
+    return (
+      <div>
+        <YodaButtons saveMetadata={this.saveMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
+        <YodaForm ref={(form) => {this.form=form;}}/>
+        <YodaButtons saveMetadata={this.saveMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
+      </div>
+    );
+  }
+};
+
+
 var tokenName = form.dataset.csrf_token_name;
 var tokenHash = form.dataset.csrf_token_hash;
 axios.defaults.headers.common = {
@@ -43,49 +163,25 @@ axios.defaults.headers.common = {
 };
 axios.defaults.xsrfCookieName = tokenName;
 axios.defaults.xsrfHeaderName = tokenHash;
-var path = form.dataset.path;
 
 axios.get("/research/metadata/data?path=" + path)
     .then(function (response) {
-        // handle success
-        const schema = response.data.schema;
-        const uiSchema = response.data.uiSchema;
-        const formData = response.data.formData;
+        schema            = response.data.schema;
+        uiSchema          = response.data.uiSchema;
+        formData          = response.data.formData;
+        isDatamanager     = response.data.isDatamanager
+        isVaultPackage    = response.data.isVaultPackage
+        parentHasMetadata = response.data.parentHasMetadata
+        metadataExists    = response.data.metadataExists
 
-        render((
-            <YodaForm className="form form-horizontal metadata-form"
-                      schema={schema}
-                      idPrefix={"yoda"}
-                      uiSchema={uiSchema}
-                      formData={formData}
-                      formContext={{env: 'research'}}
-                      fields={fields}
-                      widgets={widgets}
-                      ArrayFieldTemplate={ArrayFieldTemplate}
-                      ObjectFieldTemplate={ObjectFieldTemplate}
-                      FieldTemplate={CustomFieldTemplate}
-                      liveValidate={true}
-                      noValidate={false}
-                      noHtml5Validate={true}
-                      showErrorList={true}
-                      onChange={onChange}
-                      onSubmit={onSubmit}
-                      onError={log("errors")}>
-
-
-                <div class="form-group">
-                    <div class="col-sm-12">
-                        <button type="submit" className="btn btn-primary">Save</button>
-                        <button type="button" className="btn btn-danger delete-all-metadata-btn pull-right" data-path="">Delete all metadata</button>
-                    </div>
-                </div>
-            </YodaForm>
-        ), document.getElementById("form"));
+        render( <Container /> ,
+            document.getElementById("form")
+        );
     })
     .catch(function (error) {
-        // handle error
         console.log(error);
-    });
+    }
+);
 
 function submitData(data)
 {
@@ -197,32 +293,47 @@ function ObjectFieldTemplate(props) {
 }
 
 function ArrayFieldTemplate(props) {
-    // Compound field wrapper
-    /*
-    const isCompoundField = props.uiSchema["ui:compound"];
-    if (isCompoundField) {
-        return (
-            <div>
-                <div class="compound-field">
-                    {props.canAdd && <button type="button" onClick={props.onAddClick}>+</button>}
-                    {props.items.map(element => element.children)}
-                </div>
-            </div>
-        );
-    } else {
-        return (
-            <div>
-                {props.canAdd && <button type="button" onClick={props.onAddClick}>+</button>}
-                {props.items.map(element => element.children)}
-            </div>
-        );
+    let array = props.items;
+    let canRemove = true;
+    if (array.length === 1) {
+        canRemove = false;
     }
-    */
+    let output = props.items.map((element, i, array) => {
+        let item = props.items[i];
+        if (array.length - 1 === i) {
+            let btnCount = 1;
+            if (canRemove) {
+                btnCount = 2;
+            }
+
+            return (
+                <div className="has-btn">
+                    {element.children}
+                    <div className={"btn-controls btn-group btn-count-" + btnCount} role="group">
+                        {canRemove && <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>-</button>}
+                        <button type="button" className="clone-btn btn btn-default" onClick={props.onAddClick}>+</button>
+                    </div>
+                </div>
+            );
+        } else {
+            if (canRemove) {
+                return (
+                    <div className="has-btn">
+                        {element.children}
+                        <div className="btn-controls">
+                            <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>-</button>
+                        </div>
+                    </div>
+                )
+            }
+
+            return element.children;
+        }
+    });
 
     return (
         <div>
-            {props.canAdd && <button type="button" onClick={props.onAddClick}>+</button>}
-            {props.items.map(element => element.children)}
+            {output}
         </div>
     );
 }
