@@ -315,10 +315,10 @@ class Metadata_form_model extends CI_Model
                                             }
                                         }
 
-                                        elseif ($fieldKey == 'Creator') {
-                                            echo $fieldKey;
-                                            echo '---' . $objectKey . '---';
-                                        }
+//                                        elseif ($fieldKey == 'Creator') {
+//                                            echo $fieldKey;
+//                                            echo '---' . $objectKey . '---';
+//                                        }
                                     }
                                 } else {
                                     if ($objectField['type'] == 'string') {
