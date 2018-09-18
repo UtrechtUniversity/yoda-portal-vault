@@ -47,10 +47,8 @@ class Metadata_form_model extends CI_Model
             }
         }
 
-        # $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
-        $xsdPath = $config['xsdPath'];
-        $jsonsElements = $this->loadJSONS($rodsaccount, $xsdPath);
-
+        $folder = $config['metadataXmlPath'];
+        $jsonsElements = $this->loadJSONS($rodsaccount, $folder);
 
         $xml = new DOMDocument("1.0", "UTF-8");
         $xml->formatOutput = true;
@@ -89,11 +87,11 @@ class Metadata_form_model extends CI_Model
                                     $xml_metadata->appendChild($xmlMainElement);
                                 }
                             }
-                            elseif($structObject['yoda:structure'] == 'subproperties'){  // SINGLE subproperty struct is not present at the moment in the schema
+                            elseif($structObject['yoda:structure'] == 'subproperties'){  // Single subproperty struct is not present at the moment in the schema
 
                             }
                         }
-                        // MULTIPLE
+                        // Multiple
                         elseif ($element['type'] == 'array') {
                             if (!(isset($element['items']['type']) and $element['items']['type'] == 'object')) {
                                 // multiple non structured element
@@ -209,7 +207,7 @@ class Metadata_form_model extends CI_Model
                                         }
 
                                         // Extra intelligence to only save when there is relevant data
-                                        if ($hasLeadValue) {
+                                        if ($hasLeadValue OR true) {  // for now overrule this requirement
                                             // add the entire structure to the main element
                                             $xmlMainElement->appendChild($xmlProperties);
                                             $xml_metadata->appendChild($xmlMainElement);
@@ -230,9 +228,14 @@ class Metadata_form_model extends CI_Model
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
 
-    public function loadJSONS($rodsaccount, $xsdPath)
+    /**
+     * @param $rodsaccount
+     * @param $path - folder of area being worked in. irods will find out which json schema is to be used
+     * @return string
+     */
+    public function loadJSONS($rodsaccount, $path)
     {
-        $result = $this->CI->filesystem->getJsonSchema($rodsaccount, $xsdPath);
+        $result = $this->CI->filesystem->getJsonSchema($rodsaccount, $path);
 
         if ($result['*status'] == 'Success') {
             return $result['*result'];
@@ -240,7 +243,6 @@ class Metadata_form_model extends CI_Model
             return '';
         } 
     }
-
 
     /**
      * @param $rodsaccount
@@ -269,6 +271,122 @@ class Metadata_form_model extends CI_Model
 
         $formData = json_decode($json, TRUE);
 
+        return $formData;
+    }
+
+    /**
+     * @param $jsonSchema
+     * @param $xmlFormData
+     * @return array
+     *
+     * Combines xml data with the json schema and returns array as a basis for react form
+     */
+    public function prepareJSONSFormData($jsonSchema, $xmlFormData)
+    {
+        //$result = $jsonSchema;
+
+        $formData = array();
+        //foreach ($result['properties'] as $groupKey => $group) {
+        foreach ($jsonSchema['properties'] as $groupKey => $group) {
+            //Group
+            foreach($group['properties'] as $fieldKey => $field) {
+                // Field
+                if (array_key_exists('type', $field)) {
+                    if ($field['type'] == 'string') { // string
+                        if (isset($xmlFormData[$fieldKey])) {
+                            $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
+                        }
+                    } else if ($field['type'] == 'integer') { // integer
+                        if (isset($xmlFormData[$fieldKey])) {
+                            $formData[$groupKey][$fieldKey] = (integer) $xmlFormData[$fieldKey];
+                        }
+                    } else if ($field['type'] == 'array') { // array
+                        if ($field['items']['type'] == 'string' || !isset($field['items']['type'])) {
+                            if (isset($xmlFormData[$fieldKey])) {
+                                if (count($xmlFormData[$fieldKey]) == 1) {
+                                    $formData[$groupKey][$fieldKey] = array($xmlFormData[$fieldKey]);
+                                } else {
+                                    $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
+                                }
+                            }
+                        } else if ($field['items']['type'] == 'object') {
+                            //$formData[$groupKey][$fieldKey] = array();
+                            $emptyObjectField = array();
+                            $mainProp = true;
+                            foreach ($field['items']['properties'] as $objectKey => $objectField) {
+                                if ($field['items']['yoda:structure'] == 'subproperties') {
+                                    if ($mainProp) {
+                                        if (isset($xmlFormData[$fieldKey][$objectKey])) {
+                                            //$formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey][$objectKey];
+                                            $emptyObjectField[$objectKey] = $xmlFormData[$fieldKey][$objectKey];
+                                        }
+                                        $mainProp = false;
+                                    } else {
+                                        if (isset($xmlFormData[$fieldKey]['Properties'][$objectKey])) {
+                                            //$formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
+                                            if ($objectField['type'] == 'array') {
+                                                $emptyObjectField[$objectKey] = array($xmlFormData[$fieldKey]['Properties'][$objectKey]);
+                                            } else {
+                                                $emptyObjectField[$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
+                                            }
+
+                                        }
+                                    }
+                                } else {
+                                    if ($objectField['type'] == 'string') {
+                                        $emptyObjectField[$objectKey] = $objectKey;
+                                    } else if ($objectField['type'] == 'object') { //subproperties (OLD)
+                                        foreach ($objectField['properties'] as $subObjectKey => $subObjectField) {
+                                            if ($subObjectField['type'] == 'string') {
+                                                $emptyObjectField[$objectKey][$subObjectKey] = $objectKey;
+                                            } else if ($subObjectField['type'] == 'object') {// Composite
+                                                $compositeField = array();
+                                                foreach ($subObjectField['properties'] as $subCompositeKey => $subCompositeField) {
+                                                    $compositeField[$subCompositeKey] = $subCompositeKey;
+                                                }
+
+                                                $emptyObjectField[$objectKey][$subObjectKey] = $compositeField;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (count($emptyObjectField)) {
+                                $formData[$groupKey][$fieldKey][] = $emptyObjectField;
+                            }
+                        }
+                    } else if ($field['type'] == 'object') {
+                        $structure = $field['yoda:structure'];
+                        // Subproperties
+                        if (isset($structure) && $structure == 'subproperties') {
+                            $mainProp = true;
+                            foreach ($field['properties'] as $objectKey => $objectField) {
+                                if ($mainProp) {
+                                    if (isset($xmlFormData[$fieldKey][$objectKey])) {
+                                        $formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey][$objectKey];
+                                    }
+                                    $mainProp = false;
+                                } else {
+                                    if (isset($xmlFormData[$fieldKey]['Properties'][$objectKey])) {
+                                        $formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
+                                    }
+                                }
+                            }
+                        }
+
+                        foreach ($field['properties'] as $objectKey => $objectField) {
+                            if (isset($xmlFormData[$fieldKey][$objectKey])) {
+                                $formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey][$objectKey];
+                            }
+                        }
+                    }
+                } else {
+                    if (isset($xmlFormData[$fieldKey])) {
+                        $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
+                    }
+                }
+            }
+        }
         return $formData;
     }
 }

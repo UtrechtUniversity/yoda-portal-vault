@@ -197,114 +197,12 @@ class Metadata extends MY_Controller
 
         $jsonSchema = $this->Metadata_form_model->loadJSONS($rodsaccount, $fullPath);
 
+        $formData = $this->Metadata_form_model->prepareJSONSFormData($jsonSchema, $xmlFormData);
+
         $uiSchema = <<<'JSON'
     {
     }
 JSON;
-
-        $result = $jsonSchema;
-
-        $formData = array();
-        foreach ($result['properties'] as $groupKey => $group) {
-            //Group
-            foreach($group['properties'] as $fieldKey => $field) {
-                // Field
-                if (array_key_exists('type', $field)) {
-                    if ($field['type'] == 'string') { // string
-                        if (isset($xmlFormData[$fieldKey])) {
-                            $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
-                        }
-                    } else if ($field['type'] == 'integer') { // integer
-                        if (isset($xmlFormData[$fieldKey])) {
-                            $formData[$groupKey][$fieldKey] = (integer) $xmlFormData[$fieldKey];
-                        }
-                    } else if ($field['type'] == 'array') { // array
-                        if ($field['items']['type'] == 'string' || !isset($field['items']['type'])) {
-                            if (isset($xmlFormData[$fieldKey])) {
-                                if (count($xmlFormData[$fieldKey]) == 1) {
-                                    $formData[$groupKey][$fieldKey] = array($xmlFormData[$fieldKey]);
-                                } else {
-                                    $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
-                                }
-                            }
-                        } else if ($field['items']['type'] == 'object') {
-                            //$formData[$groupKey][$fieldKey] = array();
-                            $emptyObjectField = array();
-                            $mainProp = true;
-                            foreach ($field['items']['properties'] as $objectKey => $objectField) {
-                                if ($field['items']['yoda:structure'] == 'subproperties') {
-                                    if ($mainProp) {
-                                        if (isset($xmlFormData[$fieldKey][$objectKey])) {
-                                            //$formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey][$objectKey];
-                                            $emptyObjectField[$objectKey] = $xmlFormData[$fieldKey][$objectKey];
-                                        }
-                                        $mainProp = false;
-                                    } else {
-                                        if (isset($xmlFormData[$fieldKey]['Properties'][$objectKey])) {
-                                            //$formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
-                                            if ($objectField['type'] == 'array') {
-                                                $emptyObjectField[$objectKey] = array($xmlFormData[$fieldKey]['Properties'][$objectKey]);
-                                            } else {
-                                                $emptyObjectField[$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
-                                            }
-
-                                        }
-                                    }
-                                } else {
-                                    if ($objectField['type'] == 'string') {
-                                        $emptyObjectField[$objectKey] = $objectKey;
-                                    } else if ($objectField['type'] == 'object') { //subproperties (OLD)
-                                        foreach ($objectField['properties'] as $subObjectKey => $subObjectField) {
-                                            if ($subObjectField['type'] == 'string') {
-                                                $emptyObjectField[$objectKey][$subObjectKey] = $objectKey;
-                                            } else if ($subObjectField['type'] == 'object') {// Composite
-                                                $compositeField = array();
-                                                foreach ($subObjectField['properties'] as $subCompositeKey => $subCompositeField) {
-                                                    $compositeField[$subCompositeKey] = $subCompositeKey;
-                                                }
-
-                                                $emptyObjectField[$objectKey][$subObjectKey] = $compositeField;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            if (count($emptyObjectField)) {
-                                $formData[$groupKey][$fieldKey][] = $emptyObjectField;
-                            }
-                        }
-                    } else if ($field['type'] == 'object') {
-                        $structure = $field['yoda:structure'];
-                        // Subproperties
-                        if (isset($structure) && $structure == 'subproperties') {
-                            $mainProp = true;
-                            foreach ($field['properties'] as $objectKey => $objectField) {
-                                if ($mainProp) {
-                                    if (isset($xmlFormData[$fieldKey][$objectKey])) {
-                                        $formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey][$objectKey];
-                                    }
-                                    $mainProp = false;
-                                } else {
-                                    if (isset($xmlFormData[$fieldKey]['Properties'][$objectKey])) {
-                                        $formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
-                                    }
-                                }
-                            }
-                        }
-
-                        foreach ($field['properties'] as $objectKey => $objectField) {
-                            if (isset($xmlFormData[$fieldKey][$objectKey])) {
-                                $formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey][$objectKey];
-                            }
-                        }
-                    }
-                } else {
-                    if (isset($xmlFormData[$fieldKey])) {
-                        $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
-                    }
-                }
-            }
-        }
 
         $output = array();
         $output['path'] = $path;
