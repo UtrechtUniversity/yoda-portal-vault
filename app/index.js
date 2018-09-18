@@ -73,7 +73,7 @@ class YodaButtons extends React.Component {
 
     render() {
         // Check if metadata form is empty.
-        if (metadataExists && parentHasMetadata) {
+        if (!metadataExists && parentHasMetadata) {
 	  // Show 'Save' and 'Clone from parent folder' buttons.
           return (
             <div className="row">
