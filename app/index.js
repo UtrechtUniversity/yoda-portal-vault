@@ -67,15 +67,26 @@ class YodaButtons extends React.Component {
     }
 
     render() {
-        return (
+        // Check if metadata form is empty.
+        if (Object.keys(formData).length === 0 && formData.constructor === Object) {
+          return (
             <div className="row">
-                <div className="col-sm-12">
-                    <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>
-                    <button onClick={this.props.deleteMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right">Delete all metadata</button>
-                    <button onClick={this.props.cloneMetadata} type="button" className="btn btn-primary clone-metadata-btn pull-right">Clone from parent folder</button>
-                </div>
+              <div className="col-sm-12">
+                <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>
+                <button onClick={this.props.cloneMetadata} type="button" className="btn btn-primary clone-metadata-btn pull-right">Clone from parent folder</button>
+              </div>
             </div>
-        );
+          );
+        } else {
+          return (
+            <div className="row">
+              <div className="col-sm-12">
+                <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>
+                <button onClick={this.props.deleteMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right">Delete all metadata</button>
+              </div>
+            </div>
+          );
+        }
     }
 }
 
