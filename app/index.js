@@ -61,37 +61,35 @@ class YodaForm extends React.Component {
   }
 }
 
-class ControlPanel extends React.Component {
+class YodaButtons extends React.Component {
     constructor(props) {
         super(props);
     }
 
     render() {
         return (
-              <div className="row">
-                    <div className="col-sm-12">
-                        <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>
-                        <button onClick={this.props.deleteAllMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right" data-path="">Delete all metadata</button>
-                    </div>
+            <div className="row">
+                <div className="col-sm-12">
+                    <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>
+                    <button onClick={this.props.deleteMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right">Delete all metadata</button>
+                    <button onClick={this.props.cloneMetadata} type="button" className="btn btn-primary clone-metadata-btn pull-right">Clone from parent folder</button>
                 </div>
-    );
-  }
+            </div>
+        );
+    }
 }
 
 class Container extends React.Component {
     constructor(props) {
         super(props);
         this.saveMetadata = this.saveMetadata.bind(this);
-        this.deleteAllMetadata = this.deleteAllMetadata.bind(this);
     }
 
     saveMetadata() {
         this.form.submitButton.click();
     }
 
-    deleteAllMetadata() {
-        console.log("DELETE ALL METADATA");
-
+    deleteMetadata() {
         swal({
             title: "Are you sure?",
             text: "You will not be able to recover this action!",
@@ -109,12 +107,30 @@ class Container extends React.Component {
         });
     }
 
+    cloneMetadata() {
+        swal({
+            title: "Are you sure?",
+            text: "Entered metadata will be overwritten by cloning.",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ffcd00",
+            confirmButtonText: "Yes, clone metadata!",
+            closeOnConfirm: false,
+            animation: false
+        },
+        function(isConfirm){
+            if (isConfirm) {
+                window.location.href = '/research/metadata/clone_metadata?path=' + path;
+            }
+        });
+    }
+
     render() {
     return (
       <div>
-        <ControlPanel saveMetadata={this.saveMetadata} deleteAllMetadata={this.deleteAllMetadata} />
+        <YodaButtons saveMetadata={this.saveMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
         <YodaForm ref={(form) => {this.form=form;}}/>
-        <ControlPanel saveMetadata={this.saveMetadata} deleteAllMetadata={this.deleteAllMetadata} />
+        <YodaButtons saveMetadata={this.saveMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
       </div>
     );
   }
