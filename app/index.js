@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import axios from 'axios';
 import { render } from "react-dom";
-
-
 import Form from "react-jsonschema-form";
 
 // Custom widgets
@@ -10,29 +8,103 @@ const widgets = {};
 
 // Custom fields
 const fields = {};
-
-const log = (type) => console.log.bind(console, type);
 const onSubmit = ({formData}) => submitData(formData);
-const onChange = ({formData}) => console.log("Data changed: ",  formData);
+var schema = {};
+var uiSchema = {};
+var formData = {};
 
-
-class YodaForm extends Form {
+class YodaForm extends React.Component {
     constructor(props) {
         super(props);
-        const superOnSubmit = this.onSubmit;
-        this.onSubmit = (event) => {
-            event.preventDefault();
+      }
 
-            {this.props.formContext.env == 'research' ? (
-                this.props.onSubmit(this.state, { status: "submitted" })
-            ) : (
-                this.setState(this.state, ()=>superOnSubmit(event))
-            )}
+    onError() {
+        alert('error!');
+    }
+
+    transformErrors(errors) {
+        console.log("Errors before transform: " + errors.length);
+
+        var i = errors.length
+        while (i--) {
+            if (errors[i].name === "required") {
+                console.log("Strip required error:" + i);
+                errors.splice(i,1);
+            }
         }
 
+        console.log("Errors after transform: " + errors.length);
 
+        return errors;
     }
+
+    render () {
+        return (
+        <Form className="form form-horizontal metadata-form"
+              schema={schema}
+              idPrefix={"yoda"}
+              uiSchema={uiSchema}
+              formData={formData}
+              formContext={{env: 'research'}}
+              fields={fields}
+              widgets={widgets}
+              ArrayFieldTemplate={ArrayFieldTemplate}
+              ObjectFieldTemplate={ObjectFieldTemplate}
+              FieldTemplate={CustomFieldTemplate}
+              liveValidate={true}
+              noValidate={false}
+              noHtml5Validate={true}
+              showErrorList={true}
+              onSubmit={onSubmit}
+              onError={this.onError}
+              transformErrors={this.transformErrors}>
+      <button ref={(btn) => {this.submitButton=btn;}} className="hidden"/>
+    </Form>
+    );
+  }
 }
+
+class ControlPanel extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+              <div className="row">
+                    <div className="col-sm-12">
+                        <button onClick={this.props.submitMe} type="submit" className="btn btn-primary">Save</button>
+                        <button type="button" className="btn btn-danger delete-all-metadata-btn pull-right" data-path="">Delete all metadata</button>
+                    </div>
+                </div>
+    );
+  }
+}
+
+
+class Container extends React.Component {
+    constructor(props) {
+        super(props);
+        this.submitForm = this.submitForm.bind(this);
+    }
+
+    submitForm() {
+        this.form.submitButton.click();
+    }
+
+    render() {
+    return (
+      <div>
+        <ControlPanel submitMe={this.submitForm}/>
+        <YodaForm ref={(form) => {this.form=form;}}/>
+        <ControlPanel submitMe={this.submitForm}/>
+      </div>
+    );
+  }
+};
+
+const log = (type) => console.log.bind(console, type);
+const onChange = ({formData}) => console.log("Data changed: ",  formData);
 
 var form = document.getElementById('form');
 var tokenName = form.dataset.csrf_token_name;
@@ -47,45 +119,18 @@ var path = form.dataset.path;
 
 axios.get("/research/metadata/data?path=" + path)
     .then(function (response) {
-        // handle success
-        const schema = response.data.schema;
-        const uiSchema = response.data.uiSchema;
-        const formData = response.data.formData;
+        schema = response.data.schema;
+        uiSchema = response.data.uiSchema;
+        formData = response.data.formData;
 
-        render((
-            <YodaForm className="form form-horizontal metadata-form"
-                      schema={schema}
-                      idPrefix={"yoda"}
-                      uiSchema={uiSchema}
-                      formData={formData}
-                      formContext={{env: 'research'}}
-                      fields={fields}
-                      widgets={widgets}
-                      ArrayFieldTemplate={ArrayFieldTemplate}
-                      ObjectFieldTemplate={ObjectFieldTemplate}
-                      FieldTemplate={CustomFieldTemplate}
-                      liveValidate={true}
-                      noValidate={false}
-                      noHtml5Validate={true}
-                      showErrorList={true}
-                      onChange={onChange}
-                      onSubmit={onSubmit}
-                      onError={log("errors")}>
-
-
-                <div class="form-group">
-                    <div class="col-sm-12">
-                        <button type="submit" className="btn btn-primary">Save</button>
-                        <button type="button" className="btn btn-danger delete-all-metadata-btn pull-right" data-path="">Delete all metadata</button>
-                    </div>
-                </div>
-            </YodaForm>
-        ), document.getElementById("form"));
+        render( <Container /> ,
+            document.getElementById("form")
+        );
     })
     .catch(function (error) {
-        // handle error
         console.log(error);
-    });
+    }
+);
 
 function submitData(data)
 {
