@@ -242,32 +242,47 @@ function ObjectFieldTemplate(props) {
 }
 
 function ArrayFieldTemplate(props) {
-    // Compound field wrapper
-    /*
-    const isCompoundField = props.uiSchema["ui:compound"];
-    if (isCompoundField) {
-        return (
-            <div>
-                <div class="compound-field">
-                    {props.canAdd && <button type="button" onClick={props.onAddClick}>+</button>}
-                    {props.items.map(element => element.children)}
-                </div>
-            </div>
-        );
-    } else {
-        return (
-            <div>
-                {props.canAdd && <button type="button" onClick={props.onAddClick}>+</button>}
-                {props.items.map(element => element.children)}
-            </div>
-        );
+    let array = props.items;
+    let canRemove = true;
+    if (array.length === 1) {
+        canRemove = false;
     }
-    */
+    let output = props.items.map((element, i, array) => {
+        let item = props.items[i];
+        if (array.length - 1 === i) {
+            let btnCount = 1;
+            if (canRemove) {
+                btnCount = 2;
+            }
+
+            return (
+                <div className="has-btn">
+                    {element.children}
+                    <div className={"btn-controls btn-group btn-count-" + btnCount} role="group">
+                        {canRemove && <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>-</button>}
+                        <button type="button" className="clone-btn btn btn-default" onClick={props.onAddClick}>+</button>
+                    </div>
+                </div>
+            );
+        } else {
+            if (canRemove) {
+                return (
+                    <div className="has-btn">
+                        {element.children}
+                        <div className="btn-controls">
+                            <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>-</button>
+                        </div>
+                    </div>
+                )
+            }
+
+            return element.children;
+        }
+    });
 
     return (
         <div>
-            {props.canAdd && <button type="button" onClick={props.onAddClick}>+</button>}
-            {props.items.map(element => element.children)}
+            {output}
         </div>
     );
 }

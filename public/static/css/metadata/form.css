@@ -202,3 +202,21 @@ button[data-clone*="main"] {
 
 .compound div {
 }
+
+.has-btn {
+    position: relative;
+}
+
+.btn-controls {
+    position: absolute;
+    top:0;
+    right: 30px;
+}
+
+.btn-controls.btn-count-2 {
+    right: -3px;
+}
+
+.btn-controls button {
+    width: 34px;
+}
