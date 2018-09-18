@@ -47,13 +47,8 @@ class Metadata extends MY_Controller
         }
 
         $metadataExists = false;
-        $cloneMetadata = false;
         if ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
             $metadataExists = true;
-        }
-
-        if ($formConfig['parentHasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
-            $cloneMetadata = true;
         }
 
         $realMetadataExists = $metadataExists; // keep it as this is the true state of metadata being present or not.
@@ -61,7 +56,6 @@ class Metadata extends MY_Controller
         // Check locks
         if ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor" || $formConfig['folderStatus']=='SUBMITTED' || $formConfig['folderStatus']=='LOCKED') {
             //$form->setPermission('read');
-            $cloneMetadata = false;
             $metadataExists = false;
         }
 
@@ -162,7 +156,6 @@ class Metadata extends MY_Controller
             'tokenHash' => $tokenHash,
             'userType' => $userType,
             'metadataExists' => $metadataExists, // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
-            'cloneMetadata' => $cloneMetadata,
             'isVaultPackage' => $isVaultPackage,
             'showEditBtn' => $showEditBtn,
             'messageDatamanagerAfterSaveInVault' => $messageDatamanagerAfterSaveInVault,
