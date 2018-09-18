@@ -78,8 +78,6 @@ class Metadata_form_model extends CI_Model
                                         $compoundValue = $formData[$mainElement][$compoundElementKey];
                                         $anyValueFound = true;
                                     }
-//                                    $xmlCompoundElement = $xml->createElement($compoundElementKey);
-//                                    $xmlCompoundElement->appendChild($xml->createTextNode($compoundValue));
                                     $xmlCompoundElement = $this->_createXmlElementWithText($xml, $compoundElementKey, $compoundValue);
                                     $xmlMainElement->appendChild($xmlCompoundElement);
                                 }
@@ -98,8 +96,6 @@ class Metadata_form_model extends CI_Model
                                 // So loop through data now
                                 foreach($formData[$mainElement] as $value) {
                                     if ($value) {
-//                                        $xmlMainElement = $xml->createElement($mainElement);
-//                                        $xmlMainElement->appendChild($xml->createTextNode($value));
                                         $xmlMainElement = $this->_createXmlElementWithText($xml, $mainElement, $value);
                                         $xml_metadata->appendChild($xmlMainElement);
                                     }
@@ -118,11 +114,7 @@ class Metadata_form_model extends CI_Model
                                             // Step through object structure
                                             if ($index==0) { // Lead part of structure - ALWAYS SINGLE VALUE!!
                                                 $leadData = isset($subPropertyStructData[$subPropertyElementKey])? $subPropertyStructData[$subPropertyElementKey] : '';
-                                                //$xmlLeadElement = $xml->createElement($subPropertyElementKey);
-                                                //$xmlLeadElement->appendChild($xml->createTextNode($leadData));  // @TODO - get correct lead value
-
                                                 $xmlLeadElement = $this->_createXmlElementWithText($xml, $subPropertyElementKey, $leadData);
-
                                                 $xmlMainElement->appendChild($xmlLeadElement);
 
                                                 if (strlen($leadData)) {
@@ -130,13 +122,11 @@ class Metadata_form_model extends CI_Model
                                                 }
                                             }
                                             elseif($index==1) { // Start of subproperty part. Create subproperty structure element here.
-
                                                 $xmlProperties = $xml->createElement('Properties');
 
                                                 // Subproperty part of structure --
                                                 // This is the first line
                                                 // NEVER compound on first subprop line so take shortcut here.
-
                                                 $values = array();
                                                 if (!isset($subPropertyElementInfo['type'])) {
                                                     $values[0] = isset($subPropertyStructData[$subPropertyElementKey])? $subPropertyStructData[$subPropertyElementKey] : '';
@@ -146,24 +136,18 @@ class Metadata_form_model extends CI_Model
                                                 }
 
                                                 foreach($values as $value) {
-                                                   // $xmlSubElement = $xml->createElement($subPropertyElementKey);
-                                                    // $xmlSubElement->appendChild($xml->createTextNode($value));  // @TODO - get correct lead value
                                                     $xmlSubElement = $this->_createXmlElementWithText($xml, $subPropertyElementKey, $value);
                                                     $xmlProperties->appendChild($xmlSubElement);
                                                 }
                                             }
                                             else {  // next lines after first in subproperty part
                                                 if (!isset($subPropertyElementInfo['type'])) {
-                                                    echo 'SINGLE ITEM';  ///KOMT  NU NIET VOOR VOOR SUBPROPERTIES
+                                                    //echo 'SINGLE ITEM';  ///KOMT  NU NIET VOOR VOOR SUBPROPERTIES
                                                 }
                                                 elseif ($subPropertyElementInfo['type']=='array') {
                                                     if (!isset($subPropertyElementInfo['items']['type'])) {
                                                         foreach($subPropertyStructData[$subPropertyElementKey] as $value) {
-                                                            //$xmlSubElement = $xml->createElement($subPropertyElementKey);
-                                                            //$xmlSubElement->appendChild($xml->createTextNode($value));
-
                                                             $xmlSubElement = $this->_createXmlElementWithText($xml, $subPropertyElementKey, $value);
-
                                                             $xmlProperties->appendChild($xmlSubElement);
                                                         }
                                                     }
@@ -172,14 +156,9 @@ class Metadata_form_model extends CI_Model
                                                             $xmlSubElement = $xml->createElement($subPropertyElementKey);
                                                             foreach ($subPropertyElementInfo['items']['properties'] as $subCompoundKey => $subVal) {
                                                                 $subData = isset($data[$subCompoundKey]) ? $data[$subCompoundKey] : '';
-
-//                                                                $xmlSubCompound = $xml->createElement($subCompoundKey);
-//                                                                $xmlSubCompound->appendChild($xml->createTextNode($subData));
-
                                                                 $xmlSubCompound = $this->_createXmlElementWithText($xml, $subCompoundKey, $subData);
                                                                 $xmlSubElement->appendChild($xmlSubCompound);
                                                             }
-
                                                             $xmlProperties->appendChild($xmlSubElement);  // xmlProperties wordt geinitieerd in vorige stap
                                                         }
                                                     }
@@ -190,12 +169,7 @@ class Metadata_form_model extends CI_Model
                                                     foreach($subPropertyElementInfo['properties'] as $subCompoundKey => $subVal) {
                                                         $subData = isset($subPropertyStructData[$subPropertyElementKey][$subCompoundKey])?
                                                                             $subPropertyStructData[$subPropertyElementKey][$subCompoundKey] : '';
-
-//                                                        $xmlSubCompound = $xml->createElement($subCompoundKey);
-//                                                        $xmlSubCompound->appendChild($xml->createTextNode($subData));
-
                                                         $xmlSubCompound = $this->_createXmlElementWithText($xml, $subCompoundKey, $subData);
-
                                                         $xmlSubElement->appendChild($xmlSubCompound);
                                                     }
 
