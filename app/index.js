@@ -3,15 +3,14 @@ import axios from 'axios';
 import { render } from "react-dom";
 import Form from "react-jsonschema-form";
 
-// Custom widgets
-const widgets = {};
-
-// Custom fields
-const fields = {};
 const onSubmit = ({formData}) => submitData(formData);
+
 var schema = {};
 var uiSchema = {};
 var formData = {};
+
+var form = document.getElementById('form');
+var path = form.dataset.path;
 
 class YodaForm extends React.Component {
     constructor(props) {
@@ -46,8 +45,6 @@ class YodaForm extends React.Component {
               uiSchema={uiSchema}
               formData={formData}
               formContext={{env: 'research'}}
-              fields={fields}
-              widgets={widgets}
               ArrayFieldTemplate={ArrayFieldTemplate}
               ObjectFieldTemplate={ObjectFieldTemplate}
               FieldTemplate={CustomFieldTemplate}
@@ -58,7 +55,7 @@ class YodaForm extends React.Component {
               onSubmit={onSubmit}
               onError={this.onError}
               transformErrors={this.transformErrors}>
-      <button ref={(btn) => {this.submitButton=btn;}} className="hidden"/>
+      <button ref={(btn) => {this.submitButton=btn;}} className="hidden" />
     </Form>
     );
   }
@@ -73,40 +70,57 @@ class ControlPanel extends React.Component {
         return (
               <div className="row">
                     <div className="col-sm-12">
-                        <button onClick={this.props.submitMe} type="submit" className="btn btn-primary">Save</button>
-                        <button type="button" className="btn btn-danger delete-all-metadata-btn pull-right" data-path="">Delete all metadata</button>
+                        <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>
+                        <button onClick={this.props.deleteAllMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right" data-path="">Delete all metadata</button>
                     </div>
                 </div>
     );
   }
 }
 
-
 class Container extends React.Component {
     constructor(props) {
         super(props);
-        this.submitForm = this.submitForm.bind(this);
+        this.saveMetadata = this.saveMetadata.bind(this);
+        this.deleteAllMetadata = this.deleteAllMetadata.bind(this);
     }
 
-    submitForm() {
+    saveMetadata() {
         this.form.submitButton.click();
+    }
+
+    deleteAllMetadata() {
+        console.log("DELETE ALL METADATA");
+
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this action!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete all metadata!",
+            closeOnConfirm: false,
+            animation: false
+        },
+        function(isConfirm){
+            if (isConfirm) {
+                window.location.href = '/research/metadata/delete?path=' + path;
+            }
+        });
     }
 
     render() {
     return (
       <div>
-        <ControlPanel submitMe={this.submitForm}/>
+        <ControlPanel saveMetadata={this.saveMetadata} deleteAllMetadata={this.deleteAllMetadata} />
         <YodaForm ref={(form) => {this.form=form;}}/>
-        <ControlPanel submitMe={this.submitForm}/>
+        <ControlPanel saveMetadata={this.saveMetadata} deleteAllMetadata={this.deleteAllMetadata} />
       </div>
     );
   }
 };
 
-const log = (type) => console.log.bind(console, type);
-const onChange = ({formData}) => console.log("Data changed: ",  formData);
 
-var form = document.getElementById('form');
 var tokenName = form.dataset.csrf_token_name;
 var tokenHash = form.dataset.csrf_token_hash;
 axios.defaults.headers.common = {
@@ -115,7 +129,6 @@ axios.defaults.headers.common = {
 };
 axios.defaults.xsrfCookieName = tokenName;
 axios.defaults.xsrfHeaderName = tokenHash;
-var path = form.dataset.path;
 
 axios.get("/research/metadata/data?path=" + path)
     .then(function (response) {
