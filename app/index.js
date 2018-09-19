@@ -321,7 +321,8 @@ function submitData(data)
             //handle success
             console.log('SUCCESS:');
             console.log(response);
-            console.log(response.data);
+            console.log(response.data);	    
+            window.location.href = '/research/metadata/form?path=' + path;
         })
         .catch(function (error) {
             //handle error
