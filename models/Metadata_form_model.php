@@ -315,7 +315,26 @@ class Metadata_form_model extends CI_Model
                                             }
                                         }
                                         else {
-                                            $emptyObjectField[$objectKey] = array(0 => '');
+                                            if ($objectField['type']=='array') { // multiple
+                                                if (isset($objectField['items']['yoda:structure'])   ) { // can only be compound at this moment
+                                                    // At this moment we know that fields in a compound are not individually duplicable
+
+                                                    $compoundElements = array();
+                                                    foreach($objectField['items']['properties'] as $compoundElementKey=>$info ) {
+                                                        $compoundElements[$compoundElementKey] = '';
+                                                    }
+
+                                                    $emptyObjectField[$objectKey] = array(0 => $compoundElements);
+
+                                                }
+                                                else { // single field - multiple values allowed
+                                                    $emptyObjectField[$objectKey] = array(0 => '');
+                                                }
+                                            }
+                                            else {
+                                                // What to do here??? single thing - maybe simply leave out?
+                                            }
+
                                         }
                                     }
                                 } else {
@@ -373,7 +392,6 @@ class Metadata_form_model extends CI_Model
                 }
             }
         }
-
 
 //        print_r($formData);
 //        exit;
