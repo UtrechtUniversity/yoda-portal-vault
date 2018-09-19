@@ -13,7 +13,7 @@ var parentHasMetadata = false;
 var metadataExists    = false;
 var submitButton      = false;
 var unsubmitButton    = false;
-var editInVault       = false;
+var updateButton      = false;
 var locked            = false;
 var submit            = false;
 var unsubmit          = false;
@@ -132,75 +132,85 @@ class YodaButtons extends React.Component {
     }
 
     renderButtons() {
-	if (isVaultPackage && isDatamanager && !editInVault) {
-          // Show 'Update' button.
-         return (
-            <div>
-              {this.renderUpdateButton()}
-            </div>
-          );
-        } else if (isVaultPackage && isDatamanager && editInVault) {
-          // Show 'Save' button.
-         return (
-            <div>
-              {this.renderUpdateButton()}
-            </div>
-          );
-        } else if (!metadataExists && parentHasMetadata) {
-          // Show 'Save' and 'Clone from parent folder' buttons.
-          return (
-            <div>
-              {this.renderSaveButton()}
-              {this.renderCloneButton()}
-            </div>
-          );
-        } else if (!locked && submitButton) {
-          // Show 'Save', 'Submit' and 'Delete all metadata' buttons.
-          return (
-            <div>
-              {this.renderSaveButton()}
-              {this.renderSubmitButton()}
-              {this.renderDeleteButton()}
-            </div>
-          );
-        } else if (locked && submitButton) {
-          // Show 'Submit' button.
-          return (
-            <div>
-              {this.renderSubmitButton()}
-            </div>
-          );
-        } else if (!locked && !submitButton) {
-          // Show 'Save' and 'Delete all metadata' buttons.
-          return (
-            <div>
-              {this.renderSaveButton()}
-              {this.renderDeleteButton()}
-            </div>
-          );
-        } else if (unsubmitButton) {
-          // Show 'Unsubmit' button.
-          return (
-            <div>
-              {this.renderUnsubmitButton()}
-            </div>
-          );
+        if (isVaultPackage) {
+            if (isDatamanager && !updateButton) {
+                // Show 'Update' button.
+                return (
+                  <div>
+                    {this.renderSaveButton()}
+                  </div>
+                );
+            } else if (isDatamanager && updateButton) {
+                // Show 'Save' button.
+                return (
+                  <div>
+                    {this.renderUpdateButton()}
+                  </div>
+                );
+            } else if (!isDatamanager) {
+                // Show no buttons.
+                return (
+		  <div>
+		  </div>
+                );
+            }
         } else {
-          // Show no buttons.
-          return (
-            <div>
-            </div>
-          );
+            if (!isDatamanager && !metadataExists && parentHasMetadata) {
+		// Show 'Save' and 'Clone from parent folder' buttons.
+		return (
+		  <div>
+		    {this.renderSaveButton()}
+		    {this.renderCloneButton()}
+		  </div>
+		);
+            } else if (!isDatamanager && !locked && submitButton) {
+		// Show 'Save', 'Submit' and 'Delete all metadata' buttons.
+		return (
+	          <div>
+	            {this.renderSaveButton()}
+		    {this.renderSubmitButton()}
+		    {this.renderDeleteButton()}
+		  </div>
+		);
+            } else if (!isDatamanager && locked && submitButton) {
+		// Show 'Submit' button.
+		return (
+	          <div>
+		    {this.renderSubmitButton()}
+		  </div>
+		);
+            } else if (!isDatamanager && !locked && !submitButton) {
+		// Show 'Save' and 'Delete all metadata' buttons.
+		return (
+		  <div>
+		    {this.renderSaveButton()}
+		    {this.renderDeleteButton()}
+		  </div>
+		);
+            } else if (!isDatamanager && unsubmitButton) {
+		// Show 'Unsubmit' button.
+		return (
+		  <div>
+		    {this.renderUnsubmitButton()}
+		  </div>
+		);
+            } else {
+		// Show no buttons.
+		return (
+		  <div>
+		  </div>
+		);
+            }
         }
     }
 
     render() {
         return (
-          <div className="row yodaButtons">
-            <div className="col-sm-12">
-              {this.renderButtons()}
+	  <div className="row yodaButtons">
+	    <div className="col-sm-12">
+	      {this.renderButtons()}
             </div>
-          </div>
+	  </div>
         );
     }
 }
@@ -265,21 +275,7 @@ class Container extends React.Component {
     }
 
     updateMetadata() {
-        swal({
-            title: "Are you sure?",
-            text: "Entered metadata will be overwritten by cloning.",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#ffcd00",
-            confirmButtonText: "Yes, clone metadata!",
-            closeOnConfirm: false,
-            animation: false
-        },
-        function(isConfirm){
-            if (isConfirm) {
-                window.location.href = '/research/metadata/form?path=' + path + '&mode=edit_in_vault';
-            }
-        });
+        window.location.href = '/research/metadata/form?path=' + path + '&mode=edit_in_vault';
     }
 
     render() {
@@ -324,7 +320,7 @@ axios.get("/research/metadata/data?path=" + path)
         metadataExists    = response.data.metadataExists
         submitButton      = response.data.submitButton
         unsubmitButton    = response.data.unsubmitButton
-        editInVault       = response.data.editInVault
+        updateButton      = response.data.updateButton
         locked            = response.data.locked
 
         render(<Container />,
