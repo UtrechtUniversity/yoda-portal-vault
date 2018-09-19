@@ -9,10 +9,12 @@ var schema = {};
 var uiSchema = {};
 var formData = {};
 
-var isDatamanager = false;
-var isVaultPackage = false;
+var isDatamanager     = false;
+var isVaultPackage    = false;
 var parentHasMetadata = false;
-var metadataExists = false;
+var metadataExists    = false;
+var submitButton      = false;
+var unsubmitButton    = false;
 
 var form = document.getElementById('form');
 var path = form.dataset.path;
@@ -71,31 +73,117 @@ class YodaButtons extends React.Component {
         super(props);
     }
 
-    render() {
-        // Check if metadata form is empty.
-        if (!metadataExists && parentHasMetadata) {
-	  // Show 'Save' and 'Clone from parent folder' buttons.
+    renderSaveButton() {
+        return (
+          <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">
+            Save
+          </button>
+        );
+    }
+
+    renderSubmitButton() {
+        return (
+          <button type="submit" name="vault_submission" value="1" className="btn btn-primary">
+            Submit
+          </button>
+        );
+    }
+
+    renderUnsubmitButton() {
+        return (
+          <button type="submit" name="vault_unsubmission" className="btn btn-primary">
+            Unsubmit
+          </button>
+        );
+    }
+
+    renderUpdateButton() {
+        return (
+          <button className="btn btn-primary">
+            Update metadata
+          </button>
+        );
+    }
+
+    renderDeleteButton() {
+        return (
+          <button onClick={this.props.deleteMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right">
+            Delete all metadata
+          </button>
+        );
+    }
+
+    renderCloneButton() {
+        return (
+          <button onClick={this.props.cloneMetadata} type="button" className="btn btn-primary clone-metadata-btn pull-right">
+            Clone from parent folder
+          </button>
+        );
+    }
+
+    renderButtons() {
+       // Show unsubmit button.
+       // <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit</button>
+       //
+       // Show vault update button.
+       //  <a href="<?php echo base_url('research/metadata/form?path=' . rawurlencode($path) . '&mode=edit_in_vault'); ?>" class="btn btn-primary">Update metadata</a>
+       //
+       //  Show Save when write permissions.
+       //
+       // Show submit button.
+       //  <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit</button>
+       //
+       //
+       if (isVaultPackage && isDatamanager) {
+         return (
+            <div>
+              {this.renderUpdateButton()}
+            </div>
+          );
+        } else if (!metadataExists && parentHasMetadata) {
+          // Show 'Save' and 'Clone from parent folder' buttons.
           return (
-            <div className="row">
-              <div className="col-sm-12">
-                <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>
-                <button onClick={this.props.cloneMetadata} type="button" className="btn btn-primary clone-metadata-btn pull-right">Clone from parent folder</button>
-              </div>
+            <div>
+              {this.renderSaveButton()}
+              {this.renderCloneButton()}
+            </div>
+          );
+        } else if (submitButton) {
+          return (
+            <div>
+              {this.renderSaveButton()}
+              {this.renderSubmitButton()}
+              {this.renderDeleteButton()}
+            </div>
+          );
+        } else if (unsubmitButton) {
+          return (
+            <div>
+              {this.renderUnsubmitButton()}
             </div>
           );
         } else {
-	  // Show 'Save' and 'Delete all metadata' buttons.
+        // Show 'Save' and 'Delete all metadata' buttons.
           return (
-            <div className="row">
-              <div className="col-sm-12">
-                <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>
-                <button onClick={this.props.deleteMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right">Delete all metadata</button>
-              </div>
+            <div>
+              {this.renderSaveButton()}
+              {this.renderDeleteButton()}
             </div>
           );
         }
     }
+
+    render() {
+        return (
+          <div className="row">
+            <div className="col-sm-12">
+              {this.renderButtons()}
+            </div>
+          </div>   
+        );
+    }
 }
+
 
 class Container extends React.Component {
     constructor(props) {
@@ -173,8 +261,10 @@ axios.get("/research/metadata/data?path=" + path)
         isVaultPackage    = response.data.isVaultPackage
         parentHasMetadata = response.data.parentHasMetadata
         metadataExists    = response.data.metadataExists
+        submitButton      = response.data.submitButton
+        unsubmitButton    = response.data.unsubmitButton
 
-        render( <Container /> ,
+        render(<Container />,
             document.getElementById("form")
         );
     })

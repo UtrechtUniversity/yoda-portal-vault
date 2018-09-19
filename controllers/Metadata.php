@@ -31,7 +31,6 @@ class Metadata extends MY_Controller
         $isDatamanager = $formConfig['isDatamanager'];
         $isVaultPackage = $formConfig['isVaultPackage'];
 
-        $validationResult = true;
         $userType = $formConfig['userType'];
 
         $mode = $this->input->get('mode'); // ?mode=edit_for_vault
@@ -51,29 +50,11 @@ class Metadata extends MY_Controller
             $metadataExists = true;
         }
 
-        $realMetadataExists = $metadataExists; // keep it as this is the true state of metadata being present or not.
-
         // Check locks
         if ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor" || $formConfig['folderStatus']=='SUBMITTED' || $formConfig['folderStatus']=='LOCKED') {
             //$form->setPermission('read');
             $metadataExists = false;
         }
-
-        // Corrupt metadata causes no $form to be created.
-        // The following code (before adding 'if ($form) ' crashes ($form->getPermission() ) the application http error 500
-        $ShowUnsubmitBtn = false;
-            // Submit To Vault btn
-            $submitToVaultBtn = false;
-            $lockStatus = $formConfig['lockFound'];
-            $folderStatus = $formConfig['folderStatus'];
-            if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == '')
-                && ($userType == 'normal' || $userType == 'manager')) { // written this way as the
-                $submitToVaultBtn = true;
-            }
-
-            if (($userType == 'normal' OR $userType == 'manager')  AND $folderStatus == 'SUBMITTED') {
-                $showUnsubmitBtn = true;
-            }
 
         $flashMessage = $this->session->flashdata('flashMessage');
         $flashMessageType = $this->session->flashdata('flashMessageType');
@@ -159,14 +140,8 @@ class Metadata extends MY_Controller
             'isVaultPackage' => $isVaultPackage,
             'showEditBtn' => $showEditBtn,
             'messageDatamanagerAfterSaveInVault' => $messageDatamanagerAfterSaveInVault,
-
-            'submitToVaultBtn' => $submitToVaultBtn,
-            'showUnsubmitBtn' => $showUnsubmitBtn,
             'flashMessage' => $flashMessage,
             'flashMessageType' => $flashMessageType,
-            'validationResult' => $validationResult,
-
-            'realMetadataExists' => $realMetadataExists, // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
         );
         loadView('metadata/form', $viewParams);
     }
@@ -198,16 +173,33 @@ class Metadata extends MY_Controller
         $uiSchema = json_decode ("{}");
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-
+        $userType = $formConfig['userType'];
+        $submitButton = false;
+        $unsubmitButton = false;
+        $lockStatus = $formConfig['lockFound'];
+        $folderStatus = $formConfig['folderStatus'];
+        if (($lockStatus == 'here' || $lockStatus == 'no') 
+            && ($folderStatus == 'LOCKED' || $folderStatus == '')
+            && ($userType == 'normal' || $userType == 'manager')) {
+            $submitButton = true;
+        }
+ 
+        if (($userType == 'normal' || $userType == 'manager')  
+            && $folderStatus == 'SUBMITTED') {
+            $unsubmitButton = true;
+        }
+ 
         $output = array();
-        $output['path']                 = $path;
-        $output['schema']               = $jsonSchema;
-        $output['uiSchema']             = $uiSchema;
-        $output['formData']             = $formData;
-        $output['isDatamanager']        = ($formConfig['isDatamanager'] == 'yes') ? true: false;
-        $output['isVaultPackage']       = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
-        $output['parentHasMetadata']    = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
-        $output['metadataExists']       = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+        $output['path']              = $path;
+        $output['schema']            = $jsonSchema;
+        $output['uiSchema']          = $uiSchema;
+        $output['formData']          = $formData;
+        $output['isDatamanager']     = ($formConfig['isDatamanager'] == 'yes') ? true: false;
+        $output['isVaultPackage']    = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
+        $output['parentHasMetadata'] = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
+        $output['metadataExists']    = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+        $output['submitButton']      = $submitButton;
+        $output['unsubmitButton']    = $unsubmitButton;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }
@@ -354,9 +346,9 @@ class Metadata extends MY_Controller
         if($userType != 'reader') {
             $result = $this->filesystem->removeAllMetadata($rodsaccount, $fullPath);
             if ($result) {
-                return redirect('research/browse?dir=' . rawurlencode($path), 'refresh');
-            } else {
                 return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
+            } else {
+                return redirect('research/browse?dir=' . rawurlencode($path), 'refresh');
             }
         }
         else {
