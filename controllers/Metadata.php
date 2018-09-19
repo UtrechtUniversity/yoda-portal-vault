@@ -177,6 +177,13 @@ class Metadata extends MY_Controller
             }
         }
 
+        $isLocked = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
+        if ($isLocked) {
+            $uiSchema = json_decode ('{
+                "ui:readonly": true
+            }');
+        }
+
         $output = array();
         $output['path']              = $path;
         $output['schema']            = $jsonSchema;
@@ -186,10 +193,10 @@ class Metadata extends MY_Controller
         $output['isVaultPackage']    = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
         $output['parentHasMetadata'] = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
         $output['metadataExists']    = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
-        $output['locked']            = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
+        $output['locked']            = $isLocked;
         $output['submitButton']      = $submitButton;
         $output['unsubmitButton']    = $unsubmitButton;
-        $output['updateButton']      = updateButton;
+        $output['updateButton']      = $updateButton;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }
