@@ -45,36 +45,8 @@ class Metadata extends MY_Controller
             }
         }
 
-        $metadataExists = false;
-        if ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') {
-            $metadataExists = true;
-        }
-
-        // Check locks
-        if ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor" || $formConfig['folderStatus']=='SUBMITTED' || $formConfig['folderStatus']=='LOCKED') {
-            //$form->setPermission('read');
-            $metadataExists = false;
-        }
-
         $flashMessage = $this->session->flashdata('flashMessage');
         $flashMessageType = $this->session->flashdata('flashMessageType');
-
-        // Datamanager Edit metadata in vault btn & write permissions
-        $showEditBtn = false;
-        $messageDatamanagerAfterSaveInVault = '';  // message to datamanger via central messaging -> javascript setMessage
-        if ($isDatamanager == 'yes' && $isVaultPackage == 'yes') {
-	    if ($formConfig['hasShadowMetadataXml'] == 'no') {
-                if ($mode == 'edit_in_vault') {
-                    //$form->setPermission('write'); // Set write permissions for editing metadata in the vault.
-                } else {
-                    $showEditBtn = true; // show edit button
-                }
-	    }
-
-            if ($formConfig['hasShadowMetadataXml'] == 'yes') {
-                $messageDatamanagerAfterSaveInVault = 'Update of metadata is pending.';
-            }
-        }
 
         // Load CSRF token
         $tokenName = $this->security->get_csrf_token_name();
@@ -136,9 +108,7 @@ class Metadata extends MY_Controller
             'tokenName' => $tokenName,
             'tokenHash' => $tokenHash,
             'userType' => $userType,
-            'metadataExists' => $metadataExists, // @todo: refactor! only used in front end to have true knowledge of whether metadata exists as $metadataExists is unreliable now
             'isVaultPackage' => $isVaultPackage,
-            'showEditBtn' => $showEditBtn,
             'messageDatamanagerAfterSaveInVault' => $messageDatamanagerAfterSaveInVault,
             'flashMessage' => $flashMessage,
             'flashMessageType' => $flashMessageType,
@@ -174,21 +144,39 @@ class Metadata extends MY_Controller
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
         $userType = $formConfig['userType'];
-        $submitButton = false;
-        $unsubmitButton = false;
+
+        // Should submit button be rendered?
         $lockStatus = $formConfig['lockFound'];
         $folderStatus = $formConfig['folderStatus'];
-        if (($lockStatus == 'here' || $lockStatus == 'no') 
+        $submitButton = false;
+        if (($lockStatus == 'here' || $lockStatus == 'no')
             && ($folderStatus == 'LOCKED' || $folderStatus == '')
             && ($userType == 'normal' || $userType == 'manager')) {
             $submitButton = true;
         }
- 
-        if (($userType == 'normal' || $userType == 'manager')  
+
+        // Should unsubmit button be rendered?
+        $unsubmitButton = false;
+        if (($userType == 'normal' || $userType == 'manager')
             && $folderStatus == 'SUBMITTED') {
             $unsubmitButton = true;
         }
- 
+
+        // Should update button be rendered?
+        $updateButton = false;
+        $messageDatamanagerAfterSaveInVault = '';  // message to datamanger via central messaging -> javascript setMessage
+        if ($isDatamanager == 'yes' && $isVaultPackage == 'yes') {
+	    if ($formConfig['hasShadowMetadataXml'] == 'no') {
+                if ($mode != 'edit_in_vault') {
+                    $updateButton = true;
+                }
+	    }
+
+            if ($formConfig['hasShadowMetadataXml'] == 'yes') {
+                $messageDatamanagerAfterSaveInVault = 'Update of metadata is pending.';
+            }
+        }
+
         $output = array();
         $output['path']              = $path;
         $output['schema']            = $jsonSchema;
@@ -200,6 +188,7 @@ class Metadata extends MY_Controller
         $output['metadataExists']    = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
         $output['submitButton']      = $submitButton;
         $output['unsubmitButton']    = $unsubmitButton;
+        $output['updateButton']      = updateButton;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }

@@ -15,6 +15,7 @@ var parentHasMetadata = false;
 var metadataExists    = false;
 var submitButton      = false;
 var unsubmitButton    = false;
+var updateButton      = false;
 
 var form = document.getElementById('form');
 var path = form.dataset.path;
@@ -99,7 +100,7 @@ class YodaButtons extends React.Component {
 
     renderUpdateButton() {
         return (
-          <button className="btn btn-primary">
+          <button onClick={this.props.updateMetadata} type="button" className="btn btn-primary">
             Update metadata
           </button>
         );
@@ -134,7 +135,7 @@ class YodaButtons extends React.Component {
        //  <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit</button>
        //
        //
-       if (isVaultPackage && isDatamanager) {
+       if (isVaultPackage && isDatamanager && updateButton) {
          return (
             <div>
               {this.renderUpdateButton()}
@@ -231,15 +232,33 @@ class Container extends React.Component {
         });
     }
 
+    updateMetadata() {
+        swal({
+            title: "Are you sure?",
+            text: "Entered metadata will be overwritten by cloning.",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ffcd00",
+            confirmButtonText: "Yes, clone metadata!",
+            closeOnConfirm: false,
+            animation: false
+        },
+        function(isConfirm){
+            if (isConfirm) {
+                window.location.href = '/research/metadata/form?path=' + path + '&mode=edit_in_vault';
+            }
+        });
+    }
+
     render() {
-    return (
-      <div>
-        <YodaButtons saveMetadata={this.saveMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
-        <YodaForm ref={(form) => {this.form=form;}}/>
-        <YodaButtons saveMetadata={this.saveMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
-      </div>
-    );
-  }
+      return (
+        <div>
+          <YodaButtons saveMetadata={this.saveMetadata} updateMetadata={this.updateMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
+          <YodaForm ref={(form) => {this.form=form;}}/>
+          <YodaButtons saveMetadata={this.saveMetadata} updateMetadata={this.updateMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
+        </div>
+      );
+    }
 };
 
 
@@ -263,6 +282,7 @@ axios.get("/research/metadata/data?path=" + path)
         metadataExists    = response.data.metadataExists
         submitButton      = response.data.submitButton
         unsubmitButton    = response.data.unsubmitButton
+        updateButton      = response.data.updateButton
 
         render(<Container />,
             document.getElementById("form")
