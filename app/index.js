@@ -195,9 +195,19 @@ class Container extends React.Component {
     constructor(props) {
         super(props);
         this.saveMetadata = this.saveMetadata.bind(this);
+        this.submitMetadata = this.submitMetadata.bind(this);
+        this.unsubmitMetadata = this.unsubmitMetadata.bind(this);
     }
 
     saveMetadata() {
+        this.form.submitButton.click();
+    }
+
+    submitMetadata() {
+        this.form.submitButton.click();
+    }
+
+    unsubmitMetadata() {
         this.form.submitButton.click();
     }
 
@@ -258,9 +268,19 @@ class Container extends React.Component {
     render() {
       return (
         <div>
-          <YodaButtons saveMetadata={this.saveMetadata} updateMetadata={this.updateMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
+          <YodaButtons saveMetadata={this.saveMetadata}
+                       submitMetadata={this.submitMetadata}
+                       unsubmitMetadata={this.unsubmitMetadata}
+                       updateMetadata={this.updateMetadata}
+                       deleteMetadata={this.deleteMetadata}
+                       cloneMetadata={this.cloneMetadata} />
           <YodaForm ref={(form) => {this.form=form;}}/>
-          <YodaButtons saveMetadata={this.saveMetadata} updateMetadata={this.updateMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
+          <YodaButtons saveMetadata={this.saveMetadata}
+                       submitMetadata={this.submitMetadata}
+                       unsubmitMetadata={this.unsubmitMetadata}
+                       updateMetadata={this.updateMetadata}
+                       deleteMetadata={this.deleteMetadata}
+                       cloneMetadata={this.cloneMetadata} />
         </div>
       );
     }
