@@ -3,8 +3,6 @@ import axios from 'axios';
 import { render } from "react-dom";
 import Form from "react-jsonschema-form";
 
-const onSubmit = ({formData}) => submitData(formData);
-
 var schema = {};
 var uiSchema = {};
 var formData = {};
@@ -17,6 +15,8 @@ var submitButton      = false;
 var unsubmitButton    = false;
 var updateButton      = false;
 var locked            = false;
+var submit            = false;
+var unsubmit          = false;
 
 var form = document.getElementById('form');
 var path = form.dataset.path;
@@ -25,6 +25,10 @@ class YodaForm extends React.Component {
     constructor(props) {
         super(props);
       }
+
+    onSubmit() {
+        submitData(formData);
+    }
 
     onError() {
         alert('error!');
@@ -61,8 +65,8 @@ class YodaForm extends React.Component {
               liveValidate={true}
               noValidate={false}
               noHtml5Validate={true}
-              showErrorList={true}
-              onSubmit={onSubmit}
+              showErrorList={false}
+              onSubmit={this.onSubmit}
               onError={this.onError}
               transformErrors={this.transformErrors}>
       <button ref={(btn) => {this.submitButton=btn;}} className="hidden" />
@@ -205,10 +209,12 @@ class Container extends React.Component {
     }
 
     submitMetadata() {
+        submit = true;
         this.form.submitButton.click();
     }
 
     unsubmitMetadata() {
+        unsubmit = true;
         this.form.submitButton.click();
     }
 
@@ -332,8 +338,14 @@ function submitData(data)
     bodyFormData.set('formData', JSON.stringify(data));
 
     // Disable save button.
-    var element = document.getElementById("saveButton");
-    element.classList.add("disabled");
+    //var element = document.getElementById("saveButton");
+    //element.classList.add("disabled");
+
+    if (submit) {
+        bodyFormData.set('vault_submission', "1");
+    } else if (unsubmit) {
+        bodyFormData.set('vault_unsubmission', "1");
+    }
 
     // Save
     axios({
@@ -343,17 +355,12 @@ function submitData(data)
         config: { headers: {'Content-Type': 'multipart/form-data' }}
         })
         .then(function (response) {
-            //handle success
-            console.log('SUCCESS:');
-            console.log(response);
-            console.log(response.data);
             window.location.reload();
         })
         .catch(function (error) {
             //handle error
             console.log('ERROR:');
             console.log(error);
-            console.log(error.response);
         });
 }
 
