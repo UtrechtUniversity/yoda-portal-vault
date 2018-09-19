@@ -314,7 +314,7 @@ class Metadata_form_model extends CI_Model
                                                 $emptyObjectField[$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
                                             }
                                         }
-                                        else { 
+                                        else {
                                             $emptyObjectField[$objectKey] = array(0 => '');
                                         }
                                     }
