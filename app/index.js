@@ -213,13 +213,48 @@ function CustomFieldTemplate(props) {
 function ObjectFieldTemplate(props) {
     const { TitleField, DescriptionField } = props;
 
+    var structureClass;
     var structure;
     if ('yoda:structure' in props.schema) {
-        var structure = 'yoda-structure ' + props.schema['yoda:structure'];
+        var structureClass = 'yoda-structure ' + props.schema['yoda:structure'];
+        var structure = props.schema['yoda:structure'];
+        //console.log(123);
+        //console.log(structure);
+    }
+
+    //console.log(structure);
+
+    if (structure == 'compound') {
+        let array = props.properties;
+        let output = props.properties.map((prop, i, array) => {
+            console.log(prop.content);
+            //<div class="col-sm-6 field">
+            //{props.properties.map(prop => prop.content)}
+            return (
+                <div class="col-sm-6 field">
+                    {prop.content}
+                </div>
+            );
+        });
+
+
+        return (
+            <div className={"form-group " + structureClass}>
+                <label class="col-sm-2 combined-main-label control-label">
+                    <span>{props.title}</span>
+                </label>
+                <span class="fa-stack col-sm-1"></span>
+                <div class="col-sm-9">
+                    <div class="form-group row">
+                        {output}
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (
-        <fieldset className={structure}>
+        <fieldset className={structureClass}>
             {(props.uiSchema["ui:title"] || props.title) && (
                 <TitleField
                     id={`${props.idSchema.$id}__title`}

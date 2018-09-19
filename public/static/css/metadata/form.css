@@ -173,6 +173,11 @@ button[data-clone*="main"] {
     display: block;
 }
 
+.combined-main-label {
+    padding-top: 30px!important;
+}
+
+/*
 .compound {
     display: inline-block;
     width: 100%;
@@ -186,6 +191,7 @@ button[data-clone*="main"] {
     text-align: right;
     font-weight: bold;
 }
+
 .compound .form-group {
     width: 40%;
     display: inherit;
@@ -202,6 +208,7 @@ button[data-clone*="main"] {
 
 .compound div {
 }
+*/
 
 .has-btn {
     position: relative;
