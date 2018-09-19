@@ -169,6 +169,7 @@ class Metadata extends MY_Controller
         }
 
         // Should update button be rendered?
+        $mode = $this->input->get('mode');
         $updateButton = false;
         $messageDatamanagerAfterSaveInVault = '';  // message to datamanger via central messaging -> javascript setMessage
         if ($isDatamanager == 'yes' && $isVaultPackage == 'yes') {
