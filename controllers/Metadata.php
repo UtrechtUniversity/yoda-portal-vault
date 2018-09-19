@@ -346,9 +346,9 @@ class Metadata extends MY_Controller
         if($userType != 'reader') {
             $result = $this->filesystem->removeAllMetadata($rodsaccount, $fullPath);
             if ($result) {
-                return redirect('research/browse?dir=' . rawurlencode($path), 'refresh');
-            } else {
                 return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
+            } else {
+                return redirect('research/browse?dir=' . rawurlencode($path), 'refresh');
             }
         }
         else {
