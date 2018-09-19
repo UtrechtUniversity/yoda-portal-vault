@@ -124,19 +124,8 @@ class YodaButtons extends React.Component {
     }
 
     renderButtons() {
-       // Show unsubmit button.
-       // <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit</button>
-       //
-       // Show vault update button.
-       //  <a href="<?php echo base_url('research/metadata/form?path=' . rawurlencode($path) . '&mode=edit_in_vault'); ?>" class="btn btn-primary">Update metadata</a>
-       //
-       //  Show Save when write permissions.
-       //
-       // Show submit button.
-       //  <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit</button>
-       //
-       //
-       if (isVaultPackage && isDatamanager && updateButton) {
+	if (isVaultPackage && isDatamanager && updateButton) {
+          // Show 'Update' button.	    	    
          return (
             <div>
               {this.renderUpdateButton()}
@@ -151,6 +140,7 @@ class YodaButtons extends React.Component {
             </div>
           );
         } else if (!locked && submitButton) {
+          // Show 'Save', 'Submit' and 'Delete all metadata' buttons.	    
           return (
             <div>
               {this.renderSaveButton()}
@@ -159,23 +149,31 @@ class YodaButtons extends React.Component {
             </div>
           );
         } else if (locked && submitButton) {
+          // Show 'Submit' button.	    
           return (
             <div>
               {this.renderSubmitButton()}
             </div>
           );
+        } else if (!locked && !submitButton) {
+          // Show 'Save' and 'Delete all metadata' buttons.	    
+          return (
+            <div>
+              {this.renderSaveButton()}
+              {this.renderDeleteButton()}
+            </div>
+          );	    
         } else if (unsubmitButton) {
+          // Show 'Unsubmit' button.
           return (
             <div>
               {this.renderUnsubmitButton()}
             </div>
           );
         } else {
-        // Show 'Save' and 'Delete all metadata' buttons.
+          // Show no buttons.
           return (
             <div>
-              {this.renderSaveButton()}
-              {this.renderDeleteButton()}
             </div>
           );
         }
