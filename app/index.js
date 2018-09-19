@@ -13,7 +13,7 @@ var parentHasMetadata = false;
 var metadataExists    = false;
 var submitButton      = false;
 var unsubmitButton    = false;
-var updateButton      = false;
+var editInVault       = false;
 var locked            = false;
 var submit            = false;
 var unsubmit          = false;
@@ -132,8 +132,15 @@ class YodaButtons extends React.Component {
     }
 
     renderButtons() {
-	if (isVaultPackage && isDatamanager && updateButton) {
+	if (isVaultPackage && isDatamanager && !editInVault) {
           // Show 'Update' button.
+         return (
+            <div>
+              {this.renderUpdateButton()}
+            </div>
+          );
+        } else if (isVaultPackage && isDatamanager && editInVault) {
+          // Show 'Save' button.
          return (
             <div>
               {this.renderUpdateButton()}
@@ -317,7 +324,7 @@ axios.get("/research/metadata/data?path=" + path)
         metadataExists    = response.data.metadataExists
         submitButton      = response.data.submitButton
         unsubmitButton    = response.data.unsubmitButton
-        updateButton      = response.data.updateButton
+        editInVault       = response.data.editInVault
         locked            = response.data.locked
 
         render(<Container />,
