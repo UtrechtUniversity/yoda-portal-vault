@@ -314,11 +314,9 @@ class Metadata_form_model extends CI_Model
                                                 $emptyObjectField[$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
                                             }
                                         }
-
-//                                        elseif ($fieldKey == 'Creator') {
-//                                            echo $fieldKey;
-//                                            echo '---' . $objectKey . '---';
-//                                        }
+                                        else { 
+                                            $emptyObjectField[$objectKey] = array(0 => '');
+                                        }
                                     }
                                 } else {
                                     if ($objectField['type'] == 'string') {
@@ -343,11 +341,6 @@ class Metadata_form_model extends CI_Model
                                 $formData[$groupKey][$fieldKey][] = $emptyObjectField;
                             }
                         }
-//                        else { //HdR
-//                            if ($fieldKey=='Tag') {
-//                                $formData[$groupKey][$fieldKey] = array(0=>'blablablablabla');
-//                            }
-//                        }
                     } else if ($field['type'] == 'object') {
                         $structure = $field['yoda:structure'];
                         // Subproperties
