@@ -152,7 +152,7 @@ class YodaButtons extends React.Component {
           return (
             <div>
               {this.renderSaveButton()}
-              {this.renderSubmiButton()}
+              {this.renderSubmitButton()}
               {this.renderDeleteButton()}
             </div>
           );
