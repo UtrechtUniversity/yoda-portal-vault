@@ -82,7 +82,7 @@ class YodaButtons extends React.Component {
 
     renderSaveButton() {
         return (
-          <button onClick={this.props.saveMetadata} type="submit" id="saveButton" className="btn btn-primary">
+          <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">
             Save
           </button>
         );
@@ -90,7 +90,7 @@ class YodaButtons extends React.Component {
 
     renderSubmitButton() {
         return (
-          <button onClick={this.props.submitMetadata} type="submit" name="vault_submission" value="1" className="btn btn-primary">
+          <button onClick={this.props.submitMetadata} type="submit" className="btn btn-primary">
             Submit
           </button>
         );
@@ -98,7 +98,7 @@ class YodaButtons extends React.Component {
 
     renderUnsubmitButton() {
         return (
-          <button onClick={this.props.unsubmitMetadata} type="submit" name="vault_unsubmission" className="btn btn-primary">
+          <button onClick={this.props.unsubmitMetadata} type="submit" className="btn btn-primary">
             Unsubmit
           </button>
         );
@@ -186,7 +186,7 @@ class YodaButtons extends React.Component {
 
     render() {
         return (
-          <div className="row">
+          <div className="row yodaButtons">
             <div className="col-sm-12">
               {this.renderButtons()}
             </div>
@@ -332,22 +332,20 @@ function submitData(data)
     var tokenName = form.dataset.csrf_token_name;
     var tokenHash = form.dataset.csrf_token_hash;
 
+    // Disable buttons.
+    $('.yodaButtons button').addClass('disabled');
+
     // Create form data.
     var bodyFormData = new FormData();
     bodyFormData.set(tokenName, tokenHash);
     bodyFormData.set('formData', JSON.stringify(data));
-
-    // Disable save button.
-    //var element = document.getElementById("saveButton");
-    //element.classList.add("disabled");
-
     if (submit) {
         bodyFormData.set('vault_submission', "1");
     } else if (unsubmit) {
         bodyFormData.set('vault_unsubmission', "1");
     }
 
-    // Save
+    // Store.
     axios({
         method: 'post',
         url: "/research/metadata/store?path=" + path,
