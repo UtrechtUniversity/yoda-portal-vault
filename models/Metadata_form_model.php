@@ -275,7 +275,9 @@ class Metadata_form_model extends CI_Model
                             $formData[$groupKey][$fieldKey] = (integer) $xmlFormData[$fieldKey];
                         }
                     } else if ($field['type'] == 'array') { // array
+
                         if ($field['items']['type'] == 'string' || !isset($field['items']['type'])) {
+
                             if (isset($xmlFormData[$fieldKey])) {
                                 if (count($xmlFormData[$fieldKey]) == 1) {
                                     $formData[$groupKey][$fieldKey] = array($xmlFormData[$fieldKey]);
@@ -283,10 +285,14 @@ class Metadata_form_model extends CI_Model
                                     $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
                                 }
                             }
+                            else { // Add single (empty value) array item so duplicable fields are shown in an opened state with no actual data in em
+                                $formData[$groupKey][$fieldKey] = array(0=>'');
+                            }
                         } else if ($field['items']['type'] == 'object') {
                             //$formData[$groupKey][$fieldKey] = array();
                             $emptyObjectField = array();
                             $mainProp = true;
+
                             foreach ($field['items']['properties'] as $objectKey => $objectField) {
                                 if ($field['items']['yoda:structure'] == 'subproperties') {
                                     if ($mainProp) {
@@ -294,8 +300,12 @@ class Metadata_form_model extends CI_Model
                                             //$formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey][$objectKey];
                                             $emptyObjectField[$objectKey] = $xmlFormData[$fieldKey][$objectKey];
                                         }
+                                        else { // Add empty string so lead property exists => will visibly open the structure
+                                            $emptyObjectField[$objectKey] = '';
+                                        }
                                         $mainProp = false;
                                     } else {
+
                                         if (isset($xmlFormData[$fieldKey]['Properties'][$objectKey])) {
                                             //$formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
                                             if ($objectField['type'] == 'array') {
@@ -303,7 +313,9 @@ class Metadata_form_model extends CI_Model
                                             } else {
                                                 $emptyObjectField[$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
                                             }
-
+                                        }
+                                        else {
+                                            $emptyObjectField[$objectKey] = array(0 => '');
                                         }
                                     }
                                 } else {
@@ -361,6 +373,11 @@ class Metadata_form_model extends CI_Model
                 }
             }
         }
+
+
+//        print_r($formData);
+//        exit;
+
         return $formData;
     }
 }

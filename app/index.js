@@ -3,15 +3,21 @@ import axios from 'axios';
 import { render } from "react-dom";
 import Form from "react-jsonschema-form";
 
-// Custom widgets
-const widgets = {};
-
-// Custom fields
-const fields = {};
 const onSubmit = ({formData}) => submitData(formData);
+
 var schema = {};
 var uiSchema = {};
 var formData = {};
+
+var isDatamanager     = false;
+var isVaultPackage    = false;
+var parentHasMetadata = false;
+var metadataExists    = false;
+var submitButton      = false;
+var unsubmitButton    = false;
+
+var form = document.getElementById('form');
+var path = form.dataset.path;
 
 class YodaForm extends React.Component {
     constructor(props) {
@@ -46,8 +52,6 @@ class YodaForm extends React.Component {
               uiSchema={uiSchema}
               formData={formData}
               formContext={{env: 'research'}}
-              fields={fields}
-              widgets={widgets}
               ArrayFieldTemplate={ArrayFieldTemplate}
               ObjectFieldTemplate={ObjectFieldTemplate}
               FieldTemplate={CustomFieldTemplate}
@@ -58,55 +62,187 @@ class YodaForm extends React.Component {
               onSubmit={onSubmit}
               onError={this.onError}
               transformErrors={this.transformErrors}>
-      <button ref={(btn) => {this.submitButton=btn;}} className="hidden"/>
+      <button ref={(btn) => {this.submitButton=btn;}} className="hidden" />
     </Form>
     );
   }
 }
 
-class ControlPanel extends React.Component {
+class YodaButtons extends React.Component {
     constructor(props) {
         super(props);
     }
 
+    renderSaveButton() {
+        return (
+          <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">
+            Save
+          </button>
+        );
+    }
+
+    renderSubmitButton() {
+        return (
+          <button type="submit" name="vault_submission" value="1" className="btn btn-primary">
+            Submit
+          </button>
+        );
+    }
+
+    renderUnsubmitButton() {
+        return (
+          <button type="submit" name="vault_unsubmission" className="btn btn-primary">
+            Unsubmit
+          </button>
+        );
+    }
+
+    renderUpdateButton() {
+        return (
+          <button className="btn btn-primary">
+            Update metadata
+          </button>
+        );
+    }
+
+    renderDeleteButton() {
+        return (
+          <button onClick={this.props.deleteMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right">
+            Delete all metadata
+          </button>
+        );
+    }
+
+    renderCloneButton() {
+        return (
+          <button onClick={this.props.cloneMetadata} type="button" className="btn btn-primary clone-metadata-btn pull-right">
+            Clone from parent folder
+          </button>
+        );
+    }
+
+    renderButtons() {
+       // Show unsubmit button.
+       // <button type="submit" name="vault_unsubmission" value="1" class="btn btn-primary">Unsubmit</button>
+       //
+       // Show vault update button.
+       //  <a href="<?php echo base_url('research/metadata/form?path=' . rawurlencode($path) . '&mode=edit_in_vault'); ?>" class="btn btn-primary">Update metadata</a>
+       //
+       //  Show Save when write permissions.
+       //
+       // Show submit button.
+       //  <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit</button>
+       //
+       //
+       if (isVaultPackage && isDatamanager) {
+         return (
+            <div>
+              {this.renderUpdateButton()}
+            </div>
+          );
+        } else if (!metadataExists && parentHasMetadata) {
+          // Show 'Save' and 'Clone from parent folder' buttons.
+          return (
+            <div>
+              {this.renderSaveButton()}
+              {this.renderCloneButton()}
+            </div>
+          );
+        } else if (submitButton) {
+          return (
+            <div>
+              {this.renderSaveButton()}
+              {this.renderSubmitButton()}
+              {this.renderDeleteButton()}
+            </div>
+          );
+        } else if (unsubmitButton) {
+          return (
+            <div>
+              {this.renderUnsubmitButton()}
+            </div>
+          );
+        } else {
+        // Show 'Save' and 'Delete all metadata' buttons.
+          return (
+            <div>
+              {this.renderSaveButton()}
+              {this.renderDeleteButton()}
+            </div>
+          );
+        }
+    }
+
     render() {
         return (
-              <div className="row">
-                    <div className="col-sm-12">
-                        <button onClick={this.props.submitMe} type="submit" className="btn btn-primary">Save</button>
-                        <button type="button" className="btn btn-danger delete-all-metadata-btn pull-right" data-path="">Delete all metadata</button>
-                    </div>
-                </div>
-    );
-  }
+          <div className="row">
+            <div className="col-sm-12">
+              {this.renderButtons()}
+            </div>
+          </div>   
+        );
+    }
 }
 
 
 class Container extends React.Component {
     constructor(props) {
         super(props);
-        this.submitForm = this.submitForm.bind(this);
+        this.saveMetadata = this.saveMetadata.bind(this);
     }
 
-    submitForm() {
+    saveMetadata() {
         this.form.submitButton.click();
+    }
+
+    deleteMetadata() {
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this action!",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Yes, delete all metadata!",
+            closeOnConfirm: false,
+            animation: false
+        },
+        function(isConfirm){
+            if (isConfirm) {
+                window.location.href = '/research/metadata/delete?path=' + path;
+            }
+        });
+    }
+
+    cloneMetadata() {
+        swal({
+            title: "Are you sure?",
+            text: "Entered metadata will be overwritten by cloning.",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ffcd00",
+            confirmButtonText: "Yes, clone metadata!",
+            closeOnConfirm: false,
+            animation: false
+        },
+        function(isConfirm){
+            if (isConfirm) {
+                window.location.href = '/research/metadata/clone_metadata?path=' + path;
+            }
+        });
     }
 
     render() {
     return (
       <div>
-        <ControlPanel submitMe={this.submitForm}/>
+        <YodaButtons saveMetadata={this.saveMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
         <YodaForm ref={(form) => {this.form=form;}}/>
-        <ControlPanel submitMe={this.submitForm}/>
+        <YodaButtons saveMetadata={this.saveMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
       </div>
     );
   }
 };
 
-const log = (type) => console.log.bind(console, type);
-const onChange = ({formData}) => console.log("Data changed: ",  formData);
 
-var form = document.getElementById('form');
 var tokenName = form.dataset.csrf_token_name;
 var tokenHash = form.dataset.csrf_token_hash;
 axios.defaults.headers.common = {
@@ -115,15 +251,20 @@ axios.defaults.headers.common = {
 };
 axios.defaults.xsrfCookieName = tokenName;
 axios.defaults.xsrfHeaderName = tokenHash;
-var path = form.dataset.path;
 
 axios.get("/research/metadata/data?path=" + path)
     .then(function (response) {
-        schema = response.data.schema;
-        uiSchema = response.data.uiSchema;
-        formData = response.data.formData;
+        schema            = response.data.schema;
+        uiSchema          = response.data.uiSchema;
+        formData          = response.data.formData;
+        isDatamanager     = response.data.isDatamanager
+        isVaultPackage    = response.data.isVaultPackage
+        parentHasMetadata = response.data.parentHasMetadata
+        metadataExists    = response.data.metadataExists
+        submitButton      = response.data.submitButton
+        unsubmitButton    = response.data.unsubmitButton
 
-        render( <Container /> ,
+        render(<Container />,
             document.getElementById("form")
         );
     })
