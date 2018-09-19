@@ -31,6 +31,7 @@ class YodaForm extends React.Component {
     }
 
     transformErrors(errors) {
+	console.log(errors);
         console.log("Errors before transform: " + errors.length);
 
         var i = errors.length
@@ -85,7 +86,7 @@ class YodaButtons extends React.Component {
 
     renderSubmitButton() {
         return (
-          <button type="submit" name="vault_submission" value="1" className="btn btn-primary">
+          <button onClick={this.props.submitMetadata} type="submit" name="vault_submission" value="1" className="btn btn-primary">
             Submit
           </button>
         );
@@ -93,7 +94,7 @@ class YodaButtons extends React.Component {
 
     renderUnsubmitButton() {
         return (
-          <button type="submit" name="vault_unsubmission" className="btn btn-primary">
+          <button onClick={this.props.unsubmitMetadata} type="submit" name="vault_unsubmission" className="btn btn-primary">
             Unsubmit
           </button>
         );
@@ -419,7 +420,7 @@ function ObjectFieldTemplate(props) {
     if (structure == 'compound') {
         let array = props.properties;
         let output = props.properties.map((prop, i, array) => {
-            console.log(prop.content);
+            //console.log(prop.content);
             //<div class="col-sm-6 field">
             //{props.properties.map(prop => prop.content)}
             return (
