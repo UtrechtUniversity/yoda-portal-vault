@@ -149,7 +149,9 @@ class Metadata extends MY_Controller
         }
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-        $userType = $formConfig['userType'];
+        $isDatamanager     = ($formConfig['isDatamanager'] == 'yes') ? true: false;
+        $isVaultPackage    = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
+        $userType          = $formConfig['userType'];
 
         // Should submit button be rendered?
         $lockStatus = $formConfig['lockFound'];
@@ -172,7 +174,7 @@ class Metadata extends MY_Controller
         $mode = $this->input->get('mode');
         $updateButton = false;
         $messageDatamanagerAfterSaveInVault = '';  // message to datamanger via central messaging -> javascript setMessage
-        if ($isDatamanager == 'yes' && $isVaultPackage == 'yes') {
+        if ($isDatamanager && $isVaultPackage) {
 	    if ($formConfig['hasShadowMetadataXml'] == 'no') {
                 if ($mode != 'edit_in_vault') {
                     $updateButton = true;
@@ -194,8 +196,8 @@ class Metadata extends MY_Controller
         $output['schema']            = $jsonSchema;
         $output['uiSchema']          = $uiSchema;
         $output['formData']          = $formData;
-        $output['isDatamanager']     = ($formConfig['isDatamanager'] == 'yes') ? true: false;
-        $output['isVaultPackage']    = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
+        $output['isDatamanager']     = $isDatamanager;
+        $output['isVaultPackage']    = $isVaultPackage;
         $output['parentHasMetadata'] = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
         $output['metadataExists']    = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
         $output['locked']            = $isLocked;
