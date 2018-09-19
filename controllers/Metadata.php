@@ -186,6 +186,7 @@ class Metadata extends MY_Controller
         $output['isVaultPackage']    = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
         $output['parentHasMetadata'] = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
         $output['metadataExists']    = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+        $output['locked']            = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
         $output['submitButton']      = $submitButton;
         $output['unsubmitButton']    = $unsubmitButton;
         $output['updateButton']      = updateButton;

@@ -16,6 +16,7 @@ var metadataExists    = false;
 var submitButton      = false;
 var unsubmitButton    = false;
 var updateButton      = false;
+var locked            = false;
 
 var form = document.getElementById('form');
 var path = form.dataset.path;
@@ -149,12 +150,18 @@ class YodaButtons extends React.Component {
               {this.renderCloneButton()}
             </div>
           );
-        } else if (submitButton) {
+        } else if (!locked && submitButton) {
           return (
             <div>
               {this.renderSaveButton()}
               {this.renderSubmitButton()}
               {this.renderDeleteButton()}
+            </div>
+          );
+        } else if (locked && submitButton) {
+          return (
+            <div>
+              {this.renderSubmitButton()}
             </div>
           );
         } else if (unsubmitButton) {
@@ -180,7 +187,7 @@ class YodaButtons extends React.Component {
             <div className="col-sm-12">
               {this.renderButtons()}
             </div>
-          </div>   
+          </div>
         );
     }
 }
@@ -283,6 +290,7 @@ axios.get("/research/metadata/data?path=" + path)
         submitButton      = response.data.submitButton
         unsubmitButton    = response.data.unsubmitButton
         updateButton      = response.data.updateButton
+        locked            = response.data.locked
 
         render(<Container />,
             document.getElementById("form")
