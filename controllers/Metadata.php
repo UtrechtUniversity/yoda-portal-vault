@@ -135,12 +135,18 @@ class Metadata extends MY_Controller
 
         $jsonSchema = $this->Metadata_form_model->loadJSONS($rodsaccount, $fullPath);
 
+        $uiSchema = array(
+            "Descriptive-group" => array(
+               "Description" => array(
+                   "ui:widget" => "textarea"
+               )
+           )
+        );
+
         $formData = $this->Metadata_form_model->prepareJSONSFormData($jsonSchema, $xmlFormData);
         if (empty($formData)) {
              $formData = json_decode ("{}");
         }
-
-        $uiSchema = json_decode ("{}");
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
         $userType = $formConfig['userType'];
@@ -179,9 +185,7 @@ class Metadata extends MY_Controller
 
         $isLocked = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
         if ($isLocked) {
-            $uiSchema = json_decode ('{
-                "ui:readonly": true
-            }');
+            $uiSchema["ui:readonly"] = "true";
         }
 
         $output = array();
