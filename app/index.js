@@ -77,7 +77,7 @@ class YodaButtons extends React.Component {
 
     renderSaveButton() {
         return (
-          <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">
+          <button onClick={this.props.saveMetadata} type="submit" id="saveButton" className="btn btn-primary">
             Save
           </button>
         );
@@ -125,7 +125,7 @@ class YodaButtons extends React.Component {
 
     renderButtons() {
 	if (isVaultPackage && isDatamanager && updateButton) {
-          // Show 'Update' button.	    	    
+          // Show 'Update' button.
          return (
             <div>
               {this.renderUpdateButton()}
@@ -140,7 +140,7 @@ class YodaButtons extends React.Component {
             </div>
           );
         } else if (!locked && submitButton) {
-          // Show 'Save', 'Submit' and 'Delete all metadata' buttons.	    
+          // Show 'Save', 'Submit' and 'Delete all metadata' buttons.
           return (
             <div>
               {this.renderSaveButton()}
@@ -149,20 +149,20 @@ class YodaButtons extends React.Component {
             </div>
           );
         } else if (locked && submitButton) {
-          // Show 'Submit' button.	    
+          // Show 'Submit' button.
           return (
             <div>
               {this.renderSubmitButton()}
             </div>
           );
         } else if (!locked && !submitButton) {
-          // Show 'Save' and 'Delete all metadata' buttons.	    
+          // Show 'Save' and 'Delete all metadata' buttons.
           return (
             <div>
               {this.renderSaveButton()}
               {this.renderDeleteButton()}
             </div>
-          );	    
+          );
         } else if (unsubmitButton) {
           // Show 'Unsubmit' button.
           return (
@@ -305,10 +305,14 @@ function submitData(data)
     var tokenName = form.dataset.csrf_token_name;
     var tokenHash = form.dataset.csrf_token_hash;
 
-    // Create form data
+    // Create form data.
     var bodyFormData = new FormData();
     bodyFormData.set(tokenName, tokenHash);
     bodyFormData.set('formData', JSON.stringify(data));
+
+    // Disable save button.
+    var element = document.getElementById("saveButton");
+    element.classList.add("disabled");
 
     // Save
     axios({
@@ -321,8 +325,8 @@ function submitData(data)
             //handle success
             console.log('SUCCESS:');
             console.log(response);
-            console.log(response.data);	    
-            window.location.href = '/research/metadata/form?path=' + path;
+            console.log(response.data);
+            window.location.reload();
         })
         .catch(function (error) {
             //handle error
@@ -399,7 +403,7 @@ function ObjectFieldTemplate(props) {
             //<div class="col-sm-6 field">
             //{props.properties.map(prop => prop.content)}
             return (
-                <div class="col-sm-6 field">
+                <div className="col-sm-6 field">
                     {prop.content}
                 </div>
             );
@@ -408,12 +412,12 @@ function ObjectFieldTemplate(props) {
 
         return (
             <div className={"form-group " + structureClass}>
-                <label class="col-sm-2 combined-main-label control-label">
+                <label className="col-sm-2 combined-main-label control-label">
                     <span>{props.title}</span>
                 </label>
-                <span class="fa-stack col-sm-1"></span>
-                <div class="col-sm-9">
-                    <div class="form-group row">
+                <span className="fa-stack col-sm-1"></span>
+                <div className="col-sm-9">
+                    <div className="form-group row">
                         {output}
                     </div>
                 </div>
