@@ -15,6 +15,8 @@ var parentHasMetadata = false;
 var metadataExists    = false;
 var submitButton      = false;
 var unsubmitButton    = false;
+var updateButton      = false;
+var locked            = false;
 
 var form = document.getElementById('form');
 var path = form.dataset.path;
@@ -99,7 +101,7 @@ class YodaButtons extends React.Component {
 
     renderUpdateButton() {
         return (
-          <button className="btn btn-primary">
+          <button onClick={this.props.updateMetadata} type="button" className="btn btn-primary">
             Update metadata
           </button>
         );
@@ -134,7 +136,7 @@ class YodaButtons extends React.Component {
        //  <button type="submit" name="vault_submission" value="1" class="btn btn-primary">Submit</button>
        //
        //
-       if (isVaultPackage && isDatamanager) {
+       if (isVaultPackage && isDatamanager && updateButton) {
          return (
             <div>
               {this.renderUpdateButton()}
@@ -148,12 +150,18 @@ class YodaButtons extends React.Component {
               {this.renderCloneButton()}
             </div>
           );
-        } else if (submitButton) {
+        } else if (!locked && submitButton) {
           return (
             <div>
               {this.renderSaveButton()}
               {this.renderSubmitButton()}
               {this.renderDeleteButton()}
+            </div>
+          );
+        } else if (locked && submitButton) {
+          return (
+            <div>
+              {this.renderSubmitButton()}
             </div>
           );
         } else if (unsubmitButton) {
@@ -179,7 +187,7 @@ class YodaButtons extends React.Component {
             <div className="col-sm-12">
               {this.renderButtons()}
             </div>
-          </div>   
+          </div>
         );
     }
 }
@@ -231,15 +239,33 @@ class Container extends React.Component {
         });
     }
 
+    updateMetadata() {
+        swal({
+            title: "Are you sure?",
+            text: "Entered metadata will be overwritten by cloning.",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ffcd00",
+            confirmButtonText: "Yes, clone metadata!",
+            closeOnConfirm: false,
+            animation: false
+        },
+        function(isConfirm){
+            if (isConfirm) {
+                window.location.href = '/research/metadata/form?path=' + path + '&mode=edit_in_vault';
+            }
+        });
+    }
+
     render() {
-    return (
-      <div>
-        <YodaButtons saveMetadata={this.saveMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
-        <YodaForm ref={(form) => {this.form=form;}}/>
-        <YodaButtons saveMetadata={this.saveMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
-      </div>
-    );
-  }
+      return (
+        <div>
+          <YodaButtons saveMetadata={this.saveMetadata} updateMetadata={this.updateMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
+          <YodaForm ref={(form) => {this.form=form;}}/>
+          <YodaButtons saveMetadata={this.saveMetadata} updateMetadata={this.updateMetadata} deleteMetadata={this.deleteMetadata} cloneMetadata={this.cloneMetadata} />
+        </div>
+      );
+    }
 };
 
 
@@ -263,6 +289,8 @@ axios.get("/research/metadata/data?path=" + path)
         metadataExists    = response.data.metadataExists
         submitButton      = response.data.submitButton
         unsubmitButton    = response.data.unsubmitButton
+        updateButton      = response.data.updateButton
+        locked            = response.data.locked
 
         render(<Container />,
             document.getElementById("form")
