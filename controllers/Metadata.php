@@ -62,18 +62,18 @@ class Metadata extends MY_Controller
         // Corrupt metadata causes no $form to be created.
         // The following code (before adding 'if ($form) ' crashes ($form->getPermission() ) the application http error 500
         $ShowUnsubmitBtn = false;
-            // Submit To Vault btn
-            $submitToVaultBtn = false;
-            $lockStatus = $formConfig['lockFound'];
-            $folderStatus = $formConfig['folderStatus'];
-            if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == '')
-                && ($userType == 'normal' || $userType == 'manager')) { // written this way as the
-                $submitToVaultBtn = true;
-            }
+        // Submit To Vault btn
+        $submitToVaultBtn = false;
+        $lockStatus = $formConfig['lockFound'];
+        $folderStatus = $formConfig['folderStatus'];
+        if (($lockStatus == 'here' || $lockStatus == 'no') && ($folderStatus == 'PROTECTED' || $folderStatus == 'LOCKED' || $folderStatus == '')
+            && ($userType == 'normal' || $userType == 'manager')) { // written this way as the
+            $submitToVaultBtn = true;
+        }
 
-            if (($userType == 'normal' OR $userType == 'manager')  AND $folderStatus == 'SUBMITTED') {
-                $showUnsubmitBtn = true;
-            }
+        if (($userType == 'normal' OR $userType == 'manager')  AND $folderStatus == 'SUBMITTED') {
+            $showUnsubmitBtn = true;
+        }
 
         $flashMessage = $this->session->flashdata('flashMessage');
         $flashMessageType = $this->session->flashdata('flashMessageType');
@@ -198,16 +198,33 @@ class Metadata extends MY_Controller
         $uiSchema = json_decode ("{}");
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-
+        $userType = $formConfig['userType'];
+        $submitButton = false;
+        $unsubmitButton = false;
+        $lockStatus = $formConfig['lockFound'];
+        $folderStatus = $formConfig['folderStatus'];
+        if (($lockStatus == 'here' || $lockStatus == 'no') 
+            && ($folderStatus == 'LOCKED' || $folderStatus == '')
+            && ($userType == 'normal' || $userType == 'manager')) {
+            $submitButton = true;
+        }
+ 
+        if (($userType == 'normal' || $userType == 'manager')  
+            && $folderStatus == 'SUBMITTED') {
+            $unsubmitButton = true;
+        }
+ 
         $output = array();
-        $output['path']                 = $path;
-        $output['schema']               = $jsonSchema;
-        $output['uiSchema']             = $uiSchema;
-        $output['formData']             = $formData;
-        $output['isDatamanager']        = ($formConfig['isDatamanager'] == 'yes') ? true: false;
-        $output['isVaultPackage']       = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
-        $output['parentHasMetadata']    = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
-        $output['metadataExists']       = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+        $output['path']              = $path;
+        $output['schema']            = $jsonSchema;
+        $output['uiSchema']          = $uiSchema;
+        $output['formData']          = $formData;
+        $output['isDatamanager']     = ($formConfig['isDatamanager'] == 'yes') ? true: false;
+        $output['isVaultPackage']    = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
+        $output['parentHasMetadata'] = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
+        $output['metadataExists']    = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+        $output['submitButton']      = $submitButton;
+        $output['unsubmitButton']    = $unsubmitButton;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }
