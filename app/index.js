@@ -21,13 +21,11 @@ var unsubmit          = false;
 var form = document.getElementById('form');
 var path = form.dataset.path;
 
+const onSubmit = ({formData}) => submitData(formData);
+
 class YodaForm extends React.Component {
     constructor(props) {
         super(props);
-      }
-
-    onSubmit() {
-        submitData(formData);
     }
 
     onError() {
@@ -35,18 +33,23 @@ class YodaForm extends React.Component {
     }
 
     transformErrors(errors) {
-	console.log(errors);
-        console.log("Errors before transform: " + errors.length);
+        // Only strip errors when not submitting.
+        if (!submit) {
+            console.log(errors);
+            console.log("Errors before transform: " + errors.length);
 
-        var i = errors.length
-        while (i--) {
-            if (errors[i].name === "required") {
-                console.log("Strip required error:" + i);
-                errors.splice(i,1);
+            var i = errors.length
+            while (i--) {
+                if (errors[i].name === "required") {
+                    errors.splice(i,1);
+                } else if (errors[i].name === "type") {
+                    errors.splice(i,1);
+                } else if (errors[i].name === "enum") {
+                    errors.splice(i,1);
+                }
             }
+            console.log("Errors after transform: " + errors.length);
         }
-
-        console.log("Errors after transform: " + errors.length);
 
         return errors;
     }
@@ -66,7 +69,7 @@ class YodaForm extends React.Component {
               noValidate={false}
               noHtml5Validate={true}
               showErrorList={false}
-              onSubmit={this.onSubmit}
+              onSubmit={onSubmit}
               onError={this.onError}
               transformErrors={this.transformErrors}>
       <button ref={(btn) => {this.submitButton=btn;}} className="hidden" />
