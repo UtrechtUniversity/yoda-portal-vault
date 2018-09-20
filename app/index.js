@@ -29,8 +29,6 @@ class YodaForm extends React.Component {
     }
 
     onError() {
-	submit = false;
-	unsubmit = false;
 	console.log(errors);
     }
 
