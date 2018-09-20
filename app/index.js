@@ -29,11 +29,12 @@ class YodaForm extends React.Component {
     }
 
     onError() {
-        alert('error!');
+	submit = false;
+	unsubmit = false;
+	console.log(errors);
     }
 
     transformErrors(errors) {
-	console.log(errors);
         // Only strip errors when not submitting.
         if (!submit || mode === "edit_in_vault") {
             console.log("Errors before transform: " + errors.length);
@@ -225,15 +226,19 @@ class Container extends React.Component {
     }
 
     saveMetadata() {
+	submit = false;
+	unsubmit = false;
         this.form.submitButton.click();
     }
 
     submitMetadata() {
         submit = true;
+	unsubmit = false;
         this.form.submitButton.click();
     }
 
     unsubmitMetadata() {
+	submit = false;
         unsubmit = true;
         this.form.submitButton.click();
     }
