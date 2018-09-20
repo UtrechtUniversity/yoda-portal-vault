@@ -83,9 +83,12 @@ class YodaButtons extends React.Component {
 
     renderSaveButton() {
         return (
-          <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">
-            Save
-          </button>
+          <span>
+            <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">
+              Save
+            </button>
+            &nbsp;
+          </span>
         );
     }
 
