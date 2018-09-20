@@ -33,9 +33,9 @@ class YodaForm extends React.Component {
     }
 
     transformErrors(errors) {
+	console.log(errors);
         // Only strip errors when not submitting.
-        if (!submit) {
-            console.log(errors);
+        if (!submit || mode === "edit_in_vault") {
             console.log("Errors before transform: " + errors.length);
 
             var i = errors.length
@@ -140,7 +140,7 @@ class YodaButtons extends React.Component {
                     {this.renderSaveButton()}
                   </div>
                 );
-            } else if (isDatamanager && updateButton) {
+            } else if (isDatamanager && updateButton && mode === "edit_in_vault") {
                 // Show 'Save' button.
                 return (
                   <div>
@@ -309,7 +309,7 @@ axios.defaults.headers.common = {
 axios.defaults.xsrfCookieName = tokenName;
 axios.defaults.xsrfHeaderName = tokenHash;
 
-axios.get("/research/metadata/data?path=" + path)
+axios.get("/research/metadata/data?path=" + path + "&mode=" + mode)
     .then(function (response) {
         schema            = response.data.schema;
         uiSchema          = response.data.uiSchema;
