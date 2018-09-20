@@ -320,7 +320,7 @@ axios.get("/research/metadata/data?path=" + path)
         metadataExists    = response.data.metadataExists
         submitButton      = response.data.submitButton
         unsubmitButton    = response.data.unsubmitButton
-        editInVault       = response.data.editInVault
+        updateButton      = response.data.updateButton
         locked            = response.data.locked
 
         render(<Container />,
