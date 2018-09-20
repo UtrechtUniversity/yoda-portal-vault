@@ -158,8 +158,7 @@ class Metadata extends MY_Controller
         $folderStatus = $formConfig['folderStatus'];
         $submitButton = false;
         if (($lockStatus == 'here' || $lockStatus == 'no')
-            && ($folderStatus == 'LOCKED' || $folderStatus == '')
-            && ($folderStatus == 'SECURED')
+            && ($folderStatus == 'SECURED' || $folderStatus == 'LOCKED' || $folderStatus == '')
             && ($userType == 'normal' || $userType == 'manager')) {
             $submitButton = true;
         }
