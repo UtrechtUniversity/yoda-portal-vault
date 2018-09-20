@@ -32,9 +32,7 @@
         </script>
 <?php } ?>
 
-<?php if (!$writePermission && !$metadataExists) { ?>
 <script type="text/javascript">
     var mode = "<?php echo $mode; ?>";
 </script>
 <script src="/research/static/js/metadata/bundle.js" type="text/javascript"></script>
-<?php } ?>
