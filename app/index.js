@@ -132,14 +132,14 @@ class YodaButtons extends React.Component {
 
     renderButtons() {
         if (isVaultPackage) {
-            if (isDatamanager && !updateButton) {
+            if (isDatamanager && !updateButton && mode === "edit_in_vault") {
                 // Show 'Update' button.
                 return (
                   <div>
                     {this.renderSaveButton()}
                   </div>
                 );
-            } else if (isDatamanager && updateButton && mode === "edit_in_vault") {
+            } else if (isDatamanager && updateButton) {
                 // Show 'Save' button.
                 return (
                   <div>
