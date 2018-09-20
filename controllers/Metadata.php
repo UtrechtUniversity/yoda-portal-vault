@@ -172,22 +172,19 @@ class Metadata extends MY_Controller
 
         // Should update button be rendered?
         $mode = $this->input->get('mode');
-        $editInVault = false;
-        $messageDatamanagerAfterSaveInVault = '';  // message to datamanger via central messaging -> javascript setMessage
+        $updateButton = false;
         if ($isDatamanager && $isVaultPackage) {
-	    if ($formConfig['hasShadowMetadataXml'] == 'no') {
+           if ($formConfig['hasShadowMetadataXml'] == 'no') {
                 if ($mode != 'edit_in_vault') {
-                    $editInVault = true;
+                    $updateButton = true;
                 }
-	    }
-
-            if ($formConfig['hasShadowMetadataXml'] == 'yes') {
-                $messageDatamanagerAfterSaveInVault = 'Update of metadata is pending.';
             }
         }
 
         $isLocked = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
-        if ($isLocked || ($isVaultPackage && !$editInVault)) {
+        if ($isLocked
+            || (!$isVaultpackage && $isDatamanager)
+            || ($isVaultPackage && $updateButton)) {
             $uiSchema["ui:readonly"] = "true";
         }
 
@@ -203,7 +200,7 @@ class Metadata extends MY_Controller
         $output['locked']            = $isLocked;
         $output['submitButton']      = $submitButton;
         $output['unsubmitButton']    = $unsubmitButton;
-        $output['editInVault']       = $editInVault;
+        $output['updateButton']      = updateButton;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }
