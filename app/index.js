@@ -5,7 +5,7 @@ import Form from "react-jsonschema-form";
 
 var schema = {};
 var uiSchema = {};
-var yodaFormData = {};
+var formData = {};
 
 var isDatamanager     = false;
 var isVaultPackage    = false;
@@ -15,6 +15,7 @@ var submitButton      = false;
 var unsubmitButton    = false;
 var updateButton      = false;
 var locked            = false;
+var save              = false;
 var submit            = false;
 var unsubmit          = false;
 
@@ -26,23 +27,14 @@ const onSubmit = ({formData}) => submitData(formData);
 class YodaForm extends React.Component {
     constructor(props) {
         super(props);
-        const formContext = {
-            env: 'research',
-            checkmarks: false
-        };
-        this.state = {
-            formData: yodaFormData,
-            formContext: formContext
-        };
     }
 
-    onError() {
-	console.log(errors);
-    }
+    onError() {}
 
     transformErrors(errors) {
-        // Only strip errors when not submitting.
-        if (!submit || mode === "edit_in_vault") {
+        console.log(errors);
+        // Only strip errors when saving.
+        if (save) {
             console.log("Errors before transform: " + errors.length);
 
             var i = errors.length
@@ -61,31 +53,13 @@ class YodaForm extends React.Component {
         return errors;
     }
 
-    handleChange(yodaFormData) {
-        this.showCheckmarks(false);
-
-        // Set new form data.
-        this.setState({
-            formData: yodaFormData.formData,
-        });
-    }
-
-    showCheckmarks(show) {
-        let formContext = {...this.state.formContext};
-        formContext.checkmarks = show;
-        this.setState({
-            formContext: formContext
-        });
-    }
-
     render () {
         return (
         <Form className="form form-horizontal metadata-form"
               schema={schema}
               idPrefix={"yoda"}
               uiSchema={uiSchema}
-              formData={this.state.formData}
-              formContext={this.state.formContext}
+              formData={formData}
               ArrayFieldTemplate={ArrayFieldTemplate}
               ObjectFieldTemplate={ObjectFieldTemplate}
               FieldTemplate={CustomFieldTemplate}
@@ -94,7 +68,6 @@ class YodaForm extends React.Component {
               noHtml5Validate={true}
               showErrorList={false}
               onSubmit={onSubmit}
-              onChange={this.handleChange.bind(this)}
               onError={this.onError}
               transformErrors={this.transformErrors}>
       <button ref={(btn) => {this.submitButton=btn;}} className="hidden" />
@@ -175,67 +148,67 @@ class YodaButtons extends React.Component {
             } else if (!isDatamanager) {
                 // Show no buttons.
                 return (
-		  <div>
-		  </div>
+                  <div>
+                  </div>
                 );
             }
         } else {
             if (!isDatamanager && !metadataExists && parentHasMetadata) {
-		// Show 'Save' and 'Clone from parent folder' buttons.
-		return (
-		  <div>
-		    {this.renderSaveButton()}
-		    {this.renderCloneButton()}
-		  </div>
-		);
+                // Show 'Save' and 'Clone from parent folder' buttons.
+                return (
+                  <div>
+                    {this.renderSaveButton()}
+                    {this.renderCloneButton()}
+                  </div>
+                );
             } else if (!isDatamanager && !locked && submitButton) {
-		// Show 'Save', 'Submit' and 'Delete all metadata' buttons.
-		return (
-	          <div>
-	            {this.renderSaveButton()}
-		    {this.renderSubmitButton()}
-		    {this.renderDeleteButton()}
-		  </div>
-		);
+                // Show 'Save', 'Submit' and 'Delete all metadata' buttons.
+                return (
+                  <div>
+                    {this.renderSaveButton()}
+                    {this.renderSubmitButton()}
+                    {this.renderDeleteButton()}
+                  </div>
+                );
             } else if (!isDatamanager && locked && submitButton) {
-		// Show 'Submit' button.
-		return (
-	          <div>
-		    {this.renderSubmitButton()}
-		  </div>
-		);
+                // Show 'Submit' button.
+                return (
+                  <div>
+                    {this.renderSubmitButton()}
+                  </div>
+                );
             } else if (!isDatamanager && !locked && !submitButton) {
-		// Show 'Save' and 'Delete all metadata' buttons.
-		return (
-		  <div>
-		    {this.renderSaveButton()}
-		    {this.renderDeleteButton()}
-		  </div>
-		);
+                // Show 'Save' and 'Delete all metadata' buttons.
+                return (
+                  <div>
+                    {this.renderSaveButton()}
+                    {this.renderDeleteButton()}
+                  </div>
+                );
             } else if (!isDatamanager && unsubmitButton) {
-		// Show 'Unsubmit' button.
-		return (
-		  <div>
-		    {this.renderUnsubmitButton()}
-		  </div>
-		);
+                // Show 'Unsubmit' button.
+                return (
+                  <div>
+                    {this.renderUnsubmitButton()}
+                  </div>
+                );
             } else {
-		// Show no buttons.
-		return (
-		  <div>
-		  </div>
-		);
+                // Show no buttons.
+                return (
+                  <div>
+                  </div>
+                );
             }
         }
     }
 
     render() {
         return (
-	  <div className="row yodaButtons">
-	    <div className="col-sm-12">
-	      {this.renderButtons()}
+          <div className="row yodaButtons">
+            <div className="col-sm-12">
+              {this.renderButtons()}
             </div>
-	  </div>
+          </div>
         );
     }
 }
@@ -250,22 +223,20 @@ class Container extends React.Component {
     }
 
     saveMetadata() {
-	    submit = false;
-	    unsubmit = false;
+        save = true
+        submit = unsubmit = false;
         this.form.submitButton.click();
-        this.form.showCheckmarks(false);
     }
 
     submitMetadata() {
         submit = true;
-	    unsubmit = false;
+        save = unsubmit = false;
         this.form.submitButton.click();
-        this.form.showCheckmarks(true);
     }
 
     unsubmitMetadata() {
-	submit = false;
         unsubmit = true;
+        save = submit = false;
         this.form.submitButton.click();
     }
 
@@ -344,7 +315,7 @@ axios.get("/research/metadata/data?path=" + path + "&mode=" + mode)
     .then(function (response) {
         schema            = response.data.schema;
         uiSchema          = response.data.uiSchema;
-        yodaFormData          = response.data.formData;
+        formData          = response.data.formData;
         isDatamanager     = response.data.isDatamanager
         isVaultPackage    = response.data.isVaultPackage
         parentHasMetadata = response.data.parentHasMetadata
@@ -403,7 +374,7 @@ function CustomFieldTemplate(props) {
     //console.log('Field');
     //console.log(props);
 
-    const {id, classNames, label, help, hidden, required, description, errors, rawErrors, children, displayLabel, formContext} = props;
+    const {id, classNames, label, help, hidden, required, description, errors, rawErrors, children, displayLabel} = props;
 
     if (hidden || !displayLabel) {
         return children;
@@ -421,7 +392,7 @@ function CustomFieldTemplate(props) {
                 <span className={'fa-stack col-sm-1'}>
         <i className={'fa fa-lock safe fa-stack-1x'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Required for the vault"></i>
 
-                    {!hasErrors && formContext.checkmarks ? (
+                    {!hasErrors ? (
                         <i className={'fa fa-check fa-stack-1x checkmark-green-top-right'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Filled out correctly for the vault"></i>
                     ) : (
                         null
