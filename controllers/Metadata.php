@@ -45,6 +45,12 @@ class Metadata extends MY_Controller
             }
         }
 
+        if ($userType == 'normal' || $userType == 'manager') {
+            $writePermission = true;
+        } else {
+            $writePermission = false;
+        }
+
         $flashMessage = $this->session->flashdata('flashMessage');
         $flashMessageType = $this->session->flashdata('flashMessageType');
 
@@ -57,61 +63,26 @@ class Metadata extends MY_Controller
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
                 'lib/font-awesome/css/font-awesome.css',
                 'lib/sweetalert/sweetalert.css',
-                'lib/select2/css/select2.min.css',
-                'lib/leaflet/leaflet.css',
-                'lib/leaflet/leaflet.draw.css',
                 'css/metadata/form.css',
             ),
             'scriptIncludes' => array(
                 'lib/jqueryui-datepicker/jquery-ui-1.12.1.js',
                 'lib/sweetalert/sweetalert.min.js',
-                'lib/select2/js/select2.min.js',
-                'lib/jquery-inputmask/jquery.inputmask.bundle.js',
-                // LEAFLET
-                'lib/leaflet/leaflet.js',
-                'lib/leaflet/Leaflet.draw.js',
-                'lib/leaflet/Leaflet.Draw.Event.js',
-                'lib/leaflet/Toolbar.js',
-                'lib/leaflet/Tooltip.js',
-                'lib/leaflet/ext/GeometryUtil.js',
-                'lib/leaflet/ext/LatLngUtil.js',
-                'lib/leaflet/ext/LineUtil.Intersect.js',
-                'lib/leaflet/ext/Polygon.Intersect.js',
-                'lib/leaflet/ext/Polyline.Intersect.js',
-                'lib/leaflet/ext/TouchEvents.js',
-                'lib/leaflet/draw/DrawToolbar.js',
-                'lib/leaflet/draw/handler/Draw.Feature.js',
-                'lib/leaflet/draw/handler/Draw.SimpleShape.js',
-                'lib/leaflet/draw/handler/Draw.Polyline.js',
-                'lib/leaflet/draw/handler/Draw.Marker.js',
-                'lib/leaflet/draw/handler/Draw.Circle.js',
-                'lib/leaflet/draw/handler/Draw.CircleMarker.js',
-                'lib/leaflet/draw/handler/Draw.Polygon.js',
-                'lib/leaflet/draw/handler/Draw.Rectangle.js',
-                'lib/leaflet/edit/EditToolbar.js',
-                'lib/leaflet/edit/handler/EditToolbar.Edit.js',
-                'lib/leaflet/edit/handler/EditToolbar.Delete.js',
-                'lib/leaflet/Control.Draw.js',
-                'lib/leaflet/edit/handler/Edit.Poly.js',
-                'lib/leaflet/edit/handler/Edit.SimpleShape.js',
-                'lib/leaflet/edit/handler/Edit.Rectangle.js',
-                'lib/leaflet/edit/handler/Edit.Marker.js',
-                'lib/leaflet/edit/handler/Edit.CircleMarker.js',
-                'lib/leaflet/edit/handler/Edit.Circle.js',
-
                 'js/metadata/form.js',
-                //'js/metadata/bundle.js',
             ),
-            'activeModule'   => 'research',
-            'path' => $path,
-            'fullPath' => $fullPath,
-            'tokenName' => $tokenName,
-            'tokenHash' => $tokenHash,
-            'userType' => $userType,
-            'isVaultPackage' => $isVaultPackage,
-            'messageDatamanagerAfterSaveInVault' => $messageDatamanagerAfterSaveInVault,
-            'flashMessage' => $flashMessage,
+            'activeModule'     => 'research',
+            'path'             => $path,
+            'fullPath'         => $fullPath,
+            'tokenName'        => $tokenName,
+            'tokenHash'        => $tokenHash,
+            'userType'         => $userType,
+            'mode'             => $mode,
+            'isVaultPackage'   => $isVaultPackage,
+            'flashMessage'     => $flashMessage,
             'flashMessageType' => $flashMessageType,
+            'metadataExists'   => ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false,
+            'writePermission'  => $writePermission,
+            'messageDatamanagerAfterSaveInVault' => $messageDatamanagerAfterSaveInVault,
         );
         loadView('metadata/form', $viewParams);
     }
@@ -153,6 +124,12 @@ class Metadata extends MY_Controller
         $isVaultPackage    = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
         $userType          = $formConfig['userType'];
 
+        if ($userType == 'normal' || $userType == 'manager') {
+            $writePermission = true;
+        } else {
+            $writePermission = false;
+        }
+
         // Should submit button be rendered?
         $lockStatus = $formConfig['lockFound'];
         $folderStatus = $formConfig['folderStatus'];
@@ -183,8 +160,9 @@ class Metadata extends MY_Controller
 
         $isLocked = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
         if ($isLocked
-            || (!$isVaultpackage && $isDatamanager)
-            || ($isVaultPackage && $updateButton)) {
+            || (!$isVaultPackage && $isDatamanager && !$writePermission)
+            || ($isVaultPackage && !$isDatamanager)
+            || ($isVaultPackage && $isDatamanager && $updateButton)) {
             $uiSchema["ui:readonly"] = "true";
         }
 
@@ -198,9 +176,10 @@ class Metadata extends MY_Controller
         $output['parentHasMetadata'] = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
         $output['metadataExists']    = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
         $output['locked']            = $isLocked;
+        $output['writePermission']   = $writePermission;
         $output['submitButton']      = $submitButton;
         $output['unsubmitButton']    = $unsubmitButton;
-        $output['updateButton']      = updateButton;
+        $output['updateButton']      = $updateButton;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }
