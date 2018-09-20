@@ -5,7 +5,7 @@ import Form from "react-jsonschema-form";
 
 var schema = {};
 var uiSchema = {};
-var formData = {};
+var yodaFormData = {};
 
 var isDatamanager     = false;
 var isVaultPackage    = false;
@@ -26,6 +26,14 @@ const onSubmit = ({formData}) => submitData(formData);
 class YodaForm extends React.Component {
     constructor(props) {
         super(props);
+        const formContext = {
+            env: 'research',
+            checkmarks: false
+        };
+        this.state = {
+            formData: yodaFormData,
+            formContext: formContext
+        };
     }
 
     onError() {
@@ -53,14 +61,31 @@ class YodaForm extends React.Component {
         return errors;
     }
 
+    handleChange(yodaFormData) {
+        this.showCheckmarks(false);
+
+        // Set new form data.
+        this.setState({
+            formData: yodaFormData.formData,
+        });
+    }
+
+    showCheckmarks(show) {
+        let formContext = {...this.state.formContext};
+        formContext.checkmarks = show;
+        this.setState({
+            formContext: formContext
+        });
+    }
+
     render () {
         return (
         <Form className="form form-horizontal metadata-form"
               schema={schema}
               idPrefix={"yoda"}
               uiSchema={uiSchema}
-              formData={formData}
-              formContext={{env: 'research'}}
+              formData={this.state.formData}
+              formContext={this.state.formContext}
               ArrayFieldTemplate={ArrayFieldTemplate}
               ObjectFieldTemplate={ObjectFieldTemplate}
               FieldTemplate={CustomFieldTemplate}
@@ -69,6 +94,7 @@ class YodaForm extends React.Component {
               noHtml5Validate={true}
               showErrorList={false}
               onSubmit={onSubmit}
+              onChange={this.handleChange.bind(this)}
               onError={this.onError}
               transformErrors={this.transformErrors}>
       <button ref={(btn) => {this.submitButton=btn;}} className="hidden" />
@@ -224,15 +250,17 @@ class Container extends React.Component {
     }
 
     saveMetadata() {
-	submit = false;
-	unsubmit = false;
+	    submit = false;
+	    unsubmit = false;
         this.form.submitButton.click();
+        this.form.showCheckmarks(false);
     }
 
     submitMetadata() {
         submit = true;
-	unsubmit = false;
+	    unsubmit = false;
         this.form.submitButton.click();
+        this.form.showCheckmarks(true);
     }
 
     unsubmitMetadata() {
@@ -316,7 +344,7 @@ axios.get("/research/metadata/data?path=" + path + "&mode=" + mode)
     .then(function (response) {
         schema            = response.data.schema;
         uiSchema          = response.data.uiSchema;
-        formData          = response.data.formData;
+        yodaFormData          = response.data.formData;
         isDatamanager     = response.data.isDatamanager
         isVaultPackage    = response.data.isVaultPackage
         parentHasMetadata = response.data.parentHasMetadata
@@ -375,7 +403,7 @@ function CustomFieldTemplate(props) {
     //console.log('Field');
     //console.log(props);
 
-    const {id, classNames, label, help, hidden, required, description, errors, rawErrors, children, displayLabel} = props;
+    const {id, classNames, label, help, hidden, required, description, errors, rawErrors, children, displayLabel, formContext} = props;
 
     if (hidden || !displayLabel) {
         return children;
@@ -393,7 +421,7 @@ function CustomFieldTemplate(props) {
                 <span className={'fa-stack col-sm-1'}>
         <i className={'fa fa-lock safe fa-stack-1x'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Required for the vault"></i>
 
-                    {!hasErrors ? (
+                    {!hasErrors && formContext.checkmarks ? (
                         <i className={'fa fa-check fa-stack-1x checkmark-green-top-right'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Filled out correctly for the vault"></i>
                     ) : (
                         null
