@@ -45,6 +45,12 @@ class Metadata extends MY_Controller
             }
         }
 
+        if ($userType == 'normal' || $userType == 'manager') {
+            $writePermission = true;
+        } else {
+            $writePermission = false;
+        }
+
         $flashMessage = $this->session->flashdata('flashMessage');
         $flashMessageType = $this->session->flashdata('flashMessageType');
 
@@ -74,6 +80,8 @@ class Metadata extends MY_Controller
             'isVaultPackage'   => $isVaultPackage,
             'flashMessage'     => $flashMessage,
             'flashMessageType' => $flashMessageType,
+            'metadataExists'   => ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false,
+            'writePermission'  => $writePermission,
             'messageDatamanagerAfterSaveInVault' => $messageDatamanagerAfterSaveInVault,
         );
         loadView('metadata/form', $viewParams);
@@ -147,7 +155,7 @@ class Metadata extends MY_Controller
         $isLocked = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
         if ($isLocked
             || (!$isVaultPackage && $isDatamanager)
-            || ($isVaultPackage && !$isDatamanager)	    
+            || ($isVaultPackage && !$isDatamanager)
             || ($isVaultPackage && $isDatamanager && $updateButton)) {
             $uiSchema["ui:readonly"] = "true";
         }

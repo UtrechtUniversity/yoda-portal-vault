@@ -10,11 +10,17 @@
                     </div>
                 </div>
                 <div class="panel-body">
-                    <div id="form" class="metadata-form"
-                         data-path="<?php echo rawurlencode($path); ?>"
-                         data-csrf_token_name="<?php echo rawurlencode($tokenName); ?>"
-                         data-csrf_token_hash="<?php echo rawurlencode($tokenHash); ?>">
-                    </div>
+                    <?php if (!$writePermission && !$metadataExists) { ?>
+                        <p>
+                            There is no metadata present for this folder.
+                        </p>
+                    <?php } else { ?>
+                        <div id="form" class="metadata-form"
+                             data-path="<?php echo rawurlencode($path); ?>"
+                             data-csrf_token_name="<?php echo rawurlencode($tokenName); ?>"
+                             data-csrf_token_hash="<?php echo rawurlencode($tokenHash); ?>">
+                        </div>
+	            <?php } ?>
                 </div>
             </div>
         </div>
@@ -26,7 +32,9 @@
         </script>
 <?php } ?>
 
+<?php if (!$writePermission && !$metadataExists) { ?>
 <script type="text/javascript">
     var mode = "<?php echo $mode; ?>";
 </script>
 <script src="/research/static/js/metadata/bundle.js" type="text/javascript"></script>
+<?php } ?>
