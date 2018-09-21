@@ -487,8 +487,13 @@ function ArrayFieldTemplate(props) {
                 <div className="has-btn">
                     {element.children}
                     <div className={"btn-controls btn-group btn-count-" + btnCount} role="group">
-                        {canRemove && <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>-</button>}
-                        <button type="button" className="clone-btn btn btn-default" onClick={props.onAddClick}>+</button>
+                        {canRemove && 
+                        <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>
+                            <i class="fa fa-minus" aria-hidden="true"></i>
+                        </button>}
+                        <button type="button" className="clone-btn btn btn-default" onClick={props.onAddClick}>
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                        </button>
                     </div>
                 </div>
             );
@@ -498,7 +503,9 @@ function ArrayFieldTemplate(props) {
                     <div className="has-btn">
                         {element.children}
                         <div className="btn-controls">
-                            <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>-</button>
+                            <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>
+                                <i class="fa fa-minus" aria-hidden="true"></i>
+                            </button>
                         </div>
                     </div>
                 )
