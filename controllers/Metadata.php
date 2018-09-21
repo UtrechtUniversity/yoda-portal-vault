@@ -63,9 +63,6 @@ class Metadata extends MY_Controller
                 'lib/font-awesome/css/font-awesome.css',
                 'css/metadata/form.css',
             ),
-            'scriptIncludes' => array(
-                'js/metadata/form.js',
-            ),
             'path'             => $path,
             'tokenName'        => $tokenName,
             'tokenHash'        => $tokenHash,

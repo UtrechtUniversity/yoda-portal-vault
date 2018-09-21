@@ -13,9 +13,6 @@
                     <?php if (!$writePermission && !$metadataExists) { ?>
                         <p>There is no metadata present for this folder.</p>
                     <?php } else { ?>
-		        <script type="text/javascript">
-                            var mode = "<?php echo $mode; ?>";
-                        </script>
                         <div id="form" class="metadata-form"
                              data-path="<?php echo rawurlencode($path); ?>"
                              data-csrf_token_name="<?php echo rawurlencode($tokenName); ?>"
@@ -27,3 +24,8 @@
             </div>
         </div>
     </div>
+
+<script type="text/javascript">
+    var mode = "<?php echo $mode; ?>";
+</script>
+<script src="/research/static/js/metadata/form.js" type="text/javascript"></script>
