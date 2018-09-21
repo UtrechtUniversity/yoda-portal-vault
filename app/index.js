@@ -339,7 +339,7 @@ function submitData(data)
 }
 
 function CustomFieldTemplate(props) {
-    const {id, classNames, label, help, hidden, required, description, errors, rawErrors, children, displayLabel, formContext} = props;
+    const {id, classNames, label, help, hidden, required, description, errors, rawErrors, children, displayLabel, formData, formContext} = props;
 
     if (hidden || !displayLabel) {
         return children;
@@ -347,6 +347,10 @@ function CustomFieldTemplate(props) {
 
     const hasErrors = Array.isArray(errors.props.errors) ? true : false;
 
+    // EXPERIMENTAL: maybe we can hide locks for empty initialized undefined arrays items?
+    const showLock = required && !hasErrors && formData === undefined ? false : true;
+
+    // Only show error messages after submit.
     if (formContext.submit) {
       return (
         <div className={classNames}>
@@ -354,7 +358,7 @@ function CustomFieldTemplate(props) {
             <span data-toggle="tooltip" title="" data-original-title="">{label}</span>
           </label>
 
-          {required ? (
+          {required && showLock ? (
             <span className={'fa-stack col-sm-1'}>
               <i className={'fa fa-lock safe fa-stack-1x'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Required for the vault"></i>
               {!hasErrors ? (
@@ -385,7 +389,7 @@ function CustomFieldTemplate(props) {
             <span data-toggle="tooltip" title="" data-original-title="">{label}</span>
           </label>
 
-          {required ? (
+          {required && showLock ? (
             <span className={'fa-stack col-sm-1'}>
               <i className={'fa fa-lock safe fa-stack-1x'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Required for the vault"></i>
               {!hasErrors ? (
