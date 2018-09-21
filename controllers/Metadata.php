@@ -176,6 +176,7 @@ class Metadata extends MY_Controller
         $output['parentHasMetadata'] = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
         $output['metadataExists']    = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
         $output['locked']            = $isLocked;
+        $output['writePermission']   = $writePermission;
         $output['submitButton']      = $submitButton;
         $output['unsubmitButton']    = $unsubmitButton;
         $output['updateButton']      = $updateButton;
