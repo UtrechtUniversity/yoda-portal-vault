@@ -220,10 +220,6 @@ button[data-clone*="main"] {
     right: 30px;
 }
 
-.compound .btn-controls {
-    top: 28px;
-}
-
 .btn-controls.btn-count-2 {
     right: -3px;
 }
