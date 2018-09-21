@@ -35,8 +35,6 @@ class YodaForm extends React.Component {
         console.log(errors);
         // Only strip errors when saving.
         if (save) {
-            console.log("Errors before transform: " + errors.length);
-
             var i = errors.length
             while (i--) {
                 if (errors[i].name === "required") {
@@ -47,12 +45,11 @@ class YodaForm extends React.Component {
                     errors.splice(i,1);
                 }
             }
-            console.log("Errors after transform: " + errors.length);
         }
 
         return errors;
     }
-
+ 
     render () {
         return (
         <Form className="form form-horizontal metadata-form"
@@ -70,8 +67,8 @@ class YodaForm extends React.Component {
               onSubmit={onSubmit}
               onError={this.onError}
               transformErrors={this.transformErrors}>
-      <button ref={(btn) => {this.submitButton=btn;}} className="hidden" />
-    </Form>
+            <button ref={(btn) => {this.submitButton=btn;}} className="hidden" />
+        </Form>
     );
   }
 }
@@ -92,6 +89,14 @@ class YodaButtons extends React.Component {
         );
     }
 
+    renderSaveVaultButton() {
+        return (
+          <button onClick={this.props.saveVaultMetadata} type="submit" className="btn btn-primary">
+            Save
+          </button>
+        );
+    }
+    
     renderSubmitButton() {
         return (
           <button onClick={this.props.submitMetadata} type="submit" className="btn btn-primary">
@@ -135,14 +140,14 @@ class YodaButtons extends React.Component {
     renderButtons() {
         if (isVaultPackage) {
             if (isDatamanager && !updateButton && mode === "edit_in_vault") {
-                // Show 'Update' button.
+                // Show 'Save' button.
                 return (
                   <div>
-                    {this.renderSaveButton()}
+                    {this.renderSaveVaultButton()}
                   </div>
                 );
             } else if (isDatamanager && updateButton) {
-                // Show 'Save' button.
+                // Show 'Update' button.
                 return (
                   <div>
                     {this.renderUpdateButton()}
@@ -231,6 +236,11 @@ class Container extends React.Component {
         this.form.submitButton.click();
     }
 
+    saveVaultMetadata() {
+	save = submit = unsubmit = false;
+        this.form.submitButton.click();
+    }
+
     submitMetadata() {
         submit = true;
         save = unsubmit = false;
@@ -287,6 +297,7 @@ class Container extends React.Component {
       return (
         <div>
           <YodaButtons saveMetadata={this.saveMetadata}
+                       saveVaultMetadata={this.saveVaultMetadata}
                        submitMetadata={this.submitMetadata}
                        unsubmitMetadata={this.unsubmitMetadata}
                        updateMetadata={this.updateMetadata}
@@ -294,6 +305,7 @@ class Container extends React.Component {
                        cloneMetadata={this.cloneMetadata} />
           <YodaForm ref={(form) => {this.form=form;}}/>
           <YodaButtons saveMetadata={this.saveMetadata}
+                       saveVaultMetadata={this.saveVaultMetadata}	  
                        submitMetadata={this.submitMetadata}
                        unsubmitMetadata={this.unsubmitMetadata}
                        updateMetadata={this.updateMetadata}
