@@ -64,7 +64,7 @@ class Metadata extends MY_Controller
                 'css/metadata/form.css',
             ),
             'scriptIncludes' => array(
-                'js/metadata/bundle.js',
+                'js/metadata/form.js',
             ),
             'path'             => $path,
             'tokenName'        => $tokenName,
