@@ -124,12 +124,6 @@ class Metadata extends MY_Controller
         $isVaultPackage    = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
         $userType          = $formConfig['userType'];
 
-        if ($userType == 'normal' || $userType == 'manager') {
-            $writePermission = true;
-        } else {
-            $writePermission = false;
-        }
-
         // Should submit button be rendered?
         $lockStatus = $formConfig['lockFound'];
         $folderStatus = $formConfig['folderStatus'];
@@ -173,7 +167,6 @@ class Metadata extends MY_Controller
         $output['formData']          = $formData;
         $output['isDatamanager']     = $isDatamanager;
         $output['isVaultPackage']    = $isVaultPackage;
-        $output['writePermission']   = $writePermission;
         $output['parentHasMetadata'] = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
         $output['metadataExists']    = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
         $output['locked']            = $isLocked;
