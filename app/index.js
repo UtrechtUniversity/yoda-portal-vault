@@ -5,7 +5,7 @@ import Form from "react-jsonschema-form";
 
 var schema = {};
 var uiSchema = {};
-var formData = {};
+var yodaFormData = {};
 
 var isDatamanager     = false;
 var isVaultPackage    = false;
@@ -28,9 +28,29 @@ const onSubmit = ({formData}) => submitData(formData);
 class YodaForm extends React.Component {
     constructor(props) {
         super(props);
+
+        const formContext = {
+            submit: false
+        };
+        this.state = {
+            formData: yodaFormData,
+            formContext: formContext
+        };
     }
 
-    onError() {}
+    onChange(form) {
+        this.setState({
+            formData: form.formData,
+        });
+    }
+
+    onError(form) {
+        let formContext = {...this.state.formContext};
+        formContext.submit = submit;
+        this.setState({
+            formContext: formContext
+        });
+    }
 
     transformErrors(errors) {
         console.log(errors);
@@ -50,14 +70,15 @@ class YodaForm extends React.Component {
 
         return errors;
     }
- 
+
     render () {
         return (
         <Form className="form form-horizontal metadata-form"
               schema={schema}
               idPrefix={"yoda"}
               uiSchema={uiSchema}
-              formData={formData}
+              formData={this.state.formData}
+              formContext={this.state.formContext}
               ArrayFieldTemplate={ArrayFieldTemplate}
               ObjectFieldTemplate={ObjectFieldTemplate}
               FieldTemplate={CustomFieldTemplate}
@@ -66,7 +87,8 @@ class YodaForm extends React.Component {
               noHtml5Validate={true}
               showErrorList={false}
               onSubmit={onSubmit}
-              onError={this.onError}
+              onChange={this.onChange.bind(this)}
+              onError={this.onError.bind(this)}
               transformErrors={this.transformErrors}>
             <button ref={(btn) => {this.submitButton=btn;}} className="hidden" />
         </Form>
@@ -97,7 +119,7 @@ class YodaButtons extends React.Component {
           </button>
         );
     }
-    
+
     renderSubmitButton() {
         return (
           <button onClick={this.props.submitMetadata} type="submit" className="btn btn-primary">
@@ -299,7 +321,7 @@ class Container extends React.Component {
                        cloneMetadata={this.cloneMetadata} />
           <YodaForm ref={(form) => {this.form=form;}}/>
           <YodaButtons saveMetadata={this.saveMetadata}
-                       saveVaultMetadata={this.saveVaultMetadata}	  
+                       saveVaultMetadata={this.saveVaultMetadata}
                        submitMetadata={this.submitMetadata}
                        unsubmitMetadata={this.unsubmitMetadata}
                        updateMetadata={this.updateMetadata}
@@ -324,7 +346,7 @@ axios.get("/research/metadata/data?path=" + path + "&mode=" + mode)
     .then(function (response) {
         schema            = response.data.schema;
         uiSchema          = response.data.uiSchema;
-        formData          = response.data.formData;
+        yodaFormData      = response.data.formData;
         isDatamanager     = response.data.isDatamanager
         isVaultPackage    = response.data.isVaultPackage
         parentHasMetadata = response.data.parentHasMetadata
@@ -381,10 +403,7 @@ function submitData(data)
 }
 
 function CustomFieldTemplate(props) {
-    //console.log('Field');
-    //console.log(props);
-
-    const {id, classNames, label, help, hidden, required, description, errors, rawErrors, children, displayLabel} = props;
+    const {id, classNames, label, help, hidden, required, description, errors, rawErrors, children, displayLabel, formContext} = props;
 
     if (hidden || !displayLabel) {
         return children;
@@ -392,38 +411,68 @@ function CustomFieldTemplate(props) {
 
     const hasErrors = Array.isArray(errors.props.errors) ? true : false;
 
-    return (
+    if (formContext.submit) {
+      return (
         <div className={classNames}>
-            <label className={'col-sm-2 control-label'}>
-                <span data-toggle="tooltip" title="" data-original-title="">{label}</span>
-            </label>
+          <label className={'col-sm-2 control-label'}>
+            <span data-toggle="tooltip" title="" data-original-title="">{label}</span>
+          </label>
 
-            {required ? (
-                <span className={'fa-stack col-sm-1'}>
-        <i className={'fa fa-lock safe fa-stack-1x'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Required for the vault"></i>
-
-                    {!hasErrors ? (
-                        <i className={'fa fa-check fa-stack-1x checkmark-green-top-right'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Filled out correctly for the vault"></i>
-                    ) : (
-                        null
-                    )}
-
-      </span>
-            ) : (
-                <span className={'fa-stack col-sm-1'}></span>
-            )}
-            <div className={'col-sm-9 field-wrapper'}>
-                <div className={'row'}>
-                    <div className={'col-sm-12'}>
-                        {description}
-                        {children}
-                    </div>
-                </div>
-                {errors}
-                {help}
+          {required ? (
+            <span className={'fa-stack col-sm-1'}>
+              <i className={'fa fa-lock safe fa-stack-1x'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Required for the vault"></i>
+              {!hasErrors ? (
+                <i className={'fa fa-check fa-stack-1x checkmark-green-top-right'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Filled out correctly for the vault"><
+              ) : (
+                null
+              )}
+            </span>
+          ) : (
+            <span className={'fa-stack col-sm-1'}></span>
+          )}
+          <div className={'col-sm-9 field-wrapper'}>
+            <div className={'row'}>
+              <div className={'col-sm-12'}>
+                {description}
+                {children}
+              </div>
             </div>
+            {errors}
+            {help}
+          </div>
         </div>
-    );
+      );
+    } else {
+       return (
+        <div className={classNames}>
+          <label className={'col-sm-2 control-label'}>
+            <span data-toggle="tooltip" title="" data-original-title="">{label}</span>
+          </label>
+
+          {required ? (
+            <span className={'fa-stack col-sm-1'}>
+              <i className={'fa fa-lock safe fa-stack-1x'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Required for the vault"></i>
+              {!hasErrors ? (
+                <i className={'fa fa-check fa-stack-1x checkmark-green-top-right'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Filled out correctly for the vault"><
+              ) : (
+                null
+              )}
+            </span>
+          ) : (
+            <span className={'fa-stack col-sm-1'}></span>
+          )}
+          <div className={'col-sm-9 field-wrapper'}>
+            <div className={'row'}>
+              <div className={'col-sm-12'}>
+                {description}
+                {children}
+              </div>
+            </div>
+            {help}
+          </div>
+         </div>
+      );
+    }
 }
 
 function ObjectFieldTemplate(props) {
@@ -434,25 +483,17 @@ function ObjectFieldTemplate(props) {
     if ('yoda:structure' in props.schema) {
         var structureClass = 'yoda-structure ' + props.schema['yoda:structure'];
         var structure = props.schema['yoda:structure'];
-        //console.log(123);
-        //console.log(structure);
     }
-
-    //console.log(structure);
 
     if (structure == 'compound') {
         let array = props.properties;
         let output = props.properties.map((prop, i, array) => {
-            //console.log(prop.content);
-            //<div class="col-sm-6 field">
-            //{props.properties.map(prop => prop.content)}
             return (
                 <div className="col-sm-6 field">
                     {prop.content}
                 </div>
             );
         });
-
 
         return (
             <div className={"form-group " + structureClass}>
