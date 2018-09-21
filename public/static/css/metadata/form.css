@@ -216,8 +216,12 @@ button[data-clone*="main"] {
 
 .btn-controls {
     position: absolute;
-    top:0;
+    top: 0;
     right: 30px;
+}
+
+.compound .btn-controls {
+    top: 28px;
 }
 
 .btn-controls.btn-count-2 {
