@@ -58,11 +58,9 @@ class YodaForm extends React.Component {
         if (save) {
             var i = errors.length
             while (i--) {
-                if (errors[i].name === "required") {
-                    errors.splice(i,1);
-                } else if (errors[i].name === "type") {
-                    errors.splice(i,1);
-                } else if (errors[i].name === "enum") {
+                if (errors[i].name === "required" ||
+                    errors[i].name === "type"     ||
+                    errors[i].name === "enum") {
                     errors.splice(i,1);
                 }
             }
@@ -102,62 +100,31 @@ class YodaButtons extends React.Component {
     }
 
     renderSaveButton() {
-        return (
-          <span>
-            <button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">
-              Save
-            </button>
-            &nbsp;
-          </span>
-        );
+        return (<button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>);
     }
 
     renderSaveVaultButton() {
-        return (
-          <button onClick={this.props.saveVaultMetadata} type="submit" className="btn btn-primary">
-            Save
-          </button>
-        );
+        return (<button onClick={this.props.saveVaultMetadata} type="submit" className="btn btn-primary">Save</button>);
     }
 
     renderSubmitButton() {
-        return (
-          <button onClick={this.props.submitMetadata} type="submit" className="btn btn-primary">
-            Submit
-          </button>
-        );
+        return (<button onClick={this.props.submitMetadata} type="submit" className="btn btn-primary">Submit</button>);
     }
 
     renderUnsubmitButton() {
-        return (
-          <button onClick={this.props.unsubmitMetadata} type="submit" className="btn btn-primary">
-            Unsubmit
-          </button>
-        );
+        return (<button onClick={this.props.unsubmitMetadata} type="submit" className="btn btn-primary">Unsubmit</button>);
     }
 
     renderUpdateButton() {
-        return (
-          <button onClick={this.props.updateMetadata} type="button" className="btn btn-primary">
-            Update metadata
-          </button>
-        );
+        return (<button onClick={this.props.updateMetadata} type="button" className="btn btn-primary">Update metadata</button>);
     }
 
     renderDeleteButton() {
-        return (
-          <button onClick={this.props.deleteMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right">
-            Delete all metadata
-          </button>
-        );
+        return (<button onClick={this.props.deleteMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right">Delete all metadata </button>);
     }
 
     renderCloneButton() {
-        return (
-          <button onClick={this.props.cloneMetadata} type="button" className="btn btn-primary clone-metadata-btn pull-right">
-            Clone from parent folder
-          </button>
-        );
+        return (<button onClick={this.props.cloneMetadata} type="button" className="btn btn-primary clone-metadata-btn pull-right">Clone from parent folder</button>);
     }
 
     renderButtons() {
@@ -165,60 +132,28 @@ class YodaButtons extends React.Component {
             // Datamanager in Vault space.
             if (!updateButton && mode === "edit_in_vault") {
                 // Show 'Save' button.
-                return (
-                  <div>
-                    {this.renderSaveVaultButton()}
-                  </div>
-                );
+                return (<div>{this.renderSaveVaultButton()}</div>);
             } else if (updateButton) {
                 // Show 'Update' button.
-                return (
-                  <div>
-                    {this.renderUpdateButton()}
-                  </div>
-                );
+                return (<div>{this.renderUpdateButton()}</div>);
             }
         } else if (writePermission) {
             // Write permission in Research space.
             if (!metadataExists && parentHasMetadata) {
                 // Show 'Save' and 'Clone from parent folder' buttons.
-                return (
-                  <div>
-                    {this.renderSaveButton()}
-                    {this.renderCloneButton()}
-                  </div>
-                );
+                return (<div>{this.renderSaveButton()} {this.renderCloneButton()}</div>);
             } else if (!locked && submitButton) {
                 // Show 'Save', 'Submit' and 'Delete all metadata' buttons.
-                return (
-                  <div>
-                    {this.renderSaveButton()}
-                    {this.renderSubmitButton()}
-                    {this.renderDeleteButton()}
-                  </div>
-                );
+                return (<div> {this.renderSaveButton()} {this.renderSubmitButton()} {this.renderDeleteButton()}</div>);
             } else if (locked && submitButton) {
                 // Show 'Submit' button.
-                return (
-                  <div>
-                    {this.renderSubmitButton()}
-                  </div>
-                );
+                return (<div>{this.renderSubmitButton()}</div>);
             } else if (!locked && !submitButton) {
                 // Show 'Save' and 'Delete all metadata' buttons.
-                return (
-                  <div>
-                    {this.renderSaveButton()}
-                    {this.renderDeleteButton()}
-                  </div>
-                );
+                return (<div>{this.renderSaveButton()} {this.renderDeleteButton()}</div>);
             } else if (unsubmitButton) {
                 // Show 'Unsubmit' button.
-                return (
-                  <div>
-                    {this.renderUnsubmitButton()}
-                  </div>
-                );
+                return (<div>{this.renderUnsubmitButton()}</div>);
             }
         } else {
             // Show no buttons.
@@ -254,8 +189,22 @@ class Container extends React.Component {
     }
 
     saveVaultMetadata() {
-	save = submit = unsubmit = false;
-        this.form.submitButton.click();
+        swal({
+            title: "Are you sure?",
+            text: "Metadata will be updated in the vault.",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ffcd00",
+            confirmButtonText: "Yes, update metadata!",
+            closeOnConfirm: false,
+            animation: false
+        },
+        function(isConfirm){
+            if (isConfirm) {
+                save = submit = unsubmit = false;
+		this.form.submitButton.click();
+            }
+        });
     }
 
     submitMetadata() {
@@ -486,7 +435,7 @@ function ObjectFieldTemplate(props) {
         var structure = props.schema['yoda:structure'];
     }
 
-    if (structure == 'compound') {
+    if (structure === 'compound') {
         let array = props.properties;
         let output = props.properties.map((prop, i, array) => {
             return (
