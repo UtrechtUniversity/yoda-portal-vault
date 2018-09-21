@@ -11,14 +11,13 @@
                 </div>
                 <div class="panel-body">
                     <?php if (!$writePermission && !$metadataExists) { ?>
-                        <p>
-                            There is no metadata present for this folder.
-                        </p>
+                        <p>There is no metadata present for this folder.</p>
                     <?php } else { ?>
                         <div id="form" class="metadata-form"
                              data-path="<?php echo rawurlencode($path); ?>"
                              data-csrf_token_name="<?php echo rawurlencode($tokenName); ?>"
                              data-csrf_token_hash="<?php echo rawurlencode($tokenHash); ?>">
+                            <p>Loading metadata <i class="fa fa-spinner fa-spin fa-fw"></i></p>
                         </div>
 	            <?php } ?>
                 </div>
