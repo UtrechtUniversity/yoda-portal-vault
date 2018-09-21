@@ -242,6 +242,7 @@ class Container extends React.Component {
     constructor(props) {
         super(props);
         this.saveMetadata = this.saveMetadata.bind(this);
+	this.saveVaultMetadata = this.saveVaultMetadata.bind(this);
         this.submitMetadata = this.submitMetadata.bind(this);
         this.unsubmitMetadata = this.unsubmitMetadata.bind(this);
     }
