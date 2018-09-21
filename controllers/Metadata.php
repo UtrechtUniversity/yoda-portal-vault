@@ -124,6 +124,12 @@ class Metadata extends MY_Controller
         $isVaultPackage    = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
         $userType          = $formConfig['userType'];
 
+        if ($userType == 'normal' || $userType == 'manager') {
+            $writePermission = true;
+        } else {
+            $writePermission = false;
+        }
+
         // Should submit button be rendered?
         $lockStatus = $formConfig['lockFound'];
         $folderStatus = $formConfig['folderStatus'];
@@ -153,7 +159,7 @@ class Metadata extends MY_Controller
         }
 
         $isLocked = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
-        if ($isLocked
+        if ($isLocked || !$writePermission
             || (!$isVaultPackage && $isDatamanager)
             || ($isVaultPackage && !$isDatamanager)
             || ($isVaultPackage && $isDatamanager && $updateButton)) {
