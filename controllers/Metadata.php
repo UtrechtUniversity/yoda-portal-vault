@@ -159,8 +159,8 @@ class Metadata extends MY_Controller
         }
 
         $isLocked = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
-        if ($isLocked || !$writePermission
-            || (!$isVaultPackage && $isDatamanager)
+        if ($isLocked
+            || (!$isVaultPackage && $isDatamanager && !$writePermission)
             || ($isVaultPackage && !$isDatamanager)
             || ($isVaultPackage && $isDatamanager && $updateButton)) {
             $uiSchema["ui:readonly"] = "true";
