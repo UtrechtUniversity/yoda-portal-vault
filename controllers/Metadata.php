@@ -61,7 +61,11 @@ class Metadata extends MY_Controller
         $viewParams = array(
             'styleIncludes' => array(
                 'lib/font-awesome/css/font-awesome.css',
+                'lib/sweetalert/sweetalert.css',
                 'css/metadata/form.css',
+            ),
+            'scriptIncludes' => array(
+                'lib/sweetalert/sweetalert.min.js',
             ),
             'path'             => $path,
             'tokenName'        => $tokenName,
