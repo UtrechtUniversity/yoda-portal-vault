@@ -15,6 +15,7 @@ var submitButton      = false;
 var unsubmitButton    = false;
 var updateButton      = false;
 var locked            = false;
+var writePermission   = false;
 var save              = false;
 var submit            = false;
 var unsubmit          = false;
@@ -138,30 +139,26 @@ class YodaButtons extends React.Component {
     }
 
     renderButtons() {
-        if (isVaultPackage) {
-            if (isDatamanager && !updateButton && mode === "edit_in_vault") {
+       if (isVaultPackage && isDatamanager) {
+            // Datamanager in Vault space.
+            if (!updateButton && mode === "edit_in_vault") {
                 // Show 'Save' button.
                 return (
                   <div>
                     {this.renderSaveVaultButton()}
                   </div>
                 );
-            } else if (isDatamanager && updateButton) {
+            } else if (updateButton) {
                 // Show 'Update' button.
                 return (
                   <div>
                     {this.renderUpdateButton()}
                   </div>
                 );
-            } else if (!isDatamanager) {
-                // Show no buttons.
-                return (
-                  <div>
-                  </div>
-                );
             }
-        } else {
-            if (!isDatamanager && !metadataExists && parentHasMetadata) {
+        } else if (writePermission) {
+            // Write permission in Research space.
+            if (!metadataExists && parentHasMetadata) {
                 // Show 'Save' and 'Clone from parent folder' buttons.
                 return (
                   <div>
@@ -169,7 +166,7 @@ class YodaButtons extends React.Component {
                     {this.renderCloneButton()}
                   </div>
                 );
-            } else if (!isDatamanager && !locked && submitButton) {
+            } else if (!locked && submitButton) {
                 // Show 'Save', 'Submit' and 'Delete all metadata' buttons.
                 return (
                   <div>
@@ -178,14 +175,14 @@ class YodaButtons extends React.Component {
                     {this.renderDeleteButton()}
                   </div>
                 );
-            } else if (!isDatamanager && locked && submitButton) {
+            } else if (locked && submitButton) {
                 // Show 'Submit' button.
                 return (
                   <div>
                     {this.renderSubmitButton()}
                   </div>
                 );
-            } else if (!isDatamanager && !locked && !submitButton) {
+            } else if (!locked && !submitButton) {
                 // Show 'Save' and 'Delete all metadata' buttons.
                 return (
                   <div>
@@ -193,20 +190,17 @@ class YodaButtons extends React.Component {
                     {this.renderDeleteButton()}
                   </div>
                 );
-            } else if (!isDatamanager && unsubmitButton) {
+            } else if (unsubmitButton) {
                 // Show 'Unsubmit' button.
                 return (
                   <div>
                     {this.renderUnsubmitButton()}
                   </div>
                 );
-            } else {
-                // Show no buttons.
-                return (
-                  <div>
-                  </div>
-                );
             }
+        } else {
+            // Show no buttons.
+            return (<div></div>);
         }
     }
 
@@ -339,6 +333,7 @@ axios.get("/research/metadata/data?path=" + path + "&mode=" + mode)
         unsubmitButton    = response.data.unsubmitButton
         updateButton      = response.data.updateButton
         locked            = response.data.locked
+        writePermission   = response.data.writePermission
 
         render(<Container />,
             document.getElementById("form")
