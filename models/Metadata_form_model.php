@@ -345,7 +345,12 @@ class Metadata_form_model extends CI_Model
 
                                 // Loop through the elements constituing the structure:
                                 foreach ($field['items']['properties'] as $objectKey => $objectField) {
-
+                                                    //echo $fieldKey . '-' . $objectKey;
+//                                                    print_r($field);
+//                                                    if ($fieldKey == 'Related_Datapackage') {
+//                                                        echo 'RDP ---' . $objectKey;
+//                                                        print_r($objectField);
+//                                                    }
                                     // Start of sub property structure
                                     if ( $field['items']['yoda:structure'] == 'subproperties') {
                                         // Lead property handling
@@ -450,15 +455,32 @@ class Metadata_form_model extends CI_Model
                                                 }
                                             }  // DATA DOES NOT EXIST
                                             else {
+//                                                echo '--------- BLABLABLABLABLA------';
+//                                                print_r($objectKey);
+//                                                print_r($objectField);
+//                                                echo '---------';
+
                                                 if(isset($objectField['items']['yoda:structure'])) {
                                                     $arCompoundFields = array();
                                                     foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
                                                         $arCompoundFields[$compoundElementKey] = '';
                                                     }
-                                                    $emptyObjectField[$objectKey] = $arCompoundFields;
+                                                    $emptyObjectField[$objectKey][] = $arCompoundFields;
                                                 }
                                                 else {
-                                                    $emptyObjectField[$objectKey][] = '';
+                                                    if ($objectField['type'] == 'array') {
+                                                        $emptyObjectField[$objectKey][] = '';
+                                                    }
+                                                    else if ($objectField['type'] == 'object') {
+                                                        $arCompoundFields = array();
+                                                        foreach ($objectField['properties'] as $compoundElementKey => $info) {
+                                                            $arCompoundFields[$compoundElementKey] = '';
+                                                        }
+                                                        $emptyObjectField[$objectKey] = $arCompoundFields;
+                                                    }
+                                                    else {
+                                                        $emptyObjectField[$objectKey] = '';
+                                                    }
                                                 }
                                             }
                                         }
@@ -531,10 +553,11 @@ class Metadata_form_model extends CI_Model
         //print_r(json_encode($jsonSchema)); exit;
 //        print_r($xmlFormData);exit;
 //
+        //print_r($formData['Rights']['Creator']);
 //        print_r($formData);
-//
-//        print_r(json_encode($formData));
 //        exit;
+//        print_r(json_encode($formData));
+        //exit;
 
         return $formData;
     }
