@@ -369,6 +369,14 @@ class Metadata_form_model extends CI_Model
                                             }
                                             $mainProp = false;
                                         } else {   // sub part of sub property handling.
+//                                            if($fieldKey=='Related_Datapackage') {
+//                                                print_r($objectKey);
+//                                                echo '->';
+//                                                print_r($objectField);
+//                                                print_r($xmlData['Properties'][$objectKey]);
+//                                                echo '------------------------------------------------------------------';
+//                                            }
+
                                             if (isset($xmlData['Properties'][$objectKey])) { // DATA EXISTS FOR $objectKey
                                                 if ($objectField['type']=='array') {  // multiple - can be compound or single field
 
@@ -433,22 +441,31 @@ class Metadata_form_model extends CI_Model
                                                         }
                                                     }
                                                     //}
-                                                } elseif(($objectField['type']=='object')) {  // compound single
+                                                } elseif(($objectField['type']=='object')) {  // compound single structure
 //                                                    echo $fieldKey . '-' . $objectKey;
 //                                                    print_r()
 //                                                    if ($fieldKey == 'Related_Datapackage') {
 //                                                        echo 'RDP ---' . $objectKey;
 //                                                        print_r($objectField);
 //                                                    }
+//                                                    if($fieldKey=='Related_Datapackage') {
+//                                                        print_r($objectKey);
+//                                                        echo '->';
+//                                                        print_r($objectField);
+//                                                        print_r($xmlData['Properties'][$objectKey]);
+//                                                        echo '------------------------------------------------------------------';
+//                                                    }
 
                                                     $arCompoundFields = array();
+
+                                                    $data = $xmlData['Properties'][$objectKey];
                                                     foreach ($objectField['properties'] as $compoundElementKey => $info) {
                                                         $arCompoundFields[$compoundElementKey] = '';
 
                                                         // only take the data when not an array
-//                                                        if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
-//                                                            $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
-//                                                        }
+                                                        if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
+                                                            $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
+                                                        }
                                                     }
                                                     $emptyObjectField[$objectKey] = $arCompoundFields;
 
@@ -527,6 +544,7 @@ class Metadata_form_model extends CI_Model
                     } else if ($field['type'] == 'object') {
                         $structure = $field['yoda:structure'];
                         // Subproperties
+
                         if (isset($structure) && $structure == 'subproperties') {
                             $mainProp = true;
                             foreach ($field['properties'] as $objectKey => $objectField) {
