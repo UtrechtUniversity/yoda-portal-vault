@@ -177,7 +177,7 @@ class Container extends React.Component {
     constructor(props) {
         super(props);
         this.saveMetadata = this.saveMetadata.bind(this);
-	this.saveVaultMetadata = this.saveVaultMetadata.bind(this);
+        this.saveVaultMetadata = this.saveVaultMetadata.bind(this);
         this.submitMetadata = this.submitMetadata.bind(this);
         this.unsubmitMetadata = this.unsubmitMetadata.bind(this);
     }
@@ -189,22 +189,8 @@ class Container extends React.Component {
     }
 
     saveVaultMetadata() {
-        swal({
-            title: "Are you sure?",
-            text: "Metadata will be updated in the vault.",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#ffcd00",
-            confirmButtonText: "Yes, update metadata!",
-            closeOnConfirm: false,
-            animation: false
-        },
-        function(isConfirm){
-            if (isConfirm) {
-                save = submit = unsubmit = false;
-		this.form.submitButton.click();
-            }
-        });
+        save = submit = unsubmit = false;
+        this.form.submitButton.click();
     }
 
     submitMetadata() {
@@ -361,6 +347,7 @@ function CustomFieldTemplate(props) {
 
     const hasErrors = Array.isArray(errors.props.errors) ? true : false;
 
+    // Only show error messages after submit.
     if (formContext.submit) {
       return (
         <div className={classNames}>
@@ -501,8 +488,13 @@ function ArrayFieldTemplate(props) {
                 <div className="has-btn">
                     {element.children}
                     <div className={"btn-controls btn-group btn-count-" + btnCount} role="group">
-                        {canRemove && <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>-</button>}
-                        <button type="button" className="clone-btn btn btn-default" onClick={props.onAddClick}>+</button>
+                        {canRemove && 
+                        <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>
+                            <i class="fa fa-minus" aria-hidden="true"></i>
+                        </button>}
+                        <button type="button" className="clone-btn btn btn-default" onClick={props.onAddClick}>
+                            <i class="fa fa-plus" aria-hidden="true"></i>
+                        </button>
                     </div>
                 </div>
             );
@@ -512,7 +504,9 @@ function ArrayFieldTemplate(props) {
                     <div className="has-btn">
                         {element.children}
                         <div className="btn-controls">
-                            <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>-</button>
+                            <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>
+                                <i class="fa fa-minus" aria-hidden="true"></i>
+                            </button>
                         </div>
                     </div>
                 )

@@ -60,19 +60,14 @@ class Metadata extends MY_Controller
 
         $viewParams = array(
             'styleIncludes' => array(
-                'lib/jqueryui-datepicker/jquery-ui-1.12.1.css',
                 'lib/font-awesome/css/font-awesome.css',
                 'lib/sweetalert/sweetalert.css',
                 'css/metadata/form.css',
             ),
             'scriptIncludes' => array(
-                'lib/jqueryui-datepicker/jquery-ui-1.12.1.js',
                 'lib/sweetalert/sweetalert.min.js',
-                'js/metadata/form.js',
             ),
-            'activeModule'     => 'research',
             'path'             => $path,
-            'fullPath'         => $fullPath,
             'tokenName'        => $tokenName,
             'tokenHash'        => $tokenHash,
             'userType'         => $userType,
@@ -82,7 +77,6 @@ class Metadata extends MY_Controller
             'flashMessageType' => $flashMessageType,
             'metadataExists'   => ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false,
             'writePermission'  => $writePermission,
-            'messageDatamanagerAfterSaveInVault' => $messageDatamanagerAfterSaveInVault,
         );
         loadView('metadata/form', $viewParams);
     }
