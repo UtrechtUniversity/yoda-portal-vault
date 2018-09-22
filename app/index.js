@@ -129,7 +129,7 @@ class YodaButtons extends React.Component {
     }
 
     renderButtons() {
-       if (isVaultPackage && isDatamanager) {
+        if (isVaultPackage && isDatamanager) {
             // Datamanager in Vault space.
             if (!updateButton && mode === "edit_in_vault") {
                 // Show 'Save' button.
@@ -140,7 +140,10 @@ class YodaButtons extends React.Component {
             }
         } else if (writePermission) {
             // Write permission in Research space.
-            if (!metadataExists && parentHasMetadata) {
+            if (!metadataExists && locked) {
+                // Show no buttons.
+                return (<div></div>);
+            } else if (!metadataExists && parentHasMetadata) {
                 // Show 'Save' and 'Clone from parent folder' buttons.
                 return (<div>{this.renderSaveButton()} {this.renderCloneButton()}</div>);
             } else if (!locked && submitButton) {
@@ -494,7 +497,7 @@ function ArrayFieldTemplate(props) {
                 <div className="has-btn">
                     {element.children}
                     <div className={"btn-controls btn-group btn-count-" + btnCount} role="group">
-                        {canRemove && 
+                        {canRemove &&
                         <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>
                             <i class="fa fa-minus" aria-hidden="true"></i>
                         </button>}
