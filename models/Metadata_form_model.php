@@ -372,6 +372,13 @@ class Metadata_form_model extends CI_Model
                                             if (isset($xmlData['Properties'][$objectKey])) { // DATA EXISTS FOR $objectKey
                                                 if ($objectField['type']=='array') {  // multiple - can be compound or single field
 
+//                                                    if($fieldKey=='Creator') {
+//                                                        print_r($objectKey);
+//                                                        print_r($objectField);
+//
+//                                                        print_r($xmlData['Properties'][$objectKey]);
+//                                                    }
+
                                                     $countData = count($xmlData['Properties'][$objectKey]);
                                                     if(!$countData) { //when there are empty tags in the xml file
                                                         if(isset($objectField['items']['yoda:structure'])) {
@@ -383,7 +390,7 @@ class Metadata_form_model extends CI_Model
                                                             $emptyObjectField[$objectKey][] = $arCompoundFields;
                                                         }
                                                         else {
-                                                            $emptyObjectField[$objectKey] = '';
+                                                            $emptyObjectField[$objectKey][] = '';
                                                         }
                                                     } else {
                                                         if(isset($objectField['items']['yoda:structure'])) { // collect each compound and assess whether is valid
