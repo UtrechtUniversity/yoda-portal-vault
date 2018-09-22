@@ -47,9 +47,6 @@ class Metadata_form_model extends CI_Model
             }
         }
 
-        //print_r($formData);
-//        exit;
-
         $folder = $config['metadataXmlPath'];
         $jsonsElements = $this->loadJSONS($rodsaccount, $folder);
 
@@ -164,7 +161,9 @@ class Metadata_form_model extends CI_Model
                                                             $xmlSubElement = $xml->createElement($subPropertyElementKey);
                                                             foreach ($subPropertyElementInfo['items']['properties'] as $subCompoundKey => $subVal) {
                                                                 if(isset($data[$subCompoundKey])) {
-                                                                    $subCompoundHasAnyValue = true;
+                                                                    if ($data[$subCompoundKey]) {
+                                                                        $subCompoundHasAnyValue = true;
+                                                                    }
                                                                     $subData = $data[$subCompoundKey];
                                                                     $xmlSubCompound = $this->_createXmlElementWithText($xml, $subCompoundKey, $subData);
                                                                     $xmlSubElement->appendChild($xmlSubCompound);
@@ -172,7 +171,7 @@ class Metadata_form_model extends CI_Model
                                                                 else {
                                                                     $xmlSubCompound = $this->_createXmlElementWithText($xml, $subCompoundKey, '');
                                                                     $xmlSubElement->appendChild($xmlSubCompound);
-                                                                    $subCompoundHasAnyValue = true;
+                                                                    //$subCompoundHasAnyValue = true;
                                                                 }
                                                             }
                                                             // Only add compound struct if actually data is present within compound
@@ -195,7 +194,7 @@ class Metadata_form_model extends CI_Model
                                                         else {
                                                             $xmlSubCompound = $this->_createXmlElementWithText($xml, $subCompoundKey, '');
                                                             $xmlSubElement->appendChild($xmlSubCompound);
-                                                            $subCompoundHasAnyValue = true;
+                                                            //$subCompoundHasAnyValue = true;
                                                         }
                                                     }
                                                     // Only add compound struct if actually data is present within compound
@@ -336,71 +335,135 @@ class Metadata_form_model extends CI_Model
                                 }
                             }
                             else {
-                                $xmlDataArray = array($fieldKey=>'');
+                                $xmlDataArray = array($fieldKey=>'');  // not present situation
                             }
 
                             // Loop through data
                             foreach($xmlDataArray as $xmlData) {
                                 $mainProp = true;
                                 $emptyObjectField = array();
+
+                                // Loop through the elements constituing the structure:
                                 foreach ($field['items']['properties'] as $objectKey => $objectField) {
-                                    if ($field['items']['yoda:structure'] == 'subproperties') {
+
+                                    // Start of sub property structure
+                                    if ( $field['items']['yoda:structure'] == 'subproperties') {
+                                        // Lead property handling
                                         if ($mainProp) {
-                                            if (isset($xmlData[$objectKey])) {
-                                                //$formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey][$objectKey];
-                                                $emptyObjectField[$objectKey] = $xmlData[$objectKey];
+                                            if (isset($xmlData[$objectKey])) { // DIT KUNNEN DUS OOK LEGE REGELS ZIJN IN HET XML FORM
+                                                // Should NOT be an array!
+                                                // This is possible when a tag is present in xml but has no data. <Creator><Name></Name></Creator>
+                                                $leadData = '';
+                                                if (!is_array($xmlData[$objectKey])) {
+                                                    $leadData = $xmlData[$objectKey];
+                                                }
+                                                $emptyObjectField[$objectKey] = $leadData;
+
                                             } else { // Add empty string so lead property exists => will visibly open the structure
                                                 $emptyObjectField[$objectKey] = '';
                                             }
                                             $mainProp = false;
-                                        } else {
-                                            if (isset($xmlData['Properties'][$objectKey])) {
-                                                //$formData[$groupKey][$fieldKey][$objectKey] = $xmlFormData[$fieldKey]['Properties'][$objectKey];
-                                                if ($objectField['type'] == 'array') {
-                                                   // $emptyObjectField[$objectKey] =  array($xmlData['Properties'][$objectKey]);
-                                                    $propData = $xmlData['Properties'][$objectKey];
+                                        } else {   // sub part of sub property handling.
+                                            if (isset($xmlData['Properties'][$objectKey])) { // DATA EXISTS FOR $objectKey
+                                                if ($objectField['type']=='array') {  // multiple - can be compound or single field
 
-                                                    // Prepwork
-                                                    $propDataArray = array();
-                                                    if (is_array($propData)) {
-                                                        foreach ($propData as $propDataItemTest => $propDataItemTestValue) {
-                                                            if (!is_numeric($propDataItemTest)) {
-                                                                $propDataArray[] = $propData;
-                                                            } else {
-                                                                $propDataArray = $propData;
+                                                    $countData = count($xmlData['Properties'][$objectKey]);
+                                                    if(!$countData) { //when there are empty tags in the xml file
+                                                        if(isset($objectField['items']['yoda:structure'])) {
+                                                            // step through compound elements
+                                                            $arCompoundFields = array();
+                                                            foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
+                                                                $arCompoundFields[$compoundElementKey] = '';
                                                             }
-                                                            break;
+                                                            $emptyObjectField[$objectKey][] = $arCompoundFields;
+                                                        }
+                                                        else {
+                                                            $emptyObjectField[$objectKey] = '';
                                                         }
                                                     } else {
-                                                        $propDataArray[] = $propData;
-                                                    }
+                                                        if(isset($objectField['items']['yoda:structure'])) { // collect each compound and assess whether is valid
+                                                            // each compound field must be assigned a value
 
-                                                    foreach($propDataArray as $propDataItem) {
-                                                        $emptyObjectField[$objectKey][] = $propDataItem;
-                                                    }
-                                                } else {
-                                                    $emptyObjectField[$objectKey] = $xmlData['Properties'][$objectKey];
-                                                }
-                                            } else {
-                                                if ($objectField['type'] == 'array') { // multiple
-                                                    if (isset($objectField['items']['yoda:structure'])) { // can only be compound at this moment
-                                                        // At this moment we know that fields in a compound are not individually duplicable
+                                                            // prepare the data
+                                                            foreach($xmlData['Properties'][$objectKey] as $key=>$val) {
+                                                                if(!is_numeric($key)) {
+                                                                    $baseData[] = $xmlData['Properties'][$objectKey];
+                                                                }
+                                                                else {
+                                                                    $baseData = $xmlData['Properties'][$objectKey];
+                                                                }
+                                                                break;
+                                                            }
 
-                                                        $compoundElements = array();
-                                                        foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
-                                                            $compoundElements[$compoundElementKey] = '';
+                                                            foreach($baseData as $data) {
+                                                                //$data = $xmlData['Properties'][$objectKey];
+                                                                $arCompoundFields = array();
+                                                                foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
+                                                                    $arCompoundFields[$compoundElementKey] = '';
+
+                                                                    // only take the data when not an array
+                                                                    if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
+                                                                        $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
+                                                                    }
+                                                                }
+                                                                $emptyObjectField[$objectKey][] = $arCompoundFields;
+                                                            }
                                                         }
-
-                                                        $emptyObjectField[$objectKey] = array(0 => $compoundElements);
-                                                    } else { // single field - multiple values allowed
-                                                        $emptyObjectField[$objectKey] = array(0 => '');
+                                                        else {
+                                                            //print_r($objectField);
+                                                            // AFfiliation gedoe
+                                                            //$emptyObjectField[$objectKey][] = $xmlData['Properties'][$objectKey];
+                                                            $affValuesArray = $xmlData['Properties'][$objectKey];
+                                                            if(!is_array($affValuesArray)) {
+                                                                $affValuesArray = array($xmlData['Properties'][$objectKey]);
+                                                            }
+                                                            $emptyObjectField[$objectKey] = $affValuesArray ; //$xmlData['Properties'][$objectKey];
+                                                        }
                                                     }
-                                                } else {
-                                                    // What to do here??? single thing - maybe simply leave out?
+                                                    //}
+                                                } elseif(($objectField['type']=='object')) {  // compound single
+//                                                    echo $fieldKey . '-' . $objectKey;
+//                                                    print_r()
+//                                                    if ($fieldKey == 'Related_Datapackage') {
+//                                                        echo 'RDP ---' . $objectKey;
+//                                                        print_r($objectField);
+//                                                    }
+
+                                                    $arCompoundFields = array();
+                                                    foreach ($objectField['properties'] as $compoundElementKey => $info) {
+                                                        $arCompoundFields[$compoundElementKey] = '';
+
+                                                        // only take the data when not an array
+//                                                        if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
+//                                                            $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
+//                                                        }
+                                                    }
+                                                    $emptyObjectField[$objectKey] = $arCompoundFields;
+
+                                                }
+                                                else { // can only be single field as this is a subproperty
+                                                    $subValue = '';
+                                                    if (!is_array($xmlData['Properties'][$objectKey])) {
+                                                        $subValue = $xmlData['Properties'][$objectKey];
+                                                    }
+                                                    $emptyObjectField[$objectKey] = $subValue;
+                                                }
+                                            }  // DATA DOES NOT EXIST
+                                            else {
+                                                if(isset($objectField['items']['yoda:structure'])) {
+                                                    $arCompoundFields = array();
+                                                    foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
+                                                        $arCompoundFields[$compoundElementKey] = '';
+                                                    }
+                                                    $emptyObjectField[$objectKey] = $arCompoundFields;
+                                                }
+                                                else {
+                                                    $emptyObjectField[$objectKey][] = '';
                                                 }
                                             }
                                         }
-                                    } else {
+                                    }
+                                    else {
                                         if ($objectField['type'] == 'string') {
                                             $emptyObjectField[$objectKey] = $objectKey;
                                         } else if ($objectField['type'] == 'object') { //subproperties (OLD)
@@ -465,10 +528,12 @@ class Metadata_form_model extends CI_Model
             }
         }
 
-//        print_r($jsonSchema); exit;
+        //print_r(json_encode($jsonSchema)); exit;
 //        print_r($xmlFormData);exit;
 //
 //        print_r($formData);
+//
+//        print_r(json_encode($formData));
 //        exit;
 
         return $formData;
