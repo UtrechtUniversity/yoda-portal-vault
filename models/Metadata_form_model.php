@@ -421,6 +421,7 @@ class Metadata_form_model extends CI_Model
                                                             // each compound field must be assigned a value
 
                                                             // prepare the data
+                                                            $baseData = array();
                                                             foreach($xmlData['Properties'][$objectKey] as $key=>$val) {
                                                                 if(!is_numeric($key)) {
                                                                     $baseData[] = $xmlData['Properties'][$objectKey];
