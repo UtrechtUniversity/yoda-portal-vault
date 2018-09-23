@@ -160,7 +160,7 @@ class Metadata extends MY_Controller
             || (!$writePermission && !$isDatamanager)) {
             $uiSchema["ui:readonly"] = "true";
         }
-
+        
         $output = array();
         $output['path']              = $path;
         $output['schema']            = $jsonSchema;
