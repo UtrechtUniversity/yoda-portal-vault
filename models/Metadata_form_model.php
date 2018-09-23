@@ -64,7 +64,13 @@ class Metadata_form_model extends CI_Model
                         || $element['type']=='string' // string in situations like date on top level (embargo end date)
                     ) {  //No structure single element
 
-                        $xmlMainElement = $this->_createXmlElementWithText($xml, $mainElement, $formData[$mainElement]);
+                        // Numerical fields are set to 0 when get assigned a non numeric value by the user.
+                        // Only done for toplevel elements at this moment
+                        $elementData = $formData[$mainElement];
+                        if (isset($element['type']) && $element['type']=='integer' && !is_numeric($elementData)) {
+                            $elementData = 0; // Set to 0 when numerical value contains non numerical value
+                        }
+                        $xmlMainElement = $this->_createXmlElementWithText($xml, $mainElement, $elementData);
                         $xml_metadata->appendChild($xmlMainElement);
                     }
                     else {
