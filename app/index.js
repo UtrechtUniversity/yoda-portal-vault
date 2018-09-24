@@ -426,7 +426,7 @@ function ObjectFieldTemplate(props) {
         let array = props.properties;
         let output = props.properties.map((prop, i, array) => {
             return (
-                <div className="col-sm-6 field">
+                <div className="col-sm-6 field compound-field">
                     {prop.content}
                 </div>
             );
