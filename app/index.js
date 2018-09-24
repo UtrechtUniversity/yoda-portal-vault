@@ -339,7 +339,7 @@ function submitData(data)
 }
 
 function CustomFieldTemplate(props) {
-    const {id, classNames, label, help, hidden, required, description, errors, rawErrors, children, displayLabel, formContext} = props;
+    const {id, classNames, label, help, hidden, required, description, errors, rawErrors, children, displayLabel, formContext, readonly} = props;
 
     if (hidden || !displayLabel) {
         return children;
@@ -386,7 +386,7 @@ function CustomFieldTemplate(props) {
             <span data-toggle="tooltip" title="" data-original-title="">{label}</span>
           </label>
 
-          {required ? (
+          {required && !readonly ? (
             <span className={'fa-stack col-sm-1'}>
               <i className={'fa fa-lock safe fa-stack-1x'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Required for the vault"></i>
               {!hasErrors ? (
@@ -477,6 +477,11 @@ function ArrayFieldTemplate(props) {
         canRemove = false;
     }
     let output = props.items.map((element, i, array) => {
+        // Read only view
+        if (props.readonly) {
+            return element.children;
+        }
+
         let item = props.items[i];
         if (array.length - 1 === i) {
             let btnCount = 1;
