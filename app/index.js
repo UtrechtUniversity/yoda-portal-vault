@@ -61,7 +61,6 @@ class YodaForm extends React.Component {
             var i = errors.length
             while (i--) {
                 if (errors[i].name === "required"  ||
-                    errors[i].name === "type"      ||
                     errors[i].name === "maxLength" ||
                     errors[i].name === "enum") {
                     errors.splice(i,1);
