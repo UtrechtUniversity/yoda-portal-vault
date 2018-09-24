@@ -24,6 +24,40 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
+     * @param $xml
+     * @param $xml_metadata
+     * @param $mainElement - name of element holding the actual compound elements
+     * @param $structObjectProperties
+     * @param $formData
+     * @return mixed
+     *
+     *
+     * Creates an compound structure
+     * returns the entire object, either without or without changes
+     */
+    private function _addCompoundToXml($xml,
+                                    $xmlCompoundParent,
+                                    $compoundMainElement,
+                                    $structObjectProperties,
+                                    $formData)
+    {
+        $xmlMainElement = $xml->createElement($compoundMainElement);
+        $anyValueFound = false;
+        foreach ($structObjectProperties as $compoundElementKey => $compoundElementInfo) {
+            if (isset($formData[$compoundElementKey]) && strlen($formData[$compoundElementKey])) {
+                $anyValueFound = true;
+                $xmlCompoundElement = $this->_createXmlElementWithText($xml, $compoundElementKey, $formData[$compoundElementKey]);
+                $xmlMainElement->appendChild($xmlCompoundElement);
+            }
+        }
+        if ($anyValueFound) {
+            $xmlCompoundParent->appendChild($xmlMainElement);
+        }
+        return $anyValueFound;
+    }
+
+
+    /**
      * @param $rodsaccount
      * @param $config
      *
@@ -78,23 +112,14 @@ class Metadata_form_model extends CI_Model
 
                         if ($element['type'] == 'object') {   // SINGLGE STRUCT ON HIGHEST LEVEL
                             $structObject = $element;
-
                             if ($structObject['yoda:structure'] == 'compound') { // heeft altijd een compound signifying element nodig
-                                $xmlMainElement = $xml->createElement($mainElement);
-                                $anyValueFound = false;
-                                foreach ($structObject['properties'] as $compoundElementKey => $compoundElementInfo) {
-                                    if (isset($formData[$mainElement][$compoundElementKey]) && strlen($formData[$mainElement][$compoundElementKey])) {
-                                        $anyValueFound = true;
-
-                                        $xmlCompoundElement = $this->_createXmlElementWithText($xml, $compoundElementKey, $formData[$mainElement][$compoundElementKey]);
-                                        $xmlMainElement->appendChild($xmlCompoundElement);
-                                    }
-                                }
-                                if ($anyValueFound) {
-                                    $xml_metadata->appendChild($xmlMainElement);
-                                }
+                                $this->_addCompoundToXml($xml,
+                                                        $xml_metadata,
+                                                        $mainElement,
+                                                        $structObject['properties'],
+                                                        $formData[$mainElement]);
                             }
-                            elseif($structObject['yoda:structure'] == 'subproperties'){
+                            elseif ($structObject['yoda:structure'] == 'subproperties') {
                                 // Single subproperty struct is not present at the moment in the schema
                                 // Not handled at this moment
                             }
@@ -115,50 +140,48 @@ class Metadata_form_model extends CI_Model
                             else {
                                 $structObject = $element['items'];
                                 if ($structObject['yoda:structure'] == 'subproperties') {
-
-                                    foreach ($formData[$mainElement] as $subPropertyStructData) {  // loop through all subproperty structures
-                                        $hasLeadValue = false;
-                                        $hasSubPropertyValues = false;
+                                    foreach ($formData[$mainElement] as $subPropertyStructData) {  // loop through data for the lead/subproperty structure
+                                        $hasLeadValue = false; // Lead value is required for saving to XML fole
+                                        $hasSubPropertyValues = false; // Properties element only added to main element if actually holds data
                                         $xmlMainElement = $xml->createElement($mainElement);
                                         $index = 0; // to distinguish between lead and sub
                                         foreach ($structObject['properties'] as $subPropertyElementKey => $subPropertyElementInfo) {
-
                                             // Step through object structure
                                             if ($index==0) { // Lead part of structure - ALWAYS SINGLE VALUE!!
                                                 $leadData = isset($subPropertyStructData[$subPropertyElementKey])? $subPropertyStructData[$subPropertyElementKey] : '';
                                                 $xmlLeadElement = $this->_createXmlElementWithText($xml, $subPropertyElementKey, $leadData);
                                                 $xmlMainElement->appendChild($xmlLeadElement);
-
                                                 if (strlen($leadData)) {
                                                     $hasLeadValue = true;
                                                 }
                                             }
-                                            elseif($index==1) { // Start of subproperty part. Create subproperty structure element here.
-                                                $xmlProperties = $xml->createElement('Properties');
-                                                // Subproperty part of structure --
-                                                // This is the first line
-                                                // NEVER compound on first subprop line so take shortcut here.
-                                                // Prepwork
+                                            else {
+                                                // SUBPROPERTY PART OF STRUCTURE
+                                                if($index==1) { // Start of subproperty part. Create subproperty structure element here.
+                                                    $xmlProperties = $xml->createElement('Properties');
+                                                }
+
                                                 $values = array();
+                                                // Single simple field (i.e. no structure)
                                                 if (!isset($subPropertyElementInfo['type'])) {
                                                     $values[0] = isset($subPropertyStructData[$subPropertyElementKey])? $subPropertyStructData[$subPropertyElementKey] : '';
-                                                }
-                                                else if ($subPropertyElementInfo['type']=='array') {
-                                                    $values = $subPropertyStructData[$subPropertyElementKey];
-                                                }
-
-                                                foreach($values as $value) {
-                                                    if(strlen($value)) {
-                                                        $xmlSubElement = $this->_createXmlElementWithText($xml, $subPropertyElementKey, $value);
-                                                        $xmlProperties->appendChild($xmlSubElement);
-
-                                                        $hasSubPropertyValues = true;
+                                                    foreach($values as $value) {
+                                                        if(strlen($value)) {
+                                                            $xmlSubElement = $this->_createXmlElementWithText($xml, $subPropertyElementKey, $value);
+                                                            $xmlProperties->appendChild($xmlSubElement);
+                                                            $hasSubPropertyValues = true;
+                                                        }
                                                     }
                                                 }
-                                            }
-                                            else {  // next lines after first in subproperty part
-                                                if (!isset($subPropertyElementInfo['type'])) {
-                                                    //echo 'SINGLE ITEM';  ///KOMT  NU NIET VOOR VOOR SUBPROPERTIES
+                                                // Single compound as part of a subproperty
+                                                elseif ($subPropertyElementInfo['yoda:structure']=='compound') {
+                                                    if ($this->_addCompoundToXml($xml,
+                                                                                $xmlProperties,
+                                                                                $subPropertyElementKey,
+                                                                                $subPropertyElementInfo['properties'],
+                                                                                $subPropertyStructData[$subPropertyElementKey])) {
+                                                        $hasSubPropertyValues = true;
+                                                    }
                                                 }
                                                 elseif ($subPropertyElementInfo['type']=='array') {
                                                     if (!isset($subPropertyElementInfo['items']['type'])) {
@@ -166,66 +189,26 @@ class Metadata_form_model extends CI_Model
                                                             if (strlen($value)) {
                                                                 $xmlSubElement = $this->_createXmlElementWithText($xml, $subPropertyElementKey, $value);
                                                                 $xmlProperties->appendChild($xmlSubElement);
-
                                                                 $hasSubPropertyValues = true;
                                                             }
                                                         }
                                                     }
                                                     else {
-                                                        // Multiple compounds
+                                                        // Multiple compounds as part of a subproperty structure
                                                         foreach($subPropertyStructData[$subPropertyElementKey] as $data) {
-                                                            $subCompoundHasAnyValue = false;
-                                                            $xmlSubElement = $xml->createElement($subPropertyElementKey);
-                                                            foreach ($subPropertyElementInfo['items']['properties'] as $subCompoundKey => $subVal) {
-                                                                if(isset($data[$subCompoundKey])) {
-                                                                    if (strlen($data[$subCompoundKey])) {
-                                                                        $subData = $data[$subCompoundKey];
-                                                                        $xmlSubCompound = $this->_createXmlElementWithText($xml, $subCompoundKey, $subData);
-                                                                        $xmlSubElement->appendChild($xmlSubCompound);
-
-                                                                        $subCompoundHasAnyValue = true;
-                                                                    }
-                                                                }
-//                                                                else {
-//                                                                    $xmlSubCompound = $this->_createXmlElementWithText($xml, $subCompoundKey, '');
-//                                                                    $xmlSubElement->appendChild($xmlSubCompound);
-//                                                                    //$subCompoundHasAnyValue = true;
-//                                                                }
-                                                            }
-                                                            // Only add compound struct if actually data is present within compound
-                                                            if ($subCompoundHasAnyValue) {
-                                                                $xmlProperties->appendChild($xmlSubElement);  // xmlProperties wordt geinitieerd in vorige stap
-
+                                                            if ($this->_addCompoundToXml($xml,
+                                                                                        $xmlProperties,
+                                                                                        $subPropertyElementKey,
+                                                                                        $subPropertyElementInfo['items']['properties'],
+                                                                                        $data)) {
                                                                 $hasSubPropertyValues = true;
                                                             }
                                                         }
-                                                    }
-                                                } // Single compound
-                                                elseif ($subPropertyElementInfo['yoda:structure']=='compound') {
-                                                    $subCompoundHasAnyValue = false;
-                                                    $xmlSubElement = $xml->createElement($subPropertyElementKey);
-                                                    foreach($subPropertyElementInfo['properties'] as $subCompoundKey => $subVal) {
-                                                        if (isset($subPropertyStructData[$subPropertyElementKey][$subCompoundKey])) {
-                                                            $subData = $subPropertyStructData[$subPropertyElementKey][$subCompoundKey];
-                                                            if (strlen($subData)) {
-                                                                $xmlSubCompound = $this->_createXmlElementWithText($xml, $subCompoundKey, $subData);
-                                                                $xmlSubElement->appendChild($xmlSubCompound);
-
-                                                                $subCompoundHasAnyValue = true;
-                                                            }
-                                                        }
-                                                    }
-                                                    // Only add compound struct if actually data is present within compound
-                                                    if ($subCompoundHasAnyValue) {
-                                                        $xmlProperties->appendChild($xmlSubElement);  // xmlProperties wordt geinitieerd in vorige stap
-
-                                                        $hasSubPropertyValues = true;
                                                     }
                                                 }
                                             }
                                             $index++;
                                         }
-
                                         // Extra intelligence to only save when there is relevant data
                                         if ($hasLeadValue) {  // for now overrule this requirement
                                             // add the entire structure to the main element
