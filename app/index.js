@@ -137,11 +137,14 @@ class YodaButtons extends React.Component {
                 // Show 'Update' button.
                 return (<div>{this.renderUpdateButton()}</div>);
             }
-        } else if (writePermission) {
+       } else if (writePermission) {
             // Write permission in Research space.
             if (!metadataExists && parentHasMetadata) {
                 // Show 'Save' and 'Clone from parent folder' buttons.
                 return (<div>{this.renderSaveButton()} {this.renderCloneButton()}</div>);
+            } else if (!metadataExists && locked) {
+                // Show no buttons.
+                return (<div></div>);
             } else if (!locked && submitButton) {
                 // Show 'Save', 'Submit' and 'Delete all metadata' buttons.
                 return (<div> {this.renderSaveButton()} {this.renderSubmitButton()} {this.renderDeleteButton()}</div>);
