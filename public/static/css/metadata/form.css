@@ -227,3 +227,28 @@ button[data-clone*="main"] {
 .btn-controls button {
     width: 34px;
 }
+
+.yoda-structure.compound {
+    margin-bottom: 0px;
+}
+
+.compound-field .form-group label {
+    width: 100%;
+    text-align: left;
+}
+
+.compound-field .form-group {
+    margin-bottom: 0px;
+}
+
+.compound-field .form-group .fa-stack {
+    display: none;
+}
+
+.compound-field .form-group .field-wrapper {
+    width: 100%;
+}
+
+.compound + .btn-controls {
+    top: 27px;
+}
