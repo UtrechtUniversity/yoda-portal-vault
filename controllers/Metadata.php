@@ -157,7 +157,7 @@ class Metadata extends MY_Controller
             || (!$isVaultPackage && $isDatamanager && !$writePermission)
             || ($isVaultPackage && !$isDatamanager)
             || ($isVaultPackage && $isDatamanager && $updateButton)
-            || (!$writePermission)) {
+            || (!$writePermission && !$isDatamanager)) {
             $uiSchema["ui:readonly"] = "true";
         }
 
