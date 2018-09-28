@@ -39,6 +39,8 @@ class YodaForm extends React.Component {
     }
 
     onChange(form) {
+        formCompleteness();
+
         this.setState({
             formData: form.formData,
         });
@@ -128,6 +130,10 @@ class YodaButtons extends React.Component {
         return (<button onClick={this.props.cloneMetadata} type="button" className="btn btn-primary clone-metadata-btn pull-right">Clone from parent folder</button>);
     }
 
+    renderFormCompleteness() {
+        return (<span className="form-completeness add-pointer" aria-hidden="true" data-toggle="tooltip" title=""></span>);
+    }
+
     renderButtons() {
         if (isVaultPackage && isDatamanager) {
             // Datamanager in Vault space.
@@ -145,10 +151,10 @@ class YodaButtons extends React.Component {
                 return (<div></div>);
             } else if (!metadataExists && parentHasMetadata) {
                 // Show 'Save' and 'Clone from parent folder' buttons.
-                return (<div>{this.renderSaveButton()} {this.renderCloneButton()}</div>);
+                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()} {this.renderCloneButton()}</div>);
             } else if (!locked && submitButton) {
                 // Show 'Save', 'Submit' and 'Delete all metadata' buttons.
-                return (<div> {this.renderSaveButton()} {this.renderSubmitButton()} {this.renderDeleteButton()}</div>);
+                return (<div> {this.renderSaveButton()} {this.renderSubmitButton()} {this.renderFormCompleteness()} {this.renderDeleteButton()}</div>);
             } else if (locked && submitButton) {
                 // Show 'Submit' button.
                 return (<div>{this.renderSubmitButton()}</div>);
@@ -167,11 +173,13 @@ class YodaButtons extends React.Component {
 
     render() {
         return (
-          <div className="row yodaButtons">
-            <div className="col-sm-12">
-              {this.renderButtons()}
+            <div className="form-group">
+                <div className="row yodaButtons">
+                    <div className="col-sm-12">
+                        {this.renderButtons()}
+                    </div>
+                </div>
             </div>
-          </div>
         );
     }
 }
@@ -250,7 +258,7 @@ class Container extends React.Component {
     }
 
     render() {
-      return (
+        return (
         <div>
           <YodaButtons saveMetadata={this.saveMetadata}
                        saveVaultMetadata={this.saveVaultMetadata}
@@ -300,6 +308,8 @@ axios.get("/research/metadata/data?path=" + path + "&mode=" + mode)
         render(<Container />,
             document.getElementById("form")
         );
+
+        formCompleteness();
     })
     .catch(function (error) {
         console.log(error);
@@ -530,4 +540,32 @@ function ArrayFieldTemplate(props) {
             {output}
         </div>
     );
+}
+
+
+function formCompleteness()
+{
+    var mandatoryTotal = $('.fa-lock.safe').length;
+    var mandatoryFilled = $('.checkmark-green-top-right').length;
+
+    if (mandatoryTotal == 0) {
+        var metadataCompleteness = 100;
+    } else {
+        var metadataCompleteness = Math.ceil(100 * mandatoryFilled / mandatoryTotal);
+    }
+
+    var html = '<i class="fa fa-check ' + (metadataCompleteness > 19 ? "form-required-present" : "form-required-missing") + '"</i>' +
+    '<i class="fa fa-check ' + (metadataCompleteness > 19 ? "form-required-present" : "form-required-missing") + '"></i>' +
+    '<i class="fa fa-check ' + (metadataCompleteness > 59 ? "form-required-present" : "form-required-missing") + '"></i>' +
+    '<i class="fa fa-check ' + (metadataCompleteness > 79 ? "form-required-present" : "form-required-missing") + '"></i>' +
+    '<i class="fa fa-check ' + (metadataCompleteness > 99 ? "form-required-present" : "form-required-missing") + '"></i>';
+
+    $('.form-completeness').attr('title', 'Required for the vault: '+mandatoryTotal+', currently filled required fields: ' + mandatoryFilled);
+    $('.form-completeness').html(html);
+
+    if (mandatoryTotal == mandatoryFilled) {
+        return true;
+    }
+
+    return false;
 }
