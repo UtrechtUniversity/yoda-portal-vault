@@ -501,8 +501,11 @@ class Metadata_form_model extends CI_Model
 //                                                echo '---------';
 
                                                 if(isset($objectField['items']['yoda:structure'])) {
-                                                    // Empty array for an empty compound structure.
-                                                    $emptyObjectField[$objectKey][] = array();
+                                                    $arCompoundFields = array();
+                                                    foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
+                                                        $arCompoundFields[$compoundElementKey] = '';
+                                                    }
+                                                    $emptyObjectField[$objectKey][] = $arCompoundFields;
                                                 }
                                                 else {
                                                     if ($objectField['type'] == 'array') {
