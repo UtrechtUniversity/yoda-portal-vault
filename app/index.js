@@ -546,8 +546,8 @@ function ArrayFieldTemplate(props) {
 
 function formCompleteness()
 {
-    var mandatoryTotal = $('.fa-lock.safe').length;
-    var mandatoryFilled = $('.checkmark-green-top-right').length;
+    var mandatoryTotal = $('.fa-lock.safe:visible').length;
+    var mandatoryFilled = $('.fa-stack .checkmark-green-top-right:visible').length;
 
     if (mandatoryTotal == 0) {
         var metadataCompleteness = 100;
