@@ -30,6 +30,7 @@ class YodaForm extends React.Component {
         super(props);
 
         const formContext = {
+            submit: false,
             submit: false
         };
         this.state = {
@@ -49,6 +50,7 @@ class YodaForm extends React.Component {
     onError(form) {
         let formContext = {...this.state.formContext};
         formContext.submit = submit;
+        formContext.submit = save;
         this.setState({
             formContext: formContext
         });
@@ -61,7 +63,7 @@ class YodaForm extends React.Component {
             var i = errors.length
             while (i--) {
                 if (errors[i].name === "required"     ||
-                    errors[i].name === "dependencies" ||		    
+                    errors[i].name === "dependencies" ||
                     errors[i].name === "maxLength") {
                     errors.splice(i,1);
                 }
@@ -361,7 +363,7 @@ function CustomFieldTemplate(props) {
     const hasErrors = Array.isArray(errors.props.errors) ? true : false;
 
     // Only show error messages after submit.
-    if (formContext.submit) {
+    if (formContext.submit || formContext.save) {
       return (
         <div className={classNames}>
           <label className={'col-sm-2 control-label'}>
