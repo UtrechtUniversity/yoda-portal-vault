@@ -31,7 +31,7 @@ class YodaForm extends React.Component {
 
         const formContext = {
             submit: false,
-            submit: false
+            save: false
         };
         this.state = {
             formData: yodaFormData,
@@ -50,7 +50,7 @@ class YodaForm extends React.Component {
     onError(form) {
         let formContext = {...this.state.formContext};
         formContext.submit = submit;
-        formContext.submit = save;
+        formContext.save = save;
         this.setState({
             formContext: formContext
         });
