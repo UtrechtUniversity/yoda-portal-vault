@@ -331,34 +331,6 @@ class Metadata_form_model extends CI_Model
                                     break;
                                 }
                             }
-                            else {
-                                // Prepare an empty data array based upon the structure that can be processed by the loop
-                                if(TRUE) { //$fieldKey == 'Related_Datapackage') {
-                                    foreach ($field['items']['properties'] as $objectKey => $objectField) {
-//                                        echo $fieldKey . '--' . $objectKey;
-//                                        print_r($objectField);
-
-                                        if(isset($objectField['items']['yoda:structure'])) { // is a compound
-                                            $arrayCompound = array();
-                                            foreach($objectField['items']['properties'] as $subCompoundKey=>$subCompoundInfo) {
-                                                $arrayCompound[$subCompoundKey] = '';
-                                            }
-                                            $emptyObjectField[$objectKey][] = $arrayCompound; /// moet het enkel of meer zijn???
-                                        }
-                                        elseif(isset($objectField['yoda:structure'])) { // is a compound)
-                                            $arrayCompound = array();
-                                            foreach($objectField['properties'] as $subCompoundKey=>$subCompoundInfo) {
-                                                $arrayCompound[$subCompoundKey] = '';
-                                            }
-                                            $emptyObjectField[$objectKey] = $arrayCompound; /// moet het enkel of meer zijn???
-                                        }
-                                        else {
-                                            $emptyObjectField[$objectKey] = isset($objectField['default']) ? $objectField['default'] : '';
-                                        }
-                                    }
-                                    $xmlDataArray[]['Properties'] = $emptyObjectField;
-                                }
-                            }
                             // Loop through data
                             foreach($xmlDataArray as $xmlData) {
                                 $mainProp = true;
@@ -381,10 +353,9 @@ class Metadata_form_model extends CI_Model
                                             }
                                             $mainProp = false;
                                         } else {   // sub part of sub property handling.
-
                                             if (isset($xmlData['Properties'][$objectKey])) { // DATA EXISTS FOR $objectKey
-
                                                 if ($objectField['type']=='array') {  // multiple - can be compound or single field
+
                                                     $countData = count($xmlData['Properties'][$objectKey]);
                                                     if($countData) {
                                                         if(isset($objectField['items']['yoda:structure'])) { // collect each compound and assess whether is valid
