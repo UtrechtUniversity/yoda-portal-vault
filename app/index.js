@@ -65,6 +65,7 @@ class YodaForm extends React.Component {
                 if (errors[i].name === "required"     ||
                     errors[i].name === "dependencies" ||
                     errors[i].name === "enum"         ||
+                    errors[i].name === "type"         ||
                     errors[i].name === "maxLength") {
                     errors.splice(i,1);
                 }
@@ -82,6 +83,7 @@ class YodaForm extends React.Component {
                 if (errors[i].name === "required"     ||
                     errors[i].name === "dependencies" ||
                     errors[i].name === "enum"         ||
+                    errors[i].name === "type"         ||
                     errors[i].name === "maxLength") {
                     errors.splice(i,1);
                 }
