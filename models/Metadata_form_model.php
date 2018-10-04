@@ -409,12 +409,6 @@ class Metadata_form_model extends CI_Model
                                                     $emptyObjectField[$objectKey] = $subValue;
                                                 }
                                             }
-                                            else { // multiple but not set
-                                                foreach ($objectField['items']['properties'] as $compoundKey=>$compoundInfo) {
-                                                    $arCompoundFields[$compoundKey] = '';
-                                                }
-                                                $emptyObjectField[$objectKey][] = $arCompoundFields;
-                                            }
                                         }
                                     }
                                     else {
