@@ -64,6 +64,7 @@ class YodaForm extends React.Component {
             while (i--) {
                 if (errors[i].name === "required"     ||
                     errors[i].name === "dependencies" ||
+                    errors[i].name === "enum"         ||
                     errors[i].name === "maxLength") {
                     errors.splice(i,1);
                 }
@@ -153,6 +154,9 @@ class YodaButtons extends React.Component {
             } else if (!metadataExists && parentHasMetadata) {
                 // Show 'Save' and 'Clone from parent folder' buttons.
                 return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()} {this.renderCloneButton()}</div>);
+            } else if (!metadataExists) {
+                // Show 'Save' and 'Clone from parent folder' buttons.
+                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()}</div>);
             } else if (!locked && submitButton) {
                 // Show 'Save', 'Submit' and 'Delete all metadata' buttons.
                 return (<div> {this.renderSaveButton()} {this.renderSubmitButton()} {this.renderFormCompleteness()} {this.renderDeleteButton()}</div>);
@@ -161,7 +165,7 @@ class YodaButtons extends React.Component {
                 return (<div>{this.renderSubmitButton()}</div>);
             } else if (!locked && !submitButton) {
                 // Show 'Save' and 'Delete all metadata' buttons.
-                return (<div>{this.renderSaveButton()} {this.renderDeleteButton()}</div>);
+                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()} {this.renderDeleteButton()}</div>);
             } else if (unsubmitButton) {
                 // Show 'Unsubmit' button.
                 return (<div>{this.renderUnsubmitButton()}</div>);
