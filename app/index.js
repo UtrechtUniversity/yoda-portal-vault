@@ -74,6 +74,42 @@ class YodaForm extends React.Component {
         return errors;
     }
 
+    ErrorListTemplate(props) {
+        const {errors} = props;
+        if (!submit) {
+            var i = errors.length
+            while (i--) {
+                if (errors[i].name === "required"     ||
+                    errors[i].name === "dependencies" ||
+                    errors[i].name === "enum"         ||
+                    errors[i].name === "maxLength") {
+                    errors.splice(i,1);
+                }
+            }
+        }
+
+        if (errors.length === 0) {
+            return(<div></div>);
+        } else {
+            return (
+              <div className="panel panel-danger errors">
+                <div className="panel-heading">
+                  <h3 className="panel-title">Validation errors</h3>
+                </div>
+                <ul className="list-group">
+                  {errors.map((error, i) => {
+                    return (
+                      <li key={i} className="list-group-item text-danger">
+                        {error.stack}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            );
+        }
+    }
+
     render () {
         return (
         <Form className="form form-horizontal metadata-form"
@@ -88,7 +124,8 @@ class YodaForm extends React.Component {
               liveValidate={true}
               noValidate={false}
               noHtml5Validate={true}
-              showErrorList={false}
+              showErrorList={true}
+              ErrorList={this.ErrorListTemplate}
               onSubmit={onSubmit}
               onChange={this.onChange.bind(this)}
               onError={this.onError.bind(this)}
