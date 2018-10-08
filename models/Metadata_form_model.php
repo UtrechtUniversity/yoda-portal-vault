@@ -92,7 +92,7 @@ class Metadata_form_model extends CI_Model
         foreach ($jsonsElements['properties'] as $groupName => $formElements) {
             foreach ($formElements['properties'] as $mainElement => $element) {
 
-                if (isset($formData[$mainElement])) {
+                if (isset($formData[$mainElement]) && strlen($formData[$mainElement])) {
                     if (!isset($element['type'])
                         || $element['type']=='integer'
                         || $element['type']=='string' // string in situations like date on top level (embargo end date)
