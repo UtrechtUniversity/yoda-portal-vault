@@ -1,5 +1,9 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+use JsonSchema\SchemaStorage;
+use JsonSchema\Validator;
+use JsonSchema\Constraints\Factory;
+
 class Metadata extends MY_Controller
 {
     public function __construct()
@@ -66,6 +70,7 @@ class Metadata extends MY_Controller
             ),
             'scriptIncludes' => array(
                 'lib/sweetalert/sweetalert.min.js',
+                'js/metadata/delete.js',
             ),
             'path'             => $path,
             'tokenName'        => $tokenName,
@@ -108,9 +113,31 @@ class Metadata extends MY_Controller
            )
         );
 
+        $errors = array();
         $formData = $this->Metadata_form_model->prepareJSONSFormData($jsonSchema, $xmlFormData);
         if (empty($formData)) {
              $formData = json_decode ("{}");
+        } else {
+            // decode to objects
+            $jsonSchemaObject = json_decode($jsonSchema);
+            $formDataEncode = json_encode($formData);
+            $formDataObject = json_decode($formDataEncode);
+
+            // validate form data.
+            $schemaStorage = new SchemaStorage();
+            $schemaStorage->addSchema('file://mySchema', $jsonSchemaObject);
+            $jsonValidator = new Validator( new Factory($schemaStorage));
+            $jsonValidator->validate($formDataObject, $jsonSchemaObject);
+
+            if (!$jsonValidator->isValid()) {
+                foreach ($jsonValidator->getErrors() as $error) {
+                    // Continue if required
+                    if ($error['constraint'] == 'required') {
+                        continue;
+                    }
+                    $errors[] = $error['property'];
+                }
+            }
         }
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
@@ -163,9 +190,10 @@ class Metadata extends MY_Controller
         
         $output = array();
         $output['path']              = $path;
-        $output['schema']            = $jsonSchema;
+        $output['schema']            = json_decode($jsonSchema);
         $output['uiSchema']          = $uiSchema;
         $output['formData']          = $formData;
+        $output['formDataErrors']    = $errors;
         $output['isDatamanager']     = $isDatamanager;
         $output['isVaultPackage']    = $isVaultPackage;
         $output['parentHasMetadata'] = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;

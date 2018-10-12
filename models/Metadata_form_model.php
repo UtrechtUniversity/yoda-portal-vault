@@ -293,6 +293,7 @@ class Metadata_form_model extends CI_Model
      */
     public function prepareJSONSFormData($jsonSchema, $xmlFormData)
     {
+        $jsonSchema = json_decode($jsonSchema, true);
         $formData = array();
         //foreach ($result['properties'] as $groupKey => $group) {
         foreach ($jsonSchema['properties'] as $groupKey => $group) {
@@ -306,7 +307,11 @@ class Metadata_form_model extends CI_Model
                         }
                     } else if ($field['type'] == 'integer') { // integer
                         if (isset($xmlFormData[$fieldKey])) {
-                            $formData[$groupKey][$fieldKey] = (integer) $xmlFormData[$fieldKey];
+                            if (is_numeric($xmlFormData[$fieldKey])) {
+                                $formData[$groupKey][$fieldKey] = intval($xmlFormData[$fieldKey]);
+                            } else {
+                                $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
+                            }
                         }
                     } else if ($field['type'] == 'array') { // array
                         if ($field['items']['type'] == 'string' || !isset($field['items']['type'])) {

@@ -19,6 +19,7 @@ var writePermission   = false;
 var save              = false;
 var submit            = false;
 var unsubmit          = false;
+var formDataErrors    = [];
 
 var form = document.getElementById('form');
 var path = form.dataset.path;
@@ -337,21 +338,34 @@ axios.get("/research/metadata/data?path=" + path + "&mode=" + mode)
         schema            = response.data.schema;
         uiSchema          = response.data.uiSchema;
         yodaFormData      = response.data.formData;
-        isDatamanager     = response.data.isDatamanager
-        isVaultPackage    = response.data.isVaultPackage
-        parentHasMetadata = response.data.parentHasMetadata
-        metadataExists    = response.data.metadataExists
-        submitButton      = response.data.submitButton
-        unsubmitButton    = response.data.unsubmitButton
-        updateButton      = response.data.updateButton
-        locked            = response.data.locked
-        writePermission   = response.data.writePermission
+        isDatamanager     = response.data.isDatamanager;
+        isVaultPackage    = response.data.isVaultPackage;
+        parentHasMetadata = response.data.parentHasMetadata;
+        metadataExists    = response.data.metadataExists;
+        submitButton      = response.data.submitButton;
+        unsubmitButton    = response.data.unsubmitButton;
+        updateButton      = response.data.updateButton;
+        locked            = response.data.locked;
+        writePermission   = response.data.writePermission;
+        formDataErrors    = response.data.formDataErrors;
 
-        render(<Container />,
-            document.getElementById("form")
-        );
+        // Check form data errors
+        if (formDataErrors.length > 0) {
+            var text = '';
+            $.each(formDataErrors, function( key, field ) {
+                text +='- ' + field;
+            });
+            $('.form-data-errors .error-fields').html(text);
 
-        formCompleteness();
+            $('.form-data-errors').removeClass('hide');
+            $('.metadata-form').addClass('hide');
+        } else {
+            render(<Container/>,
+                document.getElementById("form")
+            );
+
+            formCompleteness();
+        }
     })
     .catch(function (error) {
         console.log(error);

@@ -639,7 +639,7 @@ RULE;
             );
 
             $ruleResult = $rule->execute();
-            $output['*result'] = json_decode($ruleResult['*result'], true);
+            $output['*result'] = $ruleResult['*result'];
             $output['*status'] = $ruleResult['*status'];
             $output['*statusInfo'] = $ruleResult['*statusInfo'];
 
