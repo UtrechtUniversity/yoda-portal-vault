@@ -66,6 +66,7 @@ class YodaForm extends React.Component {
                 if (errors[i].name === "required"     ||
                     errors[i].name === "dependencies" ||
                     errors[i].name === "enum"         ||
+                    errors[i].name === "type"         ||
                     errors[i].name === "maxLength") {
                     errors.splice(i,1);
                 }
@@ -83,6 +84,7 @@ class YodaForm extends React.Component {
                 if (errors[i].name === "required"     ||
                     errors[i].name === "dependencies" ||
                     errors[i].name === "enum"         ||
+                    errors[i].name === "type"         ||
                     errors[i].name === "maxLength") {
                     errors.splice(i,1);
                 }
@@ -93,14 +95,14 @@ class YodaForm extends React.Component {
             return(<div></div>);
         } else {
             return (
-              <div className="panel panel-danger errors">
+              <div className="panel panel-warning errors">
                 <div className="panel-heading">
-                  <h3 className="panel-title">Validation errors</h3>
+                  <h3 className="panel-title">Validation warnings</h3>
                 </div>
                 <ul className="list-group">
                   {errors.map((error, i) => {
                     return (
-                      <li key={i} className="list-group-item text-danger">
+                      <li key={i} className="list-group-item text-warning">
                         {error.stack}
                       </li>
                     );

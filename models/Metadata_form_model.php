@@ -104,8 +104,10 @@ class Metadata_form_model extends CI_Model
                         //if (isset($element['type']) && $element['type']=='integer' && !is_numeric($elementData)) {
                         //    $elementData = 0; // Set to 0 when numerical value contains non numerical value
                         //}
-                        $xmlMainElement = $this->_createXmlElementWithText($xml, $mainElement, $elementData);
-                        $xml_metadata->appendChild($xmlMainElement);
+                        if (strlen($elementData)) {
+                            $xmlMainElement = $this->_createXmlElementWithText($xml, $mainElement, $elementData);
+                            $xml_metadata->appendChild($xmlMainElement);
+                        }
                     }
                     else {
                         $structObject = array();
