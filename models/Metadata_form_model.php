@@ -82,7 +82,7 @@ class Metadata_form_model extends CI_Model
         }
 
         $folder = $config['metadataXmlPath'];
-        $jsonsElements = $this->loadJSONS($rodsaccount, $folder);
+        $jsonsElements = json_decode($this->loadJSONS($rodsaccount, $folder), true);
 
         $xml = new DOMDocument("1.0", "UTF-8");
         $xml->formatOutput = true;
