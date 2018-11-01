@@ -242,7 +242,8 @@ class Container extends React.Component {
     }
 
     saveVaultMetadata() {
-        save = submit = unsubmit = false;
+        submit = true;
+        save = unsubmit = false;
         this.form.submitButton.click();
     }
 
