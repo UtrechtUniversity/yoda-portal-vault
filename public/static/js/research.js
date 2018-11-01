@@ -245,6 +245,10 @@ function startBrowsing(path, items)
 	},
         "ajax": {
             url: "browse/data",
+            error: function (xhr, error, thrown) {
+                setMessage('error', 'Something went wrong. Please try again or refresh page.');
+                return true;
+            },
             dataSrc: function (json) {
                 jsonString = JSON.stringify(json);
 

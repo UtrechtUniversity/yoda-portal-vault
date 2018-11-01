@@ -18,7 +18,6 @@ The allows for creating versions; direct copies of a datapackage which is safely
 
 INSTALLATION
 ------
-
 You can use the Yoda install script to add modules to the Yoda environment.
 In the following example, $home is used for the root of the Yoda portal (where the directories `controllers`, `models`, etc. are)
 ```sh
@@ -33,15 +32,9 @@ Next, create the file `module_local.php` in the `config` directory of the module
 
 LICENSE
 -------
-
-Copyright (c) 2015-2017, Utrecht University. All rights reserved.
+Copyright (c) 2015-2018, Utrecht University. All rights reserved.
 
 This project is licensed under the GPLv3 license.
 
 The full license text can be found in [LICENSE](LICENSE).
-
-AUTHORS
--------
-
-- [Jan de Mooij](https://github.com/ajdemooij)
 

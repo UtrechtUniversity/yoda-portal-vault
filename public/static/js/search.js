@@ -97,6 +97,10 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             "ajax": {
                 "url": url,
                 "jsonp": false,
+                error: function (xhr, error, thrown) {
+                    setMessage('error', 'Something went wrong. Please try again or refresh page.');
+                    return true;
+                },
                 dataSrc: function (json) {
                     jsonString = JSON.stringify(json);
 
@@ -119,7 +123,6 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
                 $( ".browse-search" ).on( "click", function() {
                     browse($(this).attr('data-path'));
                 });
-
 
                 $('.matches').tooltip();
             },
