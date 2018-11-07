@@ -493,7 +493,7 @@ class Metadata_form_model extends CI_Model
      * Created unemarated array of a possibly associative array
      * For consistent value processing
      */
-    private function _enumerateArray(array $array)
+    private function _enumerateArray($array)
     {
         if (!is_numeric(key($array))) {
             $enumeratedArray = array();
