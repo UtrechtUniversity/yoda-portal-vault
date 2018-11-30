@@ -43,8 +43,16 @@ class YodaForm extends React.Component {
     onChange(form) {
         formCompleteness();
 
+        // Turn save mode off.
+        save = false;
+        const formContext = {
+            submit: false,
+            save: false
+        };
+
         this.setState({
             formData: form.formData,
+            formContext: formContext
         });
     }
 
@@ -75,7 +83,7 @@ class YodaForm extends React.Component {
     }
 
     ErrorListTemplate(props) {
-        const {errors} = props;
+        const {errors, formContext} = props;
         if (!submit) {
             var i = errors.length
             while (i--) {
@@ -90,22 +98,27 @@ class YodaForm extends React.Component {
         if (errors.length === 0) {
             return(<div></div>);
         } else {
-            return (
-              <div className="panel panel-warning errors">
-                <div className="panel-heading">
-                  <h3 className="panel-title">Validation warnings</h3>
-                </div>
-                <ul className="list-group">
-                  {errors.map((error, i) => {
-                    return (
-                      <li key={i} className="list-group-item text-warning">
-                        {error.stack}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            );
+            // Show error list only on save or submit.
+            if (formContext.save || formContext.submit) {
+                return (
+                  <div className="panel panel-warning errors">
+                    <div className="panel-heading">
+                      <h3 className="panel-title">Validation warnings</h3>
+                    </div>
+                    <ul className="list-group">
+                      {errors.map((error, i) => {
+                        return (
+                          <li key={i} className="list-group-item text-warning">
+                            {error.stack}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                );
+            } else {
+                return(<div></div>);
+            }
         }
     }
 
