@@ -254,10 +254,10 @@ class Metadata extends MY_Controller
                 $tmpFileContent = $this->Filesystem->read($rodsaccount, $tmpSavePath);
                 $writeResult = $this->Filesystem->write($rodsaccount, $tempPath, $tmpFileContent);
                 if ($writeResult) {
-                    //setMessage('success', 'Update of metadata is pending.'); // No message - this is, for this sitatuion dealt with by loading page
+                    setMessage('success', 'Metadata is updated.');
                     $this->Filesystem->delete($rodsaccount, $tmpSavePath);
                 } else {
-                    setMessage('error', 'Unexpected metadata xml write error.');
+                    setMessage('error', 'Unexpected metadata write error.');
                 }
             } else {
                 // result contains all collected messages as an array
