@@ -251,4 +251,28 @@ class Vault extends MY_Controller
             ->set_content_type('application/json')
             ->set_output(json_encode($output));
     }
+
+    // Check whether unpreservable files are used and return their extensions as an array
+    // So frontend can present them to user
+    public function checkForUnpreservableFiles()
+    {
+        $path = $this->input->get('path');
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $fullPath =  $pathStart . $path;
+
+        $this->load->model('Folder_Status_model');
+        $result = $this->Folder_Status_model->getUnpreservableFileFormats($fullPath);
+
+        $extensionsAsText = '';
+        if (is_array($result['*result'])) {
+            $extensionsAsText = implode(' ,', $result['*result']);
+        }
+        $output = array('status' => $result['*status'],
+            'statusInfo' => $result['*statusInfo'],
+            'result' => $extensionsAsText);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
 }

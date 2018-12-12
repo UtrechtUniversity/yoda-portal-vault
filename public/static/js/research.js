@@ -25,7 +25,30 @@ $( document ).ready(function() {
     });
 
     $("body").on("click", "a.action-submit", function() {
-        submitToVault($(this).attr('data-folder'));
+        // Check for unpreservable file formats first.
+        // If present, make user aware which extensions.
+        folder = $(this).attr('data-folder');
+
+        $.getJSON("vault/checkForUnpreservableFiles?path=" + folder, function (data) {
+            if (data.status == 'Success') {
+                if (data.result.length) {
+                    $('#showUnpreservableFiles .list-unpreservable-formats').html(data.result);
+                    $('#showUnpreservableFiles').modal('show');
+                } else {
+                    // can be submitted to vault directly as no unpreservable files are present
+                    submitToVault(folder);
+                }
+            } else {
+                setMessage('error', data.statusInfo);
+            }
+        });
+    });
+
+    $('.action-accept-presence-unpreservable-files').on("click", function() {
+        folder = $('a.action-submit').attr('data-folder');
+
+        $('#showUnpreservableFiles').modal('hide');
+        submitToVault(folder)
     });
 
     $("body").on("click", "a.action-unsubmit", function() {

@@ -176,4 +176,17 @@ class Folder_Status_model extends CI_Model
         $result = $rule->execute();
         return $result;
     }
+
+    // Get array of extensions being unpreservable file formats
+    function getUnpreservableFileFormats($fullPath)
+    {
+        $outputParams = array('*result', '*status', '*statusInfo');
+        $inputParams = array('*folder' => $fullPath);
+
+        $this->CI->load->library('irodsrule');
+        $rule = $this->irodsrule->make('iiFrontRequestDatasetUnpreservableExtensions', $inputParams, $outputParams);
+        $result = $rule->execute();
+
+        return $result;
+    }
 }
