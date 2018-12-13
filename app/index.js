@@ -24,6 +24,21 @@ var formDataErrors    = [];
 var form = document.getElementById('form');
 var path = form.dataset.path;
 
+const numberWidget = (props) => {
+    return (
+        <input type="number"
+               className="number-field form-control"
+               min="0"
+               value={props.value}
+               required={props.required}
+               onChange={(event) => props.onChange(event.target.value)} />
+    );
+};
+
+const widgets = {
+    numberWidget: numberWidget
+};
+
 const onSubmit = ({formData}) => submitData(formData);
 
 class YodaForm extends React.Component {
@@ -139,6 +154,7 @@ class YodaForm extends React.Component {
               showErrorList={true}
               ErrorList={this.ErrorListTemplate}
               onSubmit={onSubmit}
+              widgets={widgets}
               onChange={this.onChange.bind(this)}
               onError={this.onError.bind(this)}
               transformErrors={this.transformErrors}>

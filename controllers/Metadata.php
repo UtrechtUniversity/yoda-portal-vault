@@ -110,7 +110,12 @@ class Metadata extends MY_Controller
                "Description" => array(
                    "ui:widget" => "textarea"
                )
-           )
+            ),
+            "Administrative-group" => array(
+                "Retention_Period" => array(
+                    "ui:widget" => "numberWidget"
+                )
+            )
         );
 
         $errors = array();
