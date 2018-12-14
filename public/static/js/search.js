@@ -98,6 +98,7 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
                 "url": url,
                 "jsonp": false,
                 error: function (xhr, error, thrown) {
+                    $("#file-browser_processing").hide()
                     setMessage('error', 'Something went wrong. Please try again or refresh page.');
                     return true;
                 },
