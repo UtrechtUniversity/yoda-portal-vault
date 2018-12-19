@@ -27,7 +27,9 @@ class Search extends MY_Controller
         $length = $this->input->get('length');
         $order = $this->input->get('order');
         $orderDir = $order[0]['dir'];
-        $orderColumn = $order[0]['column'];
+        // $orderColumn = $order[0]['column'];
+        // Disabled until ordering is restored.
+        $orderColumn = 0;
         $draw = $this->input->get('draw');
         $itemsPerPage = $this->config->item('browser-items-per-page');
         $totalItems = 0;

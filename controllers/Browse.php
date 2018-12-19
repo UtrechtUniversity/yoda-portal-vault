@@ -208,7 +208,9 @@ class Browse extends MY_Controller
         $length = $this->input->get('length');
         $order = $this->input->get('order');
         $orderDir = $order[0]['dir'];
-        $orderColumn = $order[0]['column'];
+        // $orderColumn = $order[0]['column'];
+        // Disabled until ordering is restored.
+        $orderColumn = 0;
         $orderColumns = array(
             0 => 'COLL_NAME',
             1 => 'COLL_MODIFY_TIME'

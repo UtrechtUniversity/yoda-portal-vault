@@ -297,7 +297,7 @@ class Metadata_form_model extends CI_Model
     {
         $jsonSchema = json_decode($jsonSchema, true);
         $formData = array();
-        //foreach ($result['properties'] as $groupKey => $group) {
+	
         foreach ($jsonSchema['properties'] as $groupKey => $group) {
             //Group
             foreach($group['properties'] as $fieldKey => $field) {
@@ -316,7 +316,7 @@ class Metadata_form_model extends CI_Model
                             }
                         }
                     } else if ($field['type'] == 'array') { // array
-                        if ($field['items']['type'] == 'string' || !isset($field['items']['type'])) {
+                        if (!isset($field['items']['type']) || $field['items']['type'] == 'string') {
                             if (isset($xmlFormData[$fieldKey])) {
                                 if (count($xmlFormData[$fieldKey]) == 1) {
                                     $formData[$groupKey][$fieldKey] = array($xmlFormData[$fieldKey]);
@@ -363,8 +363,8 @@ class Metadata_form_model extends CI_Model
                                             if (isset($xmlData['Properties'][$objectKey])) { // DATA EXISTS FOR $objectKey
                                                 if ($objectField['type']=='array') {  // multiple - can be compound or single field
 
-                                                    $countData = count($xmlData['Properties'][$objectKey]);
-                                                    if($countData) {
+                                                    $data = $xmlData['Properties'][$objectKey
+                                                    if (is_array($data) && count($data)) {
                                                         if(isset($objectField['items']['yoda:structure'])) { // collect each compound and assess whether is valid
                                                             // prepare the data
                                                             $baseData = array();
@@ -377,7 +377,7 @@ class Metadata_form_model extends CI_Model
                                                                 }
                                                                 break;
                                                             }
-                                                            foreach($baseData as $data) {
+                                                            foreach ($baseData as $data) {
                                                                 $arCompoundFields = array();
                                                                 foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
                                                                     // only take the data when not an array

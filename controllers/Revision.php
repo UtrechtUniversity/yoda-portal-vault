@@ -172,7 +172,9 @@ class Revision extends MY_Controller
         $length = $this->input->get('length');
         $order = $this->input->get('order');
         $orderDir = $order[0]['dir'];
-        $orderColumn = $order[0]['column'];
+        // $orderColumn = $order[0]['column'];
+        // Disabled until ordering is restored.
+        $orderColumn = 0;
         $draw = $this->input->get('draw');
 
         $orderColumns = array( // ordering columns on the corresponding iRods column names
