@@ -363,7 +363,7 @@ class Metadata_form_model extends CI_Model
                                             if (isset($xmlData['Properties'][$objectKey])) { // DATA EXISTS FOR $objectKey
                                                 if ($objectField['type']=='array') {  // multiple - can be compound or single field
 
-                                                    $data = $xmlData['Properties'][$objectKey
+                                                    $data = $xmlData['Properties'][$objectKey];
                                                     if (is_array($data) && count($data)) {
                                                         if(isset($objectField['items']['yoda:structure'])) { // collect each compound and assess whether is valid
                                                             // prepare the data
