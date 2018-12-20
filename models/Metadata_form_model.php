@@ -297,7 +297,10 @@ class Metadata_form_model extends CI_Model
     {
         $jsonSchema = json_decode($jsonSchema, true);
         $formData = array();
-	
+
+       // print_r($jsonSchema);exit;
+
+
         foreach ($jsonSchema['properties'] as $groupKey => $group) {
             //Group
             foreach($group['properties'] as $fieldKey => $field) {
@@ -318,7 +321,7 @@ class Metadata_form_model extends CI_Model
                     } else if ($field['type'] == 'array') { // array
                         if (!isset($field['items']['type']) || $field['items']['type'] == 'string') {
                             if (isset($xmlFormData[$fieldKey])) {
-                                if (count($xmlFormData[$fieldKey]) == 1) {
+                                if (!is_array($xmlFormData[$fieldKey])) {
                                     $formData[$groupKey][$fieldKey] = array($xmlFormData[$fieldKey]);
                                 } else {
                                     $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
@@ -360,62 +363,65 @@ class Metadata_form_model extends CI_Model
                                             }
                                             $mainProp = false;
                                         } else {   // sub part of sub property handling.
-                                            if (isset($xmlData['Properties'][$objectKey])) { // DATA EXISTS FOR $objectKey
-                                                if ($objectField['type']=='array') {  // multiple - can be compound or single field
+                                            if ($objectField['type']=='array') {  // multiple - can be compound or single field
 
-                                                    $data = $xmlData['Properties'][$objectKey];
-                                                    if (is_array($data) && count($data)) {
-                                                        if(isset($objectField['items']['yoda:structure'])) { // collect each compound and assess whether is valid
-                                                            // prepare the data
-                                                            $baseData = array();
-                                                            foreach($xmlData['Properties'][$objectKey] as $key=>$val) {
-                                                                if(!is_numeric($key)) {
-                                                                    $baseData[] = $xmlData['Properties'][$objectKey];
-                                                                }
-                                                                else {
-                                                                    $baseData = $xmlData['Properties'][$objectKey];
-                                                                }
-                                                                break;
-                                                            }
-                                                            foreach ($baseData as $data) {
-                                                                $arCompoundFields = array();
-                                                                foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
-                                                                    // only take the data when not an array
-                                                                    if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
-                                                                        $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
-                                                                    }
-                                                                }
-                                                                $emptyObjectField[$objectKey][] = $arCompoundFields;
-                                                            }
+                                                //$data = $xmlData['Properties'][$objectKey];
+                                                //if (true)  { //is_array($data) && count($data)) {
+                                                if(isset($objectField['items']['yoda:structure'])) { // collect each compound and assess whether is valid
+                                                    // prepare the data
+                                                    $baseData = array();
+                                                    foreach($xmlData['Properties'][$objectKey] as $key=>$val) {
+                                                        if(!is_numeric($key)) {
+                                                            $baseData[] = $xmlData['Properties'][$objectKey];
                                                         }
                                                         else {
-                                                            $affValuesArray = $xmlData['Properties'][$objectKey];
-                                                            if(!is_array($affValuesArray)) {
-                                                                $affValuesArray = array($xmlData['Properties'][$objectKey]);
+                                                            $baseData = $xmlData['Properties'][$objectKey];
+                                                        }
+                                                        break;
+                                                    }
+                                                    foreach ($baseData as $data) {
+                                                        $arCompoundFields = array();
+                                                        foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
+                                                            // only take the data when not an array
+                                                            if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
+                                                                $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
                                                             }
-                                                            $emptyObjectField[$objectKey] = $affValuesArray ; //$xmlData['Properties'][$objectKey];
                                                         }
+                                                        $emptyObjectField[$objectKey][] = $arCompoundFields;
                                                     }
-                                                } elseif(($objectField['type']=='object')) {  // compound single structure
-                                                    $arCompoundFields = array();
+                                                }
+                                                else {
+                                                    if (!isset($xmlData['Properties'][$objectKey])) {
+                                                        $emptyObjectField[$objectKey][0] = '';
+                                                    } else {
+                                                        $affValuesArray = $xmlData['Properties'][$objectKey];
+                                                        if (!is_array($affValuesArray)) {
+                                                            $affValuesArray = array($xmlData['Properties'][$objectKey]);
+                                                        }
+                                                    $emptyObjectField[$objectKey] = $affValuesArray; //$xmlData['Properties'][$objectKey];
+                                                   }
+                                                }
+                                                //}
+                                            } elseif(($objectField['type']=='object')) {  // compound single structure
+                                                $arCompoundFields = array();
 
-                                                    $data = $xmlData['Properties'][$objectKey];
-                                                    foreach ($objectField['properties'] as $compoundElementKey => $info) {
-                                                        // only take the data when not an array
-                                                        if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
-                                                            $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
-                                                        }
+                                                $data = $xmlData['Properties'][$objectKey];
+                                                foreach ($objectField['properties'] as $compoundElementKey => $info) {
+                                                    // only take the data when not an array
+                                                    if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
+                                                        $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
                                                     }
-                                                    $emptyObjectField[$objectKey] = $arCompoundFields;
                                                 }
-                                                else { // can only be single field as this is a subproperty
-                                                    $subValue = '';
-                                                    if (!is_array($xmlData['Properties'][$objectKey])) {
-                                                        $subValue = $xmlData['Properties'][$objectKey];
-                                                    }
-                                                    $emptyObjectField[$objectKey] = $subValue;
-                                                }
+                                                $emptyObjectField[$objectKey] = $arCompoundFields;
                                             }
+                                            else { // can only be single field as this is a subproperty
+                                                $subValue = '';
+                                                if (!is_array($xmlData['Properties'][$objectKey])) {
+                                                    $subValue = $xmlData['Properties'][$objectKey];
+                                                }
+                                                $emptyObjectField[$objectKey] = $subValue;
+                                            }
+                                            //}
                                         }
                                     }
                                     else {
@@ -472,7 +478,7 @@ class Metadata_form_model extends CI_Model
                 }
             }
         }
-
+//
 //        print_r($formData);
 //        exit;
 //
