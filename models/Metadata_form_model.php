@@ -1,19 +1,15 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-
 class Metadata_form_model extends CI_Model
 {
-
     var $CI = NULL;
 
     function __construct()
     {
         parent::__construct();
         $this->CI =& get_instance();
-
         $this->CI->load->model('filesystem');
     }
-
 
     private function _createXmlElementWithText($xml, $elementName, $text)
     {
@@ -24,25 +20,25 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
+     * Creates an compound structure
+     * returns the entire object, either without or without changes
+     *
      * @param $xml
      * @param $xml_metadata
      * @param $mainElement - name of element holding the actual compound elements
      * @param $structObjectProperties
      * @param $formData
      * @return mixed
-     *
-     *
-     * Creates an compound structure
-     * returns the entire object, either without or without changes
      */
     private function _addCompoundToXml($xml,
-                                    $xmlCompoundParent,
-                                    $compoundMainElement,
-                                    $structObjectProperties,
-                                    $formData)
+                                       $xmlCompoundParent,
+                                       $compoundMainElement,
+                                       $structObjectProperties,
+                                       $formData)
     {
         $xmlMainElement = $xml->createElement($compoundMainElement);
         $anyValueFound = false;
+
         foreach ($structObjectProperties as $compoundElementKey => $compoundElementInfo) {
             if (isset($formData[$compoundElementKey]) && strlen($formData[$compoundElementKey])) {
                 $anyValueFound = true;
@@ -50,21 +46,23 @@ class Metadata_form_model extends CI_Model
                 $xmlMainElement->appendChild($xmlCompoundElement);
             }
         }
+
         if ($anyValueFound) {
             $xmlCompoundParent->appendChild($xmlMainElement);
         }
+
         return $anyValueFound;
     }
 
 
     /**
-     * @param $rodsaccount
-     * @param $config
-     *
      * Handles the posted information of a yoda form and puts the values, after escaping, in .yoda-metadata.xml
      * The config holds the correct paths to form definitions and .yoda-metadata.xml
      *
      * NO VALIDATION OF DATA IS PERFORMED IN ANY WAY
+     *
+     * @param $rodsaccount
+     * @param $config
      */
     public function processPost($rodsaccount, $config)
     {
@@ -75,7 +73,7 @@ class Metadata_form_model extends CI_Model
         // These must be excluded first for ease of use within code
         $formData = array();
         foreach($formReceivedData as $group=>$realFormData) {
-            #first level to be skipped as is descriptive
+            // first level to be skipped as is descriptive
             foreach($realFormData as $key => $val  ) {
                 $formData[$key] = $val;
             }
@@ -229,10 +227,7 @@ class Metadata_form_model extends CI_Model
         }
 
         $xml->appendChild($xml_metadata);
-
         $xmlString = $xml->saveXML();
-        print_r($xmlString);
-//exit;
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
 
@@ -253,16 +248,15 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
-     * @param $rodsaccount
-     * @param $path
-     * @return array|bool
-     *
      * Load the yoda-metadata.xml file ($path) in an array structure
      *
      * Reorganise this this in such a way that hierarchy is lost but indexing is possible by eg 'Author_Property_Role'
-     */
+     *
+     * @param $rodsaccount
+     * @param $path
+     * @return array|bool
 
-    /** USER IN NEW SITUATION */
+     */
     public function loadFormData($rodsaccount, $path)
     {
         $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
@@ -270,8 +264,6 @@ class Metadata_form_model extends CI_Model
         libxml_use_internal_errors(true);
         $xmlData = simplexml_load_string($fileContent);
         $errors = libxml_get_errors();
-
-//        print_r($errors);
 
         libxml_clear_errors();
 
