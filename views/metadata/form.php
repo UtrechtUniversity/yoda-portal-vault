@@ -11,14 +11,12 @@
                 </div>
                 <div class="panel-body">
                     <p>
-                        It is not possible to load this form as the metadata xml file is not in accordance with the form definition.<br>
-                        <br>Check the following in your XML file:
-                        <br>
+                        It is not possible to load this form as the metadata xml file is not in accordance with the form definition.<br />
+                        <br />Check the following in your XML file:
+                        <br />
                         <span class="error-fields"></span>
-                        <br>
-                        <br>
+                        <br />
                         When using the 'Delete all metadata' button beware that you will lose all data!
-
                         <button type="button" onclick="deleteMetadata('<?php echo rawurlencode($path); ?>')" class="btn btn-danger delete-all-metadata-btn pull-right">Delete all metadata </button>
                     </p>
                 </div>
