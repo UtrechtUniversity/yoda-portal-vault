@@ -249,7 +249,7 @@ class Metadata_form_model extends CI_Model
             return $result['*result'];
         } else {
             return '';
-        } 
+        }
     }
 
     /**
@@ -287,19 +287,16 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
+     * Combines XML data with the JSON schema and returns array as a basis for react form.
+     *
      * @param $jsonSchema
      * @param $xmlFormData
      * @return array
-     *
-     * Combines xml data with the json schema and returns array as a basis for react form
      */
     public function prepareJSONSFormData($jsonSchema, $xmlFormData)
     {
         $jsonSchema = json_decode($jsonSchema, true);
         $formData = array();
-
-       // print_r($jsonSchema);exit;
-
 
         foreach ($jsonSchema['properties'] as $groupKey => $group) {
             //Group
@@ -364,30 +361,31 @@ class Metadata_form_model extends CI_Model
                                             $mainProp = false;
                                         } else {   // sub part of sub property handling.
                                             if ($objectField['type']=='array') {  // multiple - can be compound or single field
-
-                                                //$data = $xmlData['Properties'][$objectKey];
-                                                //if (true)  { //is_array($data) && count($data)) {
                                                 if(isset($objectField['items']['yoda:structure'])) { // collect each compound and assess whether is valid
-                                                    // prepare the data
-                                                    $baseData = array();
-                                                    foreach($xmlData['Properties'][$objectKey] as $key=>$val) {
-                                                        if(!is_numeric($key)) {
-                                                            $baseData[] = $xmlData['Properties'][$objectKey];
-                                                        }
-                                                        else {
-                                                            $baseData = $xmlData['Properties'][$objectKey];
-                                                        }
-                                                        break;
-                                                    }
-                                                    foreach ($baseData as $data) {
-                                                        $arCompoundFields = array();
-                                                        foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
-                                                            // only take the data when not an array
-                                                            if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
-                                                                $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
+                                                    if(isset($xmlData['Properties'][$objectKey])) {
+                                                        // prepare the data
+                                                        $baseData = array();
+                                                        foreach($xmlData['Properties'][$objectKey] as $key=>$val) {
+                                                            if(!is_numeric($key)) {
+                                                                $baseData[] = $xmlData['Properties'][$objectKey];
                                                             }
+                                                            else {
+                                                                $baseData = $xmlData['Properties'][$objectKey];
+                                                            }
+                                                            break;
                                                         }
-                                                        $emptyObjectField[$objectKey][] = $arCompoundFields;
+                                                        foreach ($baseData as $data) {
+                                                            $arCompoundFields = array();
+                                                            foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
+                                                                // only take the data when not an array
+                                                                if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
+                                                                    $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
+                                                                }
+                                                            }
+                                                            $emptyObjectField[$objectKey][] = $arCompoundFields;
+                                                        }
+                                                    } else {
+                                                      // Handle empty structure?
                                                     }
                                                 }
                                                 else {
@@ -401,7 +399,6 @@ class Metadata_form_model extends CI_Model
                                                     $emptyObjectField[$objectKey] = $affValuesArray; //$xmlData['Properties'][$objectKey];
                                                    }
                                                 }
-                                                //}
                                             } elseif(($objectField['type']=='object')) {  // compound single structure
                                                 $arCompoundFields = array();
 
@@ -421,7 +418,6 @@ class Metadata_form_model extends CI_Model
                                                 }
                                                 $emptyObjectField[$objectKey] = $subValue;
                                             }
-                                            //}
                                         }
                                     }
                                     else {
@@ -478,10 +474,6 @@ class Metadata_form_model extends CI_Model
                 }
             }
         }
-//
-//        print_r($formData);
-//        exit;
-//
 
         return $formData;
     }
