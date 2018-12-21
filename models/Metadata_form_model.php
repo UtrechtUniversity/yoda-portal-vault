@@ -299,45 +299,43 @@ class Metadata_form_model extends CI_Model
         $formData = array();
 
         foreach ($jsonSchema['properties'] as $groupKey => $group) {
-            //Group
-            foreach($group['properties'] as $fieldKey => $field) {
+            // Group
+            foreach ($group['properties'] as $fieldKey => $field) {
                 // Field
-                if (array_key_exists('type', $field)) {
-                    if ($field['type'] == 'string') { // string
-                        if (isset($xmlFormData[$fieldKey])) {
+                if (array_key_exists('type', $field) && isset($xmlFormData[$fieldKey])) {
+                    if ($field['type'] == 'string') {
+                        // String
+                        $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
+                    } else if ($field['type'] == 'integer') {
+                        // Integer
+                        if (is_numeric($xmlFormData[$fieldKey])) {
+                            $formData[$groupKey][$fieldKey] = intval($xmlFormData[$fieldKey]);
+                        } else {
                             $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
                         }
-                    } else if ($field['type'] == 'integer') { // integer
-                        if (isset($xmlFormData[$fieldKey])) {
-                            if (is_numeric($xmlFormData[$fieldKey])) {
-                                $formData[$groupKey][$fieldKey] = intval($xmlFormData[$fieldKey]);
+                    } else if ($field['type'] == 'array') {
+                        // Array
+                        if (!isset($field['items']['type']) || $field['items']['type'] == 'string') {
+                            // String array
+                            if (!is_array($xmlFormData[$fieldKey])) {
+                                $formData[$groupKey][$fieldKey] = array($xmlFormData[$fieldKey]);
                             } else {
                                 $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
                             }
-                        }
-                    } else if ($field['type'] == 'array') { // array
-                        if (!isset($field['items']['type']) || $field['items']['type'] == 'string') {
-                            if (isset($xmlFormData[$fieldKey])) {
-                                if (!is_array($xmlFormData[$fieldKey])) {
-                                    $formData[$groupKey][$fieldKey] = array($xmlFormData[$fieldKey]);
-                                } else {
-                                    $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
-                                }
-                            }
                         } else if ($field['items']['type'] == 'object') {
+                            // Object array
                             $emptyObjectField = array();
 
                             $xmlDataArray = array();
-                            if (isset($xmlFormData[$fieldKey])) {
-                                foreach ($xmlFormData[$fieldKey] as $keyTest => $valueTest) {
-                                    if (is_numeric($keyTest)) {
-                                        $xmlDataArray = $xmlFormData[$fieldKey];
-                                    } else {
-                                        $xmlDataArray[] = $xmlFormData[$fieldKey];
-                                    }
-                                    break;
+                            foreach ($xmlFormData[$fieldKey] as $keyTest => $valueTest) {
+                                if (is_numeric($keyTest)) {
+                                    $xmlDataArray = $xmlFormData[$fieldKey];
+                                } else {
+                                    $xmlDataArray[] = $xmlFormData[$fieldKey];
                                 }
+                                break;
                             }
+
                             // Loop through data
                             foreach($xmlDataArray as $xmlData) {
                                 $mainProp = true;
@@ -346,7 +344,7 @@ class Metadata_form_model extends CI_Model
                                 // Loop through the elements constituing the structure:
                                 foreach ($field['items']['properties'] as $objectKey => $objectField) {
                                     // Start of sub property structure
-                                    if ( $field['items']['yoda:structure'] == 'subproperties') {
+                                    if ($field['items']['yoda:structure'] == 'subproperties') {
                                         // Lead property handling
                                         if ($mainProp) {
                                             if (isset($xmlData[$objectKey])) { // DIT KUNNEN DUS OOK LEGE REGELS ZIJN IN HET XML FORM
@@ -444,9 +442,10 @@ class Metadata_form_model extends CI_Model
                             }
                         }
                     } else if ($field['type'] == 'object') {
+                        // Object
                         $structure = $field['yoda:structure'];
-                        // Subproperties
                         if (isset($structure) && $structure == 'subproperties') {
+                            // Object subproperties
                             $mainProp = true;
                             foreach ($field['properties'] as $objectKey => $objectField) {
                                 if ($mainProp) {
@@ -467,10 +466,9 @@ class Metadata_form_model extends CI_Model
                             }
                         }
                     }
-                } else {
-                    if (isset($xmlFormData[$fieldKey])) {
-                        $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
-                    }
+                } else if (isset($xmlFormData[$fieldKey])) {
+                    // Unkown type
+                    $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
                 }
             }
         }
