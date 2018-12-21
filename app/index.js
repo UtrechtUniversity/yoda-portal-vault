@@ -381,7 +381,7 @@ axios.get("/research/metadata/data?path=" + path + "&mode=" + mode)
         if (formDataErrors.length > 0) {
             var text = '';
             $.each(formDataErrors, function( key, field ) {
-                text +='- ' + field;
+                text +='- ' + field + '<br />:';
             });
             $('.form-data-errors .error-fields').html(text);
 

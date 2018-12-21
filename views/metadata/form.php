@@ -12,7 +12,7 @@
                 <div class="panel-body">
                     <p>
                         It is not possible to load this form as the metadata xml file is not in accordance with the form definition.<br>
-                        <br>Check the following in your xml file:
+                        <br>Check the following in your XML file:
                         <br>
                         <span class="error-fields"></span>
                         <br>
