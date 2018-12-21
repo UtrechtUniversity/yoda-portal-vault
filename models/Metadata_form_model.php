@@ -298,14 +298,14 @@ class Metadata_form_model extends CI_Model
                     if ($field['type'] == 'string') {
                         // String
                         $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
-                    } else if ($field['type'] == 'integer') {
+                    } elseif ($field['type'] == 'integer') {
                         // Integer
                         if (is_numeric($xmlFormData[$fieldKey])) {
                             $formData[$groupKey][$fieldKey] = intval($xmlFormData[$fieldKey]);
                         } else {
                             $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
                         }
-                    } else if ($field['type'] == 'array') {
+                    } elseif ($field['type'] == 'array') {
                         // Array
                         if (!isset($field['items']['type']) || $field['items']['type'] == 'string') {
                             // String array
@@ -314,13 +314,13 @@ class Metadata_form_model extends CI_Model
                             } else {
                                 $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
                             }
-                        } else if ($field['items']['type'] == 'object') {
+                        } elseif ($field['items']['type'] == 'object') {
                             // Object array
                             $emptyObjectField = array();
 
                             $xmlDataArray = array();
-                            foreach ($xmlFormData[$fieldKey] as $keyTest => $valueTest) {
-                                if (is_numeric($keyTest)) {
+                            foreach ($xmlFormData[$fieldKey] as $key => $value) {
+                                if (is_numeric($key)) {
                                     $xmlDataArray = $xmlFormData[$fieldKey];
                                 } else {
                                     $xmlDataArray[] = $xmlFormData[$fieldKey];
@@ -328,7 +328,7 @@ class Metadata_form_model extends CI_Model
                                 break;
                             }
 
-                            // Loop through data
+                            // Loop through object data
                             foreach($xmlDataArray as $xmlData) {
                                 $mainProp = true;
                                 $emptyObjectField = array();
@@ -350,7 +350,7 @@ class Metadata_form_model extends CI_Model
                                             }
                                             $mainProp = false;
                                         } else {   // sub part of sub property handling.
-                                            if ($objectField['type']=='array') {  // multiple - can be compound or single field
+                                            if ($objectField['type'] == 'array') {  // multiple - can be compound or single field
                                                 if(isset($objectField['items']['yoda:structure'])) { // collect each compound and assess whether is valid
                                                     if(isset($xmlData['Properties'][$objectKey])) {
                                                         // prepare the data
@@ -377,8 +377,7 @@ class Metadata_form_model extends CI_Model
                                                     } else {
                                                       // Handle empty structure?
                                                     }
-                                                }
-                                                else {
+                                                } else {
                                                     if (!isset($xmlData['Properties'][$objectKey])) {
                                                         $emptyObjectField[$objectKey][0] = '';
                                                     } else {
@@ -386,10 +385,10 @@ class Metadata_form_model extends CI_Model
                                                         if (!is_array($affValuesArray)) {
                                                             $affValuesArray = array($xmlData['Properties'][$objectKey]);
                                                         }
-                                                    $emptyObjectField[$objectKey] = $affValuesArray; //$xmlData['Properties'][$objectKey];
+                                                        $emptyObjectField[$objectKey] = $affValuesArray; //$xmlData['Properties'][$objectKey];
                                                    }
                                                 }
-                                            } elseif(($objectField['type']=='object')) {  // compound single structure
+                                            } elseif(($objectField['type'] == 'object')) {  // compound single structure
                                                 $arCompoundFields = array();
 
                                                 $data = $xmlData['Properties'][$objectKey];
@@ -409,15 +408,14 @@ class Metadata_form_model extends CI_Model
                                                 $emptyObjectField[$objectKey] = $subValue;
                                             }
                                         }
-                                    }
-                                    else {
+                                    } else {
                                         if ($objectField['type'] == 'string') {
                                             $emptyObjectField[$objectKey] = $objectKey;
-                                        } else if ($objectField['type'] == 'object') { //subproperties (OLD)
+                                        } elseif ($objectField['type'] == 'object') { //subproperties (OLD)
                                             foreach ($objectField['properties'] as $subObjectKey => $subObjectField) {
                                                 if ($subObjectField['type'] == 'string') {
                                                     $emptyObjectField[$objectKey][$subObjectKey] = $objectKey;
-                                                } else if ($subObjectField['type'] == 'object') {// Composite
+                                                } elseif ($subObjectField['type'] == 'object') {// Composite
                                                     $compositeField = array();
                                                     foreach ($subObjectField['properties'] as $subCompositeKey => $subCompositeField) {
                                                         $compositeField[$subCompositeKey] = $subCompositeKey;
@@ -433,7 +431,7 @@ class Metadata_form_model extends CI_Model
                                 }
                             }
                         }
-                    } else if ($field['type'] == 'object') {
+                    } elseif ($field['type'] == 'object') {
                         // Object
                         $structure = $field['yoda:structure'];
                         if (isset($structure) && $structure == 'subproperties') {
@@ -458,7 +456,7 @@ class Metadata_form_model extends CI_Model
                             }
                         }
                     }
-                } else if (isset($xmlFormData[$fieldKey])) {
+                } elseif (isset($xmlFormData[$fieldKey])) {
                     // Unkown type
                     $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
                 }
