@@ -29,6 +29,7 @@ const numberWidget = (props) => {
         <input type="number"
                className="number-field form-control"
                min="0"
+               max="9999"
                value={props.value}
                required={props.required}
                onChange={(event) => props.onChange(event.target.value)} />
