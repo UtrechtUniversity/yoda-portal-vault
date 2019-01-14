@@ -40,9 +40,12 @@ class Revision extends MY_Controller
         $searchType = 'revision';
         $showStatus = false;
         $showTerm = true;
+        $searchStatusValue = '';
         $searchStart = 0;
+        $searchOrderDir = 'asc';
+        $searchOrderColumn = 0;
         $searchItemsPerPage = $this->config->item('search-items-per-page');
-        $searchData = compact('searchTerm', 'searchType', 'searchStart', 'showStatus', 'showTerm', 'searchItemsPerPage');
+        $searchData = compact('searchTerm', 'searchStatusValue', 'searchType', 'searchStart', 'searchOrderDir', 'searchOrderColumn', 'showStatus', 'showTerm', 'searchItemsPerPage');
         $searchHtml = $this->load->view('search', $searchData, true);
 
         $viewParams = array(
@@ -262,8 +265,7 @@ class Revision extends MY_Controller
                 'orgFileName' => $orgFileName,
                 'collectionExists' => $collectionExists,
                 'revisionStartPath' => $revisionStartPath,
-                'revisionFiles' => $revisionFiles,
-                'permissions' => $this->permissions
+                'revisionFiles' => $revisionFiles
             ),
             true);
 
