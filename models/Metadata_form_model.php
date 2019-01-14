@@ -350,8 +350,7 @@ class Metadata_form_model extends CI_Model
                                             }
                                             $mainProp = false;
                                         } else {   // sub part of sub property handling.
-                                            if (isset($objectField['type'])) {
-                                                if ($objectField['type'] == 'array') {  // multiple - can be compound or single field
+                                                if (isset($objectField['type']) && $objectField['type'] == 'array') {  // multiple - can be compound or single field
                                                     if (isset($objectField['items']['yoda:structure'])) { // collect each compound and assess whether is valid
                                                         if (isset($xmlData['Properties'][$objectKey])) {
                                                             // prepare the data
@@ -388,7 +387,7 @@ class Metadata_form_model extends CI_Model
                                                             $emptyObjectField[$objectKey] = $affValuesArray; //$xmlData['Properties'][$objectKey];
                                                         }
                                                     }
-                                                } elseif (($objectField['type'] == 'object')) {  // compound single structure
+                                                } elseif (isset($objectField['type']) && $objectField['type'] == 'object') {  // compound single structure
                                                     $arCompoundFields = array();
 
                                                     $data = $xmlData['Properties'][$objectKey];
@@ -401,12 +400,11 @@ class Metadata_form_model extends CI_Model
                                                     $emptyObjectField[$objectKey] = $arCompoundFields;
                                                 } else { // can only be single field as this is a subproperty
                                                     $subValue = '';
-                                                    if (!is_array($xmlData['Properties'][$objectKey])) {
+                                                    if (isset($xmlData['Properties'][$objectKey]) && !is_array($xmlData['Properties'][$objectKey])) {
                                                         $subValue = $xmlData['Properties'][$objectKey];
                                                     }
                                                     $emptyObjectField[$objectKey] = $subValue;
                                                 }
-                                            }
                                         }
                                     } else {
                                         if ($objectField['type'] == 'string') {
