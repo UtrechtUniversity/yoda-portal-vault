@@ -87,6 +87,15 @@ class Metadata_form_model extends CI_Model
 
         $xml_metadata = $xml->createElement("metadata");
 
+        $attributeXSI = $xml->createAttribute('xmlns:xsi');
+        $attributeXSI->value = 'http://www.w3.org/2001/XMLSchema-instance';
+
+        $attributeXSD = $xml->createAttribute('xsi:schemaLocation');
+        $attributeXSD->value = $this->_getSchemaLocation($folder);  // to be determined dynamically via iRODS
+
+        $xml_metadata->appendChild($attributeXSI);
+        $xml_metadata->appendChild($attributeXSD);
+
         foreach ($jsonsElements['properties'] as $groupName => $formElements) {
             foreach ($formElements['properties'] as $mainElement => $element) {
 
@@ -462,5 +471,22 @@ class Metadata_form_model extends CI_Model
         }
 
         return $formData;
+    }
+
+    /**
+     * Request for location of current XSD based on location of file
+     * @param $folder
+     * @return schemaLocation
+     */
+    private function _getSchemaLocation($folder)
+    {
+        $outputParams = array('*schemaLocation', '*status', '*statusInfo');
+        $inputParams = array('*folder' => $folder);
+
+        $this->CI->load->library('irodsrule');
+        $rule = $this->irodsrule->make('iiFrontGetSchemaLocation', $inputParams, $outputParams);
+        $result = $rule->execute();
+
+        return $result['*schemaLocation'];
     }
 }
