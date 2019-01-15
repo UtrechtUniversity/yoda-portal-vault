@@ -90,10 +90,13 @@ class Metadata_form_model extends CI_Model
         $attributeXSI = $xml->createAttribute('xmlns:xsi');
         $attributeXSI->value = 'http://www.w3.org/2001/XMLSchema-instance';
 
+        $attributeXML = $xml->createAttribute('xmlns');
+        $attributeXML->value = $this->_getSchemaLocation($folder);  // to be determined dynamically via iRODS
         $attributeXSD = $xml->createAttribute('xsi:schemaLocation');
         $attributeXSD->value = $this->_getSchemaLocation($folder);  // to be determined dynamically via iRODS
 
         $xml_metadata->appendChild($attributeXSI);
+        $xml_metadata->appendChild($attributeXML);
         $xml_metadata->appendChild($attributeXSD);
 
         foreach ($jsonsElements['properties'] as $groupName => $formElements) {
