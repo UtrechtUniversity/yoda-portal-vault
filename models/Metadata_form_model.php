@@ -92,8 +92,9 @@ class Metadata_form_model extends CI_Model
 
         $attributeXML = $xml->createAttribute('xmlns');
         $attributeXML->value = $this->_getSchemaLocation($folder);  // to be determined dynamically via iRODS
+
         $attributeXSD = $xml->createAttribute('xsi:schemaLocation');
-        $attributeXSD->value = $this->_getSchemaLocation($folder);  // to be determined dynamically via iRODS
+        $attributeXSD->value = $this->_getSchemaLocation($folder) . ' ' . $this->_getSchemaSpace($folder);  // to be determined dynamically via iRODS
 
         $xml_metadata->appendChild($attributeXSI);
         $xml_metadata->appendChild($attributeXML);
@@ -491,5 +492,22 @@ class Metadata_form_model extends CI_Model
         $result = $rule->execute();
 
         return $result['*schemaLocation'];
+    }
+
+    /**
+     * Request for space of current XSD based on location of file
+     * @param $folder
+     * @return schemaSpace
+     */
+    private function _getSchemaSpace($folder)
+    {
+        $outputParams = array('*schemaSpace', '*status', '*statusInfo');
+        $inputParams = array('*folder' => $folder);
+
+        $this->CI->load->library('irodsrule');
+        $rule = $this->irodsrule->make('iiFrontGetSchemaSpace', $inputParams, $outputParams);
+        $result = $rule->execute();
+
+        return $result['*schemaSpace'];
     }
 }
