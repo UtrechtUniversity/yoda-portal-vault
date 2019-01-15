@@ -157,13 +157,17 @@ class Metadata extends MY_Controller
         }
 
         // Should submit button be rendered?
-        $lockStatus = $formConfig['lockFound'];
-        $folderStatus = $formConfig['folderStatus'];
         $submitButton = false;
-        if (($lockStatus == 'here' || $lockStatus == 'no')
-            && ($folderStatus == 'SECURED' || $folderStatus == 'LOCKED' || $folderStatus == '')
-            && ($userType == 'normal' || $userType == 'manager')) {
-            $submitButton = true;
+        $isLocked = false;
+        if (!$isVaultPackage) {
+            $lockStatus = $formConfig['lockFound'];
+            $folderStatus = $formConfig['folderStatus'];
+            $isLocked = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
+            if (($lockStatus == 'here' || $lockStatus == 'no')
+                && ($folderStatus == 'SECURED' || $folderStatus == 'LOCKED' || $folderStatus == '')
+                && ($userType == 'normal' || $userType == 'manager')) {
+                $submitButton = true;
+            }
         }
 
         // Should unsubmit button be rendered?
@@ -184,7 +188,6 @@ class Metadata extends MY_Controller
             }
         }
 
-        $isLocked = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
         if ($isLocked
             || (!$isVaultPackage && $isDatamanager && !$writePermission)
             || ($isVaultPackage && !$isDatamanager)
@@ -192,7 +195,12 @@ class Metadata extends MY_Controller
             || (!$writePermission && !$isDatamanager)) {
             $uiSchema["ui:readonly"] = "true";
         }
-        
+
+        $parentHasMetadata = false;
+        if (!$isVaultPackage) {
+            $parentHasMetadata = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
+        }
+
         $output = array();
         $output['path']              = $path;
         $output['schema']            = json_decode($jsonSchema);
@@ -201,7 +209,7 @@ class Metadata extends MY_Controller
         $output['formDataErrors']    = $errors;
         $output['isDatamanager']     = $isDatamanager;
         $output['isVaultPackage']    = $isVaultPackage;
-        $output['parentHasMetadata'] = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
+        $output['parentHasMetadata'] = $parentHasMetadata;
         $output['metadataExists']    = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
         $output['locked']            = $isLocked;
         $output['writePermission']   = $writePermission;
