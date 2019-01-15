@@ -93,7 +93,7 @@ class Metadata_form_model extends CI_Model
         $attributeXSI->value = 'http://www.w3.org/2001/XMLSchema-instance';
 
         $attributeXSD = $xml->createAttribute('xsi:schemaLocation');
-        $attributeXSD->value = 'https://schemas.yoda.uu.nl/default research.xsd'; //$this->_getSchemaLocation($folder);  // to be determined dynamically via iRODS
+        $attributeXSD->value = $this->_getSchemaLocation($folder);  // to be determined dynamically via iRODS
 
         $xml_metadata->appendChild($attributeXSI);
         $xml_metadata->appendChild($attributeXSD);
