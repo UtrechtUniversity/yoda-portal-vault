@@ -214,7 +214,7 @@
                         <div class="btn-group">
                             <button type="button" class="btn btn-default folder-status" disabled="disabled">
                                 Actions
-			                </button>
+			                      </button>
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span><span class="sr-only">Actions</span>
                             </button>
@@ -235,16 +235,12 @@
                         <div class="btn-group">
                             <button type="button" id="vault-status" class="btn btn-default folder-status" disabled="disabled">
                                 Actions
-            			    </button>
+            			          </button>
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                                 <span class="caret"></span><span class="sr-only">Actions</span>
                             </button>
                             <ul class="dropdown-menu action-list" role="menu"></ul>
                         </div>
-                        <label class="folder-status-pending" for="vault-status">
-                            <i class="fa fa-info-circle" aria-hidden="true"></i>
-                            <span class="pending-msg"></span>
-                        </label>
                     </div>
                 </div>
             </div>

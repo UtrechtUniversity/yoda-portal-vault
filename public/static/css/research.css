@@ -69,6 +69,10 @@ ol.breadcrumb li.active {
     margin-top: 2px;
 }
 
+.top-information h1 #statusBadge {
+    margin-left: 20px;
+}
+
 .hide {
     display: none;
 }
