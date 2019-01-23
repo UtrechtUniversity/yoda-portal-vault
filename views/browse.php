@@ -224,11 +224,6 @@
                     <div class="vault">
                         <div class="btn-group" role="group">
                             <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
-                            <button type="button" class="btn btn-default copy-vault-package-to-research" data-path="">Copy datapackage to research area</button>
-                        </div>
-
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-default vault-access" data-access="" data-path="">
                         </div>
 
                         <div class="btn-group">
@@ -244,6 +239,19 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="top-info-buttons vault">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default copy-vault-package-to-research" data-path="">Copy datapackage to research area</button>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default vault-access" data-access="" data-path="">
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <ul class="list-group lock-items"></ul>
         <ul class="list-group system-metadata-items"></ul>
         <ul class="list-group actionlog-items"></ul>
