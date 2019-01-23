@@ -496,6 +496,7 @@ function topInformation(dir, showAlert)
                 $('.top-info-buttons').show();
                 $('.top-info-buttons .research').show();
                 $('.top-info-buttons .vault').hide();
+                $('.vault-extra').hide();
             } else {
                 $('.top-info-buttons').hide();
             }
@@ -541,6 +542,7 @@ function topInformation(dir, showAlert)
                     $('.top-info-buttons').show();
                     $('.top-info-buttons .research').hide();
                     $('.top-info-buttons .vault').show();
+                    $('.vault-extra').show();
                 }
             }
 
@@ -590,10 +592,12 @@ function topInformation(dir, showAlert)
                 // Datamanager sees all buttons in vault, researcher only folder status.
                 if (isDatamanager == 'yes') {
                     $('.top-info-buttons .vault').show();
+                    $('.vault-extra').show();
                 } else {
                     $('.top-info-buttons').show();
                     $('.top-info-buttons .vault').show();
-                    $('.top-info-buttons .vault .vault-access').hide();
+                    $('.vault-extra').show();
+                    $('.vault-extra .vault-access').hide();
                 }
             }
 

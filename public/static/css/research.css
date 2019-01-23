@@ -33,8 +33,6 @@ ol.breadcrumb li.active {
 }
 
 .top-info-buttons {
-    border-top: 1.5px dotted #F5F5F5;
-    border-bottom: 1.5px dotted #F5F5F5;
     padding-top: 25px;
     text-align: right;
 }

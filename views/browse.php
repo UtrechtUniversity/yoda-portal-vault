@@ -241,7 +241,7 @@
         </div>
         <div class="row">
             <div class="col-md-12">
-                <div class="top-info-buttons vault">
+                <div class="vault-extra">
                     <div class="btn-group" role="group">
                         <button type="button" class="btn btn-default copy-vault-package-to-research" data-path="">Copy datapackage to research area</button>
                     </div>
