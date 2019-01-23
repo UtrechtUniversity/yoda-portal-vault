@@ -670,6 +670,8 @@ function topInformation(dir, showAlert)
             $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + lockIcon + systemMetadataIcon + actionLogIcon + statusBadge);
             $('.top-information').show();
         });
+    } else {
+        $('.top-information').hide();
     }
 }
 
