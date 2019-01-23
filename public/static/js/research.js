@@ -721,7 +721,7 @@ function handleActionsList(actions, folder)
 function toggleFolderStatus(newStatus, path)
 {
     // Get current button text
-    ar btnText = $('#statusBadge').html();
+    var btnText = $('#statusBadge').html();
     if (newStatus == 'LOCKED') {
         $('#statusBadge').html('Lock <i class="fa fa-spinner fa-spin fa-fw"></i>');
     } else {
