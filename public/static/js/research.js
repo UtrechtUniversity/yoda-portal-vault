@@ -550,7 +550,6 @@ function topInformation(dir, showAlert)
                 $('.btn-group button.copy-vault-package-to-research').attr('data-path', dir);
                 $('.btn-group button.copy-vault-package-to-research').show();
 
-
                 // explicitely hide top info buttons related to research - this wasn't always the case
                 $('.top-info-buttons .research').hide();
                 // folder status (vault folder)
@@ -665,7 +664,7 @@ function topInformation(dir, showAlert)
             statusBadge = '<span id="statusBadge" class="badge">' + statusText + '</span>';
 
             $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + lockIcon + systemMetadataIcon + actionLogIcon + statusBadge);
-            $('.top-information h1').show();
+            $('.top-information').show();
         });
     }
 }
