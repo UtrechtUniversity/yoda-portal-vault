@@ -208,7 +208,6 @@
                     <div class="research">
                         <div class="btn-group" role="group">
                             <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
-                            <button type="button" class="btn btn-default toggle-folder-status" data-status="" data-path=""></button>
                         </div>
 
                         <div class="btn-group">

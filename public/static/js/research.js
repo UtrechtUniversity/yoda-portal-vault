@@ -16,12 +16,12 @@ $( document ).ready(function() {
         showMetadataForm($(this).attr('data-path'));
     });
 
-    $('.btn-group button.toggle-folder-status').click(function() {
-        if ($(this).attr('data-status') == 'SUBMITTED') {
-            alert('Functionality to be developed in coming sprints.');
-        } else {
-            toggleFolderStatus($(this).attr('data-status'), $(this).attr('data-path'));
-        }
+    $("body").on("click", "a.action-lock", function() {
+        toggleFolderStatus("LOCKED", $(this).attr('data-folder'));
+    });
+
+    $("body").on("click", "a.action-unlock", function() {
+      toggleFolderStatus("UNLOCKED", $(this).attr('data-folder'));
     });
 
     $("body").on("click", "a.action-submit", function() {
@@ -469,44 +469,34 @@ function topInformation(dir, showAlert)
                 $('.btn-group button.folder-status').text('Actions');
 
                 if (status == '') {
-                    $('.btn-group button.toggle-folder-status').text('Lock');
-                    $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
+                    actions['lock'] = 'Lock';
                     actions['submit'] = 'Submit';
                 } else if (status == 'LOCKED') {
-                    $('.btn-group button.toggle-folder-status').text('Unlock');
-                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    actions['unlock'] = 'Unlock';
                     actions['submit'] = 'Submit';
                 } else if (status == 'SUBMITTED') {
-                    $('.btn-group button.toggle-folder-status').text('Unlock');
-                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
                     actions['unsubmit'] = 'Unsubmit';
                 } else if (status == 'ACCEPTED') {
-                    $('.btn-group button.toggle-folder-status').text('Unlock');
-                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
                     $('.btn-group button.folder-status').next().prop("disabled", true);
                 } else if (status == 'SECURED') {
-		    // Check for locks is here for backwards compatibility with release v1.2.
-		    if (lockFound == "here") {
-                        $('.btn-group button.toggle-folder-status').text('Unlock');
-                        $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                    // Check for locks is here for backwards compatibility with release v1.2.
+                    if (lockFound == "here") {
+                        actions['lock'] = 'Lock';
                     } else {
-                        $('.btn-group button.toggle-folder-status').text('Lock');
-                        $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
-		    }
-		    actions['submit'] = 'Submit';
+                        actions['unlock'] = 'Unlock';
+                    }
+                    actions['submit'] = 'Submit';
                 } else if (status == 'REJECTED') {
                     // Check for locks is here for backwards compatibility with release v1.2.
                     if (lockFound == "here") {
-                        $('.btn-group button.toggle-folder-status').text('Unlock');
-                        $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
+                        actions['lock'] = 'Lock';
                     } else {
-                        $('.btn-group button.toggle-folder-status').text('Lock');
-                        $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
-		    }
+                        actions['unlock'] = 'Unlock';
+                    }
                     actions['submit'] = 'Submit';
                 }
+
                 var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
-                $('.btn-group button.toggle-folder-status').attr('data-path', dir);
                 $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
 
                 $('.top-info-buttons').show();
@@ -638,14 +628,6 @@ function topInformation(dir, showAlert)
                 }
             }
 
-            // Handle status btn
-            if (showStatusBtn) {
-                $('.btn-group button.toggle-folder-status').show();
-                $('.btn-group button.toggle-folder-status').prop("disabled", false);
-            } else {
-                $('.btn-group button.toggle-folder-status').prop("disabled", true);
-            }
-
             // Lock icon
             $('.lock-items').hide();
             var lockIcon = '';
@@ -721,8 +703,9 @@ function topInformation(dir, showAlert)
 function handleActionsList(actions, folder)
 {
     var html = '';
-    var possibleActions = ['submit', 'unsubmit', 'accept', 'reject',
-                          'submit-for-publication', 'cancel-publication',
+    var possibleActions = ['lock', 'unlock',
+                           'submit', 'unsubmit', 'accept', 'reject',
+                           'submit-for-publication', 'cancel-publication',
                            'approve-for-publication', 'depublish-publication',
                            'republish-publication'];
 
@@ -738,28 +721,27 @@ function handleActionsList(actions, folder)
 function toggleFolderStatus(newStatus, path)
 {
     // Get current button text
-    var btnText = $('.btn-group button.toggle-folder-status').html();
-
-    // Set spinner & disable button
-    $('.btn-group button.toggle-folder-status').html(btnText + '<i class="fa fa-spinner fa-spin fa-fw"></i>');
-    $('.btn-group button.toggle-folder-status').prop("disabled", true);
+    ar btnText = $('#statusBadge').html();
+    if (newStatus == 'LOCKED') {
+        $('#statusBadge').html('Lock <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    } else {
+        $('#statusBadge').html('Unlock <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    }
 
     // Change folder status call
     $.post( "browse/change_folder_status", { "path" : decodeURIComponent(path), "status" : newStatus }, function(data) {
         if(data.status == 'Success') {
             // Set actions
             var actions = [];
-            actions['submit'] = 'Submit';
+
 
             if ($('.actionlog-items').is(":visible")) {
                 buildActionLog(path);
             }
 
             if (newStatus == 'LOCKED') {
-                $('.btn-group button.toggle-folder-status').text('Unlock');
-                $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
-
                 $('#statusBadge').text('Locked');
+                actions['unlock'] = 'Unlock';
 
                 var totalLocks = $('.lock-icon').attr('data-locks');
                 if (totalLocks == '0') {
@@ -769,8 +751,8 @@ function toggleFolderStatus(newStatus, path)
                 }
                 setMessage('success', 'Successfully locked this folder');
             } else {
-                $('.btn-group button.toggle-folder-status').text('Lock');
-                $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
+                $('#statusBadge').text('');
+                actions['lock'] = 'Lock';
 
                 var totalLocks = $('.lock-icon').attr('data-locks');
                 if (totalLocks == '1') {
@@ -783,14 +765,13 @@ function toggleFolderStatus(newStatus, path)
                     $('.lock-items').hide();
                 }
 
-                $('#statusBadge').text('');
-
                 setMessage('success', 'Successfully unlocked this folder');
             }
+            actions['submit'] = 'Submit';
             handleActionsList(actions, path);
         } else {
             setMessage('error', data.statusInfo);
-            $('.btn-group button.toggle-folder-status').html(btnText);
+            $('#statusBadge').html(btnText);
 
             // inefficient, but for now sets the button statuses correctly in case of failure on request.
             // requires refactoring!
@@ -799,7 +780,6 @@ function toggleFolderStatus(newStatus, path)
         }
 
         // Remove disable attribute
-        $('.btn-group button.toggle-folder-status').removeAttr("disabled");
         $('.btn-group button.folder-status').next().prop("disabled", false);
     }, "json");
 }
@@ -824,11 +804,6 @@ function submitToVault(folder)
                 if (data.folderStatus == 'SUBMITTED') {
                     $('#statusBadge').html('Submitted');
 
-                    // Set folder status -> Locked
-                    $('.btn-group button.toggle-folder-status').text('Unlock');
-                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
-                    $('.btn-group button.toggle-folder-status').prop("disabled", true);
-
                     // Set ubsibmit action
                     var actions = [];
                     actions['unsubmit'] = 'Unsubmit';
@@ -845,10 +820,7 @@ function submitToVault(folder)
                     $('.btn-group button.folder-status').next().removeAttr("disabled");
                 } else {
                     $('#statusBadge').html('Accepted');
-                    $('.btn-group button.toggle-folder-status').text('Unlock');
-                    $('.btn-group button.toggle-folder-status').attr('data-status', 'UNLOCKED');
                     $('.btn-group button.folder-status').next().prop("disabled", true);
-                    $('.btn-group button.toggle-folder-status').prop("disabled", true);
                 }
 
                 // lock icon
@@ -879,14 +851,12 @@ function unsubmitToVault(folder) {
 
 	$.post( "vault/unsubmit", { "path" : decodeURIComponent(folder) }, function(data) {
             if (data.status == 'Success') {
-                $('.btn-group button.toggle-folder-status').text('Lock');
-                $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
-                $('.btn-group button.toggle-folder-status').removeAttr("disabled");
                 $('#statusBadge').html('');
 
                 // Set submit action
                 var actions = [];
                 actions['submit'] = 'Submit';
+                actions['lock'] = 'Lock';
                 handleActionsList(actions, folder);
             } else {
                 $('#statusBadge').html(btnText);
@@ -934,8 +904,6 @@ function rejectFolder(folder)
     $.post( "vault/reject", { "path" : decodeURIComponent(folder) }, function(data) {
         if (data.status == 'Success') {
             $('#statusBadge').html('Rejected');
-            $('.btn-group button.toggle-folder-status').text('Lock');
-            $('.btn-group button.toggle-folder-status').attr('data-status', 'LOCKED');
         } else {
             $('#statusBadge').html(btnText);
             setMessage('error', data.statusInfo);
@@ -944,12 +912,6 @@ function rejectFolder(folder)
             // requires refactoring!
             topInformation(folder, false);
             return;
-        }
-
-        // Make unlock btn clickable if write rights.
-        var hasWriteRights =  $('.btn-group button.folder-status').attr('data-write');
-        if (hasWriteRights == 'yes') {
-            $('.btn-group button.toggle-folder-status').prop("disabled", false);
         }
     }, "json");
 }
