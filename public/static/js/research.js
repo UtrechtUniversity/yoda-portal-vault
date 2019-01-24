@@ -571,6 +571,7 @@ function topInformation(dir, showAlert)
                 }
 
                 // Datamanager sees access buttons in vault.
+                $('.top-info-buttons').show();
                 if (isDatamanager == 'yes') {
                     if (researchGroupAccess == 'no') {
                         actions['grant-vault-access'] = 'Grant read access to research group';
