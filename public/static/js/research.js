@@ -546,7 +546,7 @@ function topInformation(dir, showAlert)
                 // handling of copying cabability from vault to dynamic space @todo -> deze plek kan anders volgens mij
                 $('.btn-group button.copy-vault-package-to-research').attr('data-path', dir);
                 $('.btn-group button.copy-vault-package-to-research').show();
-                actionsp['copy-vault-package-to-research'] = 'Copy datapackage to research space';
+                actions['copy-vault-package-to-research'] = 'Copy datapackage to research space';
 
                 // explicitely hide top info buttons related to research - this wasn't always the case
                 $('.top-info-buttons .research').hide();
