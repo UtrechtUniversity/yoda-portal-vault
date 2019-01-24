@@ -124,8 +124,12 @@ $( document ).ready(function() {
         browse($(this).attr('data-path'));
     });
 
-    $("body").on("click", "button.vault-access", function() {
-        vaultAccess($(this).attr('data-access'), $(this).attr('data-path'));
+    $("body").on("click", "a.action-grant-vault-access", function() {
+        vaultAccess('grant', $(this).attr('data-folder'));
+    });
+
+    $("body").on("click", "a.action-revoke-vault-access", function() {
+        vaultAccess('revoke', $(this).attr('data-folder'));
     });
 
     $("body").on("click", "a.action-depublish-publication", function() {
@@ -496,7 +500,6 @@ function topInformation(dir, showAlert)
                 $('.top-info-buttons').show();
                 $('.top-info-buttons .research').show();
                 $('.top-info-buttons .vault').hide();
-                $('.vault-extra').hide();
             } else {
                 $('.top-info-buttons').hide();
             }
@@ -527,13 +530,6 @@ function topInformation(dir, showAlert)
                 // is vault package
                 if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
                     $('button.vault-access').attr('data-path', dir);
-                    if (researchGroupAccess == 'no') {
-                        $('button.vault-access').text('Grant read access to research group');
-                        $('button.vault-access').attr('data-access', 'grant');
-                    } else {
-                        $('button.vault-access').text('Revoke read access to research group');
-                        $('button.vault-access').attr('data-access', 'revoke');
-                    }
 
                     $('.btn-group button.metadata-form').attr('data-path', dir);
                     $('.btn-group button.metadata-form').show();
@@ -542,7 +538,6 @@ function topInformation(dir, showAlert)
                     $('.top-info-buttons').show();
                     $('.top-info-buttons .research').hide();
                     $('.top-info-buttons .vault').show();
-                    $('.vault-extra').show();
                 }
             }
 
@@ -551,6 +546,7 @@ function topInformation(dir, showAlert)
                 // handling of copying cabability from vault to dynamic space @todo -> deze plek kan anders volgens mij
                 $('.btn-group button.copy-vault-package-to-research').attr('data-path', dir);
                 $('.btn-group button.copy-vault-package-to-research').show();
+                actionsp['copy-vault-package-to-research'] = 'Copy datapackage to research space';
 
                 // explicitely hide top info buttons related to research - this wasn't always the case
                 $('.top-info-buttons .research').hide();
@@ -592,12 +588,21 @@ function topInformation(dir, showAlert)
                 // Datamanager sees all buttons in vault, researcher only folder status.
                 if (isDatamanager == 'yes') {
                     $('.top-info-buttons .vault').show();
-                    $('.vault-extra').show();
+
+                    if (researchGroupAccess == 'no') {
+                        $('button.vault-access').text('Grant read access to research group');
+                        $('button.vault-access').attr('data-access', 'grant');
+                        actions['grant-vault-access'] = 'Grant read access to research group';
+                        $('.btn-group button.folder-status').next().prop("disabled", false);
+                    } else {
+                        $('button.vault-access').text('Revoke read access to research group');
+                        $('button.vault-access').attr('data-access', 'revoke');
+                        actions['revoke-vault-access'] = 'Revoke read access to research group';
+                        $('.btn-group button.folder-status').next().prop("disabled", false);
+                    }
                 } else {
                     $('.top-info-buttons').show();
                     $('.top-info-buttons .vault').show();
-                    $('.vault-extra').show();
-                    $('.vault-extra .vault-access').hide();
                 }
             }
 
@@ -678,17 +683,33 @@ function topInformation(dir, showAlert)
 function handleActionsList(actions, folder)
 {
     var html = '';
+    var vaultHtml = '';
     var possibleActions = ['lock', 'unlock',
                            'submit', 'unsubmit', 'accept', 'reject',
                            'submit-for-publication', 'cancel-publication',
                            'approve-for-publication', 'depublish-publication',
                            'republish-publication'];
 
+    var possibleVaultActions = ['grant-vault-access', 'revoke-vault-access',
+                                'copy-vault-package-to-research'];
+
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
             html += '<li><a class="action-' + value + '" data-folder="' + folder + '">' + actions[value] + '</a></li>';
         }
     });
+
+    $.each(possibleVaultActions, function( index, value ) {
+        if (actions.hasOwnProperty(value)) {
+            vaultHtml += '<li><a class="action-' + value + '" data-folder="' + folder + '">' + actions[value] + '</a></li>';
+        }
+    });
+
+    if (html != '' && vaultHtml != '') {
+        html += '<li class="divider"></li>' + vaultHtml;
+    } else if (vaultHtml != '') {
+        html += vaultHtml;
+    }
 
     $('.action-list').html(html);
 }
@@ -981,24 +1002,11 @@ function vaultRepublishPublication(folder)
 
 function vaultAccess(action, folder)
 {
-    var btnText = $('button.vault-access').html();
-    $('button.vault-access').html(btnText + '<i class="fa fa-spinner fa-spin fa-fw"></i>');
-    $('button.vault-access').prop("disabled", true);
-
     $.post("vault/access", {"path" : decodeURIComponent(folder), "action" : action}, function(data) {
-        if (data.status == 'Success') {
-            if (action == 'grant') {
-                $('button.vault-access').text('Revoke read access to research group');
-                $('button.vault-access').attr('data-access', 'revoke');
-            } else {
-                $('button.vault-access').text('Grant read access to research group');
-                $('button.vault-access').attr('data-access', 'grant');
-            }
-        } else {
-            $('button.vault-access').html(btnText);
+        if (data.status != 'Success') {
             setMessage('error', data.statusInfo);
         }
 
-        $('button.vault-access').prop("disabled", false);
+        topInformation(folder, false);
     }, "json");
 }

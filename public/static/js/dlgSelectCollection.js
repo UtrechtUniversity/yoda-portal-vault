@@ -3,8 +3,8 @@ var urlEncodedPath = '',
     folderSelectBrowser = null;
 
 $( document ).ready(function() {
-    $("body").on("click", "button.copy-vault-package-to-research", function() {
-        dlgShowFolderSelectDialog($(this).attr('data-path'));
+    $("body").on("click", "a.action-copy-vault-package-to-research", function() {
+        dlgShowFolderSelectDialog($(this).attr('data-folder'));
     });
 
     $('#btn-copy-package').on('click', function(){
