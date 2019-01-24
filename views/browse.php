@@ -4,7 +4,6 @@
     var view = 'browse';
 </script>
 
-
 <script>
     // Added for selection of target for vault package @TODO names to be changed and to be added by controller
 //    var revisionItemsPerPage = <?php echo $items; ?>;
@@ -194,47 +193,27 @@
 </div>
 
 <div class="row">
-
     <ol class="breadcrumb">
         <li class="active">Home</li>
     </ol>
-<div class="top-information">
+
+    <div class="top-information">
          <div class="row">
             <div class="col-md-9">
                 <h1></h1>
             </div>
             <div class="col-md-3">
                 <div class="top-info-buttons">
-                    <div class="research">
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
-                        </div>
-
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-default folder-status" disabled="disabled">
-                                Actions
-			                      </button>
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                <span class="caret"></span><span class="sr-only">Actions</span>
-                            </button>
-			                <ul class="dropdown-menu action-list" role="menu"></ul>
-                        </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
                     </div>
 
-                    <div class="vault">
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
-                        </div>
-
-                        <div class="btn-group">
-                            <button type="button" id="vault-status" class="btn btn-default folder-status" disabled="disabled">
-                                Actions
-            			          </button>
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                <span class="caret"></span><span class="sr-only">Actions</span>
-                            </button>
-                            <ul class="dropdown-menu action-list" role="menu"></ul>
-                        </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default folder-status" disabled="disabled">Actions</button>
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span><span class="sr-only">Actions</span>
+                        </button>
+                        <ul class="dropdown-menu action-list" role="menu"></ul>
                     </div>
                 </div>
             </div>

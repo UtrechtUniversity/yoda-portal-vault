@@ -498,8 +498,6 @@ function topInformation(dir, showAlert)
                 $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
 
                 $('.top-info-buttons').show();
-                $('.top-info-buttons .research').show();
-                $('.top-info-buttons .vault').hide();
             } else {
                 $('.top-info-buttons').hide();
             }
@@ -529,27 +527,14 @@ function topInformation(dir, showAlert)
 
                 // is vault package
                 if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
-                    $('button.vault-access').attr('data-path', dir);
-
-                    $('.btn-group button.metadata-form').attr('data-path', dir);
-                    $('.btn-group button.metadata-form').show();
-
-                    //
                     $('.top-info-buttons').show();
-                    $('.top-info-buttons .research').hide();
-                    $('.top-info-buttons .vault').show();
                 }
             }
 
             // is vault package
             if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
-                // handling of copying cabability from vault to dynamic space @todo -> deze plek kan anders volgens mij
-                $('.btn-group button.copy-vault-package-to-research').attr('data-path', dir);
-                $('.btn-group button.copy-vault-package-to-research').show();
                 actions['copy-vault-package-to-research'] = 'Copy datapackage to research space';
 
-                // explicitely hide top info buttons related to research - this wasn't always the case
-                $('.top-info-buttons .research').hide();
                 // folder status (vault folder)
                 if (typeof vaultStatus != 'undefined' && typeof vaultActionPending != 'undefined') {
                     $('.btn-group button.folder-status').next().prop("disabled", true);
@@ -585,24 +570,15 @@ function topInformation(dir, showAlert)
                     }
                 }
 
-                // Datamanager sees all buttons in vault, researcher only folder status.
+                // Datamanager sees access buttons in vault.
                 if (isDatamanager == 'yes') {
-                    $('.top-info-buttons .vault').show();
-
                     if (researchGroupAccess == 'no') {
-                        $('button.vault-access').text('Grant read access to research group');
-                        $('button.vault-access').attr('data-access', 'grant');
                         actions['grant-vault-access'] = 'Grant read access to research group';
                         $('.btn-group button.folder-status').next().prop("disabled", false);
                     } else {
-                        $('button.vault-access').text('Revoke read access to research group');
-                        $('button.vault-access').attr('data-access', 'revoke');
                         actions['revoke-vault-access'] = 'Revoke read access to research group';
                         $('.btn-group button.folder-status').next().prop("disabled", false);
                     }
-                } else {
-                    $('.top-info-buttons').show();
-                    $('.top-info-buttons .vault').show();
                 }
             }
 
