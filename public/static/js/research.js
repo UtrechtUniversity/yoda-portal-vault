@@ -787,20 +787,6 @@ function submitToVault(folder)
             if (data.status == 'Success') {
                 if (data.folderStatus == 'SUBMITTED') {
                     $('#statusBadge').html('Submitted');
-
-                    // Set ubsibmit action
-                    var actions = [];
-                    actions['unsubmit'] = 'Unsubmit';
-
-                    // Datamanager actions
-                    var isDatamanager = $('.btn-group button.folder-status').attr('data-datamanager');
-
-                    if (isDatamanager == 'yes') {
-                        actions['accept'] = 'Accept';
-                        actions['reject'] = 'Reject';
-                    }
-
-                    handleActionsList(actions, folder);
                 } else {
                     $('#statusBadge').html('Accepted');
                 }
@@ -830,12 +816,6 @@ function unsubmitToVault(folder) {
         $.post("vault/unsubmit", {"path" : decodeURIComponent(folder)}, function(data) {
             if (data.status == 'Success') {
                 $('#statusBadge').html('');
-
-                // Set submit action
-                var actions = [];
-                actions['submit'] = 'Submit';
-                actions['lock'] = 'Lock';
-                handleActionsList(actions, folder);
             } else {
                 $('#statusBadge').html(btnText);
                 setMessage('error', data.statusInfo);
