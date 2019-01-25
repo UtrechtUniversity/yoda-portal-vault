@@ -694,6 +694,7 @@ function lockFolder(folder)
     // Get current button text
     var btnText = $('#statusBadge').html();
     $('#statusBadge').html('Lock <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
     // Change folder status call
     $.post("browse/change_folder_status", {"path" : decodeURIComponent(folder), "status" : "LOCKED"}, function(data) {
@@ -731,6 +732,7 @@ function unlockFolder(folder)
     // Get current button text
     var btnText = $('#statusBadge').html();
     $('#statusBadge').html('Unlock <i class="fa fa-spinner fa-spin fa-fw"></i>');
+    $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
     // Change folder status call
     $.post("browse/change_folder_status", {"path" : decodeURIComponent(folder), "status" : "UNLOCKED"}, function(data) {
@@ -779,6 +781,7 @@ function submitToVault(folder)
         // Set spinner & disable button
         var btnText = $('#statusBadge').html();
         $('#statusBadge').html('Submit <i class="fa fa-spinner fa-spin fa-fw"></i>');
+        $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
         $.post("vault/submit", {"path" : decodeURIComponent(folder)}, function(data) {
             if (data.status == 'Success') {
@@ -963,6 +966,8 @@ function vaultRepublishPublication(folder)
 
 function vaultAccess(action, folder)
 {
+    $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
+
     $.post("vault/access", {"path" : decodeURIComponent(folder), "action" : action}, function(data) {
         if (data.status != 'Success') {
             setMessage('error', data.statusInfo);
