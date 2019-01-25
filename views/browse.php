@@ -209,8 +209,8 @@
                     </div>
 
                     <div class="btn-group">
-                        <button type="button" class="btn btn-default folder-status" disabled="disabled">Actions</button>
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                        <button type="button" class="btn btn-default folder-status" data-toggle="dropdown" disabled="disabled">Actions</button>
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" disabled="disabled">
                             <span class="caret"></span><span class="sr-only">Actions</span>
                         </button>
                         <ul class="dropdown-menu action-list" role="menu"></ul>
