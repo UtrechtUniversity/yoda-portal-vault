@@ -305,9 +305,7 @@ class Metadata extends MY_Controller
                     $result = $this->vaultsubmission->validate();
                     if ($result === true) {
                         $submitResult = $this->vaultsubmission->setSubmitFlag();
-                        if ($submitResult) {
-                            setMessage('success', 'The folder is successfully submitted.');
-                        } else {
+                        if (!$submitResult) {
                             setMessage('error', $result['*statusInfo']);
                         }
                     } else {
@@ -319,12 +317,10 @@ class Metadata extends MY_Controller
             }
             elseif ($this->input->post('vault_unsubmission')) {
                 $result = $this->vaultsubmission->clearSubmitFlag();
-                if ($result['*status']== 'Success') {
-                    setMessage('success', 'This folder was successfully unsubmitted from the vault.');
-                }
-                else {
+                if ($result['*status'] != 'Success') {
                     setMessage('error', $result['*statusInfo']);
                 }
+
             }
         }
         else {
