@@ -94,6 +94,7 @@ class Metadata_form_model extends CI_Model
         $attributeXSD->value = $this->_getSchemaLocation($folder) . ' ' . $this->_getSchemaSpace($folder);  // to be determined dynamically via iRODS
 
         $xml_metadata->appendChild($attributeXSI);
+        $xml_metadata->appendChild($attributeXML);
         $xml_metadata->appendChild($attributeXSD);
 
         foreach ($jsonsElements['properties'] as $groupName => $formElements) {
