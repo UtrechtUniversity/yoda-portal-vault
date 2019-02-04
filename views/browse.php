@@ -4,15 +4,13 @@
     var view = 'browse';
 </script>
 
-
 <script>
-    // Added for selection of target for vault package @TODO names to be changed!!!!!!!!!!!!!! and to be added by controller
+    // Added for selection of target for vault package @TODO names to be changed and to be added by controller
 //    var revisionItemsPerPage = <?php echo $items; ?>;
     var browseDlgPageItems = <?php echo $items; //$dlgPageItems; ?>;
 //    var view = 'revision';
 </script>
 
-<?php // @todo  change ID of modal! ?>
 <div class="modal" id="dlg-select-folder">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -32,7 +30,6 @@
                         </div>
                     </div>
 
-                    <?php // @TODO have orig in here!!!!!!!!!!!!!!!!!!!!!!! ?>
                     <input type="hidden" id="restoration-objectid" value="">
 
                     <div class="panel revision-restore-dialog">
@@ -120,10 +117,6 @@
     </div>
 </div>
 
-
-
-
-
 <?php echo $searchHtml; ?>
 
 <div class="modal" id="confirmAgreementConditions">
@@ -152,15 +145,13 @@
                 <h2>Unpreservable file formats</h2>
                 The data you are submitting to the vault contains files that are likely to become unusable in the future.
                 <br>
-                <brFollowing file extensions were found in your dataset:
+                <br>
+                Following file extensions were found in your dataset:
                 <br>
                 <br>
-                <div class="list-unpreservable-formats">
-
-                </div>
-
-                <br>To learn more about unpreservable file formats please visit: <a href="google.com">Unpreservable file formats</a>
-
+                <div class="list-unpreservable-formats"></div>
+                <br>
+                To learn more about unpreservable file formats please visit: <a href="google.com">Unpreservable file formats</a>
             </div>
 
             <div class="modal-footer">
@@ -202,60 +193,32 @@
 </div>
 
 <div class="row">
-
     <ol class="breadcrumb">
         <li class="active">Home</li>
     </ol>
+
     <div class="top-information">
-        <h1></h1>
-
-        <div class="row">
-            <div class="col-md-12">
+         <div class="row">
+            <div class="col-md-9">
+                <h1></h1>
+            </div>
+            <div class="col-md-3">
                 <div class="top-info-buttons">
-                    <div class="research">
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
-                            <button type="button" class="btn btn-default toggle-folder-status" data-status="" data-path=""></button>
-                        </div>
-
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-default folder-status" disabled="disabled">
-                                Actions
-			                </button>
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                <span class="caret"></span><span class="sr-only">Actions</span>
-                            </button>
-			                <ul class="dropdown-menu action-list" role="menu"></ul>
-                        </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
                     </div>
 
-                    <div class="vault">
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
-                            <button type="button" class="btn btn-default copy-vault-package-to-research" data-path="">Copy datapackage to research area</button>
-                        </div>
-
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-default vault-access" data-access="" data-path="">
-                        </div>
-
-                        <div class="btn-group">
-                            <button type="button" id="vault-status" class="btn btn-default folder-status" disabled="disabled">
-                                Actions
-            			    </button>
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                <span class="caret"></span><span class="sr-only">Actions</span>
-                            </button>
-                            <ul class="dropdown-menu action-list" role="menu"></ul>
-                        </div>
-                        <label class="folder-status-pending" for="vault-status">
-                            <i class="fa fa-info-circle" aria-hidden="true"></i>
-                            <span class="pending-msg"></span>
-                        </label>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default folder-status" data-toggle="dropdown" disabled="disabled">Actions</button>
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" disabled="disabled">
+                            <span class="caret"></span><span class="sr-only">Actions</span>
+                        </button>
+                        <ul class="dropdown-menu action-list" role="menu"></ul>
                     </div>
                 </div>
             </div>
         </div>
+
         <ul class="list-group lock-items"></ul>
         <ul class="list-group system-metadata-items"></ul>
         <ul class="list-group actionlog-items"></ul>
@@ -263,18 +226,14 @@
 
     <div class="col-md-12">
         <div class="row">
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <table id="file-browser" class="table yoda-table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Modified date</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
-            </div>
+            <table id="file-browser" class="table yoda-table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Modified date</th>
+                    </tr>
+                </thead>
+            </table>
         </div>
     </div>
 </div>
