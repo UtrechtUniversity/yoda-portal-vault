@@ -225,9 +225,14 @@ class Metadata extends MY_Controller
         $output['unsubmitButton']    = $unsubmitButton;
         $output['updateButton']      = $updateButton;
 
-        // schemaLocation handling
+        // schemaLocation handling - zijn deze nodig???
         $output['schemaIdMetadata']  = $loadedFormData['schemaIdMetadata'];
         $output['schemaIdCurrent']   = $loadedFormData['schemaIdCurrent'];
+        $output['transformationChanges'] = ''; // default value
+
+//        print_r( $loadedFormData['schemaIdMetadata'] );
+//        print_r( $loadedFormData['schemaIdCurrent'] );
+//        exit;
 
         // Transformation handling
         // MUST BE IN RESERARCH!! not submitted, rejected, …).
@@ -239,6 +244,9 @@ class Metadata extends MY_Controller
                                                                                     $loadedFormData['schemaIdCurrent']);
                 if ($result['*status']!='Success') {
                     $output['formDataErrors'][] = $result['*statusInfo'];
+                }
+                else {
+                    $output['transformationChanges'] = $result['*transformationChanges'];
                 }
             }
         }
@@ -318,6 +326,13 @@ class Metadata extends MY_Controller
             $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
             if ($this->input->post('vault_submission')) { // HdR er wordt nog niet gecheckt dat juiste persoon dit mag
 
+                $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+                $loadedFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath'], $metadataExists, $pathStart);
+                if ($loadedFormData['schemaIdMetadata'] != $loadedFormData['schemaIdCurrent']) {
+                    setMessage('error', 'No submission allowed as your data is not up to date with the lastest YoDa schema for this community.');
+                    return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
+                }
+
                 if(!$this->vaultsubmission->checkLock()) {
                     setMessage('error', 'There was a locking error encountered while submitting this folder.');
                 }
@@ -338,7 +353,6 @@ class Metadata extends MY_Controller
                     } else {
                         // result contains all collected messages as an array
                         setMessage('error', implode('<br>', $result));
-
                     }
                 }
             }

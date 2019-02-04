@@ -323,6 +323,7 @@ class Metadata_form_model extends CI_Model
         $currentSchemaPath = "/$zone/yoda/schemas/$category/" . $space;
 
         $fileContent = $this->CI->filesystem->read($rodsaccount, $currentSchemaPath);
+
         $xmlData = simplexml_load_string($fileContent);
 
         $json = json_encode($xmlData);
@@ -535,7 +536,7 @@ class Metadata_form_model extends CI_Model
     // If possible transform yoda-metadata.xml into
     private function _transformMetadata($path, $schemaVersionFrom, $schemaVersionTo)
     {
-        $outputParams = array('*status', '*statusInfo');
+        $outputParams = array('*transformationChanges','*status', '*statusInfo');
         $inputParams = array('*path' => $path,
             '*versionFrom' => $schemaVersionFrom,
             '*versionTo' => $schemaVersionTo);

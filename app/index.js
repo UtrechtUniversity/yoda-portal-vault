@@ -20,6 +20,7 @@ var save              = false;
 var submit            = false;
 var unsubmit          = false;
 var formDataErrors    = [];
+var transformationChanges = ''; // holds changs that occured after transformation of data
 
 var form = document.getElementById('form');
 var path = form.dataset.path;
@@ -377,6 +378,11 @@ axios.get("/research/metadata/data?path=" + path + "&mode=" + mode)
         locked            = response.data.locked;
         writePermission   = response.data.writePermission;
         formDataErrors    = response.data.formDataErrors;
+        transformationChanges = response.data.transformationChanges;
+
+        if (transformationChanges.length > 0) {
+             alert('The changes after transformation:  ' + transformationChanges);
+        }
 
         // Check form data errors
         if (formDataErrors.length > 0) {
