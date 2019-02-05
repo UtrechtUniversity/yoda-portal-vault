@@ -230,22 +230,23 @@ class Metadata extends MY_Controller
         $output['schemaIdCurrent']   = $loadedFormData['schemaIdCurrent'];
         $output['transformationChanges'] = ''; // default value
 
-//        print_r( $loadedFormData['schemaIdMetadata'] );
-//        print_r( $loadedFormData['schemaIdCurrent'] );
-//        exit;
-
         // Transformation handling
         // MUST BE IN RESERARCH!! not submitted, rejected, …).
         if ($metadataExists && !$isVaultPackage && !$isLocked && ($folderStatus=='' || $folderStatus=='SECURED')) {
             if ($loadedFormData['schemaIdMetadata'] != $loadedFormData['schemaIdCurrent']) {
+
                 // Try transforming yoda-metadata.xml
                 $result = $this->Metadata_form_model->transformMetadataXmlVersion($formConfig['metadataXmlPath'],
                                                                                     $loadedFormData['schemaIdMetadata'],
                                                                                     $loadedFormData['schemaIdCurrent']);
+//                $result = $this->Metadata_form_model->getTransformationChanges($formConfig['metadataXmlPath'],
+//                                                                                $loadedFormData['schemaIdMetadata'],
+//                                                                                $loadedFormData['schemaIdCurrent']);
+
                 if ($result['*status']!='Success') {
                     $output['formDataErrors'][] = $result['*statusInfo'];
                 }
-                else {
+                elseif(isset($result['*transformationChanges'])) {
                     $output['transformationChanges'] = $result['*transformationChanges'];
                 }
             }
@@ -345,7 +346,9 @@ class Metadata extends MY_Controller
                     $result = $this->vaultsubmission->validate();
                     if ($result === true) {
                         $submitResult = $this->vaultsubmission->setSubmitFlag();
-                        if (!$submitResult) {
+                        if ($submitResult) {
+                            setMessage('success', 'The folder is successfully submitted.');
+                        } else {
                             setMessage('error', $result['*statusInfo']);
                         }
                     } else {
@@ -356,10 +359,12 @@ class Metadata extends MY_Controller
             }
             elseif ($this->input->post('vault_unsubmission')) {
                 $result = $this->vaultsubmission->clearSubmitFlag();
-                if ($result['*status'] != 'Success') {
+                if ($result['*status']== 'Success') {
+                    setMessage('success', 'This folder was successfully unsubmitted from the vault.');
+                }
+                else {
                     setMessage('error', $result['*statusInfo']);
                 }
-
             }
         }
         else {

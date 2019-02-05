@@ -523,20 +523,43 @@ class Metadata_form_model extends CI_Model
         return $formData;
     }
 
-    // given a
+    /**
+     * Execute transformation from schemaVersionFrom to schemaVersionTo.
+     * returns
+     *     status
+     *     statusInfo
+     * @param $path
+     * @param $schemaVersionFrom
+     * @param $schemaVersionTo
+     * @return mixed
+     */
     public function transformMetadataXmlVersion($path, $schemaVersionFrom, $schemaVersionTo)
     {
-//        return array('*status' => 'SUCCESS_NO',
-//            '*status_info' => 'Schema ID error: No conversion known for your yoda-metadata.xml <br />from ' . $schemaVersionFrom . ' <br />into ' . $schemaVersionTo
-//        );
-
         return $this->_transformMetadata($path, $schemaVersionFrom, $schemaVersionTo);
     }
 
-    // If possible transform yoda-metadata.xml into
+    /**
+     * Execute transformation from schemaVersionFrom to schemaVersionTo.
+     * returns
+     *      transformationChanges
+     *      status
+     *      statusInfo
+     * @param $path
+     * @param $schemaVersionFrom
+     * @param $schemaVersionTo
+     * @return mixed
+     */
+    public function getTransformationChanges($path, $schemaVersionFrom, $schemaVersionTo)
+    {
+        return $this->_getTransformationChanges($path, $schemaVersionFrom, $schemaVersionTo);
+    }
+
+    // Performs transformation from versionFrom to versionTo
+    // Also returns what the changes were as text.
+    // Maybe this becomes obsolete as this can now be collected by itself as well
     private function _transformMetadata($path, $schemaVersionFrom, $schemaVersionTo)
     {
-        $outputParams = array('*transformationChanges','*status', '*statusInfo');
+        $outputParams = array('*status', '*statusInfo');
         $inputParams = array('*path' => $path,
             '*versionFrom' => $schemaVersionFrom,
             '*versionTo' => $schemaVersionTo);
@@ -548,7 +571,20 @@ class Metadata_form_model extends CI_Model
         return $result;
     }
 
+    // Get the changes that versionFrom to VersiionTo imply in text format to present at end user.
+    private function _getTransformationChanges($path, $schemaVersionFrom, $schemaVersionTo)
+    {
+        $outputParams = array('*transformationChanges','*status', '*statusInfo');
+        $inputParams = array('*path' => $path,
+            '*versionFrom' => $schemaVersionFrom,
+            '*versionTo' => $schemaVersionTo);
 
+        $this->CI->load->library('irodsrule');
+        $rule = $this->irodsrule->make('iiFrontTransformationChanges', $inputParams, $outputParams);
+        $result = $rule->execute();
+
+        return $result;
+    }
         /**
      * Request for location of current XSD based on location of file
      * @param $folder
