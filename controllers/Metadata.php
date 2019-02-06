@@ -71,14 +71,14 @@ class Metadata extends MY_Controller
         $transformationButtons = false;
         if ($metadataExists && $isVaultPackage == 'no') {
             // Transformation exists (irods?)?
-            $transformation = false;
+            $transformation = true;
             if ($transformation) {
                 $showForm = false;
                 if ($writePermission) {
-                    $transformationText = '<p>Dummy text for transformtion.</p>'; // irods?
+                    $transformationText = '<p>Dummy text for transformation.</p>'; // irods?
                     $transformationButtons = true;
                 } else {
-                    $transformationText = "<p>Transformation viewer message.</p>";
+                    $transformationText = '<p>It is not possible to load this form as the metadata xml file is not in accordance with the form definition.</p>';
                     $transformationButtons = false;
                 }
             }
@@ -460,5 +460,21 @@ class Metadata extends MY_Controller
         }
 
         return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
+    }
+
+    public function transformation()
+    {
+        // @TODO: Check of er een transformatie is.
+        $this->load->model('Metadata_model');
+        $path = $this->input->get('path');
+
+        $result = $this->Metadata_model->transform($path);
+
+        if ($result['*status'] == 'Success') {
+            return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
+        } else {
+            setMessage('error', $result['*statusInfo']);
+            return redirect('research/browse?dir=' . rawurlencode($path), 'refresh');
+        }
     }
 }

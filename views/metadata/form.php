@@ -65,8 +65,8 @@
                     <?php echo $transformationText; ?>
 
                     <?php if ($transformationButtons) { ?>
-                    <button type="button" onclick="deleteMetadata('<?php echo rawurlencode($path); ?>')" class="reject-transformation btn btn-danger delete-all-metadata-btn pull-right">Reject transformation</button>
-                    <button type="button" onclick="deleteMetadata('<?php echo rawurlencode($path); ?>')" class="accept-transformation btn btn-success delete-all-metadata-btn pull-right">Accept transformation</button>
+                    <a class="reject-transformation btn btn-danger delete-all-metadata-btn pull-right" href="/research/browse?dir=<?php echo rawurlencode($path); ?>">Reject transformation</a>
+                    <a class="accept-transformation btn btn-success delete-all-metadata-btn pull-right" href="/research/metadata/transformation?path=<?php echo rawurlencode($path); ?>">Accept transformation</a>
                     <?php } ?>
                 </div>
             </div>
