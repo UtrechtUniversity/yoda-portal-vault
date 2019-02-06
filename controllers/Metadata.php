@@ -29,6 +29,7 @@ class Metadata extends MY_Controller
 
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
+        $showForm = true;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
@@ -62,6 +63,27 @@ class Metadata extends MY_Controller
         $tokenName = $this->security->get_csrf_token_name();
         $tokenHash = $this->security->get_csrf_hash();
 
+        // Transformations
+        // TODO: Vault & Datamanager checks!!
+        $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+        $transformation = false;
+        $transformationText = null;
+        $transformationButtons = false;
+        if ($metadataExists && $isVaultPackage == 'no') {
+            // Transformation exists (irods?)?
+            $transformation = false;
+            if ($transformation) {
+                $showForm = false;
+                if ($writePermission) {
+                    $transformationText = '<p>Dummy text for transformtion.</p>'; // irods?
+                    $transformationButtons = true;
+                } else {
+                    $transformationText = "<p>Transformation viewer message.</p>";
+                    $transformationButtons = false;
+                }
+            }
+        }
+
         $viewParams = array(
             'styleIncludes' => array(
                 'lib/font-awesome/css/font-awesome.css',
@@ -80,8 +102,15 @@ class Metadata extends MY_Controller
             'isVaultPackage'   => $isVaultPackage,
             'flashMessage'     => $flashMessage,
             'flashMessageType' => $flashMessageType,
-            'metadataExists'   => ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false,
+            'metadataExists'   => $metadataExists,
             'writePermission'  => $writePermission,
+            'showForm'         => $showForm,
+
+            // Transformation vars
+            'transformation' => $transformation,
+            'transformationText' => $transformationText,
+            'transformationButtons' => $transformationButtons,
+
         );
         loadView('metadata/form', $viewParams);
     }
