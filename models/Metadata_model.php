@@ -26,9 +26,8 @@ class Metadata_model extends CI_Model {
         $outputParams = array('*status', '*statusInfo');
         $inputParams = array('*path' => $path);
 
-        //$rule = $this->irodsrule->make('iiPrepareVaultMetadataForEditing', $inputParams, $outputParams);
-        //$result = $rule->execute();
-        //return $result;
-        return array('*status' => 'Success', '*statusInfo' => '');
+        $rule = $this->irodsrule->make('iiRuleTransformXml', $inputParams, $outputParams);
+        $result = $rule->execute();
+        return $result;
     }
 }

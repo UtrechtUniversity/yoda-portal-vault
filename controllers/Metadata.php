@@ -71,11 +71,11 @@ class Metadata extends MY_Controller
         $transformationButtons = false;
         if ($metadataExists && $isVaultPackage == 'no') {
             // Transformation exists (irods?)?
-            $transformation = true;
+            $transformation = ($formConfig['transformation'] == 'true' ) ? true: false;
             if ($transformation) {
                 $showForm = false;
                 if ($writePermission) {
-                    $transformationText = '<p>Dummy text for transformation.</p>'; // irods?
+                    $transformationText = $formConfig['transformationText'];
                     $transformationButtons = true;
                 } else {
                     $transformationText = '<p>It is not possible to load this form as the metadata xml file is not in accordance with the form definition.</p>';
