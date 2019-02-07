@@ -130,15 +130,7 @@ class Metadata extends MY_Controller
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
-        $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
-
-        // $loadedFormData holds:
-        // -formData
-        // -schemaIdCurrent - the actual schema ID
-        // -schemaIdMetadata - the schema ID as found within yoda-metadata.xml
-        $loadedFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath'], $metadataExists, $pathStart);
-
-        $xmlFormData = $loadedFormData['formData'];
+        $xmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
 
         $jsonSchema = $this->Metadata_form_model->loadJSONS($rodsaccount, $fullPath);
 
@@ -247,39 +239,13 @@ class Metadata extends MY_Controller
         $output['isDatamanager']     = $isDatamanager;
         $output['isVaultPackage']    = $isVaultPackage;
         $output['parentHasMetadata'] = $parentHasMetadata;
-        $output['metadataExists']    = $metadataExists; //($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+        $output['metadataExists']    = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
         $output['locked']            = $isLocked;
         $output['writePermission']   = $writePermission;
         $output['submitButton']      = $submitButton;
         $output['unsubmitButton']    = $unsubmitButton;
         $output['updateButton']      = $updateButton;
 
-        // schemaLocation handling - zijn deze nodig???
-        $output['schemaIdMetadata']  = $loadedFormData['schemaIdMetadata'];
-        $output['schemaIdCurrent']   = $loadedFormData['schemaIdCurrent'];
-        $output['transformationChanges'] = ''; // default value
-
-        // Transformation handling
-        // MUST BE IN RESERARCH!! not submitted, rejected, …).
-        if ($metadataExists && !$isVaultPackage && !$isLocked && ($folderStatus=='' || $folderStatus=='SECURED')) {
-            if ($loadedFormData['schemaIdMetadata'] != $loadedFormData['schemaIdCurrent']) {
-
-                // Try transforming yoda-metadata.xml
-                $result = $this->Metadata_form_model->transformMetadataXmlVersion($formConfig['metadataXmlPath'],
-                                                                                    $loadedFormData['schemaIdMetadata'],
-                                                                                    $loadedFormData['schemaIdCurrent']);
-//                $result = $this->Metadata_form_model->getTransformationChanges($formConfig['metadataXmlPath'],
-//                                                                                $loadedFormData['schemaIdMetadata'],
-//                                                                                $loadedFormData['schemaIdCurrent']);
-
-                if ($result['*status']!='Success') {
-                    $output['formDataErrors'][] = $result['*statusInfo'];
-                }
-                elseif(isset($result['*transformationChanges'])) {
-                    $output['transformationChanges'] = $result['*transformationChanges'];
-                }
-            }
-        }
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }
 

@@ -267,20 +267,10 @@ class Metadata_form_model extends CI_Model
      *
      * @param $rodsaccount
      * @param $path
-     * @param $metadataExists
      * @return array|bool
-     *
-     * return array('formData' => ,
-     *    'schemaIdMetadata' => ,
-     *    'schemaIdCurrent' =>
-     * )
-     *
 
-    // CHeck echo (string) $xml->Title;
-    // of $xml->Title->{'0'}
-    // https://stackoverflow.com/questions/19329120/how-to-get-the-first-element-of-a-simplexml-object
      */
-    public function loadFormData($rodsaccount, $path, $metadataExists)
+    public function loadFormData($rodsaccount, $path)
     {
         $fileContent = $this->CI->filesystem->read($rodsaccount, $path);
 
@@ -295,46 +285,10 @@ class Metadata_form_model extends CI_Model
         }
 
         $json = json_encode($xmlData);
+
         $formData = json_decode($json, TRUE);
 
-        // DETERMINE METADATA schema ID
-        // Look up yodametadata schemaLocation
-        $schemaIdMetadata = '';
-
-        if ($metadataExists) {
-            // get the schemalocations of yodametadata.xml and the current for this context (vault/research)
-            $attributes = json_decode(json_encode($xmlData->attributes('xsi', TRUE)),TRUE); // verschrikkelijke manier
-            //$schemaIdMetadata = ;
-            $temp = explode(' ', $attributes['@attributes']['schemaLocation']);
-            $schemaIdMetadata = $temp[0];
-        }
-
-        // DETERMINE CURRENT schema ID
-        // Look into the system installed XSD and retrieve the schemaId from targetNamespace
-        // Current is determined by gathering info from xsd's in /*zone/yoda/schemas/*category
-        $pathParts = explode('/', $path);
-        $zone = $pathParts[1];
-        $arTemp = explode('/', $this->_getSchemaLocation($path));
-        $category = array_pop($arTemp);
-        $space =  $this->_getSchemaSpace($path);
-
-        // determine the physical path to the xsd involved. This holds current ID
-        // Eg. /tempZone/yoda/schemas/default/research.xsd
-        $currentSchemaPath = "/$zone/yoda/schemas/$category/" . $space;
-
-        $fileContent = $this->CI->filesystem->read($rodsaccount, $currentSchemaPath);
-
-        $xmlData = simplexml_load_string($fileContent);
-
-        $json = json_encode($xmlData);
-        $xml = json_decode($json, TRUE);
-
-        $schemaIdCurrent = $xml['@attributes']['targetNamespace'];
-
-        return array( 'formData' => $formData,
-                'schemaIdMetadata' => $schemaIdMetadata,
-                'schemaIdCurrent' => $schemaIdCurrent
-        );
+        return $formData;
     }
 
     /**
@@ -524,68 +478,6 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
-     * Execute transformation from schemaVersionFrom to schemaVersionTo.
-     * returns
-     *     status
-     *     statusInfo
-     * @param $path
-     * @param $schemaVersionFrom
-     * @param $schemaVersionTo
-     * @return mixed
-     */
-    public function transformMetadataXmlVersion($path, $schemaVersionFrom, $schemaVersionTo)
-    {
-        return $this->_transformMetadata($path, $schemaVersionFrom, $schemaVersionTo);
-    }
-
-    /**
-     * Execute transformation from schemaVersionFrom to schemaVersionTo.
-     * returns
-     *      transformationChanges
-     *      status
-     *      statusInfo
-     * @param $path
-     * @param $schemaVersionFrom
-     * @param $schemaVersionTo
-     * @return mixed
-     */
-    public function getTransformationChanges($path, $schemaVersionFrom, $schemaVersionTo)
-    {
-        return $this->_getTransformationChanges($path, $schemaVersionFrom, $schemaVersionTo);
-    }
-
-    // Performs transformation from versionFrom to versionTo
-    // Also returns what the changes were as text.
-    // Maybe this becomes obsolete as this can now be collected by itself as well
-    private function _transformMetadata($path, $schemaVersionFrom, $schemaVersionTo)
-    {
-        $outputParams = array('*status', '*statusInfo');
-        $inputParams = array('*path' => $path,
-            '*versionFrom' => $schemaVersionFrom,
-            '*versionTo' => $schemaVersionTo);
-
-        $this->CI->load->library('irodsrule');
-        $rule = $this->irodsrule->make('iiFrontTransformXml', $inputParams, $outputParams);
-        $result = $rule->execute();
-
-        return $result;
-    }
-
-    // Get the changes that versionFrom to VersiionTo imply in text format to present at end user.
-    private function _getTransformationChanges($path, $schemaVersionFrom, $schemaVersionTo)
-    {
-        $outputParams = array('*transformationChanges','*status', '*statusInfo');
-        $inputParams = array('*path' => $path,
-            '*versionFrom' => $schemaVersionFrom,
-            '*versionTo' => $schemaVersionTo);
-
-        $this->CI->load->library('irodsrule');
-        $rule = $this->irodsrule->make('iiFrontTransformationChanges', $inputParams, $outputParams);
-        $result = $rule->execute();
-
-        return $result;
-    }
-        /**
      * Request for location of current XSD based on location of file
      * @param $folder
      * @return schemaLocation
