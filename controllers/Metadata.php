@@ -430,11 +430,13 @@ class Metadata extends MY_Controller
 
     public function transformation()
     {
-        // @TODO: Check of er een transformatie is.
         $this->load->model('Metadata_model');
-        $path = $this->input->get('path');
 
-        $result = $this->Metadata_model->transform($path);
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $path = $this->input->get('path');
+        $fullPath =  $pathStart . $path;
+
+        $result = $this->Metadata_model->transform($fullPath);
 
         if ($result['*status'] == 'Success') {
             return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
