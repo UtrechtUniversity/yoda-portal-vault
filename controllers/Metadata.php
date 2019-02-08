@@ -100,10 +100,14 @@ class Metadata extends MY_Controller
         $fullPath = $pathStart . $path;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-
-        $xmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
-
         $jsonSchema = $this->Metadata_form_model->loadJSONS($rodsaccount, $fullPath);
+
+        $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+        $xmlFormData = null;
+        if ($metadataExists) {
+            $xmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
+            $formData = $this->Metadata_form_model->prepareJSONSFormData($jsonSchema, $xmlFormData);
+        }
 
         $uiSchema = array(
             "Descriptive-group" => array(
@@ -118,9 +122,12 @@ class Metadata extends MY_Controller
             )
         );
 
+
+        // Validation
         $errors = array();
-        $formData = $this->Metadata_form_model->prepareJSONSFormData($jsonSchema, $xmlFormData);
-        if (empty($formData)) {
+        if (empty($xmlFormData) && $metadataExists) {
+            $errors[] = 'Please check the structure of this file.';
+        } else if (empty($formData)) {
              $formData = json_decode ("{}");
         } else {
             // decode to objects
@@ -210,7 +217,7 @@ class Metadata extends MY_Controller
         $output['isDatamanager']     = $isDatamanager;
         $output['isVaultPackage']    = $isVaultPackage;
         $output['parentHasMetadata'] = $parentHasMetadata;
-        $output['metadataExists']    = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+        $output['metadataExists']    = $metadataExists;
         $output['locked']            = $isLocked;
         $output['writePermission']   = $writePermission;
         $output['submitButton']      = $submitButton;
