@@ -29,34 +29,21 @@ class Vault extends MY_Controller
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
         if ($formConfig===false) {
             $message = array('status' => 'error', 'statusInfo' => 'Permission denied for current user.');
-        }
-        else {
+        } else {
+            // Do vault submission
+            $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
+            $result = $this->vaultsubmission->validate();
 
-            $userType = $formConfig['userType'];
+            if ($result === true) {
+                $submitResult = $this->vaultsubmission->setSubmitFlag();
 
-            // First check whether schemaIds within metadata and YoDa system are equal
-            // If not, transformation needs to take place first -> no submission allowed
-            $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
-            $loadedFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath'], $metadataExists, $pathStart);
-            if ($loadedFormData['schemaIdMetadata'] != $loadedFormData['schemaIdCurrent']) {
-                $message = array('status' => 'error', 'statusInfo' => 'No submission allowed as your data is not up to date');
-            }
-            else {
-                // Do vault submission
-                $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
-                $result = $this->vaultsubmission->validate();
-
-                if ($result === true) {
-                    $submitResult = $this->vaultsubmission->setSubmitFlag();
-
-                    if ($submitResult['*status'] == 'Success') {
-                        $message = array('status' => 'Success', 'statusInfo' => 'The folder is successfully submitted.', 'folderStatus' => $submitResult['*folderStatus']);
-                    } else {
-                        $message = array('status' => $submitResult['*status'], 'statusInfo' => $submitResult['*statusInfo']);
-                    }
+                if ($submitResult['*status'] == 'Success') {
+                    $message = array('status' => 'Success', 'statusInfo' => 'The folder is successfully submitted.', 'folderStatus' => $submitResult['*folderStatus']);
                 } else {
-                    $message = array('status' => 'error', 'statusInfo' => implode("<br><br>", $result));
+                    $message = array('status' => $submitResult['*status'], 'statusInfo' => $submitResult['*statusInfo']);
                 }
+            } else {
+                $message = array('status' => 'error', 'statusInfo' => implode("<br><br>", $result));
             }
         }
 
