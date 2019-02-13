@@ -36,12 +36,12 @@ $( document ).ready(function() {
         $.getJSON("vault/checkForUnpreservableFiles?path=" + folder, function (data) {
             if (data.status == 'Success') {
                 $('#showUnpreservableFiles .unpreservable').hide();
-                $('#showUnpreservableFiles .unpreservable').hide();
+                $('#showUnpreservableFiles .preservable').hide();
                 if(data.result) {
                     $('#showUnpreservableFiles .list-unpreservable-formats').html(data.result);
                     $('#showUnpreservableFiles .unpreservable').show();
                 } else {
-                    $('#showUnpreservableFiles .unpreservable').show();
+                    $('#showUnpreservableFiles .preservable').show();
                 }
                 $('#showUnpreservableFiles').modal('show');
             } else {
