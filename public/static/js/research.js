@@ -37,9 +37,9 @@ $( document ).ready(function() {
             if (data.status == 'Success') {
                 if(data.result) {
                     $('#showUnpreservableFiles .list-unpreservable-formats').html(data.result);
-                    $('#showUnpreservableFiles .unpreservable').modal('show');
+                    $('#showUnpreservableFiles .unpreservable').show();
                 } else {
-                    $('#showUnpreservableFiles .preservable').modal('show');
+                    $('#showUnpreservableFiles .unpreservable').show();
                 }
                 $('#showUnpreservableFiles').modal('show');
             } else {
