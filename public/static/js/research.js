@@ -25,30 +25,26 @@ $( document ).ready(function() {
     });
 
     $("body").on("click", "a.action-submit", function() {
-        // Check for unpreservable file formats first.
-        // If present, make user aware which extensions.
+        submitToVault($(this).attr('data-folder'));
+    });
+
+    $("body").on("click", "a.action-check-for-unpreservable-files", function() {
+        // Check for unpreservable file formats.
+        // If present, show extensions to user.
         folder = $(this).attr('data-folder');
 
         $.getJSON("vault/checkForUnpreservableFiles?path=" + folder, function (data) {
             if (data.status == 'Success') {
-                if (data.result.length) {
+                if(data.result) {
                     $('#showUnpreservableFiles .list-unpreservable-formats').html(data.result);
                     $('#showUnpreservableFiles').modal('show');
                 } else {
-                    // can be submitted to vault directly as no unpreservable files are present
-                    submitToVault(folder);
+                    $('#showUnpreservableFiles').modal('show');
                 }
             } else {
                 setMessage('error', data.statusInfo);
             }
         });
-    });
-
-    $('.action-accept-presence-unpreservable-files').on("click", function() {
-        folder = $('a.action-submit').attr('data-folder');
-
-        $('#showUnpreservableFiles').modal('hide');
-        submitToVault(folder)
     });
 
     $("body").on("click", "a.action-unsubmit", function() {
@@ -606,6 +602,9 @@ function topInformation(dir, showAlert)
 
             $('.btn-group button.folder-status').attr('data-write', hasWriteRights);
 
+            // Add unpreservable files check to actions.
+            actions['check-for-unpreservable-files'] = 'Check for unpreservable files';
+
             // Handle actions
             handleActionsList(actions, dir);
 
@@ -666,7 +665,8 @@ function handleActionsList(actions, folder)
                            'republish-publication'];
 
     var possibleVaultActions = ['grant-vault-access', 'revoke-vault-access',
-                                'copy-vault-package-to-research'];
+                                'copy-vault-package-to-research',
+                                'check-for-unpreservable-files'];
 
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
