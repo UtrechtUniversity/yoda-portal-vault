@@ -24,30 +24,6 @@
         </div>
     </div>
 
-    <div class="modal" id="showUnpreservableFiles">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <h2>Unpreservable file formats</h2>
-                    The data you are submitting to the vault contains files that are likely to become unusable in the future.
-                    <br>
-                    <br>
-                    Following file extensions were found in your dataset:
-                    <br>
-                    <br>
-                    <div class="list-unpreservable-formats"></div>
-                    <br>
-                    To learn more about unpreservable file formats please visit: <a href="google.com">Unpreservable file formats</a>
-                </div>
-
-                <div class="modal-footer">
-                    <button class='action-accept-presence-unpreservable-files-form btn btn-default'>Submit to vault anyway</button>
-                    <button class="btn btn-default grey cancel" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="row <?php echo !$transformation ? ' hide' : ''; ?>">
         <div class="col-md-12">
             <div class="panel panel-default">

@@ -276,35 +276,9 @@ class Container extends React.Component {
     }
 
     submitMetadata() {
-        var self = this;
-        axios.get("/research/vault/checkForUnpreservableFiles?path=" + path)
-            .then(function (response) {
-                if (response.data.status == 'Success') {
-                    if (response.data.result.length) {
-                        $('#showUnpreservableFiles .list-unpreservable-formats').html(response.data.result);
-                        $('#showUnpreservableFiles').modal('show');
-
-                        $('.action-accept-presence-unpreservable-files-form').on("click", function() {
-                            $('#showUnpreservableFiles').modal('hide');
-                            submit = true;
-                            save = unsubmit = false;
-                            self.form.submitButton.click();
-                        });
-                    } else {
-                        // can be submitted to vault directly as no unpreservable files are present
-                        submit = true;
-                        save = unsubmit = false;
-                        self.form.submitButton.click();
-                    }
-                } else {
-                    setMessage('error', data.statusInfo);
-                }
-
-            })
-            .catch(function (error) {
-                    console.log(error);
-                }
-            );
+        submit = true;
+        save = unsubmit = false;
+        this.form.submitButton.click();
     }
 
     unsubmitMetadata() {
