@@ -29,6 +29,7 @@ class Metadata extends MY_Controller
 
         $path = $this->input->get('path');
         $fullPath =  $pathStart . $path;
+        $showForm = true;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
@@ -62,6 +63,27 @@ class Metadata extends MY_Controller
         $tokenName = $this->security->get_csrf_token_name();
         $tokenHash = $this->security->get_csrf_hash();
 
+        // Transformations
+        // TODO: Vault & Datamanager checks!!
+        $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+        $transformation = false;
+        $transformationText = null;
+        $transformationButtons = false;
+        if ($metadataExists && $isVaultPackage == 'no') {
+            // Transformation exists (irods?)?
+            $transformation = ($formConfig['transformation'] == 'true' ) ? true: false;
+            if ($transformation) {
+                $showForm = false;
+                if ($writePermission) {
+                    $transformationText = $formConfig['transformationText'];
+                    $transformationButtons = true;
+                } else {
+                    $transformationText = '<p>It is not possible to load this form as the metadata xml file is not in accordance with the form definition.</p>';
+                    $transformationButtons = false;
+                }
+            }
+        }
+
         $viewParams = array(
             'styleIncludes' => array(
                 'lib/font-awesome/css/font-awesome.css',
@@ -80,8 +102,15 @@ class Metadata extends MY_Controller
             'isVaultPackage'   => $isVaultPackage,
             'flashMessage'     => $flashMessage,
             'flashMessageType' => $flashMessageType,
-            'metadataExists'   => ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false,
+            'metadataExists'   => $metadataExists,
             'writePermission'  => $writePermission,
+            'showForm'         => $showForm,
+
+            // Transformation vars
+            'transformation' => $transformation,
+            'transformationText' => $transformationText,
+            'transformationButtons' => $transformationButtons,
+
         );
         loadView('metadata/form', $viewParams);
     }
@@ -300,6 +329,13 @@ class Metadata extends MY_Controller
             $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
             if ($this->input->post('vault_submission')) { // HdR er wordt nog niet gecheckt dat juiste persoon dit mag
 
+                $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+                $loadedFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath'], $metadataExists, $pathStart);
+                if ($loadedFormData['schemaIdMetadata'] != $loadedFormData['schemaIdCurrent']) {
+                    setMessage('error', 'No submission allowed as your data is not up to date with the lastest YoDa schema for this community.');
+                    return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
+                }
+
                 if(!$this->vaultsubmission->checkLock()) {
                     setMessage('error', 'There was a locking error encountered while submitting this folder.');
                 }
@@ -312,22 +348,25 @@ class Metadata extends MY_Controller
                     $result = $this->vaultsubmission->validate();
                     if ($result === true) {
                         $submitResult = $this->vaultsubmission->setSubmitFlag();
-                        if (!$submitResult) {
+                        if ($submitResult) {
+                            setMessage('success', 'The folder is successfully submitted.');
+                        } else {
                             setMessage('error', $result['*statusInfo']);
                         }
                     } else {
                         // result contains all collected messages as an array
                         setMessage('error', implode('<br>', $result));
-
                     }
                 }
             }
             elseif ($this->input->post('vault_unsubmission')) {
                 $result = $this->vaultsubmission->clearSubmitFlag();
-                if ($result['*status'] != 'Success') {
+                if ($result['*status']== 'Success') {
+                    setMessage('success', 'This folder was successfully unsubmitted from the vault.');
+                }
+                else {
                     setMessage('error', $result['*statusInfo']);
                 }
-
             }
         }
         else {
@@ -394,5 +433,23 @@ class Metadata extends MY_Controller
         }
 
         return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
+    }
+
+    public function transformation()
+    {
+        $this->load->model('Metadata_model');
+
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $path = $this->input->get('path');
+        $fullPath =  $pathStart . $path;
+
+        $result = $this->Metadata_model->transform($fullPath);
+
+        if ($result['*status'] == 'Success') {
+            return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
+        } else {
+            setMessage('error', $result['*statusInfo']);
+            return redirect('research/browse?dir=' . rawurlencode($path), 'refresh');
+        }
     }
 }

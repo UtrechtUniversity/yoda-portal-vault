@@ -20,5 +20,14 @@ class Metadata_model extends CI_Model {
         $result = $rule->execute();
         return $result;
     }
-}
 
+    public function transform($path)
+    {
+        $outputParams = array('*status', '*statusInfo');
+        $inputParams = array('*path' => $path);
+
+        $rule = $this->irodsrule->make('iiFrontTransformXml', $inputParams, $outputParams);
+        $result = $rule->execute();
+        return $result;
+    }
+}

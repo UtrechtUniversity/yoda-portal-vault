@@ -29,11 +29,7 @@ class Vault extends MY_Controller
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
         if ($formConfig===false) {
             $message = array('status' => 'error', 'statusInfo' => 'Permission denied for current user.');
-        }
-        else {
-
-            $userType = $formConfig['userType'];
-
+        } else {
             // Do vault submission
             $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
             $result = $this->vaultsubmission->validate();
