@@ -143,10 +143,10 @@
         <div class="modal-content">
             <div class="modal-body">
                 <h2>Unpreservable file formats</h2>
-                <div class"preservable">
+                <div class="preservable hidden">
                     This folder does not contain files that are likely to become unusable in the future.
                 </div>
-                <div class"unpreservable">
+                <div class="unpreservable hidden">
                     This folder contains files that are likely to become unusable in the future.
                     <br />
                     Following unpreservable file extensions were found in your dataset:
