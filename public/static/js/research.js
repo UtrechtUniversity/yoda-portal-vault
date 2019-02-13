@@ -37,10 +37,11 @@ $( document ).ready(function() {
             if (data.status == 'Success') {
                 if(data.result) {
                     $('#showUnpreservableFiles .list-unpreservable-formats').html(data.result);
-                    $('#showUnpreservableFiles').modal('show');
+                    $('#showUnpreservableFiles .unpreservable').modal('show');
                 } else {
-                    $('#showUnpreservableFiles').modal('show');
+                    $('#showUnpreservableFiles .preservable').modal('show');
                 }
+                $('#showUnpreservableFiles').modal('show');
             } else {
                 setMessage('error', data.statusInfo);
             }

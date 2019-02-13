@@ -143,20 +143,20 @@
         <div class="modal-content">
             <div class="modal-body">
                 <h2>Unpreservable file formats</h2>
-                The data you are submitting to the vault contains files that are likely to become unusable in the future.
-                <br>
-                <br>
-                Following file extensions were found in your dataset:
-                <br>
-                <br>
-                <div class="list-unpreservable-formats"></div>
-                <br>
-                To learn more about unpreservable file formats please visit: <a href="google.com">Unpreservable file formats</a>
+                <div class"preservable">
+                    This folder does not contain files that are likely to become unusable in the future.
+                </div>
+                <div class"unpreservable">
+                    This folder contains files that are likely to become unusable in the future.
+                    <br />
+                    Following unpreservable file extensions were found in your dataset:
+                    <br />
+                    <div class="list-unpreservable-formats"></div>
+                </div>
             </div>
 
             <div class="modal-footer">
-                <button class='action-accept-presence-unpreservable-files btn btn-default'>Submit to vault anyway</button>
-                <button class="btn btn-default grey cancel" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-default grey cancel" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
