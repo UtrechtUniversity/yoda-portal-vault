@@ -475,20 +475,10 @@ function topInformation(dir, showAlert)
                 } else if (status == 'ACCEPTED') {
                     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
                 } else if (status == 'SECURED') {
-                    // Check for locks is here for backwards compatibility with release v1.2.
-                    if (lockFound == "here") {
-                        actions['lock'] = 'Lock';
-                    } else {
-                        actions['unlock'] = 'Unlock';
-                    }
+                    actions['lock'] = 'Lock';
                     actions['submit'] = 'Submit';
                 } else if (status == 'REJECTED') {
-                    // Check for locks is here for backwards compatibility with release v1.2.
-                    if (lockFound == "here") {
-                        actions['lock'] = 'Lock';
-                    } else {
-                        actions['unlock'] = 'Unlock';
-                    }
+                    actions['lock'] = 'Lock';
                     actions['submit'] = 'Submit';
                 }
 
