@@ -156,7 +156,7 @@
                     <br /><br />
                     Following unpreservable file extensions were found in your dataset:
                     <br />
-                    <div class="list-unpreservable-formats"></div>
+                    <ul class="list-unpreservable-formats"></ul>
                 </div>
             </div>
 

@@ -659,15 +659,16 @@ RULE;
      * @param $fullPath
      * @return array
      */
-    function getUnpreservableFileFormats($fullPath)
+    function getUnpreservableFileFormats($fullPath, $list)
     {
-        $outputParams = array('*result', '*status', '*statusInfo');
-        $inputParams = array('*folder' => $fullPath);
-
-        $this->CI->load->library('irodsrule');
-        $rule = $this->irodsrule->make('iiFrontRequestDatasetUnpreservableExtensions', $inputParams, $outputParams);
+        $rule = new ProdsRule(
+            $this->rodsuser->getRodsAccount(),
+            'rule { iiGetUnpreservableFilesListJson(*folder, *list); }',
+            array('*folder' => $fullPath, '*list' => $list),
+            array('ruleExecOut')
+        );
         $result = $rule->execute();
 
-        return $result;
+        return $result['ruleExecOut'];
     }
 }

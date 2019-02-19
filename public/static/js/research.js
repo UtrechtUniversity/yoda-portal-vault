@@ -33,20 +33,24 @@ $( document ).ready(function() {
         // If present, show extensions to user.
         folder = $(this).attr('data-folder');
 
-        $.getJSON("vault/checkForUnpreservableFiles?path=" + folder, function (data) {
-            if (data.status == 'Success') {
+        $.getJSON("vault/checkForUnpreservableFiles?path=" + folder + "&list=DANS", function (data) {
+            if (data.formats) {
                 $('#showUnpreservableFiles .unpreservable').hide();
                 $('#showUnpreservableFiles .preservable').hide();
-                if(data.result) {
-                    $('#showUnpreservableFiles .list-unpreservable-formats').html(data.result);
+                if(data.formats.length > 0) {
+                    for (var i = 0; i < data.formats.length; i++) {
+                        $('#showUnpreservableFiles .list-unpreservable-formats').html("");
+                        $('#showUnpreservableFiles .list-unpreservable-formats').append("<li>" + data.formats[i] + "</li>");
+                    }
                     $('#showUnpreservableFiles .unpreservable').show();
                 } else {
                     $('#showUnpreservableFiles .preservable').show();
                 }
                 $('#showUnpreservableFiles').modal('show');
             } else {
-                setMessage('error', data.statusInfo);
+                setMessage('error', "Something went wrong while checking for unpreservable files.");
             }
+
         });
     });
 
