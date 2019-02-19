@@ -1,5 +1,11 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
+/**
+ * Metadata controller
+ *
+ * @package    Yoda
+ * @copyright  Copyright (c) 2017-2019, Utrecht University. All rights reserved.
+ * @license    GPLv3, see LICENSE.
+ */
 use JsonSchema\SchemaStorage;
 use JsonSchema\Validator;
 use JsonSchema\Constraints\Factory;

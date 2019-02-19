@@ -1,6 +1,11 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
-
+/**
+ * Revision model
+ *
+ * @package    Yoda
+ * @copyright  Copyright (c) 2017-2019, Utrecht University. All rights reserved.
+ * @license    GPLv3, see LICENSE.
+ */
 class RevisionModel extends CI_Model {
 
     public function __construct()
@@ -203,4 +208,3 @@ RULE;
 
     }
 }
-
