@@ -657,7 +657,7 @@ RULE;
      *
      * @return array
      */
-    function getPreservableFormatsLists($fullPath, $list)
+    function getPreservableFormatsLists()
     {
         $rule = new ProdsRule(
             $this->rodsuser->getRodsAccount(),
