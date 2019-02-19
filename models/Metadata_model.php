@@ -16,6 +16,12 @@ class Metadata_model extends CI_Model {
         $this->CI =& get_instance();
     }
 
+    /**
+     * Prepare vault metadata for editing.
+     *
+     * @param $metadataFile
+     * @return metadata
+     */
     public function prepareVaultMetadataForEditing($metadataFile)
     {
         $outputParams = array('*tempMetadataXmlPath', '*status', '*statusInfo');
@@ -26,6 +32,12 @@ class Metadata_model extends CI_Model {
         return $result;
     }
 
+    /**
+     * Transform metadata to new schema.
+     *
+     * @param $path
+     * @return result of transformation
+     */
     public function transform($path)
     {
         $outputParams = array('*status', '*statusInfo');

@@ -267,9 +267,9 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
-     * Load the yoda-metadata.xml file ($path) in an array structure
+     * Load the yoda-metadata.xml file ($path) in an array structure.
      *
-     * Reorganise this this in such a way that hierarchy is lost but indexing is possible by eg 'Author_Property_Role'
+     * Reorganise this in such a way that hierarchy is lost but indexing is possible by eg 'Author_Property_Role'.
      *
      * @param $rodsaccount
      * @param $path
@@ -484,7 +484,8 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
-     * Request for location of current XSD based on location of file
+     * Request for location of current XSD based on location of file.
+     *
      * @param $folder
      * @return schemaLocation
      */
@@ -501,7 +502,8 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
-     * Request for space of current XSD based on location of file
+     * Request space (research or vault) of current XSD based on location of file.
+     *
      * @param $folder
      * @return schemaSpace
      */
