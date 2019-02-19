@@ -32,23 +32,54 @@ $( document ).ready(function() {
         // Check for unpreservable file formats.
         // If present, show extensions to user.
         folder = $(this).attr('data-folder');
+
+        // Retrieve preservable file format lists.
         $.getJSON("vault/preservableFormatsLists", function (data) {
-            if (data.lists.length > 0) {
-                for (var i = 0; i < data.lists.length; i++) {
-                    console.log(data.lists[i]);
+            if (Object.keys(data.lists).length > 0) {
+                lists = data.lists
+                $('#file-formats-list').html("");
+                for (var list in lists) {
+                    if (lists.hasOwnProperty(list)) {
+                        $("#file-formats-list").append(new Option(lists[list], list));
+                    }
                 }
             } else {
                 setMessage('error', "Something went wrong while checking for unpreservable files.");
             }
         });
 
+        // Retrieve unpreservable files in folder.
         $.getJSON("vault/checkForUnpreservableFiles?path=" + folder + "&list=DANS", function (data) {
             if (data.formats) {
                 $('#showUnpreservableFiles .unpreservable').hide();
                 $('#showUnpreservableFiles .preservable').hide();
                 if(data.formats.length > 0) {
+                    $('#showUnpreservableFiles .list-unpreservable-formats').html("");
                     for (var i = 0; i < data.formats.length; i++) {
-                        $('#showUnpreservableFiles .list-unpreservable-formats').html("");
+                        $('#showUnpreservableFiles .list-unpreservable-formats').append("<li>" + data.formats[i] + "</li>");
+                    }
+                    $('#showUnpreservableFiles .unpreservable').show();
+                } else {
+                    $('#showUnpreservableFiles .preservable').show();
+                }
+                $('#showUnpreservableFiles').modal('show');
+            } else {
+                setMessage('error', "Something went wrong while checking for unpreservable files.");
+            }
+        });
+    });
+
+    $("#file-formats-list").change(function() {
+        list = $("#file-formats-list option:selected").val();
+
+        // Retrieve unpreservable files in folder.
+        $.getJSON("vault/checkForUnpreservableFiles?path=" + folder + "&list=" + list, function (data) {
+            if (data.formats) {
+                $('#showUnpreservableFiles .unpreservable').hide();
+                $('#showUnpreservableFiles .preservable').hide();
+                if(data.formats.length > 0) {
+                    $('#showUnpreservableFiles .list-unpreservable-formats').html("");
+                    for (var i = 0; i < data.formats.length; i++) {
                         $('#showUnpreservableFiles .list-unpreservable-formats').append("<li>" + data.formats[i] + "</li>");
                     }
                     $('#showUnpreservableFiles .unpreservable').show();
