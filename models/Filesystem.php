@@ -652,6 +652,23 @@ RULE;
         return array();
     }
 
+    /**
+     * Retrieve lists of preservable file formats.
+     *
+     * @return array
+     */
+    function getPreservableFormatsLists($fullPath, $list)
+    {
+        $rule = new ProdsRule(
+            $this->rodsuser->getRodsAccount(),
+            'rule { iiGetPreservableFormatsListsJson(); }',
+            array(),
+            array('ruleExecOut')
+        );
+        $result = $rule->execute();
+
+        return $result['ruleExecOut'];
+    }
 
     /**
      * Retrieve extensions of unpreservable file formats in this folder.
@@ -663,7 +680,7 @@ RULE;
     {
         $rule = new ProdsRule(
             $this->rodsuser->getRodsAccount(),
-            'rule { iiGetUnpreservableFilesListJson(*folder, *list); }',
+            'rule { iiGetUnpreservableFilesJson(*folder, *list); }',
             array('*folder' => $fullPath, '*list' => $list),
             array('ruleExecOut')
         );

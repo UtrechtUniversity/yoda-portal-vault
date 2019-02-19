@@ -248,6 +248,17 @@ class Vault extends MY_Controller
             ->set_output(json_encode($output));
     }
 
+    // Retrieve lists of preservable file formats.
+    public function preservableFormatsLists()
+    {
+        $result = $this->filesystem->getPreservableFormatsLists();
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output($result);
+    }
+
+
     // Check whether unpreservable files are used and return their extensions as an array
     // So frontend can present them to user
     public function checkForUnpreservableFiles()

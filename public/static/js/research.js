@@ -32,6 +32,15 @@ $( document ).ready(function() {
         // Check for unpreservable file formats.
         // If present, show extensions to user.
         folder = $(this).attr('data-folder');
+        $.getJSON("vault/preservableFormatsLists", function (data) {
+            if (data.lists.length > 0) {
+                for (var i = 0; i < data.lists.length; i++) {
+                    console.log(data.lists[i]);
+                }
+            } else {
+                setMessage('error', "Something went wrong while checking for unpreservable files.");
+            }
+        });
 
         $.getJSON("vault/checkForUnpreservableFiles?path=" + folder + "&list=DANS", function (data) {
             if (data.formats) {
@@ -50,7 +59,6 @@ $( document ).ready(function() {
             } else {
                 setMessage('error', "Something went wrong while checking for unpreservable files.");
             }
-
         });
     });
 
