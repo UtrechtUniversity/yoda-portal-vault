@@ -256,8 +256,7 @@ class Vault extends MY_Controller
         $pathStart = $this->pathlibrary->getPathStart($this->config);
         $fullPath =  $pathStart . $path;
 
-        $this->load->model('Folder_Status_model');
-        $result = $this->Folder_Status_model->getUnpreservableFileFormats($fullPath);
+        $result = $this->filesystem->getUnpreservableFileFormats($fullPath);
 
         $extensionsAsText = '';
         if (is_array($result['*result'])) {

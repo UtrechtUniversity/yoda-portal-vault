@@ -651,4 +651,23 @@ RULE;
 
         return array();
     }
+
+
+    /**
+     * Retrieve extensions of unpreservable file formats in this folder.
+     *
+     * @param $fullPath
+     * @return array
+     */
+    function getUnpreservableFileFormats($fullPath)
+    {
+        $outputParams = array('*result', '*status', '*statusInfo');
+        $inputParams = array('*folder' => $fullPath);
+
+        $this->CI->load->library('irodsrule');
+        $rule = $this->irodsrule->make('iiFrontRequestDatasetUnpreservableExtensions', $inputParams, $outputParams);
+        $result = $rule->execute();
+
+        return $result;
+    }
 }
