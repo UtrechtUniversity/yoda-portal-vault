@@ -1,8 +1,13 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
+/**
+ * Vaultsubmission library
+ *
+ * @package    Yoda
+ * @copyright  Copyright (c) 2017-2019, Utrecht University. All rights reserved.
+ * @license    GPLv3, see LICENSE.
+ */
 class Vaultsubmission
 {
-
     public $CI;
     private $account;
     private $formConfig = array();
