@@ -67,7 +67,6 @@ class Vault extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-        $folderStatus = $formConfig['folderStatus'];
         $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
 
         $result = $this->vaultsubmission->clearSubmitFlag();
@@ -238,7 +237,6 @@ class Vault extends MY_Controller
     public function copyVaultPackageToDynamicArea()
     {
         $this->load->model('Data_Request_model');
-        $rodsaccount = $this->rodsuser->getRodsAccount();
 
         $pathStart = $this->pathlibrary->getPathStart($this->config);
 

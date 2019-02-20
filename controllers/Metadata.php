@@ -328,9 +328,6 @@ class Metadata extends MY_Controller
             return redirect('research/browse?dir=' . rawurlencode($path), 'refresh');
         }
 
-        $status = '';
-        $statusInfo = '';
-
         if ($this->input->post('vault_submission') || $this->input->post('vault_unsubmission')) {
             $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
             if ($this->input->post('vault_submission')) { // HdR er wordt nog niet gecheckt dat juiste persoon dit mag
