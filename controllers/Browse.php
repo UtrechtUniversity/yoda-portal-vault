@@ -26,14 +26,6 @@ class Browse extends MY_Controller
         $items = $this->config->item('browser-items-per-page');
         $dir = $this->input->get('dir');
 
-        /// Hdr test purposes
-        $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $rodsaccount = $this->rodsuser->getRodsAccount();
-
-        $fullPath =  $pathStart . $this->input->get('dir');
-
-        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-
         // Search results data
         $searchTerm = '';
         $searchStatusValue = '';
@@ -204,8 +196,6 @@ class Browse extends MY_Controller
      */
     public function data( $restrict = 0, $interveneOnMetadataKeys = '')
     {
-        //return -1; exit;
-
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
 
@@ -373,8 +363,6 @@ class Browse extends MY_Controller
      */
     public function selectData( $restrict = 0, $interveneOnMetadataKeys = '')
     {
-        //return -1; exit;
-
         $rodsaccount = $this->rodsuser->getRodsAccount();
         $pathStart = $this->pathlibrary->getPathStart($this->config);
 
@@ -493,12 +481,12 @@ class Browse extends MY_Controller
             $rows = array();
         }
 
-        $output = array('status' => $status,
-	                'statusInfo' => $statusInfo,
-                        'draw' => $draw,
-			'recordsTotal' => $totalItems,
-			'recordsFiltered' => $totalItems,
-			'data' => $rows);
+        $output = array('status'          => $status,
+                        'statusInfo'      => $statusInfo,
+                        'draw'            => $draw,
+                        'recordsTotal'    => $totalItems,
+                        'recordsFiltered' => $totalItems,
+                        'data'            => $rows);
 
         $this->output
             ->set_content_type('application/json')
