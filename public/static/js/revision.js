@@ -86,7 +86,7 @@ $( document ).ready(function() {
         $('.cover').addClass('hide');
         $('.revision-restore-dialog').removeClass('hide');
     });
-    $('#btn-cancel-overite-dialog').on('click', function(){
+    $('#btn-cancel-overwrite-dialog').on('click', function(){
         $('.cover').addClass('hide');
         $('.revision-restore-dialog').removeClass('hide');
     });

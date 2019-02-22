@@ -94,7 +94,7 @@
                                 </div>
                                 <div class="row">
                                     <hr>
-                                    <button class="btn btn-default pull-right"  id="btn-cancel-overite-dialog" >Cancel</button>
+                                    <button class="btn btn-default pull-right"  id="btn-cancel-overwrite-dialog" >Cancel</button>
                                 </div>
                             </div>
                         </div>
