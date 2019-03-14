@@ -1,0 +1,258 @@
+/*Panel tabs*/
+.panel-tabs {
+    position: relative;
+    bottom: 30px;
+    clear:both;
+    border-bottom: 1px solid transparent;
+}
+
+.panel-tabs > li {
+    float: left;
+    margin-bottom: -1px;
+}
+
+.panel-tabs > li > a {
+    margin-right: 2px;
+    margin-top: 4px;
+    line-height: .85;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;
+    color: #ffffff;
+}
+
+.panel-tabs > li > a:hover {
+    border-color: transparent;
+    color: #ffffff;
+    background-color: transparent;
+}
+
+.panel-tabs > li.active > a,
+.panel-tabs > li.active > a:hover,
+.panel-tabs > li.active > a:focus {
+    color: #fff;
+    cursor: default;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    background-color: rgba(255,255,255, .23);
+    border-bottom-color: transparent;
+}
+
+.tooltip-inner {
+    min-width: 100px;
+    max-width: 100%;
+}
+
+.metadata-form fieldset fieldset:not(.yoda-structure){
+    border: solid 1px #DDD !important;
+    padding: 0 10px 10px 10px;
+    border-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+legend {
+    width: auto !important;
+    border: none;
+    font-size: 14px;
+    padding: 0 5px;
+    margin-bottom: 15px!important;
+    color: #555!important;
+}
+
+.fa.safe {
+    color: red;
+    margin-top:4px;
+}
+
+.fa.safe-single {
+    color: red;
+    margin-top:10px;
+}
+
+
+.fa.checkmark-green-top-right {
+    color:#00CC00;
+    margin-left:5px;
+    margin-top:-3px;
+}
+
+.fa.form-required-present {
+    color:#00CC00;
+}
+
+.fa.form-required-missing {
+    color:#F0F0F0;
+}
+
+.add-pointer {
+    cursor: pointer
+}
+
+.panel-heading .input-group-sm {
+    margin: -7px; /* Search box */
+}
+.panel-footer  .input-group-sm {
+    margin: -6px; /* Search box */
+}
+
+#ui-datepicker-div {
+    z-index: 999!important;
+}
+
+.ui-datepicker-current {
+    visibility:hidden
+}
+
+.no-padding {
+    padding: 0;
+}
+
+button[data-clone*="main"] {
+    margin-left: 15px!important;
+}
+
+.combined-main-label {
+    padding-top: 30px!important;
+}
+
+.geo-location-map {
+    width: 860px;
+    height: 500px;
+}
+
+.flexdate.invalid {
+    color: red!important;
+}
+
+.hasDatepicker {
+    position: relative;
+    z-index: 9999;
+}
+/*
+.subproperties {
+    padding-left: 9%;
+}
+*/
+/*
+.subproperties .form-group {
+    padding-left: 9%;
+}
+
+
+.subproperties .form-group:nth-of-type(1),
+.subproperties .form-group:first-of-type {
+    padding-left: 0%;
+}
+
+.subproperties .compound {
+    padding-left: 9%;
+}
+*/
+/*
+.subproperties .compound {
+    padding-left: 9%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+}
+*/
+
+.subproperties > div:not(:first-of-type) {
+    padding-left: 9%;
+}
+
+.subproperties legend {
+    display: none;
+}
+
+.subproperties .compound {
+    padding-left: 9%;
+}
+
+.subproperties .compound legend {
+    display: block;
+}
+
+.combined-main-label {
+    padding-top: 30px!important;
+}
+
+/*
+.compound {
+    display: inline-block;
+    width: 100%;
+}
+
+.compound legend {
+    float: left;
+    width: 15%!important;
+    margin-right: 5%;
+    padding-top: 30px!important;
+    text-align: right;
+    font-weight: bold;
+}
+
+.compound .form-group {
+    width: 40%;
+    display: inherit;
+}
+
+.compound .form-group .field-wrapper {
+    width: 100%;
+    padding-right: 5%;
+}
+
+.compound .form-group label {
+    width: 22%!important;
+}
+
+.compound div {
+}
+*/
+
+.has-btn {
+    position: relative;
+}
+
+.btn-controls {
+    position: absolute;
+    top: 0;
+    right: 30px;
+}
+
+.btn-controls.btn-count-2 {
+    right: -3px;
+}
+
+.btn-controls button {
+    width: 34px;
+}
+
+.yoda-structure.compound {
+    margin-bottom: 0px;
+}
+
+.compound-field .form-group label {
+    width: 100%;
+    text-align: left;
+}
+
+.compound-field .form-group {
+    margin-bottom: 0px;
+}
+
+.compound-field .form-group .fa-stack {
+    display: none;
+}
+
+.compound-field .form-group .field-wrapper {
+    width: 100%;
+}
+
+.compound + .btn-controls {
+    top: 27px;
+}
+
+.accept-transformation {
+    margin-right: 5px;
+}
