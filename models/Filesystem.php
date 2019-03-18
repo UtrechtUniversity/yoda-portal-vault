@@ -264,7 +264,7 @@ myRule {
     *l = int(*limit);
     *o = int(*offset);
 
-    iiBrowse(*path, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, *result, *status, *statusInfo);
+    iiBrowse(*path, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, "vault", *result, *status, *statusInfo);
 }
 RULE;
         try {
