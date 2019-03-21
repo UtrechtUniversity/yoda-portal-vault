@@ -197,6 +197,14 @@ $( document ).ready(function() {
         $('#confirmRepublish').modal('hide');
         vaultRepublishPublication($(this).attr('data-folder'));
     });
+
+    $("body").on("click", "a.action-go-to-research", function() {
+        window.location.href = 'research?dir=' +  $(this).attr('research-path');
+    });
+
+    $("body").on("click", "a.action-go-to-vault", function() {
+        window.location.href = 'vault?dir=' +  $(this).attr('vaukt-path');
+    });
 });
 
 function browse(dir)
@@ -649,9 +657,16 @@ function topInformation(dir, showAlert)
             } else if (typeof vaultPath != 'undefined' ) {
                 actions['go-to-vault'] = 'Go to vault';
             }
+
             // Handle actions
             handleActionsList(actions, dir);
 
+            // Set research and vault paths.
+            if (typeof researchPath != 'undefined' ) {
+                $('a.action-go-to-research').attr('research-path', researchPath);
+            } else if (typeof vaultPath != 'undefined' ) {
+                $('a.action-go-to-vault').attr('vault-path', vaultPath);
+            }
             // data.basename.replace(/ /g, "&nbsp;")
             folderName = htmlEncode(data.result.basename).replace(/ /g, "&nbsp;");
 
