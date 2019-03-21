@@ -492,6 +492,8 @@ function topInformation(dir, showAlert)
             var inResearchGroup = data.result.inResearchGroup;
             var lockFound = data.result.lockFound;
             var lockCount = data.result.lockCount;
+            var researchPath = data.result.researchPath;
+            var vaultPath = data.result.vaultPath;
             var actions = [];
 
             // User metadata
@@ -641,6 +643,12 @@ function topInformation(dir, showAlert)
             // Add unpreservable files check to actions.
             actions['check-for-unpreservable-files'] = 'Check for unpreservable files';
 
+            // Add go to research and vault actions.
+            if (typeof researchPath != 'undefined' ) {
+                actions['go-to-research'] = 'Go to research';
+            } else if (typeof vaultPath != 'undefined' ) {
+                actions['go-to-vault'] = 'Go to vault';
+            }
             // Handle actions
             handleActionsList(actions, dir);
 
@@ -702,7 +710,8 @@ function handleActionsList(actions, folder)
 
     var possibleVaultActions = ['grant-vault-access', 'revoke-vault-access',
                                 'copy-vault-package-to-research',
-                                'check-for-unpreservable-files'];
+                                'check-for-unpreservable-files',
+                                'go-to-research', 'go-to-vault'];
 
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
