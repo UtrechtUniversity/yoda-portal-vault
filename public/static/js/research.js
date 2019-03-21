@@ -197,6 +197,10 @@ $( document ).ready(function() {
         $('#confirmRepublish').modal('hide');
         vaultRepublishPublication($(this).attr('data-folder'));
     });
+
+    $("body").on("click", "a.action-go-to-research", function() {
+        window.location.href = '/research/?dir=%2F' +  $(this).attr('research-path');
+    });
 });
 
 function browse(dir)
@@ -492,6 +496,7 @@ function topInformation(dir, showAlert)
             var inResearchGroup = data.result.inResearchGroup;
             var lockFound = data.result.lockFound;
             var lockCount = data.result.lockCount;
+            var researchPath = data.result.researchPath;
             var actions = [];
 
             // User metadata
@@ -641,8 +646,18 @@ function topInformation(dir, showAlert)
             // Add unpreservable files check to actions.
             actions['check-for-unpreservable-files'] = 'Check for unpreservable files';
 
+            // Add go to research to actions.
+            if (typeof researchPath != 'undefined' ) {
+                actions['go-to-research'] = 'Go to research';
+            }
+
             // Handle actions
             handleActionsList(actions, dir);
+
+            // Set research path.
+            if (typeof researchPath != 'undefined' ) {
+                $('a.action-go-to-research').attr('research-path', researchPath);
+            }
 
             // data.basename.replace(/ /g, "&nbsp;")
             folderName = htmlEncode(data.result.basename).replace(/ /g, "&nbsp;");
@@ -702,7 +717,8 @@ function handleActionsList(actions, folder)
 
     var possibleVaultActions = ['grant-vault-access', 'revoke-vault-access',
                                 'copy-vault-package-to-research',
-                                'check-for-unpreservable-files'];
+                                'check-for-unpreservable-files',
+                                'go-to-research'];
 
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
