@@ -199,11 +199,11 @@ $( document ).ready(function() {
     });
 
     $("body").on("click", "a.action-go-to-research", function() {
-        window.location.href = 'research?dir=' +  $(this).attr('research-path');
+        window.location.href = '/research?dir=' +  $(this).attr('research-path');
     });
 
     $("body").on("click", "a.action-go-to-vault", function() {
-        window.location.href = 'vault?dir=' +  $(this).attr('vaukt-path');
+        window.location.href = '/vault?dir=' +  $(this).attr('vault-path');
     });
 });
 
