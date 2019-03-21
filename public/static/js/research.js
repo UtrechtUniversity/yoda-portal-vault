@@ -198,10 +198,6 @@ $( document ).ready(function() {
         vaultRepublishPublication($(this).attr('data-folder'));
     });
 
-    $("body").on("click", "a.action-go-to-research", function() {
-        window.location.href = '/research/?dir=%2F' +  $(this).attr('research-path');
-    });
-
     $("body").on("click", "a.action-go-to-vault", function() {
         window.location.href = '/vault/?dir=%2F' +  $(this).attr('vault-path');
     });
@@ -500,7 +496,6 @@ function topInformation(dir, showAlert)
             var inResearchGroup = data.result.inResearchGroup;
             var lockFound = data.result.lockFound;
             var lockCount = data.result.lockCount;
-            var researchPath = data.result.researchPath;
             var vaultPath = data.result.vaultPath;
             var actions = [];
 
@@ -651,22 +646,19 @@ function topInformation(dir, showAlert)
             // Add unpreservable files check to actions.
             actions['check-for-unpreservable-files'] = 'Check for unpreservable files';
 
-            // Add go to research and vault actions.
-            if (typeof researchPath != 'undefined' ) {
-                actions['go-to-research'] = 'Go to research';
-            } else if (typeof vaultPath != 'undefined' ) {
+            // Add go to vault to actions.
+            if (typeof vaultPath != 'undefined' ) {
                 actions['go-to-vault'] = 'Go to vault';
             }
 
             // Handle actions
             handleActionsList(actions, dir);
 
-            // Set research and vault paths.
-            if (typeof researchPath != 'undefined' ) {
-                $('a.action-go-to-research').attr('research-path', researchPath);
-            } else if (typeof vaultPath != 'undefined' ) {
+            // Set vault paths.
+            if (typeof vaultPath != 'undefined' ) {
                 $('a.action-go-to-vault').attr('vault-path', vaultPath);
             }
+
             // data.basename.replace(/ /g, "&nbsp;")
             folderName = htmlEncode(data.result.basename).replace(/ /g, "&nbsp;");
 
@@ -726,7 +718,7 @@ function handleActionsList(actions, folder)
     var possibleVaultActions = ['grant-vault-access', 'revoke-vault-access',
                                 'copy-vault-package-to-research',
                                 'check-for-unpreservable-files',
-                                'go-to-research', 'go-to-vault'];
+                                'go-to-vault'];
 
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
