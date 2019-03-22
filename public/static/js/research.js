@@ -509,9 +509,6 @@ function topInformation(dir, showAlert)
 
             // folder status (normal folder)
             if (typeof status != 'undefined' && typeof isVaultPackage == 'undefined') {
-                // reset action dropdown.
-                $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
-
                 if (status == '') {
                     actions['lock'] = 'Lock';
                     actions['submit'] = 'Submit';
@@ -521,7 +518,7 @@ function topInformation(dir, showAlert)
                 } else if (status == 'SUBMITTED') {
                     actions['unsubmit'] = 'Unsubmit';
                 } else if (status == 'ACCEPTED') {
-                    $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
+
                 } else if (status == 'SECURED') {
                     actions['lock'] = 'Lock';
                     actions['submit'] = 'Submit';
@@ -539,17 +536,14 @@ function topInformation(dir, showAlert)
             }
 
             if (userType == 'reader') {
-                // Disable status dropdown.
-                $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
+                var actions = [];
                 hasWriteRights = 'no';
             }
 
             if (isDatamanager == 'yes') {
                 // Check rights as datamanager.
                 if (userType != 'manager' && userType != 'normal') {
-                    // Disable status dropdown.
                     var actions = [];
-                    $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
                     hasWriteRights = 'no';
                 }
 
@@ -557,7 +551,6 @@ function topInformation(dir, showAlert)
                     if (status == 'SUBMITTED') {
                         actions['accept'] = 'Accept';
                         actions['reject'] = 'Reject';
-                        $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
                     }
                 }
 
@@ -573,7 +566,6 @@ function topInformation(dir, showAlert)
 
                 // folder status (vault folder)
                 if (typeof vaultStatus != 'undefined' && typeof vaultActionPending != 'undefined') {
-                    $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
                     $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
 
                     // Set actions for datamanager and researcher.
@@ -582,24 +574,18 @@ function topInformation(dir, showAlert)
                             if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
                                 actions['cancel-publication'] = 'Cancel publication';
                                 actions['approve-for-publication'] = 'Approve for publication';
-                                $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
                             } else if (vaultStatus == 'UNPUBLISHED' && inResearchGroup  == 'yes') {
                                 actions['submit-for-publication'] = 'Submit for publication';
-                                $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
                             } else if (vaultStatus == 'PUBLISHED') {
                                 actions['depublish-publication'] = 'Depublish publication';
-                                $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
                             }  else if (vaultStatus == 'DEPUBLISHED') {
                                 actions['republish-publication'] = 'Republish publication';
-                                $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
                             }
                         } else if (hasDatamanager == 'yes') {
                             if (vaultStatus == 'UNPUBLISHED') {
                                 actions['submit-for-publication'] = 'Submit for publication';
-                                $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
                             } else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
                                 actions['cancel-publication'] = 'Cancel publication';
-                                $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
                             }
                         }
                     }
@@ -610,10 +596,8 @@ function topInformation(dir, showAlert)
                 if (isDatamanager == 'yes') {
                     if (researchGroupAccess == 'no') {
                         actions['grant-vault-access'] = 'Grant read access to research group';
-                        $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
                     } else {
                         actions['revoke-vault-access'] = 'Revoke read access to research group';
-                        $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
                     }
                 }
             }
@@ -696,6 +680,9 @@ function topInformation(dir, showAlert)
               }
             }
             statusBadge = '<span id="statusBadge" class="badge">' + statusText + '</span>';
+
+            // Reset action dropdown.
+            $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
 
             $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + lockIcon + systemMetadataIcon + actionLogIcon + statusBadge);
             $('.top-information').show();
