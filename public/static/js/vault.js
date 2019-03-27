@@ -517,6 +517,8 @@ function topInformation(dir, showAlert)
                         actions['revoke-vault-access'] = 'Revoke read access to research group';
                     }
                 }
+            } else {
+                $('.top-info-buttons').hide();
             }
 
             // Provenance action log
