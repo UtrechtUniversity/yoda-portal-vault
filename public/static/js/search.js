@@ -122,7 +122,12 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
             "displayStart": displayStart,
             "drawCallback": function(settings) {
                 $( ".browse-search" ).on( "click", function() {
-                    browse($(this).attr('data-path'));
+                    var path = $(this).attr('data-path');
+                    if (path.startsWith('%2Fvault-')) {
+                        browse(path); 
+                    } else {
+                        window.location = "/research/?dir=" + path;
+                    }
                 });
 
                 $('.matches').tooltip();
