@@ -16,18 +16,6 @@ $( document ).ready(function() {
         showMetadataForm($(this).attr('data-path'));
     });
 
-    $("body").on("click", "a.action-lock", function() {
-        lockFolder($(this).attr('data-folder'));
-    });
-
-    $("body").on("click", "a.action-unlock", function() {
-        unlockFolder($(this).attr('data-folder'));
-    });
-
-    $("body").on("click", "a.action-submit", function() {
-        submitToVault($(this).attr('data-folder'));
-    });
-
     $("body").on("click", "a.action-check-for-unpreservable-files", function() {
         // Check for unpreservable file formats.
         // If present, show extensions to user.
@@ -93,18 +81,6 @@ $( document ).ready(function() {
         });
     });
 
-    $("body").on("click", "a.action-unsubmit", function() {
-        unsubmitToVault($(this).attr('data-folder'));
-    });
-
-    $("body").on("click", "a.action-accept", function() {
-        acceptFolder($(this).attr('data-folder'));
-    });
-
-    $("body").on("click", "a.action-reject", function() {
-        rejectFolder($(this).attr('data-folder'));
-    });
-
     $("body").on("click", "a.action-submit-for-publication", function() {
         $('#confirmAgreementConditions .modal-body').text(''); // clear it first
 
@@ -148,10 +124,6 @@ $( document ).ready(function() {
 
     $("body").on("click", "a.action-cancel-publication", function() {
         vaultCancelPublication($(this).attr('data-folder'));
-    });
-
-    $("body").on("click", "i.lock-icon", function() {
-        toggleLocksList($(this).attr('data-folder'));
     });
 
     $("body").on("click", "i.actionlog-icon", function() {
@@ -494,8 +466,6 @@ function topInformation(dir, showAlert)
             var isVaultPackage = data.result.isVaultPackage;
             var researchGroupAccess = data.result.researchGroupAccess;
             var inResearchGroup = data.result.inResearchGroup;
-            var lockFound = data.result.lockFound;
-            var lockCount = data.result.lockCount;
             var researchPath = data.result.researchPath;
             var actions = [];
 
@@ -505,58 +475,6 @@ function topInformation(dir, showAlert)
                 $('.btn-group button.metadata-form').show();
             } else {
                 $('.btn-group button.metadata-form').hide();
-            }
-
-            // folder status (normal folder)
-            if (typeof status != 'undefined' && typeof isVaultPackage == 'undefined') {
-                if (status == '') {
-                    actions['lock'] = 'Lock';
-                    actions['submit'] = 'Submit';
-                } else if (status == 'LOCKED') {
-                    actions['unlock'] = 'Unlock';
-                    actions['submit'] = 'Submit';
-                } else if (status == 'SUBMITTED') {
-                    actions['unsubmit'] = 'Unsubmit';
-                } else if (status == 'ACCEPTED') {
-                } else if (status == 'SECURED') {
-                    actions['lock'] = 'Lock';
-                    actions['submit'] = 'Submit';
-                } else if (status == 'REJECTED') {
-                    actions['lock'] = 'Lock';
-                    actions['submit'] = 'Submit';
-                }
-
-                var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
-                $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
-
-                $('.top-info-buttons').show();
-            } else {
-                $('.top-info-buttons').hide();
-            }
-
-            if (userType == 'reader') {
-                var actions = [];
-                hasWriteRights = 'no';
-            }
-
-            if (isDatamanager == 'yes') {
-                // Check rights as datamanager.
-                if (userType != 'manager' && userType != 'normal') {
-                    var actions = [];
-                    hasWriteRights = 'no';
-                }
-
-                if (typeof status != 'undefined') {
-                    if (status == 'SUBMITTED') {
-                        actions['accept'] = 'Accept';
-                        actions['reject'] = 'Reject';
-                    }
-                }
-
-                // is vault package
-                if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
-                    $('.top-info-buttons').show();
-                }
             }
 
             // is vault package
@@ -601,15 +519,6 @@ function topInformation(dir, showAlert)
                 }
             }
 
-            // Lock icon
-            $('.lock-items').hide();
-            var lockIcon = '';
-            if (lockCount != '0' && typeof lockCount != 'undefined') {
-                lockIcon = '<i class="fa fa-exclamation-circle lock-icon" data-folder="' + dir + '" data-locks="' + lockCount + '" title="' + lockCount + ' lock(s) found" aria-hidden="true"></i>';
-            } else {
-                lockIcon = '<i class="fa fa-exclamation-circle lock-icon hide" data-folder="' + dir + '" data-locks="0" title="0 lock(s) found" aria-hidden="true"></i>';
-            }
-
             // Provenance action log
             $('.actionlog-items').hide();
             actionLogIcon = ' <i class="fa fa-book actionlog-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="Provenance action log"></i>';
@@ -647,21 +556,7 @@ function topInformation(dir, showAlert)
 
             // Set status badge.
             statusText = "";
-            if (typeof status != 'undefined' && typeof isVaultPackage == 'undefined') {
-              if (status == '') {
-                  statusText = "";
-              } else if (status == 'LOCKED') {
-                  statusText = "Locked";
-              } else if (status == 'SUBMITTED') {
-                  statusText = "Submitted";
-              } else if (status == 'ACCEPTED') {
-                  statusText = "Accepted";
-              } else if (status == 'SECURED') {
-                  statusText = "Secured";
-              } else if (status == 'REJECTED') {
-                  statusText = "Rejected";
-              }
-            } else if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
+            if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
               if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
                   statusText = "Submitted for publication";
               } else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
@@ -683,7 +578,7 @@ function topInformation(dir, showAlert)
             // Reset action dropdown.
             $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
 
-            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + lockIcon + systemMetadataIcon + actionLogIcon + statusBadge);
+            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + systemMetadataIcon + actionLogIcon + statusBadge);
             $('.top-information').show();
         });
     } else {
@@ -695,9 +590,7 @@ function handleActionsList(actions, folder)
 {
     var html = '';
     var vaultHtml = '';
-    var possibleActions = ['lock', 'unlock',
-                           'submit', 'unsubmit', 'accept', 'reject',
-                           'submit-for-publication', 'cancel-publication',
+    var possibleActions = ['submit-for-publication', 'cancel-publication',
                            'approve-for-publication', 'depublish-publication',
                            'republish-publication'];
 
@@ -727,174 +620,9 @@ function handleActionsList(actions, folder)
     $('.action-list').html(html);
 }
 
-function lockFolder(folder)
-{
-    // Get current button text
-    var btnText = $('#statusBadge').html();
-    $('#statusBadge').html('Lock <i class="fa fa-spinner fa-spin fa-fw"></i>');
-    $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
-
-    // Change folder status call
-    $.post("browse/change_folder_status", {"path" : decodeURIComponent(folder), "status" : "LOCKED"}, function(data) {
-        if(data.status == 'Success') {
-            // Set actions
-            var actions = [];
-
-            if ($('.actionlog-items').is(":visible")) {
-                buildActionLog(folder);
-            }
-
-            $('#statusBadge').text('Locked');
-            actions['unlock'] = 'Unlock';
-            actions['submit'] = 'Submit';
-
-            var totalLocks = $('.lock-icon').attr('data-locks');
-            if (totalLocks == '0') {
-                $('.lock-icon').removeClass('hide');
-                $('.lock-icon').attr('data-locks', 1);
-                $('.lock-icon').attr('title','1 lock(s) found');
-            }
-            setMessage('success', 'Successfully locked this folder');
-
-            handleActionsList(actions, folder);
-        } else {
-            setMessage('error', data.statusInfo);
-            $('#statusBadge').html(btnText);
-        }
-        topInformation(folder, false);
-    }, "json");
-}
-
-function unlockFolder(folder)
-{
-    // Get current button text
-    var btnText = $('#statusBadge').html();
-    $('#statusBadge').html('Unlock <i class="fa fa-spinner fa-spin fa-fw"></i>');
-    $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
-
-    // Change folder status call
-    $.post("browse/change_folder_status", {"path" : decodeURIComponent(folder), "status" : "UNLOCKED"}, function(data) {
-        if(data.status == 'Success') {
-            // Set actions
-            var actions = [];
-
-            if ($('.actionlog-items').is(":visible")) {
-                buildActionLog(folder);
-            }
-
-            $('#statusBadge').text('');
-            actions['lock'] = 'Lock';
-            actions['submit'] = 'Submit';
-
-            var totalLocks = $('.lock-icon').attr('data-locks');
-            if (totalLocks == '1') {
-                $('.lock-icon').addClass('hide');
-                $('.lock-icon').attr('data-locks', 0);
-            }
-
-            // unlocking -> hide lock-items as there are none
-            if ($('.lock-items').is(":visible")) {
-                $('.lock-items').hide();
-            }
-
-            setMessage('success', 'Successfully unlocked this folder');
-
-            handleActionsList(actions, folder);
-        } else {
-            setMessage('error', data.statusInfo);
-            $('#statusBadge').html(btnText);
-        }
-        topInformation(folder, false);
-    }, "json");
-}
-
 function showMetadataForm(path)
 {
     window.location.href = 'metadata/form?path=' + path;
-}
-
-function submitToVault(folder)
-{
-    if (typeof folder != 'undefined') {
-        // Set spinner & disable button
-        var btnText = $('#statusBadge').html();
-        $('#statusBadge').html('Submit <i class="fa fa-spinner fa-spin fa-fw"></i>');
-        $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
-
-        $.post("vault/submit", {"path" : decodeURIComponent(folder)}, function(data) {
-            if (data.status == 'Success') {
-                if (data.folderStatus == 'SUBMITTED') {
-                    $('#statusBadge').html('Submitted');
-                } else {
-                    $('#statusBadge').html('Accepted');
-                }
-
-                // lock icon
-                var totalLocks = $('.lock-icon').attr('data-locks');
-                if (totalLocks == '0') {
-                    $('.lock-icon').removeClass('hide');
-                    $('.lock-icon').attr('data-locks', 1);
-                    $('.lock-icon').attr('title', '1 lock(s) found');
-                }
-            } else {
-                $('#statusBadge').html(btnText);
-                setMessage('error', data.statusInfo);
-            }
-            topInformation(folder, false);
-        }, "json");
-    }
-}
-
-function unsubmitToVault(folder) {
-    if (typeof folder != 'undefined') {
-        var btnText = $('#statusBadge').html();
-        $('#statusBadge').html('Unsubmit <i class="fa fa-spinner fa-spin fa-fw"></i>');
-        $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
-
-        $.post("vault/unsubmit", {"path" : decodeURIComponent(folder)}, function(data) {
-            if (data.status == 'Success') {
-                $('#statusBadge').html('');
-            } else {
-                $('#statusBadge').html(btnText);
-                setMessage('error', data.statusInfo);
-            }
-            topInformation(folder, false);
-        }, "json");
-    }
-}
-
-function acceptFolder(folder)
-{
-    var btnText = $('#statusBadge').html();
-    $('#statusBadge').html('Accept <i class="fa fa-spinner fa-spin fa-fw"></i>');
-    $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
-
-    $.post("vault/accept", {"path" : decodeURIComponent(folder)}, function(data) {
-        if (data.status == 'Success') {
-            $('#statusBadge').html('Accepted');
-        } else {
-            $('#statusBadge').html(btnText);
-            setMessage('error', data.statusInfo);
-          }
-          topInformation(folder, false);
-      }, "json");
-}
-
-function rejectFolder(folder)
-{
-    var btnText = $('#statusBadge').html();
-    $('#statusBadge').html('Reject <i class="fa fa-spinner fa-spin fa-fw"></i>');
-    $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
-
-    $.post("vault/reject", {"path" : decodeURIComponent(folder)}, function(data) {
-        if (data.status == 'Success') {
-            $('#statusBadge').html('Rejected');
-        } else {
-            $('#statusBadge').html(btnText);
-            setMessage('error', data.statusInfo);
-          }
-          topInformation(folder, false);
-      }, "json");
 }
 
 function vaultSubmitForPublication(folder)
