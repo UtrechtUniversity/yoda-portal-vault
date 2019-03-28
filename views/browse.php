@@ -142,18 +142,20 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
-                <h2>Unpreservable file formats</h2>
+                <h3>File formats compliance with policy</h3>
                 <div class="form-group">
                     <label for="file-formats-list">Select preservable file format list:</label>
-                    <select class="form-control" id="file-formats-list"></select>
+                    <select class="form-control" id="file-formats-list">
+                        <option value="" disabled selected>Select a file format list</option>
+                    </select>
                 </div>
                 <br />
+                <div class="help"></div>
+                <div class="advice"></div>
                 <div class="preservable">
                     This folder does not contain files that are likely to become unusable in the future.
                 </div>
                 <div class="unpreservable">
-                    This folder contains files that are likely to become unusable in the future.
-                    <br /><br />
                     Following unpreservable file extensions were found in your dataset:
                     <br />
                     <ul class="list-unpreservable-formats"></ul>
