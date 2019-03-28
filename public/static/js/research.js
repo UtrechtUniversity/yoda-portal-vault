@@ -44,7 +44,7 @@ $( document ).ready(function() {
                     }
                 }
             } else {
-                setMessage('error', "Something went wrong while checking for unpreservable files.");
+                setMessage('error', "Something went wrong while checking for compliance with policy.");
             }
         });
 
@@ -64,7 +64,7 @@ $( document ).ready(function() {
                 }
                 $('#showUnpreservableFiles').modal('show');
             } else {
-                setMessage('error', "Something went wrong while checking for unpreservable files.");
+                setMessage('error', "Something went wrong while checking for compliance with policy.");
             }
         });
     });
@@ -88,7 +88,7 @@ $( document ).ready(function() {
                 }
                 $('#showUnpreservableFiles').modal('show');
             } else {
-                setMessage('error', "Something went wrong while checking for unpreservable files.");
+                setMessage('error', "Something went wrong while checking for compliance with policy.");
             }
         });
     });
@@ -639,7 +639,7 @@ function topInformation(dir, showAlert)
             $('.btn-group button.folder-status').attr('data-write', hasWriteRights);
 
             // Add unpreservable files check to actions.
-            actions['check-for-unpreservable-files'] = 'Check for unpreservable files';
+            actions['check-for-unpreservable-files'] = 'Check for compliance with policy';
 
             // Handle actions
             handleActionsList(actions, dir);
