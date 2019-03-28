@@ -149,8 +149,7 @@
                         <option value="" disabled selected>Select a file format list</option>
                     </select>
                 </div>
-                <br />
-                <div class="help"></div>
+                <div class="help"></div><br />
                 <div class="advice"></div>
                 <div class="preservable">
                     This folder does not contain files that are likely to become unusable in the future.
