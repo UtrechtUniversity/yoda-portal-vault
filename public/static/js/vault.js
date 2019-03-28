@@ -51,8 +51,8 @@ $( document ).ready(function() {
                 lists = data.lists
                 if (lists.hasOwnProperty(list)) {
                         console.log(lists[list]["name"]);
-                        $('#showUnpreservableFiles .help').text(list]["help"]);
-                        $('#showUnpreservableFiles .advice').text(list]["advice"]);
+                        $('#showUnpreservableFiles .help').text(lists[list]["help"]);
+                        $('#showUnpreservableFiles .advice').text(lists[list]["advice"]);
                 }
             } else {
                 setMessage('error', "Something went wrong while checking for compliance with policy.");
