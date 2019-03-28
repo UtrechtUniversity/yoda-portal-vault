@@ -50,7 +50,6 @@ $( document ).ready(function() {
             if (Object.keys(data.lists).length > 0) {
                 lists = data.lists
                 if (lists.hasOwnProperty(list)) {
-                        console.log(lists[list]["name"]);
                         $('#showUnpreservableFiles .help').text(lists[list]["help"]);
                         $('#showUnpreservableFiles .advice').text(lists[list]["advice"]);
                 }
