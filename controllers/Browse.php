@@ -68,7 +68,6 @@ class Browse extends MY_Controller
                 'lib/datatables/js/dataTables.bootstrap.min.js',
                 'js/research.js',
                 'js/search.js',
-                'js/dlgSelectCollection.js'
             ),
             'activeModule'   => 'research',
             'searchHtml' => $searchHtml,
