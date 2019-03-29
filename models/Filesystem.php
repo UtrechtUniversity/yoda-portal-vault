@@ -313,6 +313,64 @@ RULE;
         }
     }
 
+    static public function browseResearch($iRodsAccount, $path, $type, $orderBy, $orderSort, $limit, $offset = 0)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    *l = int(*limit);
+    *o = int(*offset);
+
+    iiBrowse(*path, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, "research", *result, *status, *statusInfo);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*path" => $path,
+                    "*collectionOrDataObject" => $type,
+                    "*orderby" => $orderBy,
+                    "*ascdesc" => $orderSort,
+                    "*limit" => $limit,
+                    "*offset" => $offset
+                ),
+                array("*result",
+                    "*status",
+                    "*statusInfo")
+            );
+
+            $ruleResult = $rule->execute();
+
+            $results = json_decode($ruleResult['*result'], true);
+
+            $status = $ruleResult['*status'];
+            $statusInfo = $ruleResult['*statusInfo'];
+
+            $summary = $results[0];
+            unset($results[0]);
+
+            $rows = $results;
+            $output = array(
+                'summary' => $summary,
+                'rows' => $rows,
+                'status' => $status,
+                'statusInfo' => $statusInfo
+            );
+
+            return $output;
+
+        } catch(RODSException $e) {
+            $output = array(
+                'status' => 'Error',
+                'statusInfo' => 'Something unexpected went wrong - ' . $e->rodsErrAbbrToCode($e->getCodeAbbr()). '. Please contact a system administrator'
+            );
+            return $output;
+        }
+    }
+
     static public function searchByName($iRodsAccount, $path, $searchString, $type, $orderBy, $orderSort, $limit, $offset = 0)
     {
         $output = array();

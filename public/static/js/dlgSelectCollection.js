@@ -19,13 +19,13 @@ function copyVaultPackageToDynamic(urlEncodedOrigin, urlEncodedTarget)
     dlgSelectAlertHide();
 
     if (typeof urlEncodedOrigin == 'undefined') {
-        errorMessage = 'PLease select a package from the vault';
+        errorMessage = 'Please select a package from the vault';
         // dlgAlertShow(errorMessage);
         dlgSelectAlertShow(errorMessage);
         return;
     }
     if (typeof urlEncodedTarget == 'undefined') {
-        errorMessage = 'The HOME folder cannot be used for restoration purposes. Please choose another folder';
+        errorMessage = 'The home folder cannot be used for restoration purposes. Please choose another folder';
         //dlgAlertShow(errorMessage);
         dlgSelectAlertShow(errorMessage);
         return;

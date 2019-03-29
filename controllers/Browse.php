@@ -371,13 +371,13 @@ class Browse extends MY_Controller
         // Collections
         if ($restrict=='collections' OR !$restrict) {
             // Get the actual total for the Collections
-            $testCollections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, 0);
+            $testCollections = $this->filesystem->browseResearch($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, 0);
             $status = $testCollections['status'];
             if ($status=='Success') {
                 $totalItems = $testCollections['summary']['total'];
 
                 $icon = 'fa-folder-o';
-                $collections = $this->filesystem->browse($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
+                $collections = $this->filesystem->browseResearch($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, $start);
 
                 $status = $collections['status'];
                 $statusInfo = $collections['statusInfo'];
@@ -414,14 +414,14 @@ class Browse extends MY_Controller
         // Objects
         if( $status=='Success' AND ($restrict=='objects' OR !$restrict)) {
             // Get the actual total for the dataObjects
-            $testObjects = $this->filesystem->browse($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, 0);
+            $testObjects = $this->filesystem->browseResearch($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, 0);
             $status = $testObjects['status'];
 
             if ($status=='Success') {
                 $totalItems += $testObjects['summary']['total'];
 
                 // Actual selecting of wanted data for the view
-                $objects = $this->filesystem->browse($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $correctedStartForObjects);
+                $objects = $this->filesystem->browseResearch($rodsaccount, $path, "DataObject", $orderColumns[$orderColumn], $orderDir, $length, $correctedStartForObjects);
 
                 $status = $objects['status'];
                 $statusInfo = $objects['statusInfo'];
