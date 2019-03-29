@@ -671,7 +671,7 @@ function submitToVault(folder)
         $('#statusBadge').html('Submit <i class="fa fa-spinner fa-spin fa-fw"></i>');
         $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
-        $.post("vault/submit", {"path" : decodeURIComponent(folder)}, function(data) {
+        $.post("research/submit", {"path" : decodeURIComponent(folder)}, function(data) {
             if (data.status == 'Success') {
                 if (data.folderStatus == 'SUBMITTED') {
                     $('#statusBadge').html('Submitted');
@@ -701,7 +701,7 @@ function unsubmitToVault(folder) {
         $('#statusBadge').html('Unsubmit <i class="fa fa-spinner fa-spin fa-fw"></i>');
         $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
-        $.post("vault/unsubmit", {"path" : decodeURIComponent(folder)}, function(data) {
+        $.post("research/unsubmit", {"path" : decodeURIComponent(folder)}, function(data) {
             if (data.status == 'Success') {
                 $('#statusBadge').html('');
             } else {
@@ -719,7 +719,7 @@ function acceptFolder(folder)
     $('#statusBadge').html('Accept <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
-    $.post("vault/accept", {"path" : decodeURIComponent(folder)}, function(data) {
+    $.post("research/accept", {"path" : decodeURIComponent(folder)}, function(data) {
         if (data.status == 'Success') {
             $('#statusBadge').html('Accepted');
         } else {
@@ -736,7 +736,7 @@ function rejectFolder(folder)
     $('#statusBadge').html('Reject <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
-    $.post("vault/reject", {"path" : decodeURIComponent(folder)}, function(data) {
+    $.post("research/reject", {"path" : decodeURIComponent(folder)}, function(data) {
         if (data.status == 'Success') {
             $('#statusBadge').html('Rejected');
         } else {
