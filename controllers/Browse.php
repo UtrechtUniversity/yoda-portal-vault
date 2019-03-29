@@ -91,36 +91,6 @@ class Browse extends MY_Controller
             ->set_output(json_encode($output));
     }
 
-    public function list_locks()
-    {
-        $rodsaccount = $this->rodsuser->getRodsAccount();
-        $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $folderPath = $this->input->get('folder');
-        $fullPath = $pathStart . $folderPath;
-
-        $result = $this->filesystem->listLocks($rodsaccount, $fullPath);
-
-        // Strip path
-        $locks = array();
-        if ($result['*status'] == 'Success') {
-            $total = $result['*result']['total'];
-            if ($total > 0) {
-                $locksResult = $result['*result']['locks'];
-                foreach ($locksResult as $path) {
-                    $locks[] = str_replace($pathStart, '', $path);
-                }
-            }
-        }
-
-        $output = array('result' => $locks,
-	                'status' => $result['*status'],
-			'statusInfo' => $result['*statusInfo']);
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
-    }
-
     public function list_actionLog()
     {
         $rodsaccount = $this->rodsuser->getRodsAccount();
@@ -487,34 +457,6 @@ class Browse extends MY_Controller
                         'recordsTotal'    => $totalItems,
                         'recordsFiltered' => $totalItems,
                         'data'            => $rows);
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
-    }
-
-
-    public function change_folder_status()
-    {
-        $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $this->load->model('Folder_Status_model');
-        $status = $this->input->post('status');
-        $path = $this->input->post('path');
-        $output = array();
-
-        $beforeAction = 'LOCKED';
-
-        if ($status == 'LOCKED') {
-            // Lock Folder
-            $result = $this->Folder_Status_model->lock($pathStart . $path);
-            $beforeAction = 'UNLOCKED';
-        } else if ($status == 'UNLOCKED') {
-            // Unlock folder
-            $result = $this->Folder_Status_model->unlock($pathStart . $path);
-        }
-
-        $output = array('status' => $result['*status'],
-	                'statusInfo' => $result['*statusInfo']);
 
         $this->output
             ->set_content_type('application/json')

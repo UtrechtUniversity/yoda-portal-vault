@@ -6,7 +6,7 @@
                         Metadata form - <?php echo str_replace(' ', '&nbsp;', htmlentities(trim($path))); ?>
                     </h3>
                     <div class="input-group-sm has-feedback pull-right">
-                        <a class="btn btn-default" href="/research/browse?dir=<?php echo rawurlencode($path); ?>">Close</a>
+                        <a class="btn btn-default" href="/vault/browse?dir=<?php echo rawurlencode($path); ?>">Close</a>
                     </div>
                 </div>
                 <div class="panel-body">
@@ -33,7 +33,7 @@
                     </h3>
                     <?php if (!$transformationButtons) { ?>
                     <div class="input-group-sm has-feedback pull-right">
-                        <a class="btn btn-default" href="/research/browse?dir=<?php echo rawurlencode($path); ?>">Close</a>
+                        <a class="btn btn-default" href="/vault/browse?dir=<?php echo rawurlencode($path); ?>">Close</a>
                     </div>
                     <?php } ?>
                 </div>
@@ -79,4 +79,4 @@
 <script type="text/javascript">
     var mode = "<?php echo $mode; ?>";
 </script>
-<script src="/research/static/js/metadata/form.js" type="text/javascript"></script>
+<script src="/vault/static/js/metadata/form.js" type="text/javascript"></script>

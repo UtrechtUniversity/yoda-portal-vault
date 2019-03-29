@@ -327,40 +327,12 @@ function startBrowsing(path, items)
     }
 }
 
-function toggleLocksList(folder)
-{
-    var isVisible = $('.lock-items').is(":visible");
-
-    // toggle locks list
-    if (isVisible) {
-        $('.lock-items').hide();
-    } else {
-        // Get locks
-        $.getJSON("browse/list_locks?folder=" + folder, function (data) {
-            $('.lock-items').hide();
-
-            if (data.status == 'Success') {
-                var html = '<li class="list-group-item disabled">Locks:</li>';
-                var locks = data.result;
-                $.each(locks, function (index, value) {
-                    html += '<li class="list-group-item"><span class="browse" data-path="' + encodeURIComponent(value) + '">' + htmlEncode(value) + '</span></li>';
-                });
-                $('.lock-items').html(html);
-                $('.lock-items').show();
-            } else {
-                setMessage('error', data.statusInfo);
-            }
-
-        });
-    }
-}
-
 function toggleActionLogList(folder)
 {
     var actionList = $('.actionlog-items'),
         isVisible = actionList.is(":visible");
 
-    // toggle locks list
+    // Toggle provenance log list.
     if (isVisible) {
         actionList.hide();
     } else {
