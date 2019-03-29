@@ -34,7 +34,7 @@ $( document ).ready(function() {
         folder = $(this).attr('data-folder');
 
         // Retrieve preservable file format lists.
-        $.getJSON("vault/preservableFormatsLists", function (data) {
+        $.getJSON("research/preservableFormatsLists", function (data) {
             if (Object.keys(data.lists).length > 0) {
                 lists = data.lists
                 $('#file-formats-list').html("");
@@ -58,7 +58,7 @@ $( document ).ready(function() {
         list = $("#file-formats-list option:selected").val();
 
         // Retrieve preservable file format lists.
-        $.getJSON("vault/preservableFormatsLists", function (data) {
+        $.getJSON("research/preservableFormatsLists", function (data) {
             if (Object.keys(data.lists).length > 0) {
                 lists = data.lists
                 if (lists.hasOwnProperty(list)) {
@@ -71,7 +71,7 @@ $( document ).ready(function() {
         });
 
         // Retrieve unpreservable files in folder.
-        $.getJSON("vault/checkForUnpreservableFiles?path=" + folder + "&list=" + list, function (data) {
+        $.getJSON("research/checkForUnpreservableFiles?path=" + folder + "&list=" + list, function (data) {
             if (data.formats) {
                 $('#showUnpreservableFiles .help').hide();
                 $('#showUnpreservableFiles .preservable').hide();
