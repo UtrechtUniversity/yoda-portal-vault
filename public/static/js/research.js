@@ -37,7 +37,7 @@ $( document ).ready(function() {
         $.getJSON("research/preservableFormatsLists", function (data) {
             if (Object.keys(data.lists).length > 0) {
                 lists = data.lists
-                $('#file-formats-list').html("");
+                $('#file-formats-list').html("<option value='' disabled selected>Select a file format list</option>");
                 for (var list in lists) {
                     if (lists.hasOwnProperty(list)) {
                         $("#file-formats-list").append(new Option(lists[list]["name"], list));
