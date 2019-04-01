@@ -236,10 +236,12 @@ function startBrowsing(path, items)
     $('#file-browser').DataTable( {
         "bFilter": false,
         "bInfo": false,
-        "bLengthChange": false,
+        "bLengthChange": true,
         "language": {
-            "emptyTable": "No accessible files/folders present"
-  },
+            "emptyTable": "No accessible files/folders present",
+            "lengthMenu": "_MENU_"
+        },
+        "dom": '<"top">rt<"bottom"lp><"clear">',
         "ajax": {
             url: "browse/data",
             error: function (xhr, error, thrown) {

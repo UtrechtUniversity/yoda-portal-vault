@@ -17,11 +17,6 @@ ol.breadcrumb li.active {
     text-overflow: ellipsis;
     width: 75%;
     float:left;
-
-    /*
-    line-height: normal;
-    padding-top: 4px;
-    */
 }
 
 .search-results {
@@ -96,4 +91,9 @@ ol.breadcrumb li.active {
     font-size: 30px;
     margin-left: 10px;
     cursor: pointer;
+}
+
+#file-browser_length {
+    float: left;
+    padding-top: 2px;
 }
