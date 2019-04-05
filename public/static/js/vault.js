@@ -176,6 +176,16 @@ $( document ).ready(function() {
     $("body").on("click", "a.action-go-to-research", function() {
         window.location.href = '/research/?dir=%2F' +  $(this).attr('research-path');
     });
+
+    $("body").on("click", "a.action-archive-request", function() {
+        vaultArchiveRequest($(this).attr('data-folder'));
+    });
+    $("body").on("click", "a.action-cancel-archive-request", function() {
+        vaultCancelArchiveRequest($(this).attr('data-folder'));
+    });
+    $("body").on("click", "a.remove-from-archive", function() {
+        vaultRemoveFromArchive($(this).attr('data-folder'));
+    });
 });
 
 function browse(dir)
@@ -446,6 +456,8 @@ function topInformation(dir, showAlert)
             var researchPath = data.result.researchPath;
             var actions = [];
 
+            console.log(vaultStatus);
+
             // User metadata
             if (metadata == 'true') {
                 $('.btn-group button.metadata-form').attr('data-path', dir);
@@ -453,6 +465,8 @@ function topInformation(dir, showAlert)
             } else {
                 $('.btn-group button.metadata-form').hide();
             }
+
+            console.log(isVaultPackage);
 
             // is vault package
             if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
@@ -472,8 +486,13 @@ function topInformation(dir, showAlert)
                                 actions['submit-for-publication'] = 'Submit for publication';
                             } else if (vaultStatus == 'PUBLISHED') {
                                 actions['depublish-publication'] = 'Depublish publication';
-                            }  else if (vaultStatus == 'DEPUBLISHED') {
+                                actions['archive-request'] = 'Archive publication';
+                            } else if (vaultStatus == 'DEPUBLISHED') {
                                 actions['republish-publication'] = 'Republish publication';
+                            } else if (vaultStatus == 'PENDING_ARCHIVE_REQUEST' || vaultStatus == 'ARCHIVE_REQUEST') {
+                                actions['cancel-archive-request'] = 'Cancel archive request';
+                            } else if (vaultStatus == 'ARCHIVED') {
+                                actions['remove-from-archive'] = 'Remove from archive';
                             }
                         } else if (hasDatamanager == 'yes') {
                             if (vaultStatus == 'UNPUBLISHED') {
@@ -548,6 +567,12 @@ function topInformation(dir, showAlert)
                   statusText = "Depublication pending";
               } else if (vaultStatus == 'PENDING_REPUBLICATION') {
                   statusText = "Republication pending";
+              } else if (vaultStatus == 'ARCHIVED') {
+                  statusText = "Archived";
+              } else if (vaultStatus == 'PENDING_ARCHIVE_REQUEST') {
+                  statusText = "Archive request pending";
+              } else if (vaultStatus == 'ARCHIVE_REQUEST') {
+                  statusText = "Archive request submitted";
               } else {
                   statusText = "Unpublished";
               }
@@ -571,7 +596,10 @@ function handleActionsList(actions, folder)
     var vaultHtml = '';
     var possibleActions = ['submit-for-publication', 'cancel-publication',
                            'approve-for-publication', 'depublish-publication',
-                           'republish-publication'];
+                           'republish-publication',
+                           'archive-request',
+                           'cancel-archive-request',
+                           'remove-archive'];
 
     var possibleVaultActions = ['grant-vault-access', 'revoke-vault-access',
                                 'copy-vault-package-to-research',
@@ -701,3 +729,47 @@ function vaultAccess(action, folder)
         topInformation(folder, false);
     }, "json");
 }
+
+// archiving functions
+function vaultArchiveRequest(folder)
+{
+    //alert(folder + ' archive request');
+    $.post("vault/archive_request", {"path" : decodeURIComponent(folder)}, function(data) {
+        if (data.status == 'Success') {
+            $('#statusBadge').html('Archive requested');
+        } else {
+            $('#statusBadge').html(btnText);
+            setMessage('error', data.statusInfo);
+        }
+        topInformation(folder, false);
+    }, "json");
+}
+
+function vaultCancelArchiveRequest(folder)
+{
+    //alert(folder + ' Cancel achive request');
+    $.post("vault/cancel_archive_request", {"path" : decodeURIComponent(folder)}, function(data) {
+        if (data.status == 'Success') {
+            $('#statusBadge').html('Archive requested');
+        } else {
+            $('#statusBadge').html(btnText);
+            setMessage('error', data.statusInfo);
+        }
+        topInformation(folder, false);
+    }, "json");
+}
+
+function vaultRemoveFromArchive(folder)
+{
+    //alert(folder + ' Remove from archive');
+    $.post("vault/remove_from_archive", {"path" : decodeURIComponent(folder)}, function(data) {
+        if (data.status == 'Success') {
+            $('#statusBadge').html('Archive requested');
+        } else {
+            $('#statusBadge').html(btnText);
+            setMessage('error', data.statusInfo);
+        }
+        topInformation(folder, false);
+    }, "json");
+}
+

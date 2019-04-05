@@ -51,6 +51,9 @@
                 <option value="vault:APPROVED_FOR_PUBLICATION">Approved for publication</option>
                 <option value="vault:PUBLISHED">Published</option>
                 <option value="vault:DEPUBLISHED">Depublished</option>
+                <option value="vault:ARCHIVE_REQUEST">Archive request submitted</option>
+                <option value="vault:PENDING_ARCHIVE_REQUEST">Archive request pending</option>
+                <option value="vault:ARCHIVED">Archived</option>
             </optgroup>
         </select>
     </div>

@@ -188,4 +188,54 @@ class Vault extends MY_Controller
             ->set_content_type('application/json')
             ->set_output($result);
     }
+
+    // ARCHIVING FUNCTIONS
+    public function archive_request()
+    {
+        $this->load->model('Folder_Status_model');
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $path = $this->input->post('path');
+        $fullPath =  $pathStart . $path;
+
+        $result = $this->Folder_Status_model->archive_request($fullPath);
+        $output = array('status' => $result['*status'],
+            'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
+
+    public function cancel_archive_request()
+    {
+        $this->load->model('Folder_Status_model');
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $path = $this->input->post('path');
+        $fullPath =  $pathStart . $path;
+
+        $result = $this->Folder_Status_model->cancel_archive_request($fullPath);
+        $output = array('status' => $result['*status'],
+            'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
+
+    public function remove_from_archive()
+    {
+        $this->load->model('Folder_Status_model');
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $path = $this->input->post('path');
+        $fullPath =  $pathStart . $path;
+
+        $result = $this->Folder_Status_model->remove_from_archive($fullPath);
+        $output = array('status' => $result['*status'],
+            'statusInfo' => $result['*statusInfo']);
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($output));
+    }
+
 }

@@ -157,4 +157,50 @@ class Folder_Status_model extends CI_Model
         $result = $rule->execute();
         return $result;
     }
+
+    // ARCHIVE FUNCTIONAILTY
+
+    /*
+     * Submit a request for a published package to be archived
+     *
+     * @param $folder Folder to submit for archiving
+     * @return status
+     */
+    function archive_request($folder)
+    {
+        $outputParams = array('*status', '*statusInfo');
+        $inputParams = array('*folder' => $folder );
+
+        $this->CI->load->library('irodsrule');
+
+        $rule = $this->irodsrule->make('iiVaultArchiveRequest', $inputParams, $outputParams);  //iiVaultSubmit
+        $result = $rule->execute();
+        return $result;
+    }
+
+    function cancel_archive_request($folder)
+    {
+        $outputParams = array('*status', '*statusInfo');
+        $inputParams = array('*folder' => $folder );
+
+        $this->CI->load->library('irodsrule');
+
+        $rule = $this->irodsrule->make('iiVaultCancelArchiveRequest', $inputParams, $outputParams); //iiVaultSubmit
+        $result = $rule->execute();
+        return $result;
+    }
+
+    function remove_from_archive($folder)
+    {
+        $outputParams = array('*status', '*statusInfo');
+        $inputParams = array('*folder' => $folder );
+
+        $this->CI->load->library('irodsrule');
+
+        $rule = $this->irodsrule->make('iiVaultRemoveFromArchive', $inputParams, $outputParams); //iiVaultSubmit
+        $result = $rule->execute();
+        return $result;
+    }
+
+
 }
