@@ -183,7 +183,7 @@ $( document ).ready(function() {
     $("body").on("click", "a.action-cancel-archive-request", function() {
         vaultCancelArchiveRequest($(this).attr('data-folder'));
     });
-    $("body").on("click", "a.remove-from-archive", function() {
+    $("body").on("click", "a.action-remove-from-archive", function() {
         vaultRemoveFromArchive($(this).attr('data-folder'));
     });
 });
@@ -456,8 +456,6 @@ function topInformation(dir, showAlert)
             var researchPath = data.result.researchPath;
             var actions = [];
 
-            console.log(vaultStatus);
-
             // User metadata
             if (metadata == 'true') {
                 $('.btn-group button.metadata-form').attr('data-path', dir);
@@ -465,8 +463,6 @@ function topInformation(dir, showAlert)
             } else {
                 $('.btn-group button.metadata-form').hide();
             }
-
-            console.log(isVaultPackage);
 
             // is vault package
             if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
@@ -476,7 +472,7 @@ function topInformation(dir, showAlert)
                 if (typeof vaultStatus != 'undefined' && typeof vaultActionPending != 'undefined') {
                     $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
 
-                    // Set actions for datamanager and researcher.
+                    // Set actions for d atamanager and researcher.
                     if (vaultActionPending == 'no') {
                         if (isDatamanager == 'yes') {
                             if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
@@ -599,7 +595,7 @@ function handleActionsList(actions, folder)
                            'republish-publication',
                            'archive-request',
                            'cancel-archive-request',
-                           'remove-archive'];
+                           'remove-from-archive'];
 
     var possibleVaultActions = ['grant-vault-access', 'revoke-vault-access',
                                 'copy-vault-package-to-research',
@@ -733,7 +729,6 @@ function vaultAccess(action, folder)
 // archiving functions
 function vaultArchiveRequest(folder)
 {
-    //alert(folder + ' archive request');
     $.post("vault/archive_request", {"path" : decodeURIComponent(folder)}, function(data) {
         if (data.status == 'Success') {
             $('#statusBadge').html('Archive request submitted');
@@ -748,7 +743,9 @@ function vaultArchiveRequest(folder)
 // not functioning
 function vaultCancelArchiveRequest(folder)
 {
-    //alert(folder + ' Cancel achive request');
+    $('#statusBadge').html('Archive request canceled');
+    return;
+
     $.post("vault/cancel_archive_request", {"path" : decodeURIComponent(folder)}, function(data) {
         if (data.status == 'Success') {
             $('#statusBadge').html('Archive request canceled');
@@ -763,7 +760,9 @@ function vaultCancelArchiveRequest(folder)
 // not functionling
 function vaultRemoveFromArchive(folder)
 {
-    //alert(folder + ' Remove from archive');
+    $('#statusBadge').html('Request for removal of archive submitted');
+    return;
+
     $.post("vault/remove_from_archive", {"path" : decodeURIComponent(folder)}, function(data) {
         if (data.status == 'Success') {
             $('#statusBadge').html('Removal of archive submitted');
