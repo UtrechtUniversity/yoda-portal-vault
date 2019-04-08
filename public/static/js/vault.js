@@ -736,7 +736,7 @@ function vaultArchiveRequest(folder)
     //alert(folder + ' archive request');
     $.post("vault/archive_request", {"path" : decodeURIComponent(folder)}, function(data) {
         if (data.status == 'Success') {
-            $('#statusBadge').html('Archive requested');
+            $('#statusBadge').html('Archive request submitted');
         } else {
             $('#statusBadge').html(btnText);
             setMessage('error', data.statusInfo);
@@ -745,12 +745,13 @@ function vaultArchiveRequest(folder)
     }, "json");
 }
 
+// not functioning
 function vaultCancelArchiveRequest(folder)
 {
     //alert(folder + ' Cancel achive request');
     $.post("vault/cancel_archive_request", {"path" : decodeURIComponent(folder)}, function(data) {
         if (data.status == 'Success') {
-            $('#statusBadge').html('Archive requested');
+            $('#statusBadge').html('Archive request canceled');
         } else {
             $('#statusBadge').html(btnText);
             setMessage('error', data.statusInfo);
@@ -759,12 +760,13 @@ function vaultCancelArchiveRequest(folder)
     }, "json");
 }
 
+// not functionling
 function vaultRemoveFromArchive(folder)
 {
     //alert(folder + ' Remove from archive');
     $.post("vault/remove_from_archive", {"path" : decodeURIComponent(folder)}, function(data) {
         if (data.status == 'Success') {
-            $('#statusBadge').html('Archive requested');
+            $('#statusBadge').html('Removal of archive submitted');
         } else {
             $('#statusBadge').html(btnText);
             setMessage('error', data.statusInfo);
