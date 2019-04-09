@@ -183,9 +183,6 @@ $( document ).ready(function() {
     $("body").on("click", "a.action-cancel-archive-request", function() {
         vaultCancelArchiveRequest($(this).attr('data-folder'));
     });
-    $("body").on("click", "a.action-remove-from-archive", function() {
-        vaultRemoveFromArchive($(this).attr('data-folder'));
-    });
 });
 
 function browse(dir)
@@ -487,8 +484,6 @@ function topInformation(dir, showAlert)
                                 actions['republish-publication'] = 'Republish publication';
                             } else if (vaultStatus == 'PENDING_ARCHIVE_REQUEST' || vaultStatus == 'ARCHIVE_REQUEST') {
                                 actions['cancel-archive-request'] = 'Cancel archive request';
-                            } else if (vaultStatus == 'ARCHIVED') {
-                                actions['remove-from-archive'] = 'Remove from archive';
                             }
                         } else if (hasDatamanager == 'yes') {
                             if (vaultStatus == 'UNPUBLISHED') {
@@ -594,8 +589,7 @@ function handleActionsList(actions, folder)
                            'approve-for-publication', 'depublish-publication',
                            'republish-publication',
                            'archive-request',
-                           'cancel-archive-request',
-                           'remove-from-archive'];
+                           'cancel-archive-request'];
 
     var possibleVaultActions = ['grant-vault-access', 'revoke-vault-access',
                                 'copy-vault-package-to-research',
@@ -749,23 +743,6 @@ function vaultCancelArchiveRequest(folder)
     $.post("vault/cancel_archive_request", {"path" : decodeURIComponent(folder)}, function(data) {
         if (data.status == 'Success') {
             $('#statusBadge').html('Archive request canceled');
-        } else {
-            $('#statusBadge').html(btnText);
-            setMessage('error', data.statusInfo);
-        }
-        topInformation(folder, false);
-    }, "json");
-}
-
-// not functionling
-function vaultRemoveFromArchive(folder)
-{
-    $('#statusBadge').html('Request for removal of archive submitted');
-    return;
-
-    $.post("vault/remove_from_archive", {"path" : decodeURIComponent(folder)}, function(data) {
-        if (data.status == 'Success') {
-            $('#statusBadge').html('Removal of archive submitted');
         } else {
             $('#statusBadge').html(btnText);
             setMessage('error', data.statusInfo);
