@@ -407,16 +407,17 @@ class Metadata_form_model extends CI_Model
                                                         }
                                                     }
                                                 } elseif (isset($objectField['type']) && $objectField['type'] == 'object') {  // compound single structure
-                                                    $arCompoundFields = array();
-
-                                                    $data = $xmlData['Properties'][$objectKey];
-                                                    foreach ($objectField['properties'] as $compoundElementKey => $info) {
-                                                        // only take the data when not an array
-                                                        if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
-                                                            $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
+                                                    if (isset($xmlData['Properties'][$objectKey])) {
+                                                        $arCompoundFields = array();
+                                                        $data = $xmlData['Properties'][$objectKey];
+                                                        foreach ($objectField['properties'] as $compoundElementKey => $info) {
+                                                            // only take the data when not an array
+                                                            if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
+                                                                $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
+                                                            }
                                                         }
+                                                        $emptyObjectField[$objectKey] = $arCompoundFields;
                                                     }
-                                                    $emptyObjectField[$objectKey] = $arCompoundFields;
                                                 } else { // can only be single field as this is a subproperty
                                                     $subValue = '';
                                                     if (isset($xmlData['Properties'][$objectKey]) && !is_array($xmlData['Properties'][$objectKey])) {
