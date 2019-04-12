@@ -178,8 +178,8 @@ class Metadata extends MY_Controller
 
             if (!$jsonValidator->isValid()) {
                 foreach ($jsonValidator->getErrors() as $error) {
-                    // Continue if required
-                    if ($error['constraint'] == 'required') {
+                    // Continue if required or if there is a dependency
+                    if ($error['constraint'] == 'required' || $error['constraint'] == 'dependencies') {
                         continue;
                     }
                     $errors[] = $error['property'];
