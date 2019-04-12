@@ -494,8 +494,9 @@ function topInformation(dir, showAlert)
                         actions['revoke-vault-access'] = 'Revoke read access to research group';
                     }
                 }
-            } else {
-                $('.top-info-buttons').hide();
+
+                // Add unpreservable files check to actions.
+                actions['check-for-unpreservable-files'] = 'Check for compliance with policy';
             }
 
             // Provenance action log
@@ -513,9 +514,6 @@ function topInformation(dir, showAlert)
             }
 
             $('.btn-group button.folder-status').attr('data-write', hasWriteRights);
-
-            // Add unpreservable files check to actions.
-            actions['check-for-unpreservable-files'] = 'Check for compliance with policy';
 
             // Add go to research to actions.
             if (typeof researchPath != 'undefined' ) {
