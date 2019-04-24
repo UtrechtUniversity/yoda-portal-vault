@@ -237,6 +237,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Modified date</th>
+                        <th></th>
                     </tr>
                 </thead>
             </table>

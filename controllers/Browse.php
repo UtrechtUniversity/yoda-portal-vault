@@ -253,7 +253,8 @@ class Browse extends MY_Controller
                                 $filePath = str_replace($pathStart, '', $row['path']);
                                 $rows[] = array(
                                     '<span class="browse" data-path="' . rawurlencode($filePath) . '"><i class="fa ' . $icon . '" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                                    date('Y-m-d H:i:s', $row['modify_time'])
+                                    date('Y-m-d H:i:s', $row['modify_time']),
+                                    ''
                                 );
 
                                 $totalItemsLeftInView--;
@@ -295,7 +296,8 @@ class Browse extends MY_Controller
                                 $filePath = str_replace($pathStart, '', $row['path']);
                                 $rows[] = array(
                                     '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                                    date('Y-m-d H:i:s', $row['modify_time'])
+                                    date('Y-m-d H:i:s', $row['modify_time']),
+                                    '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a>'
                                 );
                                 $totalItemsLeftInView--;
                             }
