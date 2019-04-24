@@ -519,4 +519,13 @@ class Browse extends MY_Controller
             ->set_content_type('application/json')
             ->set_output(json_encode($output));
     }
+
+    function download()
+    {
+        $rodsaccount = $this->rodsuser->getRodsAccount();
+        $pathStart = $this->pathlibrary->getPathStart($this->config);
+        $filePath = $this->input->get('filepath');
+
+        $this->filesystem->download($rodsaccount, $pathStart . $filePath);
+    }
 }

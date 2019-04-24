@@ -62,6 +62,37 @@ class Filesystem extends CI_Model {
     }
 
     /**
+     * Download a file from iRODS.
+     *
+     * @param $rodsaccount
+     * @param $path
+     * @return mixed
+     */
+    function download($rodsaccount, $file)
+    {
+        $filename = basename($file);
+        header('Content-Type: application/octet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        try {
+            $file = new ProdsFile($rodsaccount, $file);
+            $file->open("r");
+
+            // Grab the file content.
+            while ($buffer = $file->read(4096)) {
+                echo $buffer;
+                ob_flush();
+            }
+
+            // Close the file pointer.
+            $file->close();
+        } catch(RODSException $e) {
+            return false;
+        }
+    }
+
+
+    /**
      * Write a file to iRODS.
      *
      * @param $rodsaccount
