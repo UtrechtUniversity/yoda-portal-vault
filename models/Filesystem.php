@@ -70,6 +70,7 @@ class Filesystem extends CI_Model {
      */
     function download($rodsaccount, $file)
     {
+        setlocale(LC_ALL, "en_US.UTF-8");
         $filename = basename($file);
         header('Content-Type: application/octet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
