@@ -70,22 +70,35 @@ class Filesystem extends CI_Model {
      */
     function download($rodsaccount, $file)
     {
+        // Close session to allow other pages to continue.
+        session_write_close();
+
+        // Set locale for multibyte characters.
         setlocale(LC_ALL, "en_US.UTF-8");
+
+        // Set headers to force download.
         $filename = basename($file);
         header('Content-Type: application/octet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
 
+        // Try to open file from iRODS.
         try {
             $file = new ProdsFile($rodsaccount, $file);
             $file->open("r");
+        } catch(RODSException $e) {
+            header("HTTP/1.0 404 Not Found");
+            exit;
+        }
 
+        // Serve the file content.
+        try {
             // Determine file size.
             $size = $file->seek(0, SEEK_END);
             header("Content-Length: " . $size);
             $file->rewind();
 
             // Grab the file content.
-            while ($buffer = $file->read(8*1024)) {
+            while ($buffer = $file->read(16*1024)) {
                 echo $buffer;
                 ob_flush();
             }
@@ -93,9 +106,11 @@ class Filesystem extends CI_Model {
             // Close the file pointer.
             $file->close();
         } catch(RODSException $e) {
-            return false;
+            header("HTTP/1.0 500 Internal Server Error");
+            exit;
         }
     }
+
 
 
     /**
