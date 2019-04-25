@@ -79,8 +79,13 @@ class Filesystem extends CI_Model {
             $file = new ProdsFile($rodsaccount, $file);
             $file->open("r");
 
+            // Determine file size.
+            $size = $file->seek(0, SEEK_END);
+            header("Content-Length: " . $size);
+            $file->rewind();
+
             // Grab the file content.
-            while ($buffer = $file->read(4096)) {
+            while ($buffer = $file->read(8*1024)) {
                 echo $buffer;
                 ob_flush();
             }
