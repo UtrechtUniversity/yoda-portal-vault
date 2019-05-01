@@ -41,8 +41,8 @@
                     <?php echo $transformationText; ?>
 
                     <?php if ($transformationButtons) { ?>
-                    <a class="reject-transformation btn btn-danger delete-all-metadata-btn pull-right" href="/research/browse?dir=<?php echo rawurlencode($path); ?>">Reject transformation</a>
-                    <a class="accept-transformation btn btn-success delete-all-metadata-btn pull-right" href="/research/metadata/transformation?path=<?php echo rawurlencode($path); ?>">Accept transformation</a>
+                    <a class="reject-transformation btn btn-danger delete-all-metadata-btn pull-right" href="/vault/browse?dir=<?php echo rawurlencode($path); ?>">Reject transformation</a>
+                    <a class="accept-transformation btn btn-success delete-all-metadata-btn pull-right" href="/vault/metadata/transformation?path=<?php echo rawurlencode($path); ?>">Accept transformation</a>
                     <?php } ?>
                 </div>
             </div>
@@ -57,7 +57,7 @@
                         Metadata form - <?php echo str_replace(' ', '&nbsp;', htmlentities(trim($path))); ?>
                     </h3>
                     <div class="input-group-sm has-feedback pull-right">
-                        <a class="btn btn-default" href="/research/browse?dir=<?php echo rawurlencode($path); ?>">Close</a>
+                        <a class="btn btn-default" href="/vault/browse?dir=<?php echo rawurlencode($path); ?>">Close</a>
                     </div>
                 </div>
                 <div class="panel-body">
