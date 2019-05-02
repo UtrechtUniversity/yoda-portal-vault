@@ -300,7 +300,7 @@ class Container extends React.Component {
         },
         function(isConfirm){
             if (isConfirm) {
-                window.location.href = '/research/metadata/delete?path=' + path;
+                window.location.href = '/vault/metadata/delete?path=' + path;
             }
         });
     }
@@ -318,13 +318,13 @@ class Container extends React.Component {
         },
         function(isConfirm){
             if (isConfirm) {
-                window.location.href = '/research/metadata/clone_metadata?path=' + path;
+                window.location.href = '/vault/metadata/clone_metadata?path=' + path;
             }
         });
     }
 
     updateMetadata() {
-        window.location.href = '/research/metadata/form?path=' + path + '&mode=edit_in_vault';
+        window.location.href = '/vault/metadata/form?path=' + path + '&mode=edit_in_vault';
     }
 
     render() {
@@ -360,7 +360,7 @@ axios.defaults.headers.common = {
 axios.defaults.xsrfCookieName = tokenName;
 axios.defaults.xsrfHeaderName = tokenHash;
 
-axios.get("/research/metadata/data?path=" + path + "&mode=" + mode)
+axios.get("/vault/metadata/data?path=" + path + "&mode=" + mode)
     .then(function (response) {
         schema            = response.data.schema;
         uiSchema          = response.data.uiSchema;
@@ -421,12 +421,12 @@ function submitData(data)
     // Store.
     axios({
         method: 'post',
-        url: "/research/metadata/store?path=" + path,
+        url: "/vault/metadata/store?path=" + path,
         data: bodyFormData,
         config: { headers: {'Content-Type': 'multipart/form-data' }}
         })
         .then(function (response) {
-            window.location.href = "/research/metadata/form?path=" + path;
+            window.location.href = "/vault/metadata/form?path=" + path;
         })
         .catch(function (error) {
             //handle error
