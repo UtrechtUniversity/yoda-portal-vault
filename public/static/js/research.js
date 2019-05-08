@@ -20,18 +20,8 @@ $( document ).ready(function() {
         $("#upload").trigger("click");
     });
 
-    $("#upload").change(function() {
-        // When changed, there are new files to upload.
-        var i = 0,
-            files = $(this).files,
-            len = files.length;
-
-        for (; i < len; i++) {
-            console.log("Filename: " + files[i].name);
-            console.log("Type: " + files[i].type);
-            console.log("Size: " + files[i].size + " bytes");
-        }
-    });
+    const uploadElement = document.getElementById("#upload");
+    uploadElement.addEventListener("change", handleUpload, false);
 
     $("body").on("click", "a.action-lock", function() {
         lockFolder($(this).attr('data-folder'));
@@ -764,4 +754,9 @@ function rejectFolder(folder)
           }
           topInformation(folder, false);
       }, "json");
+}
+
+function handleUpload() {
+    const fileList = this.files;
+    console.log(fileList);
 }
