@@ -20,7 +20,7 @@ $( document ).ready(function() {
         $("#upload").trigger("click");
     });
 
-    const uploadElement = document.getElementById("#upload");
+    const uploadElement = document.getElementById("upload");
     uploadElement.addEventListener("change", handleUpload, false);
 
     $("body").on("click", "a.action-lock", function() {
@@ -757,6 +757,11 @@ function rejectFolder(folder)
 }
 
 function handleUpload() {
-    const fileList = this.files;
-    console.log(fileList);
+    const files = this.files;
+
+    for (var i = 0; i < files.length; i++) {
+        console.log("Filename: " + files[i].name);
+        console.log("Type: " + files[i].type);
+        console.log("Size: " + files[i].size + " bytes");
+    }
 }
