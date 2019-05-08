@@ -213,7 +213,9 @@
                     <div class="btn-group" role="group">
                         <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
                     </div>
-
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default upload" data-path="">Upload</button>
+                    </div>
                     <div class="btn-group">
                         <button type="button" class="btn btn-default folder-status" data-toggle="dropdown" disabled="disabled">Actions</button>
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" disabled="disabled">
