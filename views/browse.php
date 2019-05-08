@@ -214,6 +214,7 @@
                         <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
                     </div>
                     <div class="btn-group" role="group">
+                        <input type="file" id="upload" style="display: none" />
                         <button type="button" class="btn btn-default upload" data-path=""><i class="fa fa-upload" aria-hidden="true"></i> Upload</button>
                     </div>
                     <div class="btn-group">

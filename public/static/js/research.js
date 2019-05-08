@@ -16,6 +16,10 @@ $( document ).ready(function() {
         showMetadataForm($(this).attr('data-path'));
     });
 
+    $('.btn-group button.upload').click(function(){
+        $("#upload").trigger("click");
+    });
+
     $("body").on("click", "a.action-lock", function() {
         lockFolder($(this).attr('data-folder'));
     });
