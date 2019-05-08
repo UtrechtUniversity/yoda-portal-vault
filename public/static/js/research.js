@@ -20,6 +20,19 @@ $( document ).ready(function() {
         $("#upload").trigger("click");
     });
 
+    $("#upload").change(function() {
+        // When changed, there are new files to upload.
+        var i = 0,
+            files = $(this).files,
+            len = files.length;
+
+        for (; i < len; i++) {
+            console.log("Filename: " + files[i].name);
+            console.log("Type: " + files[i].type);
+            console.log("Size: " + files[i].size + " bytes");
+        }
+    });
+
     $("body").on("click", "a.action-lock", function() {
         lockFolder($(this).attr('data-folder'));
     });
