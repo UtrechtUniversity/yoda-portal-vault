@@ -214,7 +214,7 @@
                         <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
                     </div>
                     <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-default upload" data-path="">Upload</button>
+                        <button type="button" class="btn btn-default upload" data-path=""><i class="fa fa-upload" aria-hidden="true"></i> Upload</button>
                     </div>
                     <div class="btn-group">
                         <button type="button" class="btn btn-default folder-status" data-toggle="dropdown" disabled="disabled">Actions</button>
