@@ -205,10 +205,10 @@
 
     <div class="top-information">
          <div class="row">
-            <div class="col-md-9">
+            <div class="col-md-8">
                 <h1></h1>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="top-info-buttons">
                     <div class="btn-group" role="group">
                         <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>

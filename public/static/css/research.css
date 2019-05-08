@@ -38,11 +38,6 @@ ol.breadcrumb li.active {
     display: none;
 }
 
-.top-info-buttons .btn-group .toggle-folder-status,
-.top-info-buttons .btn-group .metadata-form {
-    margin-right: 10px;
-}
-
 .action-list li {
     cursor: pointer;
 }
