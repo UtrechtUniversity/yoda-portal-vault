@@ -111,7 +111,57 @@ class Filesystem extends CI_Model {
         }
     }
 
+    /**
+     * Upload a file to iRODS.
+     *
+     * @param $rodsaccount
+     * @param $path
+     * @return mixed
+     */
+    function upload($rodsaccount, $path, $file)
+    {
+        try {
+            $tmpFile = $file["tmp_name"];
 
+            // Check file size.
+            $size = filesize($tmpFile);
+            $maxSize = 25 * 1024 * 1024;
+            if ($size > $maxSize) {
+                $output = array(
+                    'status' => 'ERROR',
+                    'statusInfo' => 'File exceeds size limit'
+                );
+                return $output;
+            }
+
+            // Upload file.
+            $path = $path . "/" . $file["name"];
+            $fd = fopen($tmpFile, "r");
+            $content =  fread($fd, $size);
+            $this->write($rodsaccount, $path, $content);
+            fclose($fd);
+
+            $output = array(
+                'status' => 'OK',
+                'statusInfo' => ''
+            );
+            return $output;
+        } catch(RODSException $e) {
+            if ($e->getCodeAbbr() == "OVERWRITE_WITHOUT_FORCE_FLAG") {
+                $output = array(
+                    'status' => 'ERROR',
+                    'statusInfo' => 'File already exists'
+                );
+                return $output;
+            } else {
+                $output = array(
+                    'status' => 'ERROR',
+                    'statusInfo' => 'Upload failed'
+                );
+                return $output;
+           }
+        }
+    }
 
     /**
      * Write a file to iRODS.

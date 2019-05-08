@@ -36,6 +36,22 @@
     </div>
 </div>
 
+<div class="modal" id="uploads">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-body">
+                <h3>Uploads</h3>
+                <div id="files"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-default grey cancel" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <ol class="breadcrumb">
         <li class="active">Home</li>
