@@ -763,6 +763,7 @@ function rejectFolder(folder)
 
 // File uploads.
 function handleUpload(path, files) {
+    var promises = [];
     $('#files').html("");
     $('#uploads').modal('show');
 
@@ -782,46 +783,56 @@ function handleUpload(path, files) {
         }
 
         // Send file.
-        sendFile(id, path, file);
+        var promise = sendFile(id, path, file);
+        promises.push(promise);
     }
 
-    // Reload file browser.
-    browse(path);
+    // Reload file browser if all promises are resolved.
+    Promise.all(promises).then(function() {
+        browse(path);
+    });
 }
 
 function sendFile(id, path, file) {
-    const uri = "browse/upload";
-    const xhr = new XMLHttpRequest();
-    const fd = new FormData();
+    // Return a new promise.
+    return new Promise(function(resolve, reject) {
 
-    xhr.open("POST", uri, true);
+        const uri = "browse/upload";
+        const xhr = new XMLHttpRequest();
+        const fd = new FormData();
 
-    xhr.onloadend = function (e) {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            response = JSON.parse(xhr.response);
-            if (response.status == "OK") {
-                $("#" + id + " .msg").html("OK");
+        xhr.open("POST", uri, true);
+
+        xhr.onloadend = function (e) {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                response = JSON.parse(xhr.response);
+                if (response.status == "OK") {
+                    $("#" + id + " .msg").html("OK");
+                    resolve(xhr.response);
+                } else {
+                    $("#" + id + " .msg").html(response.statusInfo);
+                    $("#" + id + " progress").val(0);
+                    resolve(xhr.response);
+                }
             } else {
-                $("#" + id + " .msg").html(response.statusInfo);
+                $("#" + id + " .msg").html("FAILED");
                 $("#" + id + " progress").val(0);
+                resolve(xhr.response);
             }
-        } else {
-            $("#" + id + " .msg").html("FAILED");
-            $("#" + id + " progress").val(0);
         }
-    }
 
-    xhr.upload.addEventListener('progress', function(e) {
-        var percent = (e.loaded / e.total) * 100;
-        $("#" + id + " progress").val(percent);
+        xhr.upload.addEventListener('progress', function(e) {
+            var percent = (e.loaded / e.total) * 100;
+            $("#" + id + " progress").val(percent);
+        });
+
+        fd.append(YodaPortal.csrf.tokenName, YodaPortal.csrf.tokenValue);
+        fd.append('filepath', decodeURIComponent(path));
+        fd.append('file', file);
+
+        // Initiate a multipart/form-data upload.
+        xhr.send(fd);
     });
-
-    fd.append(YodaPortal.csrf.tokenName, YodaPortal.csrf.tokenValue);
-    fd.append('filepath', decodeURIComponent(path));
-    fd.append('file', file);
-
-    // Initiate a multipart/form-data upload.
-    xhr.send(fd);
 }
 
 function logUpload(id, file) {
