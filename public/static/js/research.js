@@ -445,6 +445,7 @@ function topInformation(dir, showAlert)
                 if (status == '') {
                     actions['lock'] = 'Lock';
                     actions['submit'] = 'Submit';
+                    $('.btn-group button.upload').prop("disabled", false);
                 } else if (status == 'LOCKED') {
                     actions['unlock'] = 'Unlock';
                     actions['submit'] = 'Submit';
@@ -455,6 +456,7 @@ function topInformation(dir, showAlert)
                 } else if (status == 'SECURED') {
                     actions['lock'] = 'Lock';
                     actions['submit'] = 'Submit';
+                    $('.btn-group button.upload').prop("disabled", false);
                 } else if (status == 'REJECTED') {
                     actions['lock'] = 'Lock';
                     actions['submit'] = 'Submit';
@@ -532,7 +534,6 @@ function topInformation(dir, showAlert)
             if (typeof status != 'undefined') {
               if (status == '') {
                   statusText = "";
-                  $('.btn-group button.upload').prop("disabled", false);
               } else if (status == 'LOCKED') {
                   statusText = "Locked";
               } else if (status == 'SUBMITTED') {
@@ -541,7 +542,6 @@ function topInformation(dir, showAlert)
                   statusText = "Accepted";
               } else if (status == 'SECURED') {
                   statusText = "Secured";
-                  $('.btn-group button.upload').prop("disabled", false);
               } else if (status == 'REJECTED') {
                   statusText = "Rejected";
               }
