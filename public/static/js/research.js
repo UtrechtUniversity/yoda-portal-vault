@@ -784,6 +784,9 @@ function handleUpload(path, files) {
         // Send file.
         sendFile(id, path, file);
     }
+
+    // Reload file browser.
+    browse(path);
 }
 
 function sendFile(id, path, file) {
