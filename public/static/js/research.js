@@ -541,6 +541,7 @@ function topInformation(dir, showAlert)
                   statusText = "Accepted";
               } else if (status == 'SECURED') {
                   statusText = "Secured";
+                  $('.btn-group button.upload').prop("disabled", false);
               } else if (status == 'REJECTED') {
                   statusText = "Rejected";
               }
