@@ -441,6 +441,7 @@ function topInformation(dir, showAlert)
             $('#upload').attr('data-path', dir);
 
             // folder status (normal folder)
+            $('.btn-group button.upload').prop("disabled", true);
             if (typeof status != 'undefined') {
                 if (status == '') {
                     actions['lock'] = 'Lock';
@@ -530,7 +531,6 @@ function topInformation(dir, showAlert)
 
             // Set status badge.
             statusText = "";
-            $('.btn-group button.upload').prop("disabled", true);
             if (typeof status != 'undefined') {
               if (status == '') {
                   statusText = "";
