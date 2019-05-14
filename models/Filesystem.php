@@ -137,7 +137,14 @@ class Filesystem extends CI_Model {
             // Upload file.
             $path = $path . "/" . $file["name"];
             $fd = fopen($tmpFile, "r");
-            $content =  fread($fd, $size);
+
+            // Only fread file if not empty.
+            if ($size > 0) {
+                $content = fread($fd, $size);
+            } else {
+                $content = "";
+            }
+
             $this->write($rodsaccount, $path, $content);
             fclose($fd);
 
