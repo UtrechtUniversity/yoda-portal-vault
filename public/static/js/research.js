@@ -763,6 +763,11 @@ function rejectFolder(folder)
 
 // File uploads.
 function handleUpload(path, files) {
+    // Check if files are uploaded.
+    if (files.length < 1) {
+        return;
+    }
+
     var promises = [];
     $('#files').html("");
     $('#uploads').modal('show');
