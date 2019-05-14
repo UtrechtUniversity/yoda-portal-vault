@@ -837,7 +837,7 @@ function sendFile(id, path, file) {
 
 function logUpload(id, file) {
     log = '<div class="row" id="' + id + '">' +
-          '<div class="col-md-6">' + file.name + '</div>' +
+          '<div class="col-md-6" style="word-wrap: break-word;">' + file.name + '</div>' +
           '<div class="col-md-3"><progress value="0" max="100"></progress></div>' +
           '<div class="col-md-3 msg"><i class="fa fa-spinner fa-spin fa-fw"></i></div>'
           '</div>';
