@@ -16,6 +16,20 @@ $( document ).ready(function() {
         showMetadataForm($(this).attr('data-path'));
     });
 
+    $("body").on("click", "a.view-video", function() {
+        path = $(this).attr('data-path');
+        viewerHtml = '<video width="570" controls autoplay><source src="' + path + '"></video>';
+        $('#viewer').html(viewerHtml);
+        $('#viewMedia').modal('show');
+    });
+
+    $("body").on("click", "a.view-image", function() {
+        path = $(this).attr('data-path');
+        viewerHtml = '<img width="570" src="' + path + '" />';
+        $('#viewer').html(viewerHtml);
+        $('#viewMedia').modal('show');
+    });
+
     $("body").on("click", "a.action-check-for-unpreservable-files", function() {
         // Check for unpreservable file formats.
         // If present, show extensions to user.

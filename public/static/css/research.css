@@ -97,3 +97,7 @@ ol.breadcrumb li.active {
     float: left;
     padding-top: 2px;
 }
+
+.view-image, .view-video {
+    cursor: pointer;
+}
