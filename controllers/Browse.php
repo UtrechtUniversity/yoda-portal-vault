@@ -294,11 +294,34 @@ class Browse extends MY_Controller
                         foreach ($objects['rows'] as $row) {
                             if ($this->_allowRowWhenBrowsing($row, $interveningKeys) AND $totalItemsLeftInView) {
                                 $filePath = str_replace($pathStart, '', $row['path']);
-                                $rows[] = array(
-                                    '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                                    date('Y-m-d H:i:s', $row['modify_time']),
-                                    '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a>'
-                                );
+                                $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+
+                                // File extensions enabled for viewing.
+                                $video = array("mp4", "ogg", "webm");
+                                $image = array("jpg", "jpeg", "gif", "png");
+
+                                // Video object.
+                                if (in_array($ext, $video)) {
+                                    $rows[] = array(
+                                        '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                        date('Y-m-d H:i:s', $row['modify_time']),
+                                        '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-video" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-video-o" aria-hidden="true"></i></a>'
+                                    );
+                                // Image object.
+                                } else if (in_array($ext, $image)) {
+                                    $rows[] = array(
+                                        '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                        date('Y-m-d H:i:s', $row['modify_time']),
+                                        '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-image" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-image-o" aria-hidden="true"></i></a>'
+                                    );
+                                // Other object.
+                                } else {
+                                    $rows[] = array(
+                                        '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                        date('Y-m-d H:i:s', $row['modify_time']),
+                                        '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a>'
+                                    );
+                                }
                                 $totalItemsLeftInView--;
                             }
                         }

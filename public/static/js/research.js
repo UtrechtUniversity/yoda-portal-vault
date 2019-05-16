@@ -24,6 +24,20 @@ $( document ).ready(function() {
         handleUpload($(this).attr('data-path'), this.files);
     });
 
+    $("body").on("click", "a.view-video", function() {
+        path = $(this).attr('data-path');
+        viewerHtml = '<video width="570" controls autoplay><source src="' + path + '"></video>';
+        $('#viewer').html(viewerHtml);
+        $('#viewMedia').modal('show');
+    });
+
+    $("body").on("click", "a.view-image", function() {
+        path = $(this).attr('data-path');
+        viewerHtml = '<img width="570" src="' + path + '" />';
+        $('#viewer').html(viewerHtml);
+        $('#viewMedia').modal('show');
+    });
+
     $("body").on("click", "a.action-lock", function() {
         lockFolder($(this).attr('data-folder'));
     });
