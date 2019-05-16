@@ -38,6 +38,10 @@ $( document ).ready(function() {
         $('#viewMedia').modal('show');
     });
 
+    $("#viewMedia.modal").on("hidden.bs.modal", function() {
+        $("#viewer").html("");
+    });
+
     $("body").on("click", "a.action-lock", function() {
         lockFolder($(this).attr('data-folder'));
     });
