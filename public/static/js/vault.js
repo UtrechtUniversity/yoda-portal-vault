@@ -30,6 +30,10 @@ $( document ).ready(function() {
         $('#viewMedia').modal('show');
     });
 
+    $("#viewMedia.modal").on("hidden.bs.modal", function(){
+        $("#viewer").html("");
+    });
+
     $("body").on("click", "a.action-check-for-unpreservable-files", function() {
         // Check for unpreservable file formats.
         // If present, show extensions to user.
