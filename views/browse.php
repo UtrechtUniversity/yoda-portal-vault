@@ -103,7 +103,7 @@
 
     <div class="col-md-12">
         <div class="row">
-            <table id="file-browser" class="table yoda-table table-striped">
+            <table id="file-browser" class="table yoda-table table-striped" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
                 <thead>
                     <tr>
                         <th>Name</th>

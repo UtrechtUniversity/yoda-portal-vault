@@ -453,7 +453,7 @@ function topInformation(dir, showAlert)
             } else {
                 $('.btn-group button.metadata-form').hide();
             }
-            $('#upload').attr('data-path', dir);
+            $('#upload').attr('data-path', "");
 
             // folder status (normal folder)
             $('.btn-group button.upload').prop("disabled", true);
@@ -461,6 +461,9 @@ function topInformation(dir, showAlert)
                 if (status == '') {
                     actions['lock'] = 'Lock';
                     actions['submit'] = 'Submit';
+
+                    // Enable uploads.
+                    $('#upload').attr('data-path', dir);
                     $('.btn-group button.upload').prop("disabled", false);
                 } else if (status == 'LOCKED') {
                     actions['unlock'] = 'Unlock';
@@ -472,6 +475,9 @@ function topInformation(dir, showAlert)
                 } else if (status == 'SECURED') {
                     actions['lock'] = 'Lock';
                     actions['submit'] = 'Submit';
+
+                    // Enable uploads.
+                    $('#upload').attr('data-path', dir);
                     $('.btn-group button.upload').prop("disabled", false);
                 } else if (status == 'REJECTED') {
                     actions['lock'] = 'Lock';
@@ -570,6 +576,7 @@ function topInformation(dir, showAlert)
             $('.top-information').show();
         });
     } else {
+        $('#upload').attr('data-path', "");
         $('.top-information').hide();
     }
 }
@@ -778,6 +785,11 @@ function rejectFolder(folder)
 
 // File uploads.
 function handleUpload(path, files) {
+    // Check if path is specified.
+    if (path == "") {
+]        return;
+    }
+
     // Check if files are uploaded.
     if (files.length < 1) {
         return;
@@ -862,4 +874,16 @@ function logUpload(id, file) {
           '<div class="col-md-3 msg"><i class="fa fa-spinner fa-spin fa-fw"></i></div>'
           '</div>';
     $('#files').append(log);
+}
+
+function dropHandler(ev) {
+    // Prevent default behavior (Prevent file from being opened)
+    ev.preventDefault();
+
+    handleUpload($("#upload").attr('data-path'), ev.dataTransfer.files);
+}
+
+function dragOverHandler(ev) {
+  // Prevent default behavior (Prevent file from being opened)
+  ev.preventDefault();
 }
