@@ -787,7 +787,7 @@ function rejectFolder(folder)
 function handleUpload(path, files) {
     // Check if path is specified.
     if (path == "") {
-]        return;
+        return;
     }
 
     // Check if files are uploaded.
