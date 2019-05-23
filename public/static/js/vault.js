@@ -517,10 +517,15 @@ function topInformation(dir, showAlert)
                 actions['check-for-unpreservable-files'] = 'Check for compliance with policy';
             }
 
+            // Hide buttons in grp-vault groups.
+            if (typeof isVaultPackage == 'undefined') {
+                $('.top-info-buttons').hide();
+            }
+
             // Provenance action log
             $('.actionlog-items').hide();
             actionLogIcon = ' <i class="fa fa-book actionlog-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="Provenance action log"></i>';
-            if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'no') {
+            if (typeof isVaultPackage == 'undefined' || isVaultPackage == 'no') {
                 actionLogIcon = '';
             }
 
