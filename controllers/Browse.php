@@ -269,6 +269,7 @@ class Browse extends MY_Controller
 
                                 // File extensions enabled for viewing.
                                 $video = array("mp4", "ogg", "webm");
+                                $audio = array("mp3", "ogg", "wav");
                                 $image = array("jpg", "jpeg", "gif", "png");
 
                                 // Video object.
@@ -277,6 +278,13 @@ class Browse extends MY_Controller
                                         '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
                                         date('Y-m-d H:i:s', $row['modify_time']),
                                         '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-video" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-video-o" aria-hidden="true"></i></a>'
+                                    );
+                                // Audio object.
+                                } else if (in_array($ext, $image)) {
+                                    $rows[] = array(
+                                        '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                        date('Y-m-d H:i:s', $row['modify_time']),
+                                        '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-audio" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-audio-o" aria-hidden="true"></i></a>'
                                     );
                                 // Image object.
                                 } else if (in_array($ext, $image)) {
