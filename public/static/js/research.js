@@ -31,6 +31,13 @@ $( document ).ready(function() {
         $('#viewMedia').modal('show');
     });
 
+    $("body").on("click", "a.view-audio", function() {
+        path = $(this).attr('data-path');
+        viewerHtml = '<audio width="570" controls autoplay><source src="' + path + '"></audio>';
+        $('#viewer').html(viewerHtml);
+        $('#viewMedia').modal('show');
+    });
+
     $("body").on("click", "a.view-image", function() {
         path = $(this).attr('data-path');
         viewerHtml = '<img width="570" src="' + path + '" />';
