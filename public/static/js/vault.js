@@ -520,6 +520,8 @@ function topInformation(dir, showAlert)
             // Hide buttons in grp-vault groups.
             if (typeof isVaultPackage == 'undefined') {
                 $('.top-info-buttons').hide();
+            } else {
+                $('.top-info-buttons').show();
             }
 
             // Provenance action log
