@@ -1,7 +1,8 @@
 {
   "name": "metadata-form",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "JSON schema metadata form",
+  "license": "GPL-3.0-only",
   "main": "webpack.config.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
