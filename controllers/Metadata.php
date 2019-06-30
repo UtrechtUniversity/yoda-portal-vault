@@ -136,23 +136,55 @@ class Metadata extends MY_Controller
         $fullPath = $pathStart . $path;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
+
         $jsonSchema = $this->Metadata_form_model->loadJSONS($rodsaccount, $fullPath);
 
         $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
         $xmlFormData = null;
         if ($metadataExists) {
             $xmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
+
             $formData = $this->Metadata_form_model->prepareJSONSFormData($jsonSchema, $xmlFormData);
+//            echo '<pre>';
+//            print_r($formData);
+//            echo '</pre>';
+//            exit;
+
+//            $formData = array();
+//            $formData['Descriptive-group']['Geo_Box_Spatial'][0]['GeoBoundsSpatial']['northBoundLatitude'] = 100;
+//            $formData['Descriptive-group']['Geo_Box_Spatial'][0]['GeoBoundsSpatial']['westBoundLongitude'] = 100;
+//            $formData['Descriptive-group']['Geo_Box_Spatial'][0]['GeoBoundsSpatial']['southBoundLatitude'] = 100;
+//            $formData['Descriptive-group']['Geo_Box_Spatial'][0]['GeoBoundsSpatial']['eastBoundLongitude'] = 100;
+//            $formData['Descriptive-group']['Geo_Box_Spatial'][0]['Description_Spatial'] = 'Harm manual';
+////
+//            $formData['Descriptive-group']['Geo_Box_Spatial'][1]['GeoBoundsSpatial']['northBoundLatitude'] = 200;
+//            $formData['Descriptive-group']['Geo_Box_Spatial'][1]['GeoBoundsSpatial']['westBoundLongitude'] = 200;
+//            $formData['Descriptive-group']['Geo_Box_Spatial'][1]['GeoBoundsSpatial']['southBoundLatitude'] = 200;
+//            $formData['Descriptive-group']['Geo_Box_Spatial'][1]['GeoBoundsSpatial']['eastBoundLongitude'] = 200;
+//            $formData['Descriptive-group']['Geo_Box_Spatial'][1]['Description_Spatial'] = 'Harm manual 2';
+
+
+            //        [Description_Spatial] => Description_Spatial
+//            echo '<pre>';
+//            print_r($formData);
+//            echo '</pre>';
+//            exit;
         }
 
         $uiSchema = array(
             "Descriptive-group" => array(
-               "Description" => array(
-                   "ui:widget" => "textarea"
-               ),
-               "GeoLocation" => array(
-                   "ui:field" => "geo"
-               )
+                "Description" => array(
+                    "ui:widget" => "textarea"
+                ),
+                "Additional_Documentation" => array(
+                    "ui:widget" => "textarea"
+                ),
+                "Geo_Box" => array(
+                    "ui:field" => "geo"
+                ),
+                "Geo_Box_Compoound.GeoBounds" => array(
+                    "ui:field" => "geo"
+                )
             ),
             "Administrative-group" => array(
                 "Retention_Period" => array(
@@ -282,6 +314,11 @@ class Metadata extends MY_Controller
         $rodsaccount = $this->rodsuser->getRodsAccount();
 
         $arrayPost = $this->input->post();
+
+        echo '<pre>';
+            print_r($arrayPost);
+        echo '</pre>';
+        exit;
 
         $this->load->model('Metadata_form_model');
         $this->load->model('Metadata_model');

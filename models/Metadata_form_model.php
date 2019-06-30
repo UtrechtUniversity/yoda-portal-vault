@@ -427,7 +427,32 @@ class Metadata_form_model extends CI_Model
                                                 }
                                         }
                                     } else {
-                                        if ($objectField['type'] == 'string') {
+                                        // geoLocation requires specific handling
+                                        if(isset($objectField['yoda:structure']) && $objectField['yoda:structure']=='geoLocation' ) {
+                                            foreach($xmlFormData[$fieldKey] as $test=>$testVal) {
+                                                if (is_numeric($test)) {
+                                                    $iterate =  $xmlFormData[$fieldKey];
+                                                }
+                                                else {
+                                                    $iterate =  array(0 => $xmlFormData[$fieldKey]);
+                                                }
+                                                break;
+                                            }
+
+                                            $formData[$groupKey][$fieldKey] = $iterate;
+
+                                            // each geoLocation field has to be converted to a number. Otherwise, frontend won't accept.
+                                            foreach ($iterate as $geoIndex => $geoData) {
+                                                //print_r($geoData);
+
+                                                foreach($geoData['geoLocationBox'] as $longLatKey => $longLatVal) {
+                                                    $formData[$groupKey][$fieldKey][$geoIndex]['geoLocationBox'][$longLatKey] =
+                                                        floatval($longLatVal);
+                                                }
+                                            }
+                                           break;
+                                        }
+                                        elseif ($objectField['type'] == 'string') {
                                             $emptyObjectField[$objectKey] = $objectKey;
                                         } elseif ($objectField['type'] == 'object') { //subproperties (OLD)
                                             foreach ($objectField['properties'] as $subObjectKey => $subObjectField) {
