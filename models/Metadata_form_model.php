@@ -75,6 +75,10 @@ class Metadata_form_model extends CI_Model
         $arrayPost = $this->CI->input->post();
         $formReceivedData = json_decode($arrayPost['formData'], true);
 
+//        echo '<pre>hallo';
+//        print_r($formReceivedData);
+//        echo '</pre>';
+
         // formData now contains info of descriptive groups.
         // These must be excluded first for ease of use within code
         $formData = array();
@@ -193,7 +197,7 @@ class Metadata_form_model extends CI_Model
                                                     }
                                                 }
                                                 // Single compound as part of a subproperty
-                                                elseif ($subPropertyElementInfo['yoda:structure']=='compound') {
+                                                elseif (isset($subPropertyElementInfo['yoda:structure']) && $subPropertyElementInfo['yoda:structure']=='compound') {
                                                     if ($this->_addCompoundToXml($xml,
                                                                                 $xmlProperties,
                                                                                 $subPropertyElementKey,
@@ -230,10 +234,36 @@ class Metadata_form_model extends CI_Model
                                         }
                                         // Extra intelligence to only save when there is relevant data
                                         if ($hasLeadValue) {  // for now overrule this requirement
-                                            // add the entire structure to the main element
+                                             // add the entire structure to the main element
                                             if ($hasSubPropertyValues) {
                                                 $xmlMainElement->appendChild($xmlProperties);
                                             }
+                                            $xml_metadata->appendChild($xmlMainElement);
+                                        }
+                                    }
+                                }
+                                // Compound at top level - for now
+                                elseif($structObject['yoda:structure'] == 'compound') {
+                                    $xmlMainElement = $xml->createElement($mainElement);
+                                    foreach($formData[$mainElement] as $compoundElement) {
+                                        // Take over entire structure as in post
+                                        // Per main element in posted data, add entire structure of the compound
+                                        $xmlMainElement = $xml->createElement($mainElement);
+
+                                        foreach($compoundElement as $L1Key=>$L1Val){
+                                            if(is_array($L1Val)) {
+                                                $xmlCompoundPart = $xml->createElement($L1Key);
+                                                foreach($L1Val as $L2Key=>$L2Val) {
+                                                    $xmlCompoundPartSub = $this->_createXmlElementWithText($xml, $L2Key, $L2Val);
+                                                    $xmlCompoundPart->appendChild($xmlCompoundPartSub);
+                                                }
+                                                $xmlMainElement->appendChild($xmlCompoundPart);
+                                            }
+                                            else {
+                                                $xmlCompoundPart = $this->_createXmlElementWithText($xml, $L1Key, $L1Val);
+                                                $xmlMainElement->appendChild($xmlCompoundPart);
+                                            }
+
                                             $xml_metadata->appendChild($xmlMainElement);
                                         }
                                     }
@@ -247,6 +277,10 @@ class Metadata_form_model extends CI_Model
 
         $xml->appendChild($xml_metadata);
         $xmlString = $xml->saveXML();
+
+        print_r($xmlString);
+        exit;
+
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
 
@@ -443,10 +477,8 @@ class Metadata_form_model extends CI_Model
 
                                             // each geoLocation field has to be converted to a number. Otherwise, frontend won't accept.
                                             foreach ($iterate as $geoIndex => $geoData) {
-                                                //print_r($geoData);
-
-                                                foreach($geoData['geoLocationBox'] as $longLatKey => $longLatVal) {
-                                                    $formData[$groupKey][$fieldKey][$geoIndex]['geoLocationBox'][$longLatKey] =
+                                                foreach($geoData[$objectKey] as $longLatKey => $longLatVal) {
+                                                    $formData[$groupKey][$fieldKey][$geoIndex][$objectKey][$longLatKey] =
                                                         floatval($longLatVal);
                                                 }
                                             }

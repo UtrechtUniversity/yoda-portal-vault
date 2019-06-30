@@ -315,11 +315,6 @@ class Metadata extends MY_Controller
 
         $arrayPost = $this->input->post();
 
-        echo '<pre>';
-            print_r($arrayPost);
-        echo '</pre>';
-        exit;
-
         $this->load->model('Metadata_form_model');
         $this->load->model('Metadata_model');
         $this->load->model('Folder_Status_model');
@@ -329,6 +324,9 @@ class Metadata extends MY_Controller
         $fullPath = $pathStart . $path;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
+
+        $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+        exit;
 
         $userType = $formConfig['userType'];
         $lockStatus = $formConfig['lockFound'];
