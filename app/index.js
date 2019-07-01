@@ -2,6 +2,10 @@ import React, { Component } from "react";
 import axios from 'axios';
 import { render } from "react-dom";
 import Form from "react-jsonschema-form-uu";
+import Modal from 'react-modal';
+import { Map, TileLayer, Marker, Popup, FeatureGroup } from 'react-leaflet';
+import L from 'leaflet';
+import { EditControl } from "react-leaflet-draw";
 
 var schema = {};
 var uiSchema = {};
@@ -36,8 +40,161 @@ const numberWidget = (props) => {
     );
 };
 
+const customModalStyles = {
+    content : {
+        top                   : '50%',
+        left                  : '50%',
+        right                 : 'auto',
+        bottom                : 'auto',
+        marginRight           : '-50%',
+        transform             : 'translate(-50%, -50%)',
+        width                 : '50%',
+        height                : '600px',
+    }
+};
+
+class GeoLocation extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            modalIsOpen: false,
+            ...props.formData
+        };
+        console.log(props);
+
+        this.openModal = this.openModal.bind(this);
+        this.closeModal = this.closeModal.bind(this);
+        this.afterOpenModal = this.afterOpenModal.bind(this);
+        this.drawCreated = this.drawCreated.bind(this);
+        this.drawEdited = this.drawEdited.bind(this);
+        this.drawDeleted = this.drawDeleted.bind(this);
+        this.drawStop = this.drawStop.bind(this);
+        this.setFormData = this.setFormData.bind(this);
+    }
+
+    openModal(e) {
+        e.preventDefault();
+        this.setState({modalIsOpen: true});
+    }
+
+    closeModal(e) {
+        e.preventDefault();
+        this.setState({modalIsOpen: false});
+    }
+
+    afterOpenModal(e) {
+        const {northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude} = this.state;
+        let map = this.refs.map.leafletElement;
+        console.log(map);
+        if (typeof northBoundLatitude !== 'undefined' &&
+            typeof westBoundLongitude !== 'undefined' &&
+            typeof southBoundLatitude !== 'undefined' &&
+            typeof eastBoundLongitude !== 'undefined'
+        ) {
+            let bounds = [
+                [northBoundLatitude, westBoundLongitude],
+                [southBoundLatitude, eastBoundLongitude]
+            ];
+            L.rectangle(bounds).addTo(map);
+            map.fitBounds(bounds, {'padding': [150, 150]});
+        }
+    }
+
+    drawCreated(e) {
+        let layer = e.layer;
+        this.setFormData('northBoundLatitude', layer.getLatLngs()[0][2].lat);
+        this.setFormData('westBoundLongitude', layer.getLatLngs()[0][2].lng);
+        this.setFormData('southBoundLatitude', layer.getLatLngs()[0][0].lat);
+        this.setFormData('eastBoundLongitude', layer.getLatLngs()[0][0].lng);
+    }
+
+    drawEdited(e) {
+        e.layers.eachLayer( (layer) => {
+            this.setFormData('northBoundLatitude', layer.getLatLngs()[0][2].lat);
+            this.setFormData('westBoundLongitude', layer.getLatLngs()[0][2].lng);
+            this.setFormData('southBoundLatitude', layer.getLatLngs()[0][0].lat);
+            this.setFormData('eastBoundLongitude', layer.getLatLngs()[0][0].lng);
+        });
+    }
+
+    drawDeleted(e) {
+        this.setFormData('northBoundLatitude', undefined);
+        this.setFormData('westBoundLongitude', undefined);
+        this.setFormData('southBoundLatitude', undefined);
+        this.setFormData('eastBoundLongitude', undefined);
+    }
+
+    drawStop(e) {
+        console.log('STOP123');
+        console.log(e.sourceTarget._leaflet_id);
+
+        let map = this.refs.map.leafletElement;
+        map.eachLayer(function (layer) {
+            if (layer instanceof L.Rectangle) {
+                console.log(e.layer);
+                console.log(layer._leaflet_id);
+                map.removeLayer(layer);
+            }
+        });
+    }
+
+    setFormData(fieldName, fieldValue) {
+        this.setState({
+            [fieldName]: fieldValue
+        }, () => this.props.onChange(this.state));
+    }
+
+    render() {
+        const {northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude} = this.state;
+        return (
+            <div>
+                <label><span>Geo Location</span></label>
+                <button onClick={(e) => {this.openModal(e); }}>Open Map</button>
+                N: {northBoundLatitude} W: {westBoundLongitude} S: {southBoundLatitude} E: {eastBoundLongitude}
+
+                <Modal
+                    isOpen={this.state.modalIsOpen}
+                    onAfterOpen={this.afterOpenModal}
+                    onRequestClose={this.closeModal}
+                    style={customModalStyles}
+                    ariaHideApp={false}
+                >
+                    <Map ref='map' center={[48.760, 13.275]} zoom={4} animate={false}>
+                        <TileLayer
+                            attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        <FeatureGroup>
+                            <EditControl
+                                position='topright'
+                                onCreated={this.drawCreated}
+                                onEdited={this.drawEdited}
+                                onDeleted={this.drawDeleted}
+                                onDrawStart={this.drawStop}
+                                draw={{
+                                    circle: false,
+                                    polygon: false,
+                                    marker: false,
+                                    circlemarker: false,
+                                    polyline: false
+                                }}
+                            />
+                        </FeatureGroup>
+                    </Map>
+
+                    <button onClick={(e) => {this.closeModal(e); }}>Close</button>
+                </Modal>
+            </div>
+        );
+    }
+}
+
 const widgets = {
     numberWidget: numberWidget
+};
+
+const fields = {
+    geo: GeoLocation
 };
 
 const onSubmit = ({formData}) => submitData(formData);
@@ -142,6 +299,7 @@ class YodaForm extends React.Component {
               schema={schema}
               idPrefix={"yoda"}
               uiSchema={uiSchema}
+              fields={fields}
               formData={this.state.formData}
               formContext={this.state.formContext}
               ArrayFieldTemplate={ArrayFieldTemplate}
@@ -426,7 +584,7 @@ function submitData(data)
         config: { headers: {'Content-Type': 'multipart/form-data' }}
         })
         .then(function (response) {
-            window.location.href = "/research/metadata/form?path=" + path;
+            //window.location.href = "/research/metadata/form?path=" + path;
         })
         .catch(function (error) {
             //handle error

@@ -95,6 +95,7 @@ class Metadata extends MY_Controller
                 'lib/font-awesome/css/font-awesome.css',
                 'lib/sweetalert/sweetalert.css',
                 'css/metadata/form.css',
+                'css/metadata/leaflet.css',
             ),
             'scriptIncludes' => array(
                 'lib/sweetalert/sweetalert.min.js',
@@ -148,6 +149,9 @@ class Metadata extends MY_Controller
             "Descriptive-group" => array(
                "Description" => array(
                    "ui:widget" => "textarea"
+               ),
+               "GeoLocation" => array(
+                   "ui:field" => "geo"
                )
             ),
             "Administrative-group" => array(
