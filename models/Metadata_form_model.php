@@ -278,8 +278,8 @@ class Metadata_form_model extends CI_Model
         $xml->appendChild($xml_metadata);
         $xmlString = $xml->saveXML();
 
-        print_r($xmlString);
-        exit;
+//        print_r($xmlString);
+//        exit;
 
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
