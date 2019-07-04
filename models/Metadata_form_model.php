@@ -248,6 +248,10 @@ class Metadata_form_model extends CI_Model
         $xml->appendChild($xml_metadata);
         $xmlString = $xml->saveXML();
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
+
+        $jsonString = $arrayPost['formData'];
+        $jsonFile = dirname($arrayPost['formData']) . 'yoda-metadata.json';
+        $this->CI->filesystem->writeXml($rodsaccount, $jsonFile, $jsonString);
     }
 
     /**
