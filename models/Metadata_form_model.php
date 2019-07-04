@@ -74,8 +74,9 @@ class Metadata_form_model extends CI_Model
     {
         $arrayPost = $this->CI->input->post();
 
-        $jsonString = $arrayPost['formData'];
-        $jsonFile = dirname($config['metadataXmlPath']) . 'yoda-metadata.json';
+        // Save metadata as JSON.
+        $jsonString = json_encode(json_decode($arrayPost['formData']), JSON_PRETTY_PRINT);
+        $jsonFile = dirname($config['metadataXmlPath']) . '/yoda-metadata.json';
         $this->CI->filesystem->writeXml($rodsaccount, $jsonFile, $jsonString);
 
         $formReceivedData = json_decode($arrayPost['formData'], true);
