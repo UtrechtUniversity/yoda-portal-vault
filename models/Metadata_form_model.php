@@ -73,6 +73,11 @@ class Metadata_form_model extends CI_Model
     public function processPost($rodsaccount, $config)
     {
         $arrayPost = $this->CI->input->post();
+
+        $jsonString = $arrayPost['formData'];
+        $jsonFile = dirname($config['metadataXmlPath']) . 'yoda-metadata.json';
+        $this->CI->filesystem->writeXml($rodsaccount, $jsonFile, $jsonString);
+
         $formReceivedData = json_decode($arrayPost['formData'], true);
 
         // formData now contains info of descriptive groups.
@@ -248,10 +253,6 @@ class Metadata_form_model extends CI_Model
         $xml->appendChild($xml_metadata);
         $xmlString = $xml->saveXML();
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
-
-        $jsonString = $arrayPost['formData'];
-        $jsonFile = dirname($arrayPost['formData']) . 'yoda-metadata.json';
-        $this->CI->filesystem->writeXml($rodsaccount, $jsonFile, $jsonString);
     }
 
     /**
