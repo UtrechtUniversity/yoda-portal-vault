@@ -75,10 +75,6 @@ class Metadata_form_model extends CI_Model
         $arrayPost = $this->CI->input->post();
         $formReceivedData = json_decode($arrayPost['formData'], true);
 
-//        echo '<pre>hallo';
-//        print_r($formReceivedData);
-//        echo '</pre>';
-
         // formData now contains info of descriptive groups.
         // These must be excluded first for ease of use within code
         $formData = array();
@@ -242,6 +238,17 @@ class Metadata_form_model extends CI_Model
                                         }
                                     }
                                 }
+                                // Geo location at top level
+                                elseif($structObject['yoda:structure']=='geoLocation') {
+                                    foreach($formData[$mainElement] as $geoBoxData) {
+                                        $xmlGeoMain = $xml->createElement($mainElement);
+                                        foreach($geoBoxData as $geoCoordName=>$geoCoordVal) {
+                                            $xmlGeoSub = $this->_createXmlElementWithText($xml, $geoCoordName, $geoCoordVal);
+                                            $xmlGeoMain->appendChild($xmlGeoSub);
+                                        }
+                                        $xml_metadata->appendChild($xmlGeoMain);
+                                    }
+                                }
                                 // Compound at top level - for now
                                 elseif($structObject['yoda:structure'] == 'compound') {
                                     $xmlMainElement = $xml->createElement($mainElement);
@@ -277,9 +284,6 @@ class Metadata_form_model extends CI_Model
 
         $xml->appendChild($xml_metadata);
         $xmlString = $xml->saveXML();
-
-//        print_r($xmlString);
-//        exit;
 
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
@@ -370,7 +374,6 @@ class Metadata_form_model extends CI_Model
                         } elseif ($field['items']['type'] == 'object') {
                             // Object array
                             $emptyObjectField = array();
-
                             $xmlDataArray = array();
                             foreach ($xmlFormData[$fieldKey] as $key => $value) {
                                 if (is_numeric($key)) {
@@ -386,6 +389,18 @@ class Metadata_form_model extends CI_Model
                                 $mainProp = true;
                                 $emptyObjectField = array();
 
+                                // Trap geoLocation, not part of compound => specific handling is required
+                                if ($field['items']['yoda:structure']=='geoLocation') {
+                                    $geoArray = array();
+                                    foreach($xmlData as $geoName=>$geoValue) {
+                                        // geoName contains: northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude
+                                        $geoArray[$geoName] = floatval($geoValue); // has to be of type number otherwise frontend won't accept
+                                    }
+                                    $formData[$groupKey][$fieldKey][] = $geoArray;
+
+                                    // Skip to next data for same field - do not go into next foreach!
+                                    continue;
+                                }
                                 // Loop through the elements constituing the structure:
                                 foreach ($field['items']['properties'] as $objectKey => $objectField) {
                                     // Start of sub property structure
@@ -482,7 +497,7 @@ class Metadata_form_model extends CI_Model
                                                         floatval($longLatVal);
                                                 }
                                             }
-                                           break;
+                                            break;
                                         }
                                         elseif ($objectField['type'] == 'string') {
                                             $emptyObjectField[$objectKey] = $objectKey;
