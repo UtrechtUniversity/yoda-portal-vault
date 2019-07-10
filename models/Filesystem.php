@@ -726,7 +726,6 @@ RULE;
         return array();
     }
 
-
     /**
      * Get the category dependent JSON schema from iRODS.
      *
@@ -741,6 +740,46 @@ RULE;
         $ruleBody = <<<'RULE'
 myRule {
     iiFrontGetJsonSchema(*folder, *result, *status, *statusInfo);
+}
+RULE;
+        try {
+            $rule = new ProdsRule(
+                $iRodsAccount,
+                $ruleBody,
+                array(
+                    "*folder" => $folder
+                ),
+                array("*result", "*status", "*statusInfo")
+            );
+
+            $ruleResult = $rule->execute();
+            $output['*result'] = $ruleResult['*result'];
+            $output['*status'] = $ruleResult['*status'];
+            $output['*statusInfo'] = $ruleResult['*statusInfo'];
+
+            return $output;
+
+        } catch(RODSException $e) {
+            return array();
+        }
+
+        return array();
+    }
+
+    /**
+     * Get the category dependent JSON UI schema from iRODS.
+     *
+     * @param $iRodsAccount
+     * @param $folder
+     * @return array
+     */
+    function getJsonUiSchema($iRodsAccount, $folder)
+    {
+        $output = array();
+
+        $ruleBody = <<<'RULE'
+myRule {
+    iiFrontGetJsonUiSchema(*folder, *result, *status, *statusInfo);
 }
 RULE;
         try {
