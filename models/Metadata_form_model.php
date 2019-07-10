@@ -193,7 +193,7 @@ class Metadata_form_model extends CI_Model
                                                     }
                                                 }
                                                 // Single compound as part of a subproperty
-                                                elseif ($subPropertyElementInfo['yoda:structure']=='compound') {
+                                                elseif (isset($subPropertyElementInfo['yoda:structure']) && $subPropertyElementInfo['yoda:structure']=='compound') {
                                                     if ($this->_addCompoundToXml($xml,
                                                                                 $xmlProperties,
                                                                                 $subPropertyElementKey,
@@ -230,10 +230,47 @@ class Metadata_form_model extends CI_Model
                                         }
                                         // Extra intelligence to only save when there is relevant data
                                         if ($hasLeadValue) {  // for now overrule this requirement
-                                            // add the entire structure to the main element
+                                             // add the entire structure to the main element
                                             if ($hasSubPropertyValues) {
                                                 $xmlMainElement->appendChild($xmlProperties);
                                             }
+                                            $xml_metadata->appendChild($xmlMainElement);
+                                        }
+                                    }
+                                }
+                                // Geo location at top level
+                                elseif($structObject['yoda:structure']=='geoLocation') {
+                                    foreach($formData[$mainElement] as $geoBoxData) {
+                                        $xmlGeoMain = $xml->createElement($mainElement);
+                                        foreach($geoBoxData as $geoCoordName=>$geoCoordVal) {
+                                            $xmlGeoSub = $this->_createXmlElementWithText($xml, $geoCoordName, $geoCoordVal);
+                                            $xmlGeoMain->appendChild($xmlGeoSub);
+                                        }
+                                        $xml_metadata->appendChild($xmlGeoMain);
+                                    }
+                                }
+                                // Compound at top level - for now
+                                elseif($structObject['yoda:structure'] == 'compound') {
+                                    $xmlMainElement = $xml->createElement($mainElement);
+                                    foreach($formData[$mainElement] as $compoundElement) {
+                                        // Take over entire structure as in post
+                                        // Per main element in posted data, add entire structure of the compound
+                                        $xmlMainElement = $xml->createElement($mainElement);
+
+                                        foreach($compoundElement as $L1Key=>$L1Val){
+                                            if(is_array($L1Val)) {
+                                                $xmlCompoundPart = $xml->createElement($L1Key);
+                                                foreach($L1Val as $L2Key=>$L2Val) {
+                                                    $xmlCompoundPartSub = $this->_createXmlElementWithText($xml, $L2Key, $L2Val);
+                                                    $xmlCompoundPart->appendChild($xmlCompoundPartSub);
+                                                }
+                                                $xmlMainElement->appendChild($xmlCompoundPart);
+                                            }
+                                            else {
+                                                $xmlCompoundPart = $this->_createXmlElementWithText($xml, $L1Key, $L1Val);
+                                                $xmlMainElement->appendChild($xmlCompoundPart);
+                                            }
+
                                             $xml_metadata->appendChild($xmlMainElement);
                                         }
                                     }
@@ -247,6 +284,7 @@ class Metadata_form_model extends CI_Model
 
         $xml->appendChild($xml_metadata);
         $xmlString = $xml->saveXML();
+
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
 
@@ -336,7 +374,6 @@ class Metadata_form_model extends CI_Model
                         } elseif ($field['items']['type'] == 'object') {
                             // Object array
                             $emptyObjectField = array();
-
                             $xmlDataArray = array();
                             foreach ($xmlFormData[$fieldKey] as $key => $value) {
                                 if (is_numeric($key)) {
@@ -352,6 +389,18 @@ class Metadata_form_model extends CI_Model
                                 $mainProp = true;
                                 $emptyObjectField = array();
 
+                                // Trap geoLocation, not part of compound => specific handling is required
+                                if ($field['items']['yoda:structure']=='geoLocation') {
+                                    $geoArray = array();
+                                    foreach($xmlData as $geoName=>$geoValue) {
+                                        // geoName contains: northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude
+                                        $geoArray[$geoName] = floatval($geoValue); // has to be of type number otherwise frontend won't accept
+                                    }
+                                    $formData[$groupKey][$fieldKey][] = $geoArray;
+
+                                    // Skip to next data for same field - do not go into next foreach!
+                                    continue;
+                                }
                                 // Loop through the elements constituing the structure:
                                 foreach ($field['items']['properties'] as $objectKey => $objectField) {
                                     // Start of sub property structure
@@ -427,7 +476,30 @@ class Metadata_form_model extends CI_Model
                                                 }
                                         }
                                     } else {
-                                        if ($objectField['type'] == 'string') {
+                                        // geoLocation requires specific handling
+                                        if(isset($objectField['yoda:structure']) && $objectField['yoda:structure']=='geoLocation' ) {
+                                            foreach($xmlFormData[$fieldKey] as $test=>$testVal) {
+                                                if (is_numeric($test)) {
+                                                    $iterate =  $xmlFormData[$fieldKey];
+                                                }
+                                                else {
+                                                    $iterate =  array(0 => $xmlFormData[$fieldKey]);
+                                                }
+                                                break;
+                                            }
+
+                                            $formData[$groupKey][$fieldKey] = $iterate;
+
+                                            // each geoLocation field has to be converted to a number. Otherwise, frontend won't accept.
+                                            foreach ($iterate as $geoIndex => $geoData) {
+                                                foreach($geoData[$objectKey] as $longLatKey => $longLatVal) {
+                                                    $formData[$groupKey][$fieldKey][$geoIndex][$objectKey][$longLatKey] =
+                                                        floatval($longLatVal);
+                                                }
+                                            }
+                                            break;
+                                        }
+                                        elseif ($objectField['type'] == 'string') {
                                             $emptyObjectField[$objectKey] = $objectKey;
                                         } elseif ($objectField['type'] == 'object') { //subproperties (OLD)
                                             foreach ($objectField['properties'] as $subObjectKey => $subObjectField) {
