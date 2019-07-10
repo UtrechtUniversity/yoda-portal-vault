@@ -267,6 +267,22 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
+     * @param $rodsaccount
+     * @param $path - folder of area being worked in. irods will find out which json UI schema is to be used
+     * @return string
+     */
+    public function getJsonUiSchema($rodsaccount, $path)
+    {
+        $result = $this->CI->filesystem->getJsonUiSchema($rodsaccount, $path);
+
+        if ($result['*status'] == 'Success') {
+            return $result['*result'];
+        } else {
+            return '';
+        }
+    }
+
+    /**
      * Load the yoda-metadata.xml file ($path) in an array structure.
      *
      * Reorganise this in such a way that hierarchy is lost but indexing is possible by eg 'Author_Property_Role'.

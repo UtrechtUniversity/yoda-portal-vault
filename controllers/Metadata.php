@@ -136,6 +136,7 @@ class Metadata extends MY_Controller
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
         $jsonSchema = $this->Metadata_form_model->loadJSONS($rodsaccount, $fullPath);
+        $uiSchema = $this->Metadata_form_model->getJsonUiSchema($rodsaccount, $fullPath);
 
         $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
         $xmlFormData = null;
@@ -143,20 +144,6 @@ class Metadata extends MY_Controller
             $xmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
             $formData = $this->Metadata_form_model->prepareJSONSFormData($jsonSchema, $xmlFormData);
         }
-
-        $uiSchema = array(
-            "Descriptive-group" => array(
-               "Description" => array(
-                   "ui:widget" => "textarea"
-               )
-            ),
-            "Administrative-group" => array(
-                "Retention_Period" => array(
-                    "ui:widget" => "numberWidget"
-                )
-            )
-        );
-
 
         // Validation
         $errors = array();
