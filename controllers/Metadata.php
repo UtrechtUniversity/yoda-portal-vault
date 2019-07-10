@@ -232,7 +232,7 @@ class Metadata extends MY_Controller
         $output = array();
         $output['path']              = $path;
         $output['schema']            = json_decode($jsonSchema);
-        $output['uiSchema']          = $uiSchema;
+        $output['uiSchema']          = json_decode($uiSchema);
         $output['formData']          = $formData;
         $output['formDataErrors']    = $errors;
         $output['isDatamanager']     = $isDatamanager;
