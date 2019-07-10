@@ -217,6 +217,7 @@ class Metadata extends MY_Controller
             }
         }
 
+        $uiSchema = json_decode($uiSchema);
         if ($isLocked
             || (!$isVaultPackage && $isDatamanager && !$writePermission)
             || ($isVaultPackage && !$isDatamanager)
@@ -233,7 +234,7 @@ class Metadata extends MY_Controller
         $output = array();
         $output['path']              = $path;
         $output['schema']            = json_decode($jsonSchema);
-        $output['uiSchema']          = json_decode($uiSchema);
+        $output['uiSchema']          = $uiSchema;
         $output['formData']          = $formData;
         $output['formDataErrors']    = $errors;
         $output['isDatamanager']     = $isDatamanager;
