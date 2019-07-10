@@ -217,7 +217,7 @@ class Metadata extends MY_Controller
             }
         }
 
-        $uiSchema = json_decode($uiSchema);
+        $uiSchema = json_decode($uiSchema, true);
         if ($isLocked
             || (!$isVaultPackage && $isDatamanager && !$writePermission)
             || ($isVaultPackage && !$isDatamanager)
