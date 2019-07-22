@@ -133,10 +133,10 @@ class Metadata_form_model extends CI_Model
                             $structObject = $element;
                             if ($structObject['yoda:structure'] == 'compound') { // heeft altijd een compound signifying element nodig
                                 $this->_addCompoundToXml($xml,
-                                                        $xml_metadata,
-                                                        $mainElement,
-                                                        $structObject['properties'],
-                                                        $formData[$mainElement]);
+                                    $xml_metadata,
+                                    $mainElement,
+                                    $structObject['properties'],
+                                    $formData[$mainElement]);
                             }
                             elseif ($structObject['yoda:structure'] == 'subproperties') {
                                 // Single subproperty struct is not present at the moment in the schema
@@ -195,10 +195,10 @@ class Metadata_form_model extends CI_Model
                                                 // Single compound as part of a subproperty
                                                 elseif (isset($subPropertyElementInfo['yoda:structure']) && $subPropertyElementInfo['yoda:structure']=='compound') {
                                                     if ($this->_addCompoundToXml($xml,
-                                                                                $xmlProperties,
-                                                                                $subPropertyElementKey,
-                                                                                $subPropertyElementInfo['properties'],
-                                                                                $subPropertyStructData[$subPropertyElementKey])) {
+                                                        $xmlProperties,
+                                                        $subPropertyElementKey,
+                                                        $subPropertyElementInfo['properties'],
+                                                        $subPropertyStructData[$subPropertyElementKey])) {
                                                         $hasSubPropertyValues = true;
                                                     }
                                                 }
@@ -216,10 +216,10 @@ class Metadata_form_model extends CI_Model
                                                         // Multiple compounds as part of a subproperty structure
                                                         foreach($subPropertyStructData[$subPropertyElementKey] as $data) {
                                                             if ($this->_addCompoundToXml($xml,
-                                                                                        $xmlProperties,
-                                                                                        $subPropertyElementKey,
-                                                                                        $subPropertyElementInfo['items']['properties'],
-                                                                                        $data)) {
+                                                                $xmlProperties,
+                                                                $subPropertyElementKey,
+                                                                $subPropertyElementInfo['items']['properties'],
+                                                                $data)) {
                                                                 $hasSubPropertyValues = true;
                                                             }
                                                         }
@@ -230,7 +230,7 @@ class Metadata_form_model extends CI_Model
                                         }
                                         // Extra intelligence to only save when there is relevant data
                                         if ($hasLeadValue) {  // for now overrule this requirement
-                                             // add the entire structure to the main element
+                                            // add the entire structure to the main element
                                             if ($hasSubPropertyValues) {
                                                 $xmlMainElement->appendChild($xmlProperties);
                                             }
@@ -241,23 +241,29 @@ class Metadata_form_model extends CI_Model
                                 // Geo location at top level
                                 elseif($structObject['yoda:structure']=='geoLocation') {
                                     foreach($formData[$mainElement] as $geoBoxData) {
-                                        $xmlGeoMain = $xml->createElement($mainElement);
-                                        foreach($geoBoxData as $geoCoordName=>$geoCoordVal) {
-                                            $xmlGeoSub = $this->_createXmlElementWithText($xml, $geoCoordName, $geoCoordVal);
-                                            $xmlGeoMain->appendChild($xmlGeoSub);
+                                        // check presence of fields that are part of the box to prevent additions of empty fields
+                                        if ($this->_isCompleteBoundingBox($geoBoxData)) {
+                                            $xmlGeoMain = $xml->createElement($mainElement);
+                                            foreach ($geoBoxData as $geoCoordName => $geoCoordVal) {
+                                                $xmlGeoSub = $this->_createXmlElementWithText($xml, $geoCoordName, $geoCoordVal);
+                                                $xmlGeoMain->appendChild($xmlGeoSub);
+                                            }
+                                            $xml_metadata->appendChild($xmlGeoMain);
                                         }
-                                        $xml_metadata->appendChild($xmlGeoMain);
                                     }
                                 }
                                 // Compound at top level - for now
                                 elseif($structObject['yoda:structure'] == 'compound') {
-                                    $xmlMainElement = $xml->createElement($mainElement);
                                     foreach($formData[$mainElement] as $compoundElement) {
                                         // Take over entire structure as in post
                                         // Per main element in posted data, add entire structure of the compound
+
+                                        // hier trappen compound element inclusief een geoLocationBox
+                                        // Testen of zowel geoBox als extra info leeg is en dan NIET wegschrijven
+
                                         $xmlMainElement = $xml->createElement($mainElement);
 
-                                        foreach($compoundElement as $L1Key=>$L1Val){
+                                        foreach($compoundElement as $L1Key=>$L1Val) {
                                             if(is_array($L1Val)) {
                                                 $xmlCompoundPart = $xml->createElement($L1Key);
                                                 foreach($L1Val as $L2Key=>$L2Val) {
@@ -418,62 +424,62 @@ class Metadata_form_model extends CI_Model
                                             }
                                             $mainProp = false;
                                         } else {   // sub part of sub property handling.
-                                                if (isset($objectField['type']) && $objectField['type'] == 'array') {  // multiple - can be compound or single field
-                                                    if (isset($objectField['items']['yoda:structure'])) { // collect each compound and assess whether is valid
-                                                        if (isset($xmlData['Properties'][$objectKey])) {
-                                                            // prepare the data
-                                                            $baseData = array();
-                                                            foreach ($xmlData['Properties'][$objectKey] as $key => $val) {
-                                                                if (!is_numeric($key)) {
-                                                                    $baseData[] = $xmlData['Properties'][$objectKey];
-                                                                } else {
-                                                                    $baseData = $xmlData['Properties'][$objectKey];
-                                                                }
-                                                                break;
+                                            if (isset($objectField['type']) && $objectField['type'] == 'array') {  // multiple - can be compound or single field
+                                                if (isset($objectField['items']['yoda:structure'])) { // collect each compound and assess whether is valid
+                                                    if (isset($xmlData['Properties'][$objectKey])) {
+                                                        // prepare the data
+                                                        $baseData = array();
+                                                        foreach ($xmlData['Properties'][$objectKey] as $key => $val) {
+                                                            if (!is_numeric($key)) {
+                                                                $baseData[] = $xmlData['Properties'][$objectKey];
+                                                            } else {
+                                                                $baseData = $xmlData['Properties'][$objectKey];
                                                             }
-                                                            foreach ($baseData as $data) {
-                                                                $arCompoundFields = array();
-                                                                foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
-                                                                    // only take the data when not an array
-                                                                    if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
-                                                                        $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
-                                                                    }
+                                                            break;
+                                                        }
+                                                        foreach ($baseData as $data) {
+                                                            $arCompoundFields = array();
+                                                            foreach ($objectField['items']['properties'] as $compoundElementKey => $info) {
+                                                                // only take the data when not an array
+                                                                if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
+                                                                    $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
                                                                 }
-                                                                $emptyObjectField[$objectKey][] = $arCompoundFields;
                                                             }
-                                                        } else {
-                                                            // Handle empty structure?
+                                                            $emptyObjectField[$objectKey][] = $arCompoundFields;
                                                         }
                                                     } else {
-                                                        if (!isset($xmlData['Properties'][$objectKey])) {
-                                                            $emptyObjectField[$objectKey][0] = '';
-                                                        } else {
-                                                            $affValuesArray = $xmlData['Properties'][$objectKey];
-                                                            if (!is_array($affValuesArray)) {
-                                                                $affValuesArray = array($xmlData['Properties'][$objectKey]);
-                                                            }
-                                                            $emptyObjectField[$objectKey] = $affValuesArray; //$xmlData['Properties'][$objectKey];
+                                                        // Handle empty structure?
+                                                    }
+                                                } else {
+                                                    if (!isset($xmlData['Properties'][$objectKey])) {
+                                                        $emptyObjectField[$objectKey][0] = '';
+                                                    } else {
+                                                        $affValuesArray = $xmlData['Properties'][$objectKey];
+                                                        if (!is_array($affValuesArray)) {
+                                                            $affValuesArray = array($xmlData['Properties'][$objectKey]);
                                                         }
+                                                        $emptyObjectField[$objectKey] = $affValuesArray; //$xmlData['Properties'][$objectKey];
                                                     }
-                                                } elseif (isset($objectField['type']) && $objectField['type'] == 'object') {  // compound single structure
-                                                    if (isset($xmlData['Properties'][$objectKey])) {
-                                                        $arCompoundFields = array();
-                                                        $data = $xmlData['Properties'][$objectKey];
-                                                        foreach ($objectField['properties'] as $compoundElementKey => $info) {
-                                                            // only take the data when not an array
-                                                            if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
-                                                                $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
-                                                            }
-                                                        }
-                                                        $emptyObjectField[$objectKey] = $arCompoundFields;
-                                                    }
-                                                } else { // can only be single field as this is a subproperty
-                                                    $subValue = '';
-                                                    if (isset($xmlData['Properties'][$objectKey]) && !is_array($xmlData['Properties'][$objectKey])) {
-                                                        $subValue = $xmlData['Properties'][$objectKey];
-                                                    }
-                                                    $emptyObjectField[$objectKey] = $subValue;
                                                 }
+                                            } elseif (isset($objectField['type']) && $objectField['type'] == 'object') {  // compound single structure
+                                                if (isset($xmlData['Properties'][$objectKey])) {
+                                                    $arCompoundFields = array();
+                                                    $data = $xmlData['Properties'][$objectKey];
+                                                    foreach ($objectField['properties'] as $compoundElementKey => $info) {
+                                                        // only take the data when not an array
+                                                        if (isset($data[$compoundElementKey]) && !is_array($data[$compoundElementKey])) {
+                                                            $arCompoundFields[$compoundElementKey] = $data[$compoundElementKey];
+                                                        }
+                                                    }
+                                                    $emptyObjectField[$objectKey] = $arCompoundFields;
+                                                }
+                                            } else { // can only be single field as this is a subproperty
+                                                $subValue = '';
+                                                if (isset($xmlData['Properties'][$objectKey]) && !is_array($xmlData['Properties'][$objectKey])) {
+                                                    $subValue = $xmlData['Properties'][$objectKey];
+                                                }
+                                                $emptyObjectField[$objectKey] = $subValue;
+                                            }
                                         }
                                     } else {
                                         // geoLocation requires specific handling
@@ -487,14 +493,16 @@ class Metadata_form_model extends CI_Model
                                                 }
                                                 break;
                                             }
-
                                             $formData[$groupKey][$fieldKey] = $iterate;
 
-                                            // each geoLocation field has to be converted to a number. Otherwise, frontend won't accept.
                                             foreach ($iterate as $geoIndex => $geoData) {
-                                                foreach($geoData[$objectKey] as $longLatKey => $longLatVal) {
-                                                    $formData[$groupKey][$fieldKey][$geoIndex][$objectKey][$longLatKey] =
-                                                        floatval($longLatVal);
+                                                $bboxKeys = array('northBoundLatitude', 'westBoundLongitude', 'southBoundLatitude', 'eastBoundLongitude');
+                                                foreach($bboxKeys as $bbKey) {
+                                                    $val = -10000; //def
+                                                    if (isset($geoData[$objectKey][$bbKey])) {
+                                                        $val = $geoData[$objectKey][$bbKey];
+                                                    }
+                                                    $formData[$groupKey][$fieldKey][$geoIndex][$objectKey][$bbKey] = floatval($val);
                                                 }
                                             }
                                             break;
@@ -553,7 +561,26 @@ class Metadata_form_model extends CI_Model
             }
         }
 
+//        echo '<pre>';
+//        print_r($formData);
+//        echo '</pre>';
+
         return $formData;
+    }
+
+    /**
+     * Determine whether a bounding box has all coordinates complete
+     *
+     * @param $boundingBoxArray - array that should con
+     * @return boolean
+     */
+    private function _isCompleteBoundingBox($geoBoxData)
+    {
+        return (isset($geoBoxData['northBoundLatitude'])  &&
+            isset($geoBoxData['westBoundLongitude'])  &&
+            isset($geoBoxData['southBoundLatitude'])  &&
+            isset($geoBoxData['eastBoundLongitude'])
+        );
     }
 
     /**
