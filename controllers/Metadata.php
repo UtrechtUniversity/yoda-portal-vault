@@ -160,6 +160,14 @@ class Metadata extends MY_Controller
                 ),
                 "Geo_Box_Compoound.GeoBounds" => array(
                     "ui:field" => "geo"
+                ),
+                "Geo_Box_New" => array(
+                    "items" => array(
+                        "ui:field" => "geo"
+                    )
+                ),
+                "GeoLocation" => array(
+                    "ui:field" => "geo"
                 )
             ),
             "Administrative-group" => array(

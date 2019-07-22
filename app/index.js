@@ -584,7 +584,7 @@ function submitData(data)
         config: { headers: {'Content-Type': 'multipart/form-data' }}
         })
         .then(function (response) {
-            //window.location.href = "/research/metadata/form?path=" + path;
+            window.location.href = "/research/metadata/form?path=" + path;
         })
         .catch(function (error) {
             //handle error
