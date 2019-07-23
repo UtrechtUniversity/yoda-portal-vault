@@ -138,6 +138,7 @@ class Metadata extends MY_Controller
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
         $jsonSchema = $this->Metadata_form_model->loadJSONS($rodsaccount, $fullPath);
+        $uiSchema = $this->Metadata_form_model->getJsonUiSchema($rodsaccount, $fullPath);
 
         $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
         $xmlFormData = null;
@@ -146,37 +147,6 @@ class Metadata extends MY_Controller
 
             $formData = $this->Metadata_form_model->prepareJSONSFormData($jsonSchema, $xmlFormData);
         }
-
-        $uiSchema = array(
-            "Descriptive-group" => array(
-                "Description" => array(
-                    "ui:widget" => "textarea"
-                ),
-                "Additional_Documentation" => array(
-                    "ui:widget" => "textarea"
-                ),
-                "Geo_Box" => array(
-                    "ui:field" => "geo"
-                ),
-                "Geo_Box_Compoound.GeoBounds" => array(
-                    "ui:field" => "geo"
-                ),
-                "Geo_Box_New" => array(
-                    "items" => array(
-                        "ui:field" => "geo"
-                    )
-                ),
-                "GeoLocation" => array(
-                    "ui:field" => "geo"
-                )
-            ),
-            "Administrative-group" => array(
-                "Retention_Period" => array(
-                    "ui:widget" => "numberWidget"
-                )
-            )
-        );
-
 
         // Validation
         $errors = array();
@@ -250,6 +220,7 @@ class Metadata extends MY_Controller
             }
         }
 
+        $uiSchema = json_decode($uiSchema, true);
         if ($isLocked
             || (!$isVaultPackage && $isDatamanager && !$writePermission)
             || ($isVaultPackage && !$isDatamanager)

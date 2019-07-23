@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import axios from 'axios';
 import { render } from "react-dom";
-import Form from "react-jsonschema-form-uu";
 import Modal from 'react-modal';
 import { Map, TileLayer, Marker, Popup, FeatureGroup } from 'react-leaflet';
 import L from 'leaflet';
 import { EditControl } from "react-leaflet-draw";
+import Form from "react-jsonschema-form";
 
 var schema = {};
 var uiSchema = {};
