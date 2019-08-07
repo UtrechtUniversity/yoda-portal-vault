@@ -270,6 +270,10 @@ class Metadata extends MY_Controller
 
         $arrayPost = $this->input->post();
 
+        //print_r($arrayPost);
+        //exit;
+
+
         $this->load->model('Metadata_form_model');
         $this->load->model('Metadata_model');
         $this->load->model('Folder_Status_model');

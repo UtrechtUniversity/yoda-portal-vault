@@ -7,6 +7,9 @@ import L from 'leaflet';
 import { EditControl } from "react-leaflet-draw";
 import Form from "react-jsonschema-form";
 
+var globalGeoBoxCounter = 0; // Additions for being able to manually add geoBoxes
+var globalThis = null;
+
 var schema = {};
 var uiSchema = {};
 var yodaFormData = {};
@@ -49,7 +52,7 @@ const customModalStyles = {
         marginRight           : '-50%',
         transform             : 'translate(-50%, -50%)',
         width                 : '50%',
-        height                : '600px',
+        height                : '625px',
     }
 };
 
@@ -60,7 +63,6 @@ class GeoLocation extends React.Component {
             modalIsOpen: false,
             ...props.formData
         };
-        console.log(props);
 
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
@@ -70,10 +72,15 @@ class GeoLocation extends React.Component {
         this.drawDeleted = this.drawDeleted.bind(this);
         this.drawStop = this.drawStop.bind(this);
         this.setFormData = this.setFormData.bind(this);
+        this.geoBoxID = globalGeoBoxCounter;
+        globalGeoBoxCounter++;
     }
 
     openModal(e) {
         e.preventDefault();
+
+        globalThis = this; // @todo: get rid of this dirty trick
+
         this.setState({modalIsOpen: true});
     }
 
@@ -85,7 +92,6 @@ class GeoLocation extends React.Component {
     afterOpenModal(e) {
         const {northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude} = this.state;
         let map = this.refs.map.leafletElement;
-        console.log(map);
         if (typeof northBoundLatitude !== 'undefined' &&
             typeof westBoundLongitude !== 'undefined' &&
             typeof southBoundLatitude !== 'undefined' &&
@@ -98,17 +104,84 @@ class GeoLocation extends React.Component {
             L.rectangle(bounds).addTo(map);
             map.fitBounds(bounds, {'padding': [150, 150]});
         }
+
+        this.fillCoordinateInputs(northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude);
+
+        // @todo: MOET DIT HIER??
+        $('.geoInputCoords').on('input propertychange paste', function() {
+            var boxID = $(this).attr("boxID");
+
+            // Remove earlier rectangle(s)
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Rectangle) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // only make persistent when correct coordinates are added by user
+            var lat0 = Number($(".geoLat0[boxID='" + boxID + "']").val()),
+                lng0 = Number($(".geoLng0[boxID='" + boxID + "']").val()),
+                lat1 = Number($(".geoLat1[boxID='" + boxID + "']").val()),
+                lng1 = Number($(".geoLng1[boxID='" + boxID + "']").val()),
+                alertText = '';
+
+            // Validation of coordinates - resetten als dialog wordt heropend
+            if(!$.isNumeric( lng0 )){
+                alertText += ', WEST';
+            }
+            if(!$.isNumeric( lat0 )){
+                alertText = ', NORTH';
+            }
+            if(!$.isNumeric( lng1 )){
+                alertText += ', EAST';
+            }
+            if(!$.isNumeric( lat1 )){
+                alertText += ', SOUTH';
+            }
+
+            if (alertText) {
+                $('.geoAlert[boxID="' + boxID + '"]').html('Invalid coordinates: ' + alertText.substring(2));
+            }
+            else {
+                $('.geoAlert[boxID="' + boxID + '"]').html(''); // reset the alert box -> no alert required
+                let bounds = [[lat0, lng0], [lat1, lng1]];
+
+                var rectangle = L.rectangle(bounds);
+                map.addLayer(rectangle);
+                rectangle.addTo(map);
+
+                map.fitBounds(bounds, {'padding': [10, 10]});
+
+                globalThis.setFormData('northBoundLatitude', lat0);
+                globalThis.setFormData('westBoundLongitude', lng0);
+                globalThis.setFormData('southBoundLatitude', lat1);
+                globalThis.setFormData('eastBoundLongitude', lng1);
+            }
+       });
+    }
+
+    fillCoordinateInputs(northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude) {
+        $('.geoLat0').val(northBoundLatitude);
+        $('.geoLng0').val(westBoundLongitude);
+        $('.geoLat1').val(southBoundLatitude);
+        $('.geoLng1').val(eastBoundLongitude);
     }
 
     drawCreated(e) {
         let layer = e.layer;
+        console.log('DRAW CREATED');
+
         this.setFormData('northBoundLatitude', layer.getLatLngs()[0][2].lat);
         this.setFormData('westBoundLongitude', layer.getLatLngs()[0][2].lng);
         this.setFormData('southBoundLatitude', layer.getLatLngs()[0][0].lat);
         this.setFormData('eastBoundLongitude', layer.getLatLngs()[0][0].lng);
+
+        this.fillCoordinateInputs(layer.getLatLngs()[0][2].lat, layer.getLatLngs()[0][2].lng,
+            layer.getLatLngs()[0][0].lat, layer.getLatLngs()[0][0].lng);
     }
 
     drawEdited(e) {
+        console.log('DRAW EDITIED');
         e.layers.eachLayer( (layer) => {
             this.setFormData('northBoundLatitude', layer.getLatLngs()[0][2].lat);
             this.setFormData('westBoundLongitude', layer.getLatLngs()[0][2].lng);
@@ -118,6 +191,7 @@ class GeoLocation extends React.Component {
     }
 
     drawDeleted(e) {
+        console.log('DRAW DELETED');
         this.setFormData('northBoundLatitude', undefined);
         this.setFormData('westBoundLongitude', undefined);
         this.setFormData('southBoundLatitude', undefined);
@@ -147,10 +221,13 @@ class GeoLocation extends React.Component {
     render() {
         const {northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude} = this.state;
         return (
-            <div>
+                <div class={'geoDiv' + this.geoBoxID}>
                 <label><span>Geo Location</span></label>
                 <button onClick={(e) => {this.openModal(e); }}>Open Map</button>
-                N: {northBoundLatitude} W: {westBoundLongitude} S: {southBoundLatitude} E: {eastBoundLongitude}
+                <br></br>
+                WN: {westBoundLongitude}, {northBoundLatitude}
+                <br></br>
+                ES: {eastBoundLongitude}, {southBoundLatitude}
 
                 <Modal
                     isOpen={this.state.modalIsOpen}
@@ -183,6 +260,11 @@ class GeoLocation extends React.Component {
                     </Map>
 
                     <button onClick={(e) => {this.closeModal(e); }}>Close</button>
+                    West: <input type='text' class='geoInputCoords geoLng0' boxID={this.geoBoxID}></input>
+                    North: <input type='text' class='geoInputCoords geoLat0' boxID={this.geoBoxID}></input>
+                    East: <input type='text' class='geoInputCoords geoLng1' boxID={this.geoBoxID}></input>
+                    South: <input type='text' class='geoInputCoords geoLat1' boxID={this.geoBoxID}></input>
+                    <div class='geoAlert' boxID={this.geoBoxID}></div>
                 </Modal>
             </div>
         );
@@ -810,3 +892,4 @@ function formCompleteness()
 
     return false;
 }
+
