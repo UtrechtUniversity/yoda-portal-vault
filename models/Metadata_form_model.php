@@ -254,33 +254,100 @@ class Metadata_form_model extends CI_Model
                                 }
                                 // Compound at top level - for now
                                 elseif($structObject['yoda:structure'] == 'compound') {
-                                    foreach($formData[$mainElement] as $compoundElement) {
-                                        // Take over entire structure as in post
-                                        // Per main element in posted data, add entire structure of the compound
 
-                                        // hier trappen compound element inclusief een geoLocationBox
-                                        // Testen of zowel geoBox als extra info leeg is en dan NIET wegschrijven
+//                                    echo '<pre>';
+//
+//                                    print_r($structObject); // <<== STRUCTURE BLUEPRINT of
 
+                                    //print_r($element); // <<== STRUCTURE BLUEPRINT
+                                    //print_r($compoundElement); // <<= DATA! the keys must be present within $element
+
+                                    // We are in a compound, step through structure and find corresponding data
+                                    // $mainElement
+                                    //
+                                    // The data defines how often this has to be looped throug
+                                    //print_r($formData[$mainElement]); exit;
+                                    foreach ($formData[$mainElement] as $compoundData) {
+
+                                        //print_r($compoundData['geoLocationBox']['northBoundLatitude']);exit;
+//                                        print_r($compoundData);
                                         $xmlMainElement = $xml->createElement($mainElement);
+                                        $dataPresent = false;
 
-                                        foreach($compoundElement as $L1Key=>$L1Val) {
-                                            if(is_array($L1Val)) {
-                                                $xmlCompoundPart = $xml->createElement($L1Key);
-                                                foreach($L1Val as $L2Key=>$L2Val) {
-                                                    $xmlCompoundPartSub = $this->_createXmlElementWithText($xml, $L2Key, $L2Val);
-                                                    $xmlCompoundPart->appendChild($xmlCompoundPartSub);
+                                        foreach ($structObject['properties'] as $compoundElement => $compoundElementInfo) {
+                                            // Per $subElement check the elkement type and retrieve its corresponding data.
+                                            if (isset($compoundElementInfo['yoda:structure'])) {
+                                                if ($compoundElementInfo['yoda:structure'] == 'geoLocation') {
+                                                    // Wat te doen met LEGE velden!!!??
+                                                    // In dit geval nog
+                                                    $xmlCompoundPart = $xml->createElement($compoundElement);
+                                                    foreach ($compoundElementInfo['properties'] as $compoundSubElement => $compoundSubElementInfo) {
+//                                                        echo '---dataGEO: ' . $mainElement . '->' . $compoundElement . '->' . $compoundSubElement . '->';
+//                                                        echo $compoundData[$compoundElement][$compoundSubElement];
+                                                        $compoundVal = '';
+                                                        if (isset($compoundData[$compoundElement][$compoundSubElement])) {
+                                                            $compoundVal = $compoundData[$compoundElement][$compoundSubElement];
+                                                            if ($compoundVal) {
+                                                                $dataPresent = true;
+                                                            }
+                                                        }
+                                                        $xmlCompoundPartSub = $this->_createXmlElementWithText($xml, $compoundSubElement, $compoundVal);
+                                                        $xmlCompoundPart->appendChild($xmlCompoundPartSub);
+                                                    }
+
+                                                    $xmlMainElement->appendChild($xmlCompoundPart);
+//                                                    $xml_metadata->appendChild($xmlMainElement);
+                                                } elseif ($compoundElementInfo['yoda:structure'] == 'compound') {
+                                                    // Wat te doen met LEGE velden!!!??
+                                                    $xmlCompoundPart = $xml->createElement($compoundElement);
+                                                    foreach ($compoundElementInfo['properties'] as $compoundSubElement => $compoundSubElementInfo) {
+//                                                        echo '---dataCompound: ' . $mainElement . '->' . $compoundElement . '->' . $compoundSubElement . '->';
+//                                                        echo $compoundData[$compoundElement][$compoundSubElement];
+                                                        $compoundVal = '';
+                                                        if (isset($compoundData[$compoundElement][$compoundSubElement])) {
+                                                            $compoundVal = $compoundData[$compoundElement][$compoundSubElement];
+                                                            if ($compoundVal) {
+                                                                $dataPresent = true;
+                                                            }
+                                                        }
+                                                        $xmlCompoundPartSub = $this->_createXmlElementWithText($xml, $compoundSubElement, $compoundVal);
+                                                        $xmlCompoundPart->appendChild($xmlCompoundPartSub);
+                                                    }
+                                                    $xmlMainElement->appendChild($xmlCompoundPart);
+//                                                    $xml_metadata->appendChild($xmlMainElement);
                                                 }
+                                            } else {
+                                                //echo '---data: ' . $mainElement . '->' . $compoundElement . '->';
+                                                //echo $compoundData[$compoundElement];
+                                                $compoundVal = '';
+                                                if (isset($compoundData[$compoundElement])) {
+                                                    $compoundVal = $compoundData[$compoundElement];
+                                                    if ($compoundVal) {
+                                                        $dataPresent = true;
+                                                    }
+                                                }
+                                                $xmlCompoundPart = $this->_createXmlElementWithText($xml, $compoundElement, $compoundVal);
                                                 $xmlMainElement->appendChild($xmlCompoundPart);
+//                                                    $xml_metadata->appendChild($xmlMainElement);
                                             }
-                                            else {
-                                                $xmlCompoundPart = $this->_createXmlElementWithText($xml, $L1Key, $L1Val);
-                                                $xmlMainElement->appendChild($xmlCompoundPart);
-                                            }
+                                        }
 
+                                        // IS ER DATA?
+                                        // ALLEEN ALS
+
+                                        if ($dataPresent) {
                                             $xml_metadata->appendChild($xmlMainElement);
                                         }
+
+                                        // als je hier bent, heb je het hele element bij elkaar.
+                                        // Hier is te besluiten wat te doen als er info mist, of als het helemaal leeg blijkt te zijn.
                                     }
-                                }
+                                    // Je zit ook nog met de completeness van de gegevens
+//                                    echo '</pre>';
+//
+//                                    exit;
+
+                                } // end of compound handling
                             }
                         }
                     }
@@ -288,8 +355,13 @@ class Metadata_form_model extends CI_Model
             }
         }
 
+
         $xml->appendChild($xml_metadata);
         $xmlString = $xml->saveXML();
+
+        //print_r($xmlString);
+
+        //return;
 
         $this->CI->filesystem->writeXml($rodsaccount, $config['metadataXmlPath'], $xmlString);
     }
@@ -369,6 +441,10 @@ class Metadata_form_model extends CI_Model
         $jsonSchema = json_decode($jsonSchema, true);
         $formData = array();
 
+//        echo '<pre>';
+//        print_r($xmlFormData);
+//        echo '</pre>';
+
         foreach ($jsonSchema['properties'] as $groupKey => $group) {
             // Group
             foreach ($group['properties'] as $fieldKey => $field) {
@@ -388,12 +464,14 @@ class Metadata_form_model extends CI_Model
                         // Array
                         if (!isset($field['items']['type']) || $field['items']['type'] == 'string') {
                             // String array
+//                            echo 'HALLO66' . '---' . $fieldKey . '---';
                             if (!is_array($xmlFormData[$fieldKey])) {
                                 $formData[$groupKey][$fieldKey] = array($xmlFormData[$fieldKey]);
                             } else {
                                 $formData[$groupKey][$fieldKey] = $xmlFormData[$fieldKey];
                             }
                         } elseif ($field['items']['type'] == 'object') {
+//                            echo 'HALLO55' . '---' . $fieldKey . '---';
                             // Object array
                             $emptyObjectField = array();
                             $xmlDataArray = array();
@@ -499,7 +577,12 @@ class Metadata_form_model extends CI_Model
                                         }
                                     } else {
                                         // geoLocation requires specific handling
+
                                         if(isset($objectField['yoda:structure']) && $objectField['yoda:structure']=='geoLocation' ) {
+
+                                            // Geo_Box_Spatial
+//                                            print_r($fieldKey);
+
                                             foreach($xmlFormData[$fieldKey] as $test=>$testVal) {
                                                 if (is_numeric($test)) {
                                                     $iterate =  $xmlFormData[$fieldKey];
@@ -511,14 +594,49 @@ class Metadata_form_model extends CI_Model
                                             }
                                             $formData[$groupKey][$fieldKey] = $iterate;
 
-                                            foreach ($iterate as $geoIndex => $geoData) {
-                                                $bboxKeys = array('northBoundLatitude', 'westBoundLongitude', 'southBoundLatitude', 'eastBoundLongitude');
-                                                foreach($bboxKeys as $bbKey) {
-                                                    $val = -10000; //def
-                                                    if (isset($geoData[$objectKey][$bbKey])) {
-                                                        $val = $geoData[$objectKey][$bbKey];
+                                            // Grosso modo approach in cleaning up the geoLocation compound fields
+                                            $bboxKeys = array('northBoundLatitude', 'westBoundLongitude', 'southBoundLatitude', 'eastBoundLongitude');
+                                            foreach($formData[$groupKey][$fieldKey] as $geoIndex=>$geoCompoundArray ) {
+                                                // geoBox evaluation
+                                                if (isset($geoCompoundArray['geoLocationBox'])) {
+                                                    $count=0;
+                                                    foreach($bboxKeys as $bbKey) {
+                                                        if ($geoCompoundArray['geoLocationBox'][$bbKey] == array()) {
+                                                            unset($formData[$groupKey][$fieldKey][$geoIndex]['geoLocationBox'][$bbKey]);
+                                                            $count++;
+                                                        }
+                                                        else {
+                                                            $formData[$groupKey][$fieldKey][$geoIndex]['geoLocationBox'][$bbKey] =
+                                                                floatval($geoCompoundArray['geoLocationBox'][$bbKey]);
+                                                        }
                                                     }
-                                                    $formData[$groupKey][$fieldKey][$geoIndex][$objectKey][$bbKey] = floatval($val);
+                                                    if ($count==4) { // take entire geoLocationBox out
+                                                        unset($formData[$groupKey][$fieldKey][$geoIndex]['geoLocationBox']);
+                                                    }
+                                                }
+
+                                                //Spatial exclusion evalutaion
+                                                if (isset($geoCompoundArray['Description_Spatial'])) {
+                                                    if ($geoCompoundArray['Description_Spatial'] == array()) {
+                                                        unset($formData[$groupKey][$fieldKey][$geoIndex]['Description_Spatial']);
+                                                    }
+                                                }
+
+                                                // Temporal exclusion
+                                                if (isset($geoCompoundArray['Description_Temporal'])) {
+                                                    $count = 0;
+                                                    if ($geoCompoundArray['Description_Temporal']['Start_Date'] == array()) {
+                                                        unset($formData[$groupKey][$fieldKey][$geoIndex]['Description_Temporal']['Start_Date']);
+                                                        $count++;
+                                                    }
+                                                    if ($geoCompoundArray['Description_Temporal']['End_Date'] == array()) {
+                                                        unset($formData[$groupKey][$fieldKey][$geoIndex]['Description_Temporal']['End_Date']);
+                                                        $count++;
+                                                    }
+                                                    if($count==2) {
+                                                        // Only take out Desciption_Temporal if both sub fields are no longer there.
+                                                        unset($formData[$groupKey][$fieldKey][$geoIndex]['Description_Temporal']);
+                                                    }
                                                 }
                                             }
                                             break;
@@ -546,7 +664,6 @@ class Metadata_form_model extends CI_Model
                             }
                         }
                     } elseif ($field['type'] == 'object') {
-                        // Object
                         $structure = $field['yoda:structure'];
                         if (isset($structure) && $structure == 'subproperties') {
                             // Object subproperties
@@ -576,10 +693,12 @@ class Metadata_form_model extends CI_Model
                 }
             }
         }
-
+//
 //        echo '<pre>';
 //        print_r($formData);
 //        echo '</pre>';
+//
+//        exit;
 
         return $formData;
     }

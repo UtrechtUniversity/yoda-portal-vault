@@ -646,7 +646,7 @@ function submitData(data)
     var tokenHash = form.dataset.csrf_token_hash;
 
     // Disable buttons.
-    $('.yodaButtons button').attr("disabled", true);
+    //$('.yodaButtons button').attr("disabled", true);
 
     // Create form data.
     var bodyFormData = new FormData();
