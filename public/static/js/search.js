@@ -90,10 +90,12 @@ function search(value, type, itemsPerPage, displayStart, searchOrderDir, searchO
         $('#search').DataTable( {
             "bFilter": false,
             "bInfo": false,
-            "bLengthChange": false,
+            "bLengthChange": true,
             "language": {
-                "emptyTable": "Your search did not match any documents"
+                "emptyTable": "Your search did not match any documents",
+                "lengthMenu": "_MENU_"
             },
+            "dom": '<"top">rt<"bottom"lp><"clear">',
             "ajax": {
                 "url": url,
                 "jsonp": false,
