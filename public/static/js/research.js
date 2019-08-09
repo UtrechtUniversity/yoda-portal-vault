@@ -861,7 +861,7 @@ function sendFile(id, path, file) {
         }
 
         xhr.upload.addEventListener('progress', function(e) {
-            var percent = (e.loaded / e.total) * 100;
+            var percent = parseInt((e.loaded / e.total) * 100);
             $("#" + id + " progress").val(percent);
         });
 
