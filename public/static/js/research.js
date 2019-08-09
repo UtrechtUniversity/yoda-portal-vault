@@ -113,7 +113,7 @@ $( document ).ready(function() {
                 if(data.formats.length > 0) {
                     $('#showUnpreservableFiles .list-unpreservable-formats').html("");
                     for (var i = 0; i < data.formats.length; i++) {
-                        $('#showUnpreservableFiles .list-unpreservable-formats').append("<li>" + data.formats[i] + "</li>");
+                        $('#showUnpreservableFiles .list-unpreservable-formats').append("<li>" + htmlEncode(data.formats[i]) + "</li>");
                     }
                     $('#showUnpreservableFiles .help').show();
                     $('#showUnpreservableFiles .advice').show();
