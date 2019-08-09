@@ -210,6 +210,11 @@ button[data-clone*="main"] {
 }
 */
 
+.has-btn .select-box {
+    width: calc(100% - 17px);
+    top: -1px;
+}
+
 .has-btn {
     position: relative;
 }
