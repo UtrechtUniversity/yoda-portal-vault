@@ -51,7 +51,7 @@ const customModalStyles = {
         bottom                : 'auto',
         marginRight           : '-50%',
         transform             : 'translate(-50%, -50%)',
-        width                 : '50%',
+        width                 : '58%',
         height                : '625px',
     }
 };
@@ -223,8 +223,8 @@ class GeoLocation extends React.Component {
         const {northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude} = this.state;
         return (
                 <div class={'geoDiv' + this.geoBoxID}>
-                <label><span>Geo Location</span></label>
-                <button onClick={(e) => {this.openModal(e); }}>Open Map</button>
+                <label><span>Geo Location:</span></label>
+                <button class='btn' onClick={(e) => {this.openModal(e); }}>Open Map</button>
                 <br></br>
                 WN: {westBoundLongitude}, {northBoundLatitude}
                 <br></br>
@@ -260,11 +260,17 @@ class GeoLocation extends React.Component {
                         </FeatureGroup>
                     </Map>
 
-                    <button onClick={(e) => {this.closeModal(e); }}>Close</button>
-                    West: <input type='text' class='geoInputCoords geoLng0' boxID={this.geoBoxID}></input>
-                    North: <input type='text' class='geoInputCoords geoLat0' boxID={this.geoBoxID}></input>
-                    East: <input type='text' class='geoInputCoords geoLng1' boxID={this.geoBoxID}></input>
-                    South: <input type='text' class='geoInputCoords geoLat1' boxID={this.geoBoxID}></input>
+                    <div class='row'>
+                        <div class='col-sm-11'>
+                            <label>West:</label> <input type='text' class='geoInputCoords geoLng0' boxID={this.geoBoxID}></input>
+                            <label>North:</label> <input type='text' class='geoInputCoords geoLat0' boxID={this.geoBoxID}></input>
+                            <label>East:</label> <input type='text' class='geoInputCoords geoLng1' boxID={this.geoBoxID}></input>
+                            <label>South:</label> <input type='text' class='geoInputCoords geoLat1' boxID={this.geoBoxID}></input>
+                        </div>
+                        <div class='col-sm-1'>
+                            <button class='btn' onClick={(e) => {this.closeModal(e); }}>Close</button>
+                        </div>
+                    </div>
                     <div class='geoAlert' boxID={this.geoBoxID}></div>
                 </Modal>
             </div>
