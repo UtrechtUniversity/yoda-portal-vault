@@ -169,7 +169,6 @@ class GeoLocation extends React.Component {
 
     drawCreated(e) {
         let layer = e.layer;
-        console.log('DRAW CREATED');
 
         this.setFormData('northBoundLatitude', layer.getLatLngs()[0][2].lat);
         this.setFormData('westBoundLongitude', layer.getLatLngs()[0][2].lng);
@@ -181,7 +180,6 @@ class GeoLocation extends React.Component {
     }
 
     drawEdited(e) {
-        console.log('DRAW EDITIED');
         e.layers.eachLayer( (layer) => {
             this.setFormData('northBoundLatitude', layer.getLatLngs()[0][2].lat);
             this.setFormData('westBoundLongitude', layer.getLatLngs()[0][2].lng);
@@ -191,7 +189,6 @@ class GeoLocation extends React.Component {
     }
 
     drawDeleted(e) {
-        console.log('DRAW DELETED');
         this.setFormData('northBoundLatitude', undefined);
         this.setFormData('westBoundLongitude', undefined);
         this.setFormData('southBoundLatitude', undefined);
@@ -199,14 +196,9 @@ class GeoLocation extends React.Component {
     }
 
     drawStop(e) {
-        console.log('STOP123');
-        console.log(e.sourceTarget._leaflet_id);
-
         let map = this.refs.map.leafletElement;
         map.eachLayer(function (layer) {
             if (layer instanceof L.Rectangle) {
-                console.log(e.layer);
-                console.log(layer._leaflet_id);
                 map.removeLayer(layer);
             }
         });
@@ -892,4 +884,3 @@ function formCompleteness()
 
     return false;
 }
-
