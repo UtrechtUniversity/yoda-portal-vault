@@ -167,6 +167,9 @@ class Metadata extends MY_Controller
             $jsonValidator->validate($formDataObject, $jsonSchemaObject);
 
             if (!$jsonValidator->isValid()) {
+
+                //print_r($jsonValidator->getErrors());
+
                 foreach ($jsonValidator->getErrors() as $error) {
                     // Continue if required or if there is a dependency
                     if ($error['constraint'] == 'required' || $error['constraint'] == 'dependencies') {
@@ -270,8 +273,10 @@ class Metadata extends MY_Controller
 
         $arrayPost = $this->input->post();
 
-        //print_r($arrayPost);
-        //exit;
+//        echo '<pre>';
+//        print_r(json_decode($arrayPost['formData']));
+//        echo '</pre>';
+//        exit;
 
 
         $this->load->model('Metadata_form_model');
