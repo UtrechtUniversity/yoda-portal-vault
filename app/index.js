@@ -175,8 +175,10 @@ class GeoLocation extends React.Component {
         this.setFormData('southBoundLatitude', layer.getLatLngs()[0][0].lat);
         this.setFormData('eastBoundLongitude', layer.getLatLngs()[0][0].lng);
 
-        this.fillCoordinateInputs(layer.getLatLngs()[0][2].lat, layer.getLatLngs()[0][2].lng,
-            layer.getLatLngs()[0][0].lat, layer.getLatLngs()[0][0].lng);
+        this.fillCoordinateInputs(
+            layer.getLatLngs()[0][2].lat, layer.getLatLngs()[0][2].lng,
+            layer.getLatLngs()[0][0].lat, layer.getLatLngs()[0][0].lng
+        );
     }
 
     drawEdited(e) {
@@ -185,6 +187,11 @@ class GeoLocation extends React.Component {
             this.setFormData('westBoundLongitude', layer.getLatLngs()[0][2].lng);
             this.setFormData('southBoundLatitude', layer.getLatLngs()[0][0].lat);
             this.setFormData('eastBoundLongitude', layer.getLatLngs()[0][0].lng);
+
+            this.fillCoordinateInputs(
+                layer.getLatLngs()[0][2].lat, layer.getLatLngs()[0][2].lng,
+                layer.getLatLngs()[0][0].lat, layer.getLatLngs()[0][0].lng
+            );
         });
     }
 
@@ -193,6 +200,8 @@ class GeoLocation extends React.Component {
         this.setFormData('westBoundLongitude', undefined);
         this.setFormData('southBoundLatitude', undefined);
         this.setFormData('eastBoundLongitude', undefined);
+
+        this.fillCoordinateInputs("", "", "", "");
     }
 
     drawStop(e) {
