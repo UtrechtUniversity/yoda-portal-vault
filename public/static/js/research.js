@@ -802,6 +802,9 @@ function handleUpload(path, files) {
         return;
     }
 
+    // Keep track of the number of uploads to generate unique element IDs.
+    handleUpload.nextFileId = handleUpload.nextFileId || 1;
+
     var promises = [];
     $('#files').html("");
     $('#uploads').modal('show');
@@ -811,8 +814,7 @@ function handleUpload(path, files) {
         const file = files[i];
 
         // Log file upload.
-        const timestamp = new Date().getUTCMilliseconds();
-        const id = "upload" + timestamp;
+        const id = "upload" + handleUpload.nextFileId++;
         this.logUpload(id, file);
 
         // Check file size.
