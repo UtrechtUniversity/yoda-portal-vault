@@ -88,7 +88,7 @@ ol.breadcrumb li.active {
     cursor: pointer;
 }
 
-#file-browser_length {
+#file-browser_length, #search_length {
     float: left;
     padding-top: 2px;
 }

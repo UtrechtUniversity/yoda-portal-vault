@@ -113,7 +113,7 @@ $( document ).ready(function() {
                 if(data.formats.length > 0) {
                     $('#showUnpreservableFiles .list-unpreservable-formats').html("");
                     for (var i = 0; i < data.formats.length; i++) {
-                        $('#showUnpreservableFiles .list-unpreservable-formats').append("<li>" + data.formats[i] + "</li>");
+                        $('#showUnpreservableFiles .list-unpreservable-formats').append("<li>" + htmlEncode(data.formats[i]) + "</li>");
                     }
                     $('#showUnpreservableFiles .help').show();
                     $('#showUnpreservableFiles .advice').show();
@@ -802,6 +802,9 @@ function handleUpload(path, files) {
         return;
     }
 
+    // Keep track of the number of uploads to generate unique element IDs.
+    handleUpload.nextFileId = handleUpload.nextFileId || 1;
+
     var promises = [];
     $('#files').html("");
     $('#uploads').modal('show');
@@ -811,8 +814,7 @@ function handleUpload(path, files) {
         const file = files[i];
 
         // Log file upload.
-        const timestamp = new Date().getUTCMilliseconds();
-        const id = "upload" + timestamp;
+        const id = "upload" + handleUpload.nextFileId++;
         this.logUpload(id, file);
 
         // Check file size.
@@ -861,7 +863,7 @@ function sendFile(id, path, file) {
         }
 
         xhr.upload.addEventListener('progress', function(e) {
-            var percent = (e.loaded / e.total) * 100;
+            var percent = parseInt((e.loaded / e.total) * 100);
             $("#" + id + " progress").val(percent);
         });
 
