@@ -62,26 +62,23 @@ class Metadata_form_model extends CI_Model
 
 
     /**
-     * Handles the posted information of a yoda form and puts the values, after escaping, in .yoda-metadata.xml
-     * The config holds the correct paths to form definitions and .yoda-metadata.xml
+     * Process post from the metadata form.
      *
-     * NO VALIDATION OF DATA IS PERFORMED IN ANY WAY
-     *
-     * @param $rodsaccount
-     * @param $config
+     * @param $rodsaccount Rods account
+     * @param $path        Path of collection
      */
-    public function processPost($rodsaccount, $config)
+    public function processPost($rodsaccount, $path)
     {
         $arrayPost = $this->CI->input->post();
         $data = $arrayPost['formData'];
 
         $rule = new ProdsRule(
             $this->rodsuser->getRodsAccount(),
-            'rule { iiSaveFormMetadata(*data); }',
-            array('*data' => $data),
+            'rule { iiSaveFormMetadata(*path, *data); }',
+            array('*path' => $path, '*data' => $data),
             array('ruleExecOut')
         );
-        
+
         $result = json_decode($rule->execute()['ruleExecOut'], true);
         return $result;
     }

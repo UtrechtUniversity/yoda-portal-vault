@@ -289,7 +289,7 @@ class Metadata extends MY_Controller
             $tempPath = $result['*tempMetadataXmlPath'];
             $tmpSavePath = $tempPath . '.tmp';
             $formConfig['metadataXmlPath'] = $tmpSavePath;
-            $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+            $this->Metadata_form_model->processPost($rodsaccount, $fullPath);
             $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
 
             $result = $this->vaultsubmission->validate();
@@ -333,7 +333,7 @@ class Metadata extends MY_Controller
                 else {
                     // first perform a save action of the latest posted data - only if there is no lock!
                     if ($formConfig['folderStatus']!='LOCKED') {
-                        $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+                        $result = $this->Metadata_form_model->processPost($rodsaccount, $fullPath);
                     }
                     // Do vault submission
                     $result = $this->vaultsubmission->validate();
@@ -372,7 +372,7 @@ class Metadata extends MY_Controller
             }
 
             if ($this->input->server('REQUEST_METHOD') == 'POST') {
-                $result = $this->Metadata_form_model->processPost($rodsaccount, $formConfig);
+                $result = $this->Metadata_form_model->processPost($rodsaccount, $fullPath);
             }
         }
 
