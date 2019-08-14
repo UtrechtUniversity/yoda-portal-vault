@@ -73,20 +73,17 @@ class Metadata_form_model extends CI_Model
     public function processPost($rodsaccount, $config)
     {
         $arrayPost = $this->CI->input->post();
-        $jsonString = $arrayPost['formData'];
+        $data = $arrayPost['formData'];
 
-        $outputParams = array('*status', '*statusInfo');
-        $inputParams = array('*jsonMetadata' => $jsonString);
-
-        $this->CI->load->library('irodsrule');
-        $rule = $this->irodsrule->make('iiSaveFormMetadata', $inputParams, $outputParams);
-        $result = $rule->execute();
-
-        if ($result['*status'] == 'Success') {
-            return '';
-        } else {
-            return $result['*statusInfo'];
-        }
+        $rule = new ProdsRule(
+            $this->rodsuser->getRodsAccount(),
+            'rule { iiSaveFormMetadata(*data); }',
+            array('*data' => $data),
+            array('ruleExecOut')
+        );
+        
+        $result = json_decode($rule->execute()['ruleExecOut'], true);
+        return $result;
     }
 
     /**
