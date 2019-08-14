@@ -283,33 +283,6 @@ class Metadata extends MY_Controller
         $isDatamanager = $formConfig['isDatamanager'];
         $isVaultPackage = $formConfig['isVaultPackage'];
 
-        // Datamanager save metadata in vault package
-        if ($isDatamanager == 'yes' && $isVaultPackage == 'yes') {
-            $result = $this->Metadata_model->prepareVaultMetadataForEditing($formConfig['metadataXmlPath']);
-            $tempPath = $result['*tempMetadataXmlPath'];
-            $tmpSavePath = $tempPath . '.tmp';
-            $formConfig['metadataXmlPath'] = $tmpSavePath;
-            $this->Metadata_form_model->processPost($rodsaccount, $fullPath);
-            $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
-
-            $result = $this->vaultsubmission->validate();
-            if ($result === true) {
-                $tmpFileContent = $this->Filesystem->read($rodsaccount, $tmpSavePath);
-                $writeResult = $this->Filesystem->write($rodsaccount, $tempPath, $tmpFileContent);
-                if ($writeResult) {
-                    setMessage('success', 'Metadata is updated.');
-                    $this->Filesystem->delete($rodsaccount, $tmpSavePath);
-                } else {
-                    setMessage('error', 'Unexpected metadata write error.');
-                }
-            } else {
-                // result contains all collected messages as an array
-                setMessage('error', implode('<br>', $result));
-            }
-
-            return redirect('research/metadata/form?path=' . rawurlencode($path) . '&mode=edit_in_vault', 'refresh');
-        }
-
         if (!($userType=='normal' || $userType=='manager')) { // superseeds userType!= reader - which comes too late for permissions for vault submission
             $this->session->set_flashdata('flashMessage', 'Insufficient rights to perform this action.'); // wat is een locking error?
             $this->session->set_flashdata('flashMessageType', 'danger');

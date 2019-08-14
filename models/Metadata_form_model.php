@@ -17,50 +17,6 @@ class Metadata_form_model extends CI_Model
         $this->CI->load->model('filesystem');
     }
 
-    private function _createXmlElementWithText($xml, $elementName, $text)
-    {
-        $xmlElement = $xml->createElement($elementName);
-        $xmlElement->appendChild($xml->createTextNode($text));
-
-        return $xmlElement;
-    }
-
-    /**
-     * Creates an compound structure
-     * returns the entire object, either without or without changes
-     *
-     * @param $xml
-     * @param $xml_metadata
-     * @param $mainElement - name of element holding the actual compound elements
-     * @param $structObjectProperties
-     * @param $formData
-     * @return mixed
-     */
-    private function _addCompoundToXml($xml,
-                                       $xmlCompoundParent,
-                                       $compoundMainElement,
-                                       $structObjectProperties,
-                                       $formData)
-    {
-        $xmlMainElement = $xml->createElement($compoundMainElement);
-        $anyValueFound = false;
-
-        foreach ($structObjectProperties as $compoundElementKey => $compoundElementInfo) {
-            if (isset($formData[$compoundElementKey]) && strlen($formData[$compoundElementKey])) {
-                $anyValueFound = true;
-                $xmlCompoundElement = $this->_createXmlElementWithText($xml, $compoundElementKey, $formData[$compoundElementKey]);
-                $xmlMainElement->appendChild($xmlCompoundElement);
-            }
-        }
-
-        if ($anyValueFound) {
-            $xmlCompoundParent->appendChild($xmlMainElement);
-        }
-
-        return $anyValueFound;
-    }
-
-
     /**
      * Process post from the metadata form.
      *
