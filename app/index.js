@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import Select from 'react-select';
 import axios from 'axios';
 import { render } from "react-dom";
 import Form from "react-jsonschema-form";
@@ -36,8 +37,20 @@ const numberWidget = (props) => {
     );
 };
 
+const enumWidget = (props) => {
+
+	return (
+		<Select
+		className={"select-box"}
+		required={props.required}
+		onChange={(event) => props.onChange(event.value)}
+		options={props["options"]["enumOptions"]} />
+	);
+};
+
 const widgets = {
-    numberWidget: numberWidget
+    numberWidget: numberWidget,
+    SelectWidget: enumWidget
 };
 
 const onSubmit = ({formData}) => submitData(formData);
@@ -137,6 +150,7 @@ class YodaForm extends React.Component {
     }
 
     render () {
+
         return (
         <Form className="form form-horizontal metadata-form"
               schema={schema}
