@@ -18,12 +18,12 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
-     * Process post from the metadata form.
+     * Save JSON metdata posted from the metadata form.
      *
      * @param $rodsaccount Rods account
-     * @param $path        Path of collection
+     * @param $path        Path of collection being worked in
      */
-    public function processPost($rodsaccount, $path)
+    public function saveJsonMetadata($rodsaccount, $path)
     {
         $arrayPost = $this->CI->input->post();
         $data = $arrayPost['formData'];
@@ -43,7 +43,7 @@ class Metadata_form_model extends CI_Model
      * Get JSON schema for collection.
      *
      * @param $rodsaccount
-     * @param $path        Collection of area being worked in
+     * @param $path        Path of collection being worked in
      *
      * @return string      JSON schema
      */
@@ -62,7 +62,7 @@ class Metadata_form_model extends CI_Model
      * Get JSON UI schema for collection.
      *
      * @param $rodsaccount
-     * @param $path        Collection of area being worked in
+     * @param $path        Path of collection being worked in
      *
      * @return string      JSON UI schema
      */
@@ -81,7 +81,7 @@ class Metadata_form_model extends CI_Model
      * Get the yoda-metadata.json file contents for a collection.
      *
      * @param $rodsaccount
-     * @param $path        Collection of area being worked in
+     * @param $path        Path of collection being worked in
      *
      * @return mixed
 
