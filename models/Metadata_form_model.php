@@ -40,11 +40,14 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
+     * Get JSON schema for collection.
+     *
      * @param $rodsaccount
-     * @param $path - folder of area being worked in. irods will find out which json schema is to be used
-     * @return string
+     * @param $path        Collection of area being worked in
+     *
+     * @return string      JSON schema
      */
-    public function loadJSONS($rodsaccount, $path)
+    public function getJsonSchema($rodsaccount, $path)
     {
         $result = $this->CI->filesystem->getJsonSchema($rodsaccount, $path);
 
@@ -56,9 +59,12 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
+     * Get JSON UI schema for collection.
+     *
      * @param $rodsaccount
-     * @param $path - folder of area being worked in. irods will find out which json UI schema is to be used
-     * @return string
+     * @param $path        Collection of area being worked in
+     *
+     * @return string      JSON UI schema
      */
     public function getJsonUiSchema($rodsaccount, $path)
     {

@@ -121,7 +121,7 @@ class Metadata extends MY_Controller
         $fullPath = $pathStart . $path;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-        $jsonSchema = $this->Metadata_form_model->loadJSONS($rodsaccount, $fullPath);
+        $jsonSchema = $this->Metadata_form_model->getJsonSchema($rodsaccount, $fullPath);
         $uiSchema = $this->Metadata_form_model->getJsonUiSchema($rodsaccount, $fullPath);
 
         $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
