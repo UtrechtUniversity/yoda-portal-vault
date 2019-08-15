@@ -44,18 +44,6 @@ class Metadata extends MY_Controller
 
         $userType = $formConfig['userType'];
 
-        $mode = $this->input->get('mode'); // ?mode=edit_for_vault
-        if ($isDatamanager == 'yes' && $isVaultPackage == 'yes' && $mode == 'edit_in_vault') {
-            // .tmp file for XSD validation
-            $result = $this->Metadata_model->prepareVaultMetadataForEditing($formConfig['metadataXmlPath']);
-
-            $tmpSavePath = $result['*tempMetadataXmlPath'] . '.tmp';
-            $tmpFileExists = $this->Filesystem->read($rodsaccount, $tmpSavePath);
-            if ($tmpFileExists !== false) {
-                $formConfig['metadataXmlPath'] = $tmpSavePath;
-            }
-        }
-
         if ($userType == 'normal' || $userType == 'manager') {
             $writePermission = true;
         } else {
@@ -105,7 +93,6 @@ class Metadata extends MY_Controller
             'tokenName'        => $tokenName,
             'tokenHash'        => $tokenHash,
             'userType'         => $userType,
-            'mode'             => $mode,
             'isVaultPackage'   => $isVaultPackage,
             'flashMessage'     => $flashMessage,
             'flashMessageType' => $flashMessageType,
@@ -207,17 +194,6 @@ class Metadata extends MY_Controller
             $unsubmitButton = true;
         }
 
-        // Should update button be rendered?
-        $mode = $this->input->get('mode');
-        $updateButton = false;
-        if ($isDatamanager && $isVaultPackage) {
-           if ($formConfig['hasShadowMetadataXml'] == 'no') {
-                if ($mode != 'edit_in_vault') {
-                    $updateButton = true;
-                }
-            }
-        }
-
         $uiSchema = json_decode($uiSchema, true);
         if ($isLocked
             || (!$isVaultPackage && $isDatamanager && !$writePermission)
@@ -246,7 +222,6 @@ class Metadata extends MY_Controller
         $output['writePermission']   = $writePermission;
         $output['submitButton']      = $submitButton;
         $output['unsubmitButton']    = $unsubmitButton;
-        $output['updateButton']      = $updateButton;
 
         $this->output->set_content_type('application/json')->set_output(json_encode($output));
     }
