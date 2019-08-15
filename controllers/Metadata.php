@@ -58,7 +58,7 @@ class Metadata extends MY_Controller
 
         // Transformations
         // TODO: Vault & Datamanager checks!!
-        $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+        $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataJson'] == 'true') ? true: false;
         $transformation = false;
         $transformationText = null;
         $transformationButtons = false;
@@ -85,8 +85,7 @@ class Metadata extends MY_Controller
             ),
             'scriptIncludes' => array(
                 'lib/sweetalert/sweetalert.min.js',
-                'js/metadata/delete.js',
-		'lib/jquery/jquery-3.4.1.min.js'
+                'js/metadata/delete.js'
             ),
             'path'             => $path,
             'tokenName'        => $tokenName,
@@ -124,16 +123,21 @@ class Metadata extends MY_Controller
         $jsonSchema = $this->Metadata_form_model->getJsonSchema($rodsaccount, $fullPath);
         $uiSchema = $this->Metadata_form_model->getJsonUiSchema($rodsaccount, $fullPath);
 
-        $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+        // Check if yoda-metadata.json or yoda-metadata.xml exists.
+        $jsonMetadataExists = ($formConfig['hasMetadataJson'] == 'true') ? true: false;
+        $xmlMetadataExists = ($formConfig['hasMetadataXml'] == 'true') ? true: false;
         $xmlFormData = null;
-        if ($metadataExists) {
+
+        if ($jsonMetadataExists) {
+            $formData = $this->Metadata_form_model->getJsonMetadata($rodsaccount, $formConfig['metadataJsonPath']);
+        } else if ($xmlMetadataExists) {
             $xmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
             $formData = $this->Metadata_form_model->prepareJSONSFormData($jsonSchema, $xmlFormData);
         }
 
         // Validation
         $errors = array();
-        if (empty($xmlFormData) && $metadataExists) {
+        if (empty($formData) && ($jsonMetadataExists || $xmlMetadataExists)) {
             $errors[] = 'Please check the structure of this file.';
         } else if (empty($formData)) {
              $formData = json_decode ("{}");
