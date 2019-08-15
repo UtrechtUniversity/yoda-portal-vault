@@ -78,6 +78,21 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
+     * Get the yoda-metadata.json file contents.
+     *
+     * @param $rodsaccount
+     * @param $path
+     * @return string
+
+     */
+    public function getJsonMetadata($rodsaccount, $path)
+    {
+        $formData = $this->CI->filesystem->read($rodsaccount, $path);
+
+        return $formData;
+    }
+
+    /**
      * Load the yoda-metadata.xml file ($path) in an array structure.
      *
      * Reorganise this in such a way that hierarchy is lost but indexing is possible by eg 'Author_Property_Role'.
