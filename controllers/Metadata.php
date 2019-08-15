@@ -285,6 +285,9 @@ class Metadata extends MY_Controller
                     // first perform a save action of the latest posted data - only if there is no lock!
                     if ($formConfig['folderStatus']!='LOCKED') {
                         $result = $this->Metadata_form_model->saveJsonMetadata($rodsaccount, $fullPath);
+                        if ($result['status'] != "Success") {
+                            setMessage('error', 'Saving the metadata form failed: ' . $result['statusInfo']);
+                        }
                     }
                     // Do vault submission
                     $result = $this->vaultsubmission->validate();
@@ -324,6 +327,9 @@ class Metadata extends MY_Controller
 
             if ($this->input->server('REQUEST_METHOD') == 'POST') {
                 $result = $this->Metadata_form_model->saveJsonMetadata($rodsaccount, $fullPath);
+                if ($result['status'] != "Success") {
+                    setMessage('error', 'Saving the metadata form failed: ' . $result['statusInfo']);
+                }
             }
         }
 
