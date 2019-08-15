@@ -40,7 +40,6 @@ class Metadata extends MY_Controller
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
         $isDatamanager = $formConfig['isDatamanager'];
-        $isVaultPackage = $formConfig['isVaultPackage'];
 
         $userType = $formConfig['userType'];
 
@@ -63,7 +62,7 @@ class Metadata extends MY_Controller
         $transformation = false;
         $transformationText = null;
         $transformationButtons = false;
-        if ($metadataExists && $isVaultPackage == 'no') {
+        if ($metadataExists) {
             // Transformation exists (irods?)?
             $transformation = ($formConfig['transformation'] == 'true' ) ? true: false;
             if ($transformation) {
@@ -93,7 +92,6 @@ class Metadata extends MY_Controller
             'tokenName'        => $tokenName,
             'tokenHash'        => $tokenHash,
             'userType'         => $userType,
-            'isVaultPackage'   => $isVaultPackage,
             'flashMessage'     => $flashMessage,
             'flashMessageType' => $flashMessageType,
             'metadataExists'   => $metadataExists,

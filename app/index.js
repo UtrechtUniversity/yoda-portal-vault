@@ -9,7 +9,6 @@ var uiSchema = {};
 var yodaFormData = {};
 
 var isDatamanager     = false;
-var isVaultPackage    = false;
 var parentHasMetadata = false;
 var metadataExists    = false;
 var submitButton      = false;
@@ -215,16 +214,7 @@ class YodaButtons extends React.Component {
     }
 
     renderButtons() {
-        if (isVaultPackage && isDatamanager) {
-            // Datamanager in Vault space.
-            if (!updateButton && mode === "edit_in_vault") {
-                // Show 'Save' button.
-                return (<div>{this.renderSaveVaultButton()}</div>);
-            } else if (updateButton) {
-                // Show 'Update' button.
-                return (<div>{this.renderUpdateButton()}</div>);
-            }
-        } else if (writePermission) {
+        if (writePermission) {
             // Write permission in Research space.
             if (!metadataExists && locked) {
                 // Show no buttons.
@@ -380,7 +370,6 @@ axios.get("/research/metadata/data?path=" + path + "&mode=" + mode)
         uiSchema          = response.data.uiSchema;
         yodaFormData      = response.data.formData;
         isDatamanager     = response.data.isDatamanager;
-        isVaultPackage    = response.data.isVaultPackage;
         parentHasMetadata = response.data.parentHasMetadata;
         metadataExists    = response.data.metadataExists;
         submitButton      = response.data.submitButton;
