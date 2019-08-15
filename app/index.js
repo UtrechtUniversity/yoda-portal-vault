@@ -37,11 +37,13 @@ const numberWidget = (props) => {
 };
 
 const enumWidget = (props) => {
-
+	
 	return (
 		<Select
 		className={"select-box"}
+		placeholder={props.value}
 		required={props.required}
+		isDisabled={props.enabled}
 		onChange={(event) => props.onChange(event.value)}
 		options={props["options"]["enumOptions"]} />
 	);
