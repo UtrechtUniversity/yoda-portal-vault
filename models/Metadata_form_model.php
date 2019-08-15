@@ -310,40 +310,4 @@ class Metadata_form_model extends CI_Model
 
         return $formData;
     }
-
-    /**
-     * Request for location of current XSD based on location of file.
-     *
-     * @param $folder
-     * @return schemaLocation
-     */
-    private function _getSchemaLocation($folder)
-    {
-        $outputParams = array('*schemaLocation', '*status', '*statusInfo');
-        $inputParams = array('*folder' => $folder);
-
-        $this->CI->load->library('irodsrule');
-        $rule = $this->irodsrule->make('iiFrontGetSchemaLocation', $inputParams, $outputParams);
-        $result = $rule->execute();
-
-        return $result['*schemaLocation'];
-    }
-
-    /**
-     * Request space (research or vault) of current XSD based on location of file.
-     *
-     * @param $folder
-     * @return schemaSpace
-     */
-    private function _getSchemaSpace($folder)
-    {
-        $outputParams = array('*schemaSpace', '*status', '*statusInfo');
-        $inputParams = array('*folder' => $folder);
-
-        $this->CI->load->library('irodsrule');
-        $rule = $this->irodsrule->make('iiFrontGetSchemaSpace', $inputParams, $outputParams);
-        $result = $rule->execute();
-
-        return $result['*schemaSpace'];
-    }
 }
