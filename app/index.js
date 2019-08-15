@@ -364,7 +364,7 @@ axios.defaults.headers.common = {
 axios.defaults.xsrfCookieName = tokenName;
 axios.defaults.xsrfHeaderName = tokenHash;
 
-axios.get("/research/metadata/data?path=" + path + "&mode=" + mode)
+axios.get("/research/metadata/data?path=" + path)
     .then(function (response) {
         schema            = response.data.schema;
         uiSchema          = response.data.uiSchema;
