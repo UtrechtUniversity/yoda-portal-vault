@@ -78,18 +78,19 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
-     * Get the yoda-metadata.json file contents.
+     * Get the yoda-metadata.json file contents for a collection.
      *
      * @param $rodsaccount
-     * @param $path
-     * @return string
+     * @param $path        Collection of area being worked in
+     *
+     * @return mixed
 
      */
     public function getJsonMetadata($rodsaccount, $path)
     {
         $formData = $this->CI->filesystem->read($rodsaccount, $path);
 
-        return $formData;
+        return json_decode($formData);
     }
 
     /**
