@@ -16,6 +16,7 @@
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-jsonschema-form": "^1.6.1",
+    "react-select": "^3.0.4",
     "webpack": "^4.6.0",
     "webpack-cli": "^3.3.4"
   },

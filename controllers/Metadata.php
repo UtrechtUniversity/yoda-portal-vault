@@ -94,11 +94,12 @@ class Metadata extends MY_Controller
             'styleIncludes' => array(
                 'lib/font-awesome/css/font-awesome.css',
                 'lib/sweetalert/sweetalert.css',
-                'css/metadata/form.css',
+                'css/metadata/form.css'
             ),
             'scriptIncludes' => array(
                 'lib/sweetalert/sweetalert.min.js',
                 'js/metadata/delete.js',
+		'lib/jquery/jquery-3.4.1.min.js'
             ),
             'path'             => $path,
             'tokenName'        => $tokenName,
