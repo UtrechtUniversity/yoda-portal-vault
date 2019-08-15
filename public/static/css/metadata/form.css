@@ -210,11 +210,18 @@ button[data-clone*="main"] {
 }
 */
 
+/*
 .has-btn .select-box {
-    width: calc(100% - 17px);
+    width: calc(100% - 0px);
     top: -1px;
 }
 
+.select-box * {
+    border-radius: 1px;!important
+    height: 20px;
+    min-height: 15px;
+}
+*/
 .has-btn {
     position: relative;
 }
