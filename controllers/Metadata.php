@@ -219,7 +219,7 @@ class Metadata extends MY_Controller
         $output['isDatamanager']     = $isDatamanager;
         $output['isVaultPackage']    = $isVaultPackage;
         $output['parentHasMetadata'] = $parentHasMetadata;
-        $output['metadataExists']    = $metadataExists;
+        $output['metadataExists']    = ($jsonMetadataExists || $xmlMetadataExists);
         $output['locked']            = $isLocked;
         $output['writePermission']   = $writePermission;
         $output['submitButton']      = $submitButton;
