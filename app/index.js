@@ -36,16 +36,29 @@ const numberWidget = (props) => {
     );
 };
 
+const customStyles = {
+	control: styles => ({...styles, borderRadius: '0px', minHeight: '15px', height: '33.5px'})
+};
+
 const enumWidget = (props) => {
 	
+	var enumArray = props["schema"]["enum"];
+	var enumNames = props["schema"]["enumNames"];
+
+	if (enumNames == null) enumNames = enumArray;
+
+	var i = enumArray.indexOf(props["value"]);
+	var placeholder = enumNames[i] == null ? " " : enumNames[i];
+
 	return (
 		<Select
 		className={"select-box"}
-		placeholder={props.value}
+		placeholder={placeholder}
 		required={props.required}
-		isDisabled={props.enabled}
+		isDisabled={props.readonly}
 		onChange={(event) => props.onChange(event.value)}
-		options={props["options"]["enumOptions"]} />
+		options={props["options"]["enumOptions"]}
+		styles={customStyles} />
 	);
 };
 
