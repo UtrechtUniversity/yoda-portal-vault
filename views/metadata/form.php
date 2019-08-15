@@ -76,7 +76,4 @@
         </div>
     </div>
 
-<script type="text/javascript">
-    var mode = "<?php echo $mode; ?>";
-</script>
 <script src="/research/static/js/metadata/form.js" type="text/javascript"></script>
