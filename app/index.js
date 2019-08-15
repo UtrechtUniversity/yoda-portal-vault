@@ -49,11 +49,12 @@ const enumWidget = (props) => {
 	if (enumNames == null) enumNames = enumArray;
 
 	var i = enumArray.indexOf(props["value"]);
+	var placeholder = enumNames[i] == null ? " " : enumNames[i];
 
 	return (
 		<Select
 		className={"select-box"}
-		placeholder={enumNames[i]}
+		placeholder={placeholder}
 		required={props.required}
 		isDisabled={props.readonly}
 		onChange={(event) => props.onChange(event.value)}
