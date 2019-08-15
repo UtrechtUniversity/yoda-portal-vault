@@ -1,8 +1,8 @@
 import React, { Component } from "react";
-import Select from 'react-select';
 import axios from 'axios';
 import { render } from "react-dom";
 import Form from "react-jsonschema-form";
+import Select from 'react-select';
 
 var schema = {};
 var uiSchema = {};
@@ -42,11 +42,12 @@ const customStyles = {
 };
 
 const enumWidget = (props) => {
-
 	var enumArray = props["schema"]["enum"];
 	var enumNames = props["schema"]["enumNames"];
 
-	if (enumNames == null) enumNames = enumArray;
+	if (enumNames == null) {
+        enumNames = enumArray;
+    }
 
 	var i = enumArray.indexOf(props["value"]);
 	var placeholder = enumNames[i] == null ? " " : enumNames[i];
