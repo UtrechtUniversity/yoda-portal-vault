@@ -37,11 +37,12 @@ const numberWidget = (props) => {
 };
 
 const customStyles = {
-	control: styles => ({...styles, borderRadius: '0px', minHeight: '15px', height: '33.5px'})
+	control: styles => ({...styles, borderRadius: '0px', minHeight: '15px', height: '33.5px'}),
+    placeholder: () => ({color: '#555'})
 };
 
 const enumWidget = (props) => {
-	
+
 	var enumArray = props["schema"]["enum"];
 	var enumNames = props["schema"]["enumNames"];
 
