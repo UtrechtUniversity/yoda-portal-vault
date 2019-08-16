@@ -24,31 +24,6 @@
         </div>
     </div>
 
-    <div class="row <?php echo !$transformation ? ' hide' : ''; ?>">
-        <div class="col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-heading clearfix">
-                    <h3 class="panel-title pull-left">
-                        Metadata form - <?php echo str_replace(' ', '&nbsp;', htmlentities(trim($path))); ?>
-                    </h3>
-                    <?php if (!$transformationButtons) { ?>
-                    <div class="input-group-sm has-feedback pull-right">
-                        <a class="btn btn-default" href="/vault/browse?dir=<?php echo rawurlencode($path); ?>">Close</a>
-                    </div>
-                    <?php } ?>
-                </div>
-                <div class="panel-body">
-                    <?php echo $transformationText; ?>
-
-                    <?php if ($transformationButtons) { ?>
-                    <a class="reject-transformation btn btn-danger delete-all-metadata-btn pull-right" href="/vault/browse?dir=<?php echo rawurlencode($path); ?>">Reject transformation</a>
-                    <a class="accept-transformation btn btn-success delete-all-metadata-btn pull-right" href="/vault/metadata/transformation?path=<?php echo rawurlencode($path); ?>">Accept transformation</a>
-                    <?php } ?>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="row metadata-form<?php echo !$showForm ? ' hide' : ''; ?>">
         <div class="col-md-12">
             <div class="panel panel-default">

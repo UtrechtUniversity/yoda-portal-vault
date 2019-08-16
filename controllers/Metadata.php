@@ -69,26 +69,7 @@ class Metadata extends MY_Controller
         $tokenName = $this->security->get_csrf_token_name();
         $tokenHash = $this->security->get_csrf_hash();
 
-        // Transformations
-        // TODO: Vault & Datamanager checks!!
-        $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
-        $transformation = false;
-        $transformationText = null;
-        $transformationButtons = false;
-        if ($metadataExists && $isVaultPackage == 'no') {
-            // Transformation exists (irods?)?
-            $transformation = ($formConfig['transformation'] == 'true' ) ? true: false;
-            if ($transformation) {
-                $showForm = false;
-                if ($writePermission) {
-                    $transformationText = $formConfig['transformationText'];
-                    $transformationButtons = true;
-                } else {
-                    $transformationText = '<p>It is not possible to load this form as the metadata xml file is not in accordance with the form definition.</p>';
-                    $transformationButtons = false;
-                }
-            }
-        }
+        $metadataExists = ($formConfig['hasMetadataJson'] == 'true' || $formConfig['hasMetadataJson'] == 'yes') ? true: false;
 
         $viewParams = array(
             'styleIncludes' => array(
@@ -97,8 +78,7 @@ class Metadata extends MY_Controller
                 'css/metadata/form.css'
             ),
             'scriptIncludes' => array(
-                'lib/sweetalert/sweetalert.min.js',
-		'lib/jquery/jquery-3.4.1.min.js'
+                'lib/sweetalert/sweetalert.min.js'
             ),
             'path'             => $path,
             'tokenName'        => $tokenName,
@@ -111,12 +91,6 @@ class Metadata extends MY_Controller
             'metadataExists'   => $metadataExists,
             'writePermission'  => $writePermission,
             'showForm'         => $showForm,
-
-            // Transformation vars
-            'transformation' => $transformation,
-            'transformationText' => $transformationText,
-            'transformationButtons' => $transformationButtons,
-
         );
         loadView('metadata/form', $viewParams);
     }
@@ -138,16 +112,15 @@ class Metadata extends MY_Controller
         $jsonSchema = $this->Metadata_form_model->getJsonSchema($rodsaccount, $fullPath);
         $uiSchema = $this->Metadata_form_model->getJsonUiSchema($rodsaccount, $fullPath);
 
-        $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
-        $xmlFormData = null;
+        $metadataExists = ($formConfig['hasMetadataJson'] == 'true' || $formConfig['hasMetadataJson'] == 'yes') ? true: false;
+        $formData = null;
         if ($metadataExists) {
-            $xmlFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath']);
-            $formData = $this->Metadata_form_model->prepareJSONSFormData($jsonSchema, $xmlFormData);
+            $formData = $this->Metadata_form_model->getJsonMetadata($rodsaccount, $formConfig['metadataJsonPath']);
         }
 
         // Validation
         $errors = array();
-        if (empty($xmlFormData) && $metadataExists) {
+        if (empty($formData) && $metadataExists) {
             $errors[] = 'Please check the structure of this file.';
         } else if (empty($formData)) {
              $formData = json_decode ("{}");
@@ -210,10 +183,8 @@ class Metadata extends MY_Controller
         $mode = $this->input->get('mode');
         $updateButton = false;
         if ($isDatamanager && $isVaultPackage) {
-           if ($formConfig['hasShadowMetadataXml'] == 'no') {
-                if ($mode != 'edit_in_vault') {
-                    $updateButton = true;
-                }
+            if ($mode != 'edit_in_vault') {
+                $updateButton = true;
             }
         }
 
