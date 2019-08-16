@@ -24,26 +24,10 @@ class Metadata_model extends CI_Model {
      */
     public function prepareVaultMetadataForEditing($metadataFile)
     {
-        $outputParams = array('*tempMetadataXmlPath', '*status', '*statusInfo');
-        $inputParams = array('*metadataXmlPath' => $metadataFile);
+        $outputParams = array('*tempMetadataJsonPath', '*status', '*statusInfo');
+        $inputParams = array('*metadataJsonPath' => $metadataFile);
 
         $rule = $this->irodsrule->make('iiPrepareVaultMetadataForEditing', $inputParams, $outputParams);
-        $result = $rule->execute();
-        return $result;
-    }
-
-    /**
-     * Transform metadata to new schema.
-     *
-     * @param $path
-     * @return result of transformation
-     */
-    public function transform($path)
-    {
-        $outputParams = array('*status', '*statusInfo');
-        $inputParams = array('*path' => $path);
-
-        $rule = $this->irodsrule->make('iiFrontTransformXml', $inputParams, $outputParams);
         $result = $rule->execute();
         return $result;
     }
