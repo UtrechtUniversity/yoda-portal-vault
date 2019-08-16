@@ -47,12 +47,12 @@ class Metadata extends MY_Controller
         $mode = $this->input->get('mode'); // ?mode=edit_for_vault
         if ($isDatamanager == 'yes' && $isVaultPackage == 'yes' && $mode == 'edit_in_vault') {
             // .tmp file for XSD validation
-            $result = $this->Metadata_model->prepareVaultMetadataForEditing($formConfig['metadataXmlPath']);
+            $result = $this->Metadata_model->prepareVaultMetadataForEditing($formConfig['metadataJsonPath']);
 
-            $tmpSavePath = $result['*tempMetadataXmlPath'] . '.tmp';
+            $tmpSavePath = $result['*tempMetadataJsonPath'] . '.tmp';
             $tmpFileExists = $this->Filesystem->read($rodsaccount, $tmpSavePath);
             if ($tmpFileExists !== false) {
-                $formConfig['metadataXmlPath'] = $tmpSavePath;
+                $formConfig['metadataJsonPath'] = $tmpSavePath;
             }
         }
 
