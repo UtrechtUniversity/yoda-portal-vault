@@ -254,13 +254,13 @@ RULE;
         }
     }
 
-    static public function cloneMetadata($iRodsAccount, $path, $parentPath)
+    static public function cloneMetadata($iRodsAccount, $path)
     {
         $output = array();
 
         $ruleBody = <<<'RULE'
 myRule {
-    iiCloneMetadataXml(*src, *dst);
+    iiCloneMetadataFile(*coll);
 }
 RULE;
         try {
@@ -268,8 +268,7 @@ RULE;
                 $iRodsAccount,
                 $ruleBody,
                 array(
-                    "*src" => $parentPath,
-                    "*dst" => $path,
+                    "*coll" => $path,
                 ),
                 array()
             );

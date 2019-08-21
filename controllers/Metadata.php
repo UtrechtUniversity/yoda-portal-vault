@@ -58,13 +58,13 @@ class Metadata extends MY_Controller
 
         // Transformations
         // TODO: Vault & Datamanager checks!!
-        $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataJson'] == 'true') ? true: false;
+        $metadataExists = $formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataJson'] == 'true';
         $transformation = false;
         $transformationText = null;
         $transformationButtons = false;
         if ($metadataExists) {
             // Transformation exists (irods?)?
-            $transformation = ($formConfig['transformation'] == 'true' ) ? true: false;
+            $transformation = $formConfig['transformation'] == 'true' ;
             if ($transformation) {
                 $showForm = false;
                 if ($writePermission) {
@@ -124,8 +124,8 @@ class Metadata extends MY_Controller
         $uiSchema = $this->Metadata_form_model->getJsonUiSchema($rodsaccount, $fullPath);
 
         // Check if yoda-metadata.json or yoda-metadata.xml exists.
-        $jsonMetadataExists = ($formConfig['hasMetadataJson'] == 'true') ? true: false;
-        $xmlMetadataExists = ($formConfig['hasMetadataXml'] == 'true') ? true: false;
+        $jsonMetadataExists = $formConfig['hasMetadataJson'] == 'true';
+        $xmlMetadataExists  = $formConfig['hasMetadataXml']  == 'true';
         $xmlFormData = null;
 
         if ($jsonMetadataExists) {
@@ -165,8 +165,8 @@ class Metadata extends MY_Controller
         }
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-        $isDatamanager     = ($formConfig['isDatamanager'] == 'yes') ? true: false;
-        $isVaultPackage    = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
+        $isDatamanager     = $formConfig['isDatamanager']  == 'yes';
+        $isVaultPackage    = $formConfig['isVaultPackage'] == 'yes';
         $userType          = $formConfig['userType'];
 
         if ($userType == 'normal' || $userType == 'manager') {
@@ -181,7 +181,7 @@ class Metadata extends MY_Controller
         if (!$isVaultPackage) {
             $lockStatus = $formConfig['lockFound'];
             $folderStatus = $formConfig['folderStatus'];
-            $isLocked = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
+            $isLocked = $formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor";
             if (($lockStatus == 'here' || $lockStatus == 'no')
                 && ($folderStatus == 'SECURED' || $folderStatus == 'LOCKED' || $folderStatus == '')
                 && ($userType == 'normal' || $userType == 'manager')) {
@@ -207,7 +207,7 @@ class Metadata extends MY_Controller
 
         $parentHasMetadata = false;
         if (!$isVaultPackage) {
-            $parentHasMetadata = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
+            $parentHasMetadata = $formConfig['parentHasMetadata'] == 'true';
         }
 
         $output = array();
@@ -271,7 +271,7 @@ class Metadata extends MY_Controller
             $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
             if ($this->input->post('vault_submission')) { // HdR er wordt nog niet gecheckt dat juiste persoon dit mag
 
-                $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
+                $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes');
                 $loadedFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath'], $metadataExists, $pathStart);
                 if ($loadedFormData['schemaIdMetadata'] != $loadedFormData['schemaIdCurrent']) {
                     setMessage('error', 'No submission allowed as your data is not up to date with the lastest YoDa schema for this community.');
@@ -373,11 +373,8 @@ class Metadata extends MY_Controller
         $fullPath =  $pathStart . $path;
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-        if ($formConfig['parentHasMetadataXml'] == 'true') {
-            $xmlPath = $formConfig['metadataXmlPath'];
-            $xmlParentPath = $formConfig['parentMetadataXmlPath'];
-
-            $result = $this->filesystem->cloneMetadata($rodsaccount, $xmlPath, $xmlParentPath);
+        if ($formConfig['parentHasMetadata'] == 'true') {
+            $result = $this->filesystem->cloneMetadata($rodsaccount, $fullPath);
         }
 
         return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
