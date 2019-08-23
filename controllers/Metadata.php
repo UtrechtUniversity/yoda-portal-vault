@@ -231,95 +231,22 @@ class Metadata extends MY_Controller
      * Permitted only for userType in {normal, manager}
      *
      */
-    function store()
-    {
-        $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $rodsaccount = $this->rodsuser->getRodsAccount();
+     function store()
+     {
+         $pathStart = $this->pathlibrary->getPathStart($this->config);
+         $rodsaccount = $this->rodsuser->getRodsAccount();
 
-        $arrayPost = $this->input->post();
+         $arrayPost = $this->input->post();
 
-        $this->load->model('Metadata_form_model');
-        $this->load->model('Metadata_model');
-        $this->load->model('Folder_Status_model');
-        $this->load->model('Filesystem');
+         $this->load->model('Metadata_form_model');
 
-        $path = $this->input->get('path');
-        $fullPath = $pathStart . $path;
+         $path = $this->input->get('path');
+         $fullPath = $pathStart . $path;
 
-        $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
+         if ($this->input->server('REQUEST_METHOD') == 'POST') {
+             $result = $this->Metadata_form_model->saveJsonMetadata($rodsaccount, $fullPath);
+         }
 
-        $userType = $formConfig['userType'];
-        $lockStatus = $formConfig['lockFound'];
-        $folderStatus = $formConfig['folderStatus'];
-        $isDatamanager = $formConfig['isDatamanager'];
-        $isVaultPackage = $formConfig['isVaultPackage'];
-
-        if (!($userType=='normal' || $userType=='manager')) { // superseeds userType!= reader - which comes too late for permissions for vault submission
-            $this->session->set_flashdata('flashMessage', 'Insufficient rights to perform this action.'); // wat is een locking error?
-            $this->session->set_flashdata('flashMessageType', 'danger');
-            return redirect('research/browse?dir=' . rawurlencode($path), 'refresh');
-        }
-
-        if ($this->input->post('vault_submission') || $this->input->post('vault_unsubmission')) {
-            $this->load->library('vaultsubmission', array('formConfig' => $formConfig, 'folder' => $fullPath));
-            if ($this->input->post('vault_submission')) { // HdR er wordt nog niet gecheckt dat juiste persoon dit mag
-
-                $metadataExists = ($formConfig['hasMetadataXml'] == 'true' || $formConfig['hasMetadataXml'] == 'yes') ? true: false;
-                $loadedFormData = $this->Metadata_form_model->loadFormData($rodsaccount, $formConfig['metadataXmlPath'], $metadataExists, $pathStart);
-                if ($loadedFormData['schemaIdMetadata'] != $loadedFormData['schemaIdCurrent']) {
-                    setMessage('error', 'No submission allowed as your data is not up to date with the lastest YoDa schema for this community.');
-                    return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
-                }
-
-                if(!$this->vaultsubmission->checkLock()) {
-                    setMessage('error', 'There was a locking error encountered while submitting this folder.');
-                }
-                else {
-                    // first perform a save action of the latest posted data - only if there is no lock!
-                    if ($formConfig['folderStatus']!='LOCKED') {
-                        $result = $this->Metadata_form_model->processPost($rodsaccount, $fullPath);
-                    }
-                    // Do vault submission
-                    $result = $this->vaultsubmission->validate();
-                    if ($result === true) {
-                        $submitResult = $this->vaultsubmission->setSubmitFlag();
-                        if ($submitResult) {
-                            setMessage('success', 'The folder is successfully submitted.');
-                        } else {
-                            setMessage('error', $result['*statusInfo']);
-                        }
-                    } else {
-                        // result contains all collected messages as an array
-                        setMessage('error', implode('<br>', $result));
-                    }
-                }
-            }
-            elseif ($this->input->post('vault_unsubmission')) {
-                $result = $this->vaultsubmission->clearSubmitFlag();
-                if ($result['*status']== 'Success') {
-                    setMessage('success', 'This folder was successfully unsubmitted from the vault.');
-                }
-                else {
-                    setMessage('error', $result['*statusInfo']);
-                }
-            }
-        }
-        else {
-            // save metadata xml.  Check for correct conditions
-            if ($folderStatus == 'SUBMITTED') {
-                setMessage('error', 'The form has already been submitted');
-                return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
-            }
-            if ($folderStatus == 'LOCKED' || $lockStatus == 'ancestor') {
-                setMessage('error', 'The metadata form is locked possibly by the action of another user.');
-                return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
-            }
-
-            if ($this->input->server('REQUEST_METHOD') == 'POST') {
-                $result = $this->Metadata_form_model->processPost($rodsaccount, $fullPath);
-            }
-        }
-
-        return redirect('research/metadata/form?path=' . rawurlencode($path), 'refresh');
-    }
+         return redirect('vault/metadata/form?path=' . rawurlencode($path), 'refresh');
+     }
 }

@@ -18,6 +18,26 @@ class Metadata_form_model extends CI_Model
     }
 
     /**
+     * Save JSON metdata posted from the metadata form.
+     *
+     * @param $rodsaccount Rods account
+     * @param $path        Path of collection being worked in
+     */
+    public function saveJsonMetadata($rodsaccount, $path)
+    {
+        $arrayPost = $this->CI->input->post();
+        $data = $arrayPost['formData'];
+        $rule = new ProdsRule(
+            $this->rodsuser->getRodsAccount(),
+            'rule { iiSaveFormMetadata(*path, *data); }',
+            array('*path' => $path, '*data' => $data),
+            array('ruleExecOut')
+        );
+        $result = json_decode($rule->execute()['ruleExecOut'], true);
+        return $result;
+    }
+
+    /**
      * Get JSON schema for collection.
      *
      * @param $rodsaccount
