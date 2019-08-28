@@ -128,19 +128,29 @@ class GeoLocation extends React.Component {
                 [northBoundLatitude, westBoundLongitude],
                 [southBoundLatitude, eastBoundLongitude]
             ];
-            L.rectangle(bounds).addTo(map);
+
+            // Coordinates are a point.
+            if (northBoundLatitude == southBoundLatitude && westBoundLongitude == eastBoundLongitude) {
+                var latlng = L.latLng(northBoundLatitude, westBoundLongitude);
+                L.marker(latlng).addTo(map);
+
+                var latLngs = [latlng];
+                var markerBounds = L.latLngBounds(latLngs);
+                map.fitBounds(markerBounds);
+            } else {
+                L.rectangle(bounds).addTo(map);
+            }
             map.fitBounds(bounds, {'padding': [150, 150]});
         }
 
         this.fillCoordinateInputs(northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude);
 
-        // @todo: MOET DIT HIER??
         $('.geoInputCoords').on('input propertychange paste', function() {
             var boxID = $(this).attr("boxID");
 
-            // Remove earlier rectangle(s)
+            // Remove earlier markers and rectangle(s)
             map.eachLayer(function (layer) {
-                if (layer instanceof L.Rectangle) {
+                if (layer instanceof L.Marker || layer instanceof L.Rectangle) {
                     map.removeLayer(layer);
                 }
             });
@@ -173,10 +183,17 @@ class GeoLocation extends React.Component {
                 $('.geoAlert[boxID="' + boxID + '"]').html(''); // reset the alert box -> no alert required
                 let bounds = [[lat0, lng0], [lat1, lng1]];
 
-                var rectangle = L.rectangle(bounds);
-                map.addLayer(rectangle);
-                rectangle.addTo(map);
-
+                // Coordinates are a point.
+                if (lat0 == lat1 && lng0 == lng1) {
+                    var latlng = L.latLng(lat0, lng0);
+                    var marker = L.marker(latlng);
+                    map.addLayer(marker);
+                    marker.addTo(map);
+                } else {
+                    var rectangle = L.rectangle(bounds);
+                    map.addLayer(rectangle);
+                    rectangle.addTo(map);
+                }
                 map.fitBounds(bounds, {'padding': [10, 10]});
 
                 globalThis.setFormData('northBoundLatitude', lat0);
@@ -197,19 +214,17 @@ class GeoLocation extends React.Component {
     drawCreated(e) {
         let layer = e.layer;
 
-        this.setFormData('northBoundLatitude', layer.getLatLngs()[0][2].lat);
-        this.setFormData('westBoundLongitude', layer.getLatLngs()[0][2].lng);
-        this.setFormData('southBoundLatitude', layer.getLatLngs()[0][0].lat);
-        this.setFormData('eastBoundLongitude', layer.getLatLngs()[0][0].lng);
+        if (layer instanceof L.Marker) {
+            this.setFormData('northBoundLatitude', layer.getLatLng().lat);
+            this.setFormData('westBoundLongitude', layer.getLatLng().lng);
+            this.setFormData('southBoundLatitude', layer.getLatLng().lat);
+            this.setFormData('eastBoundLongitude', layer.getLatLng().lng);
 
-        this.fillCoordinateInputs(
-            layer.getLatLngs()[0][2].lat, layer.getLatLngs()[0][2].lng,
-            layer.getLatLngs()[0][0].lat, layer.getLatLngs()[0][0].lng
-        );
-    }
-
-    drawEdited(e) {
-        e.layers.eachLayer( (layer) => {
+            this.fillCoordinateInputs(
+                layer.getLatLng().lat, layer.getLatLng().lng,
+                layer.getLatLng().lat, layer.getLatLng().lng
+            );
+        } else if (layer instanceof L.Rectangle)  {
             this.setFormData('northBoundLatitude', layer.getLatLngs()[0][2].lat);
             this.setFormData('westBoundLongitude', layer.getLatLngs()[0][2].lng);
             this.setFormData('southBoundLatitude', layer.getLatLngs()[0][0].lat);
@@ -219,6 +234,32 @@ class GeoLocation extends React.Component {
                 layer.getLatLngs()[0][2].lat, layer.getLatLngs()[0][2].lng,
                 layer.getLatLngs()[0][0].lat, layer.getLatLngs()[0][0].lng
             );
+        }
+    }
+
+    drawEdited(e) {
+        e.layers.eachLayer( (layer) => {
+            if (layer instanceof L.Marker) {
+                this.setFormData('northBoundLatitude', layer.getLatLng().lat);
+                this.setFormData('westBoundLongitude', layer.getLatLng().lng);
+                this.setFormData('southBoundLatitude', layer.getLatLng().lat);
+                this.setFormData('eastBoundLongitude', layer.getLatLng().lng);
+
+                this.fillCoordinateInputs(
+                    layer.getLatLng().lat, layer.getLatLng().lng,
+                    layer.getLatLng().lat, layer.getLatLng().lng
+                );
+            } else if (layer instanceof L.Rectangle)  {
+                this.setFormData('northBoundLatitude', layer.getLatLngs()[0][2].lat);
+                this.setFormData('westBoundLongitude', layer.getLatLngs()[0][2].lng);
+                this.setFormData('southBoundLatitude', layer.getLatLngs()[0][0].lat);
+                this.setFormData('eastBoundLongitude', layer.getLatLngs()[0][0].lng);
+
+                this.fillCoordinateInputs(
+                    layer.getLatLngs()[0][2].lat, layer.getLatLngs()[0][2].lng,
+                    layer.getLatLngs()[0][0].lat, layer.getLatLngs()[0][0].lng
+                );
+            }
         });
     }
 
