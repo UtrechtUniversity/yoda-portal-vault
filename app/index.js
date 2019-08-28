@@ -306,7 +306,8 @@ class GeoLocation extends React.Component {
 }
 
 const widgets = {
-    numberWidget: numberWidget
+    numberWidget: numberWidget,
+    SelectWidget: enumWidget
 };
 
 const fields = {
