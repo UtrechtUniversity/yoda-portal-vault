@@ -125,18 +125,14 @@ class GeoLocation extends React.Component {
             typeof eastBoundLongitude !== 'undefined'
         ) {
             let bounds = [
-                [northBoundLatitude, westBoundLongitude],
-                [southBoundLatitude, eastBoundLongitude]
+                [northBoundLatitude,       westBoundLongitude],
+                [southBoundLatitude + 0.1, eastBoundLongitude + 0.1]
             ];
 
             // Coordinates are a point.
             if (northBoundLatitude == southBoundLatitude && westBoundLongitude == eastBoundLongitude) {
                 var latlng = L.latLng(northBoundLatitude, westBoundLongitude);
                 L.marker(latlng).addTo(map);
-
-                var latLngs = [latlng];
-                var markerBounds = L.latLngBounds(latLngs);
-                map.fitBounds(markerBounds);
             } else {
                 L.rectangle(bounds).addTo(map);
             }
@@ -178,23 +174,18 @@ class GeoLocation extends React.Component {
 
             if (alertText) {
                 $('.geoAlert[boxID="' + boxID + '"]').html('Invalid coordinates: ' + alertText.substring(2));
-            }
-            else {
+            } else {
                 $('.geoAlert[boxID="' + boxID + '"]').html(''); // reset the alert box -> no alert required
-                let bounds = [[lat0, lng0], [lat1, lng1]];
+                let bounds = [[lat0, lng0], [lat1 + 0.1, lng1 + 0.1]];
 
                 // Coordinates are a point.
                 if (lat0 == lat1 && lng0 == lng1) {
                     var latlng = L.latLng(lat0, lng0);
-                    var marker = L.marker(latlng);
-                    map.addLayer(marker);
-                    marker.addTo(map);
+                    L.marker(latlng).addTo(map);
                 } else {
-                    var rectangle = L.rectangle(bounds);
-                    map.addLayer(rectangle);
-                    rectangle.addTo(map);
+                    L.rectangle(bounds).addTo(map);
                 }
-                map.fitBounds(bounds, {'padding': [10, 10]});
+                map.fitBounds(bounds, {'padding': [150, 150]});
 
                 globalThis.setFormData('northBoundLatitude', lat0);
                 globalThis.setFormData('westBoundLongitude', lng0);
@@ -275,7 +266,7 @@ class GeoLocation extends React.Component {
     drawStop(e) {
         let map = this.refs.map.leafletElement;
         map.eachLayer(function (layer) {
-            if (layer instanceof L.Rectangle) {
+            if (layer instanceof L.Marker || layer instanceof L.Rectangle) {
                 map.removeLayer(layer);
             }
         });
@@ -320,7 +311,7 @@ class GeoLocation extends React.Component {
                                 draw={{
                                     circle: false,
                                     polygon: false,
-                                    marker: false,
+                                    marker: true,
                                     circlemarker: false,
                                     polyline: false
                                 }}
