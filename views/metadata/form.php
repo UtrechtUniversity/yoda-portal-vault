@@ -15,9 +15,6 @@
                         <br />Check the following in your XML file:
                         <br />
                         <span class="error-fields"></span>
-                        <br />
-                        When using the 'Delete all metadata' button beware that you will lose all data!
-                        <button type="button" onclick="deleteMetadata('<?php echo rawurlencode($path); ?>')" class="btn btn-danger delete-all-metadata-btn pull-right">Delete all metadata </button>
                     </p>
                 </div>
             </div>

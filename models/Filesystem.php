@@ -171,61 +171,6 @@ RULE;
         return array();
     }
 
-    static public function removeAllMetadata($iRodsAccount, $path)
-    {
-        $output = array();
-
-        $ruleBody = <<<'RULE'
-myRule {
-    iiRemoveAllMetadata(*path);
-}
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*path" => $path
-                ),
-                array()
-            );
-
-            $rule->execute();
-            return true;
-        } catch(RODSException $e) {
-            return false;
-        }
-    }
-
-    static public function cloneMetadata($iRodsAccount, $path, $parentPath)
-    {
-        $output = array();
-
-        $ruleBody = <<<'RULE'
-myRule {
-    iiCloneMetadataXml(*src, *dst);
-}
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*src" => $parentPath,
-                    "*dst" => $path,
-                ),
-                array()
-            );
-
-            $rule->execute();
-            return true;
-        } catch(RODSException $e) {
-            print_r($e);
-            exit;
-            return false;
-        }
-    }
-
     static public function collectionDetails($iRodsAccount, $path)
     {
         $output = array();

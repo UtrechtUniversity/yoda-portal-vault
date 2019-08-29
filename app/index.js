@@ -219,14 +219,6 @@ class YodaButtons extends React.Component {
         return (<button onClick={this.props.updateMetadata} type="button" className="btn btn-primary">Update metadata</button>);
     }
 
-    renderDeleteButton() {
-        return (<button onClick={this.props.deleteMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right">Delete all metadata </button>);
-    }
-
-    renderCloneButton() {
-        return (<button onClick={this.props.cloneMetadata} type="button" className="btn btn-primary clone-metadata-btn pull-right">Clone from parent folder</button>);
-    }
-
     renderFormCompleteness() {
         return (<span className="form-completeness add-pointer" aria-hidden="true" data-toggle="tooltip" title=""></span>);
     }
@@ -247,20 +239,20 @@ class YodaButtons extends React.Component {
                 // Show no buttons.
                 return (<div></div>);
             } else if (!metadataExists && parentHasMetadata) {
-                // Show 'Save' and 'Clone from parent folder' buttons.
-                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()} {this.renderCloneButton()}</div>);
+                // Show 'Save' button.
+                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()}</div>);
             } else if (!metadataExists) {
-                // Show 'Save' and 'Clone from parent folder' buttons.
+                // Show 'Save' button.
                 return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()}</div>);
             } else if (!locked && submitButton) {
-                // Show 'Save', 'Submit' and 'Delete all metadata' buttons.
-                return (<div> {this.renderSaveButton()} {this.renderSubmitButton()} {this.renderFormCompleteness()} {this.renderDeleteButton()}</div>);
+                // Show 'Save' and 'Submit' buttons.
+                return (<div> {this.renderSaveButton()} {this.renderSubmitButton()} {this.renderFormCompleteness()} </div>);
             } else if (locked && submitButton) {
                 // Show 'Submit' button.
                 return (<div>{this.renderSubmitButton()}</div>);
             } else if (!locked && !submitButton) {
-                // Show 'Save' and 'Delete all metadata' buttons.
-                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()} {this.renderDeleteButton()}</div>);
+                // Show 'Save' button.
+                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()} </div>);
             } else if (unsubmitButton) {
                 // Show 'Unsubmit' button.
                 return (<div>{this.renderUnsubmitButton()}</div>);
@@ -318,42 +310,6 @@ class Container extends React.Component {
         this.form.submitButton.click();
     }
 
-    deleteMetadata() {
-        swal({
-            title: "Are you sure?",
-            text: "You will not be able to recover this action!",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55",
-            confirmButtonText: "Yes, delete all metadata!",
-            closeOnConfirm: false,
-            animation: false
-        },
-        function(isConfirm){
-            if (isConfirm) {
-                window.location.href = '/vault/metadata/delete?path=' + path;
-            }
-        });
-    }
-
-    cloneMetadata() {
-        swal({
-            title: "Are you sure?",
-            text: "Entered metadata will be overwritten by cloning.",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#ffcd00",
-            confirmButtonText: "Yes, clone metadata!",
-            closeOnConfirm: false,
-            animation: false
-        },
-        function(isConfirm){
-            if (isConfirm) {
-                window.location.href = '/vault/metadata/clone_metadata?path=' + path;
-            }
-        });
-    }
-
     updateMetadata() {
         window.location.href = '/vault/metadata/form?path=' + path + '&mode=edit_in_vault';
     }
@@ -365,17 +321,13 @@ class Container extends React.Component {
                        saveVaultMetadata={this.saveVaultMetadata}
                        submitMetadata={this.submitMetadata}
                        unsubmitMetadata={this.unsubmitMetadata}
-                       updateMetadata={this.updateMetadata}
-                       deleteMetadata={this.deleteMetadata}
-                       cloneMetadata={this.cloneMetadata} />
+                       updateMetadata={this.updateMetadata} />
           <YodaForm ref={(form) => {this.form=form;}}/>
           <YodaButtons saveMetadata={this.saveMetadata}
                        saveVaultMetadata={this.saveVaultMetadata}
                        submitMetadata={this.submitMetadata}
                        unsubmitMetadata={this.unsubmitMetadata}
-                       updateMetadata={this.updateMetadata}
-                       deleteMetadata={this.deleteMetadata}
-                       cloneMetadata={this.cloneMetadata} />
+                       updateMetadata={this.updateMetadata} />
         </div>
       );
     }
