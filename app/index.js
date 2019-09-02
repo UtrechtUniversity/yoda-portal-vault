@@ -5,9 +5,6 @@ import Form from "react-jsonschema-form";
 import Select from 'react-select';
 import Geolocation from "./Geolocation"
 
-var globalGeoBoxCounter = 0; // Additions for being able to manually add geoBoxes
-var globalThis = null;
-
 var schema = {};
 var uiSchema = {};
 var yodaFormData = {};
@@ -210,10 +207,6 @@ class YodaButtons extends React.Component {
         return (<button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>);
     }
 
-    renderSaveVaultButton() {
-        return (<button onClick={this.props.saveVaultMetadata} type="submit" className="btn btn-primary">Save</button>);
-    }
-
     renderSubmitButton() {
         return (<button onClick={this.props.submitMetadata} type="submit" className="btn btn-primary">Submit</button>);
     }
@@ -287,7 +280,6 @@ class Container extends React.Component {
     constructor(props) {
         super(props);
         this.saveMetadata = this.saveMetadata.bind(this);
-        this.saveVaultMetadata = this.saveVaultMetadata.bind(this);
         this.submitMetadata = this.submitMetadata.bind(this);
         this.unsubmitMetadata = this.unsubmitMetadata.bind(this);
     }
@@ -295,12 +287,6 @@ class Container extends React.Component {
     saveMetadata() {
         save = true
         submit = unsubmit = false;
-        this.form.submitButton.click();
-    }
-
-    saveVaultMetadata() {
-        submit = true;
-        save = unsubmit = false;
         this.form.submitButton.click();
     }
 
@@ -352,15 +338,10 @@ class Container extends React.Component {
         });
     }
 
-    updateMetadata() {
-        window.location.href = '/research/metadata/form?path=' + path + '&mode=edit_in_vault';
-    }
-
     render() {
         return (
         <div>
           <YodaButtons saveMetadata={this.saveMetadata}
-                       saveVaultMetadata={this.saveVaultMetadata}
                        submitMetadata={this.submitMetadata}
                        unsubmitMetadata={this.unsubmitMetadata}
                        updateMetadata={this.updateMetadata}
@@ -368,7 +349,6 @@ class Container extends React.Component {
                        cloneMetadata={this.cloneMetadata} />
           <YodaForm ref={(form) => {this.form=form;}}/>
           <YodaButtons saveMetadata={this.saveMetadata}
-                       saveVaultMetadata={this.saveVaultMetadata}
                        submitMetadata={this.submitMetadata}
                        unsubmitMetadata={this.unsubmitMetadata}
                        updateMetadata={this.updateMetadata}
