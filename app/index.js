@@ -283,13 +283,15 @@ class GeoLocation extends React.Component {
     render() {
         const {northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude} = this.state;
         return (
-                <div class={'geoDiv' + this.geoBoxID}>
-                <label><span>Geo Location:</span></label>
-                <button class='btn' onClick={(e) => {this.openModal(e); }}>Open Map</button>
-                <br></br>
-                WN: {westBoundLongitude}, {northBoundLatitude}
-                <br></br>
-                ES: {eastBoundLongitude}, {southBoundLatitude}
+                <div class={'form-group geoDiv' + this.geoBoxID}>
+                  <label class="col-sm-2 control-label">
+                    <span>Geolocation</span>
+                  </label>
+                  <span class="fa-stack col-sm-1"></span>
+                  <div class="col-sm-9">
+                    <button class='btn' onClick={(e) => {this.openModal(e); }}>Open Map</button>&nbsp;
+                    WN: {westBoundLongitude}, {northBoundLatitude} ES: {eastBoundLongitude}, {southBoundLatitude}
+                  </div>
 
                 <Modal
                     isOpen={this.state.modalIsOpen}
