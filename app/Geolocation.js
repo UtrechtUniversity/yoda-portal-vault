@@ -1,3 +1,5 @@
+import React, { Component } from "react";
+import { render } from "react-dom";
 import Modal from 'react-modal';
 import { Map, TileLayer, Marker, FeatureGroup } from 'react-leaflet';
 import L from 'leaflet';
