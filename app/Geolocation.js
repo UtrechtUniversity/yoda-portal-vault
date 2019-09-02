@@ -276,3 +276,5 @@ class Geolocation extends React.Component {
         );
     }
 }
+
+export default Geolocation;
