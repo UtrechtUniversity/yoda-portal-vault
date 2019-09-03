@@ -216,10 +216,6 @@ class YodaButtons extends React.Component {
         return (<button onClick={this.props.unsubmitMetadata} type="submit" className="btn btn-primary">Unsubmit</button>);
     }
 
-    renderUpdateButton() {
-        return (<button onClick={this.props.updateMetadata} type="button" className="btn btn-primary">Update metadata</button>);
-    }
-
     renderDeleteButton() {
         return (<button onClick={this.props.deleteMetadata} type="button" className="btn btn-danger delete-all-metadata-btn pull-right">Delete all metadata </button>);
     }
@@ -345,14 +341,12 @@ class Container extends React.Component {
           <YodaButtons saveMetadata={this.saveMetadata}
                        submitMetadata={this.submitMetadata}
                        unsubmitMetadata={this.unsubmitMetadata}
-                       updateMetadata={this.updateMetadata}
                        deleteMetadata={this.deleteMetadata}
                        cloneMetadata={this.cloneMetadata} />
           <YodaForm ref={(form) => {this.form=form;}}/>
           <YodaButtons saveMetadata={this.saveMetadata}
                        submitMetadata={this.submitMetadata}
                        unsubmitMetadata={this.unsubmitMetadata}
-                       updateMetadata={this.updateMetadata}
                        deleteMetadata={this.deleteMetadata}
                        cloneMetadata={this.cloneMetadata} />
         </div>
