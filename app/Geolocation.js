@@ -80,7 +80,7 @@ class Geolocation extends React.Component {
         this.fillCoordinateInputs(northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude);
 
         $('.geoInputCoords').on('input propertychange paste', function() {
-            var boxID = $(this).attr("boxID");
+            var boxid = $(this).attr("boxid");
 
             // Remove earlier markers and rectangle(s)
             map.eachLayer(function (layer) {
@@ -90,10 +90,10 @@ class Geolocation extends React.Component {
             });
 
             // only make persistent when correct coordinates are added by user
-            var lat0 = Number($(".geoLat0[boxID='" + boxID + "']").val()),
-                lng0 = Number($(".geoLng0[boxID='" + boxID + "']").val()),
-                lat1 = Number($(".geoLat1[boxID='" + boxID + "']").val()),
-                lng1 = Number($(".geoLng1[boxID='" + boxID + "']").val()),
+            var lat0 = Number($(".geoLat0[boxid='" + boxid + "']").val()),
+                lng0 = Number($(".geoLng0[boxid='" + boxid + "']").val()),
+                lat1 = Number($(".geoLat1[boxid='" + boxid + "']").val()),
+                lng1 = Number($(".geoLng1[boxid='" + boxid + "']").val()),
                 alertText = '';
 
             // Validation of coordinates - resetten als dialog wordt heropend
@@ -111,9 +111,9 @@ class Geolocation extends React.Component {
             }
 
             if (alertText) {
-                $('.geoAlert[boxID="' + boxID + '"]').html('Invalid coordinates: ' + alertText.substring(2));
+                $('.geoAlert[boxid="' + boxid + '"]').html('Invalid coordinates: ' + alertText.substring(2));
             } else {
-                $('.geoAlert[boxID="' + boxID + '"]').html(''); // reset the alert box -> no alert required
+                $('.geoAlert[boxid="' + boxid + '"]').html(''); // reset the alert box -> no alert required
                 let bounds = [[lat0, lng0], [lat1 + 0.1, lng1 + 0.1]];
 
                 // Coordinates are a point.
@@ -261,16 +261,16 @@ class Geolocation extends React.Component {
 
                     <div class='row'>
                         <div class='col-sm-11'>
-                            <label>West:</label> <input type='text' class='geoInputCoords geoLng0' boxID={this.geoBoxID}></input>
-                            <label>North:</label> <input type='text' class='geoInputCoords geoLat0' boxID={this.geoBoxID}></input>
-                            <label>East:</label> <input type='text' class='geoInputCoords geoLng1' boxID={this.geoBoxID}></input>
-                            <label>South:</label> <input type='text' class='geoInputCoords geoLat1' boxID={this.geoBoxID}></input>
+                            <label>West:</label> <input type='text' class='geoInputCoords geoLng0' boxid={this.geoBoxID}></input>
+                            <label>North:</label> <input type='text' class='geoInputCoords geoLat0' boxid={this.geoBoxID}></input>
+                            <label>East:</label> <input type='text' class='geoInputCoords geoLng1' boxid={this.geoBoxID}></input>
+                            <label>South:</label> <input type='text' class='geoInputCoords geoLat1' boxid={this.geoBoxID}></input>
                         </div>
                         <div class='col-sm-1'>
                             <button class='btn' onClick={(e) => {this.closeModal(e); }}>Close</button>
                         </div>
                     </div>
-                    <div class='geoAlert' boxID={this.geoBoxID}></div>
+                    <div class='geoAlert' boxid={this.geoBoxID}></div>
                 </Modal>
             </div>
         );
