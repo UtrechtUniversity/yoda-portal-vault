@@ -37,6 +37,7 @@ const numberWidget = (props) => {
                max="9999"
                value={props.value}
                required={props.required}
+               disabled={props.readonly}
                onChange={(event) => props.onChange(event.target.value)} />
     );
 };
