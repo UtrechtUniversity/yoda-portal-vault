@@ -241,30 +241,32 @@ class Geolocation extends React.Component {
                             attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
-                        <FeatureGroup>
-                            <EditControl
-                                position='topright'
-                                onCreated={this.drawCreated}
-                                onEdited={this.drawEdited}
-                                onDeleted={this.drawDeleted}
-                                onDrawStart={this.drawStop}
-                                draw={{
-                                    circle: false,
-                                    polygon: false,
-                                    marker: true,
-                                    circlemarker: false,
-                                    polyline: false
-                                }}
-                            />
-                        </FeatureGroup>
+                        if (!this.props.readonly) {
+                            <FeatureGroup>
+                                <EditControl
+                                    position='topright'
+                                    onCreated={this.drawCreated}
+                                    onEdited={this.drawEdited}
+                                    onDeleted={this.drawDeleted}
+                                    onDrawStart={this.drawStop}
+                                    draw={{
+                                        circle: false,
+                                        polygon: false,
+                                        marker: true,
+                                        circlemarker: false,
+                                        polyline: false
+                                    }}
+                                />
+                            </FeatureGroup>
+                        }
                     </Map>
 
                     <div className='row'>
                         <div className='col-sm-11'>
-                            <label>West:</label> <input type='text' className='geoInputCoords geoLng0' boxid={this.geoBoxID}></input>
-                            <label>North:</label> <input type='text' className='geoInputCoords geoLat0' boxid={this.geoBoxID}></input>
-                            <label>East:</label> <input type='text' className='geoInputCoords geoLng1' boxid={this.geoBoxID}></input>
-                            <label>South:</label> <input type='text' className='geoInputCoords geoLat1' boxid={this.geoBoxID}></input>
+                            <label>West:</label> <input type='text' className='geoInputCoords geoLng0' boxid={this.geoBoxID} disabled={this.props.readonly}></input>
+                            <label>North:</label> <input type='text' className='geoInputCoords geoLat0' boxid={this.geoBoxID} disabled={this.props.readonly}></input>
+                            <label>East:</label> <input type='text' className='geoInputCoords geoLng1' boxid={this.geoBoxID} disabled={this.props.readonly}></input>
+                            <label>South:</label> <input type='text' className='geoInputCoords geoLat1' boxid={this.geoBoxID} disabled={this.props.readonly}></input>
                         </div>
                         <div className='col-sm-1'>
                             <button className='btn' onClick={(e) => {this.closeModal(e); }}>Close</button>
