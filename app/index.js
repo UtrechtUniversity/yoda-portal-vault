@@ -531,7 +531,7 @@ function ObjectFieldTemplate(props) {
         let array = props.properties;
         let output = props.properties.map((prop, i, array) => {
             return (
-                <div className="col-sm-6 field compound-field">
+                <div key={i} className="col-sm-6 field compound-field">
                     {prop.content}
                 </div>
             );
@@ -595,7 +595,7 @@ function ArrayFieldTemplate(props) {
             }
 
             return (
-                <div className="has-btn">
+                <div key={i} className="has-btn">
                     {element.children}
                     <div className={"btn-controls btn-group btn-count-" + btnCount} role="group">
                         {canRemove &&
@@ -611,7 +611,7 @@ function ArrayFieldTemplate(props) {
         } else {
             if (canRemove) {
                 return (
-                    <div className="has-btn">
+                    <div key={i} className="has-btn">
                         {element.children}
                         <div className="btn-controls">
                             <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>
