@@ -14,16 +14,8 @@ var yodaFormData = {};
 
 var isDatamanager     = false;
 var isVaultPackage    = false;
-var parentHasMetadata = false;
-var metadataExists    = false;
-var submitButton      = false;
-var unsubmitButton    = false;
 var updateButton      = false;
-var locked            = false;
-var writePermission   = false;
 var save              = false;
-var submit            = false;
-var unsubmit          = false;
 var formDataErrors    = [];
 
 var form = document.getElementById('form');
@@ -86,7 +78,6 @@ class YodaForm extends React.Component {
         super(props);
 
         const formContext = {
-            submit: false,
             save: false
         };
         this.state = {
@@ -101,7 +92,6 @@ class YodaForm extends React.Component {
         // Turn save mode off.
         save = false;
         const formContext = {
-            submit: false,
             save: false
         };
 
@@ -113,7 +103,6 @@ class YodaForm extends React.Component {
 
     onError(form) {
         let formContext = {...this.state.formContext};
-        formContext.submit = submit;
         formContext.save = save;
         this.setState({
             formContext: formContext
@@ -138,21 +127,12 @@ class YodaForm extends React.Component {
 
     ErrorListTemplate(props) {
         const {errors, formContext} = props;
-        if (!submit) {
-            var i = errors.length
-            while (i--) {
-                if (errors[i].name === "required"     ||
-                    errors[i].name === "dependencies") {
-                    errors.splice(i,1);
-                }
-            }
-        }
 
         if (errors.length === 0) {
             return(<div></div>);
         } else {
             // Show error list only on save or submit.
-            if (formContext.save || formContext.submit) {
+            if (formContext.save) {
                 return (
                   <div className="panel panel-warning errors">
                     <div className="panel-heading">
@@ -212,18 +192,6 @@ class YodaButtons extends React.Component {
         return (<button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>);
     }
 
-    renderSaveVaultButton() {
-        return (<button onClick={this.props.saveVaultMetadata} type="submit" className="btn btn-primary">Save</button>);
-    }
-
-    renderSubmitButton() {
-        return (<button onClick={this.props.submitMetadata} type="submit" className="btn btn-primary">Submit</button>);
-    }
-
-    renderUnsubmitButton() {
-        return (<button onClick={this.props.unsubmitMetadata} type="submit" className="btn btn-primary">Unsubmit</button>);
-    }
-
     renderUpdateButton() {
         return (<button onClick={this.props.updateMetadata} type="button" className="btn btn-primary">Update metadata</button>);
     }
@@ -237,34 +205,10 @@ class YodaButtons extends React.Component {
             // Datamanager in Vault space.
             if (!updateButton && mode === "edit_in_vault") {
                 // Show 'Save' button.
-                return (<div>{this.renderSaveVaultButton()}</div>);
+                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()}</div>);
             } else if (updateButton) {
                 // Show 'Update' button.
                 return (<div>{this.renderUpdateButton()}</div>);
-            }
-        } else if (writePermission) {
-            // Write permission in Research space.
-            if (!metadataExists && locked) {
-                // Show no buttons.
-                return (<div></div>);
-            } else if (!metadataExists && parentHasMetadata) {
-                // Show 'Save' button.
-                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()}</div>);
-            } else if (!metadataExists) {
-                // Show 'Save' button.
-                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()}</div>);
-            } else if (!locked && submitButton) {
-                // Show 'Save' and 'Submit' buttons.
-                return (<div> {this.renderSaveButton()} {this.renderSubmitButton()} {this.renderFormCompleteness()} </div>);
-            } else if (locked && submitButton) {
-                // Show 'Submit' button.
-                return (<div>{this.renderSubmitButton()}</div>);
-            } else if (!locked && !submitButton) {
-                // Show 'Save' button.
-                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()} </div>);
-            } else if (unsubmitButton) {
-                // Show 'Unsubmit' button.
-                return (<div>{this.renderUnsubmitButton()}</div>);
             }
         } else {
             // Show no buttons.
@@ -290,32 +234,10 @@ class Container extends React.Component {
     constructor(props) {
         super(props);
         this.saveMetadata = this.saveMetadata.bind(this);
-        this.saveVaultMetadata = this.saveVaultMetadata.bind(this);
-        this.submitMetadata = this.submitMetadata.bind(this);
-        this.unsubmitMetadata = this.unsubmitMetadata.bind(this);
     }
 
     saveMetadata() {
-        save = true
-        submit = unsubmit = false;
-        this.form.submitButton.click();
-    }
-
-    saveVaultMetadata() {
-        submit = true;
-        save = unsubmit = false;
-        this.form.submitButton.click();
-    }
-
-    submitMetadata() {
-        submit = true;
-        save = unsubmit = false;
-        this.form.submitButton.click();
-    }
-
-    unsubmitMetadata() {
-        unsubmit = true;
-        save = submit = false;
+        save = true;
         this.form.submitButton.click();
     }
 
@@ -327,15 +249,9 @@ class Container extends React.Component {
         return (
         <div>
           <YodaButtons saveMetadata={this.saveMetadata}
-                       saveVaultMetadata={this.saveVaultMetadata}
-                       submitMetadata={this.submitMetadata}
-                       unsubmitMetadata={this.unsubmitMetadata}
                        updateMetadata={this.updateMetadata} />
           <YodaForm ref={(form) => {this.form=form;}}/>
           <YodaButtons saveMetadata={this.saveMetadata}
-                       saveVaultMetadata={this.saveVaultMetadata}
-                       submitMetadata={this.submitMetadata}
-                       unsubmitMetadata={this.unsubmitMetadata}
                        updateMetadata={this.updateMetadata} />
         </div>
       );
@@ -359,13 +275,7 @@ axios.get("/vault/metadata/data?path=" + path + "&mode=" + mode)
         yodaFormData      = response.data.formData;
         isDatamanager     = response.data.isDatamanager;
         isVaultPackage    = response.data.isVaultPackage;
-        parentHasMetadata = response.data.parentHasMetadata;
-        metadataExists    = response.data.metadataExists;
-        submitButton      = response.data.submitButton;
-        unsubmitButton    = response.data.unsubmitButton;
         updateButton      = response.data.updateButton;
-        locked            = response.data.locked;
-        writePermission   = response.data.writePermission;
         formDataErrors    = response.data.formDataErrors;
 
         // Check form data errors
@@ -404,11 +314,6 @@ function submitData(data)
     var bodyFormData = new FormData();
     bodyFormData.set(tokenName, tokenHash);
     bodyFormData.set('formData', JSON.stringify(data));
-    if (submit) {
-        bodyFormData.set('vault_submission', "1");
-    } else if (unsubmit) {
-        bodyFormData.set('vault_unsubmission', "1");
-    }
 
     // Store.
     axios({
@@ -436,8 +341,8 @@ function CustomFieldTemplate(props) {
 
     const hasErrors = Array.isArray(errors.props.errors) ? true : false;
 
-    // Only show error messages after submit.
-    if (formContext.submit || formContext.save) {
+    // Only show error messages after save.
+    if (formContext.save) {
       return (
         <div className={classNames}>
           <label className={'col-sm-2 control-label'}>
