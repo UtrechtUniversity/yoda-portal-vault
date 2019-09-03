@@ -241,24 +241,26 @@ class Geolocation extends React.Component {
                             attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         />
-                        if (!this.props.readonly) {
-                            <FeatureGroup>
-                                <EditControl
-                                    position='topright'
-                                    onCreated={this.drawCreated}
-                                    onEdited={this.drawEdited}
-                                    onDeleted={this.drawDeleted}
-                                    onDrawStart={this.drawStop}
-                                    draw={{
-                                        circle: false,
-                                        polygon: false,
-                                        marker: true,
-                                        circlemarker: false,
-                                        polyline: false
-                                    }}
-                                />
-                            </FeatureGroup>
-                        }
+                        <FeatureGroup>
+                            <EditControl
+                                position='topright'
+                                onCreated={this.drawCreated}
+                                onEdited={this.drawEdited}
+                                onDeleted={this.drawDeleted}
+                                onDrawStart={this.drawStop}
+                                draw={{
+                                    circle: false,
+                                    polygon: false,
+                                    circlemarker: false,
+                                    polyline: false,
+                                    marker: !this.props.readonly,
+                                    rectangle: !this.props.readonly
+                                }}
+                                edit={{
+                                    remove: !this.props.readonly
+                                }}
+                            />
+                        </FeatureGroup>
                     </Map>
 
                     <div className='row'>
