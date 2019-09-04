@@ -20,19 +20,6 @@ var formDataErrors    = [];
 var form = document.getElementById('form');
 var path = form.dataset.path;
 
-const numberWidget = (props) => {
-    return (
-        <input type="number"
-               className="number-field form-control"
-               min="0"
-               max="9999"
-               value={props.value}
-               required={props.required}
-               disabled={props.readonly}
-               onChange={(event) => props.onChange(event.target.value)} />
-    );
-};
-
 const customStyles = {
     control: styles => ({...styles, borderRadius: '0px', minHeight: '15px', height: '33.5px'}),
     placeholder: () => ({color: '#555'})
@@ -62,7 +49,6 @@ const enumWidget = (props) => {
 };
 
 const widgets = {
-    numberWidget: numberWidget,
     SelectWidget: enumWidget
 };
 
