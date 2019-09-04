@@ -25,7 +25,7 @@ class Geolocation extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            modalIsOpen: false,
+            showModal: false,
             ...props.formData
         };
 
@@ -46,12 +46,14 @@ class Geolocation extends React.Component {
 
         globalThis = this; // @todo: get rid of this dirty trick
 
-        this.setState({modalIsOpen: true});
+        this.setState({showModal: true});
     }
 
     closeModal(e) {
         e.preventDefault();
-        this.setState({modalIsOpen: false});
+
+        delete this.state["showModal"];
+        this.setState(this.state);
     }
 
     afterOpenModal(e) {
@@ -230,7 +232,7 @@ class Geolocation extends React.Component {
                   </div>
 
                 <Modal
-                    isOpen={this.state.modalIsOpen}
+                    isOpen={this.state.showModal}
                     onAfterOpen={this.afterOpenModal}
                     onRequestClose={this.closeModal}
                     style={customModalStyles}
