@@ -40,21 +40,10 @@ class Metadata extends MY_Controller
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
 
         $isDatamanager = $formConfig['isDatamanager'];
-        $isVaultPackage = $formConfig['isVaultPackage'];
 
         $userType = $formConfig['userType'];
 
         $mode = $this->input->get('mode'); // ?mode=edit_for_vault
-        if ($isDatamanager == 'yes' && $isVaultPackage == 'yes' && $mode == 'edit_in_vault') {
-            // .tmp file for XSD validation
-            $result = $this->Metadata_model->prepareVaultMetadataForEditing($formConfig['metadataJsonPath']);
-
-            $tmpSavePath = $result['*tempMetadataJsonPath'] . '.tmp';
-            $tmpFileExists = $this->Filesystem->read($rodsaccount, $tmpSavePath);
-            if ($tmpFileExists !== false) {
-                $formConfig['metadataJsonPath'] = $tmpSavePath;
-            }
-        }
 
         if ($userType == 'normal' || $userType == 'manager') {
             $writePermission = true;
@@ -69,7 +58,6 @@ class Metadata extends MY_Controller
         $tokenName = $this->security->get_csrf_token_name();
         $tokenHash = $this->security->get_csrf_hash();
 
-        $metadataExists = ($formConfig['hasMetadataJson'] == 'true' || $formConfig['hasMetadataJson'] == 'yes') ? true: false;
 
         $viewParams = array(
             'styleIncludes' => array(
@@ -86,10 +74,9 @@ class Metadata extends MY_Controller
             'tokenHash'        => $tokenHash,
             'userType'         => $userType,
             'mode'             => $mode,
-            'isVaultPackage'   => $isVaultPackage,
             'flashMessage'     => $flashMessage,
             'flashMessageType' => $flashMessageType,
-            'metadataExists'   => $metadataExists,
+            'metadataExists'   => true,
             'writePermission'  => $writePermission,
             'showForm'         => $showForm,
         );
@@ -113,15 +100,11 @@ class Metadata extends MY_Controller
         $jsonSchema = $this->Metadata_form_model->getJsonSchema($rodsaccount, $fullPath);
         $uiSchema = $this->Metadata_form_model->getJsonUiSchema($rodsaccount, $fullPath);
 
-        $metadataExists = ($formConfig['hasMetadataJson'] == 'true' || $formConfig['hasMetadataJson'] == 'yes') ? true: false;
-        $formData = null;
-        if ($metadataExists) {
-            $formData = $this->Metadata_form_model->getJsonMetadata($rodsaccount, $formConfig['metadataJsonPath']);
-        }
+        $formData = $this->Metadata_form_model->getJsonMetadata($rodsaccount, $formConfig['metadataJsonPath']);
 
         // Validation
         $errors = array();
-        if (empty($formData) && $metadataExists) {
+        if (empty($formData)) {
             $errors[] = 'Please check the structure of this file.';
         } else if (empty($formData)) {
              $formData = json_decode ("{}");
@@ -149,8 +132,7 @@ class Metadata extends MY_Controller
         }
 
         $formConfig = $this->filesystem->metadataFormPaths($rodsaccount, $fullPath);
-        $isDatamanager     = ($formConfig['isDatamanager'] == 'yes') ? true: false;
-        $isVaultPackage    = ($formConfig['isVaultPackage'] == 'yes') ? true: false;
+        $isDatamanager     = $formConfig['isDatamanager']  == 'yes';
         $userType          = $formConfig['userType'];
 
         if ($userType == 'normal' || $userType == 'manager') {
@@ -162,16 +144,6 @@ class Metadata extends MY_Controller
         // Should submit button be rendered?
         $submitButton = false;
         $isLocked = false;
-        if (!$isVaultPackage) {
-            $lockStatus = $formConfig['lockFound'];
-            $folderStatus = $formConfig['folderStatus'];
-            $isLocked = ($formConfig['lockFound'] == "here" || $formConfig['lockFound'] == "ancestor") ? true: false;
-            if (($lockStatus == 'here' || $lockStatus == 'no')
-                && ($folderStatus == 'SECURED' || $folderStatus == 'LOCKED' || $folderStatus == '')
-                && ($userType == 'normal' || $userType == 'manager')) {
-                $submitButton = true;
-            }
-        }
 
         // Should unsubmit button be rendered?
         $unsubmitButton = false;
@@ -182,25 +154,14 @@ class Metadata extends MY_Controller
 
         // Should update button be rendered?
         $mode = $this->input->get('mode');
-        $updateButton = false;
-        if ($isDatamanager && $isVaultPackage) {
-            if ($mode != 'edit_in_vault') {
-                $updateButton = true;
-            }
-        }
+        $updateButton = $isDatamanager && $mode !== 'edit_in_vault';
 
         $uiSchema = json_decode($uiSchema, true);
         if ($isLocked
-            || (!$isVaultPackage && $isDatamanager && !$writePermission)
-            || ($isVaultPackage && !$isDatamanager)
-            || ($isVaultPackage && $isDatamanager && $updateButton)
+            || (!$isDatamanager)
+            || ($isDatamanager && $updateButton)
             || (!$writePermission && !$isDatamanager)) {
             $uiSchema["ui:readonly"] = "true";
-        }
-
-        $parentHasMetadata = false;
-        if (!$isVaultPackage) {
-            $parentHasMetadata = ($formConfig['parentHasMetadataXml'] == 'true') ? true: false;
         }
 
         $output = array();
@@ -210,9 +171,6 @@ class Metadata extends MY_Controller
         $output['formData']          = $formData;
         $output['formDataErrors']    = $errors;
         $output['isDatamanager']     = $isDatamanager;
-        $output['isVaultPackage']    = $isVaultPackage;
-        $output['parentHasMetadata'] = $parentHasMetadata;
-        $output['metadataExists']    = $metadataExists;
         $output['locked']            = $isLocked;
         $output['writePermission']   = $writePermission;
         $output['submitButton']      = $submitButton;

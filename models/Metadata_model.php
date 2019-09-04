@@ -15,20 +15,4 @@ class Metadata_model extends CI_Model {
         parent::__construct();
         $this->CI =& get_instance();
     }
-
-    /**
-     * Prepare vault metadata for editing.
-     *
-     * @param $metadataFile
-     * @return metadata
-     */
-    public function prepareVaultMetadataForEditing($metadataFile)
-    {
-        $outputParams = array('*tempMetadataJsonPath', '*status', '*statusInfo');
-        $inputParams = array('*metadataJsonPath' => $metadataFile);
-
-        $rule = $this->irodsrule->make('iiPrepareVaultMetadataForEditing', $inputParams, $outputParams);
-        $result = $rule->execute();
-        return $result;
-    }
 }

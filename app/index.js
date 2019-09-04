@@ -16,8 +16,6 @@ var uiSchema = {};
 var yodaFormData = {};
 
 var isDatamanager     = false;
-var isVaultPackage    = false;
-var parentHasMetadata = false;
 var metadataExists    = false;
 var submitButton      = false;
 var unsubmitButton    = false;
@@ -503,7 +501,7 @@ class YodaButtons extends React.Component {
     }
 
     renderButtons() {
-        if (isVaultPackage && isDatamanager) {
+        if (isDatamanager) {
             // Datamanager in Vault space.
             if (!updateButton && mode === "edit_in_vault") {
                 // Show 'Save' button.
@@ -511,30 +509,6 @@ class YodaButtons extends React.Component {
             } else if (updateButton) {
                 // Show 'Update' button.
                 return (<div>{this.renderUpdateButton()}</div>);
-            }
-        } else if (writePermission) {
-            // Write permission in Research space.
-            if (!metadataExists && locked) {
-                // Show no buttons.
-                return (<div></div>);
-            } else if (!metadataExists && parentHasMetadata) {
-                // Show 'Save' button.
-                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()}</div>);
-            } else if (!metadataExists) {
-                // Show 'Save' button.
-                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()}</div>);
-            } else if (!locked && submitButton) {
-                // Show 'Save' and 'Submit' buttons.
-                return (<div> {this.renderSaveButton()} {this.renderSubmitButton()} {this.renderFormCompleteness()} </div>);
-            } else if (locked && submitButton) {
-                // Show 'Submit' button.
-                return (<div>{this.renderSubmitButton()}</div>);
-            } else if (!locked && !submitButton) {
-                // Show 'Save' button.
-                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()} </div>);
-            } else if (unsubmitButton) {
-                // Show 'Unsubmit' button.
-                return (<div>{this.renderUnsubmitButton()}</div>);
             }
         } else {
             // Show no buttons.
@@ -628,8 +602,6 @@ axios.get("/vault/metadata/data?path=" + path + "&mode=" + mode)
         uiSchema          = response.data.uiSchema;
         yodaFormData      = response.data.formData;
         isDatamanager     = response.data.isDatamanager;
-        isVaultPackage    = response.data.isVaultPackage;
-        parentHasMetadata = response.data.parentHasMetadata;
         metadataExists    = response.data.metadataExists;
         submitButton      = response.data.submitButton;
         unsubmitButton    = response.data.unsubmitButton;
