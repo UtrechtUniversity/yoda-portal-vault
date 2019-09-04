@@ -1,12 +1,9 @@
 import React, { Component } from "react";
 import axios from 'axios';
 import { render } from "react-dom";
-import Modal from 'react-modal';
-import { Map, TileLayer, Marker, Popup, FeatureGroup } from 'react-leaflet';
-import L from 'leaflet';
-import { EditControl } from "react-leaflet-draw";
 import Form from "react-jsonschema-form";
 import Select from 'react-select';
+import Geolocation from "./Geolocation"
 
 var globalGeoBoxCounter = 0; // Additions for being able to manually add geoBoxes
 var globalThis = null;
@@ -16,15 +13,8 @@ var uiSchema = {};
 var yodaFormData = {};
 
 var isDatamanager     = false;
-var metadataExists    = false;
-var submitButton      = false;
-var unsubmitButton    = false;
 var updateButton      = false;
-var locked            = false;
-var writePermission   = false;
 var save              = false;
-var submit            = false;
-var unsubmit          = false;
 var formDataErrors    = [];
 
 var form = document.getElementById('form');
@@ -38,25 +28,13 @@ const numberWidget = (props) => {
                max="9999"
                value={props.value}
                required={props.required}
+               disabled={props.readonly}
                onChange={(event) => props.onChange(event.target.value)} />
     );
 };
 
-const customModalStyles = {
-    content : {
-        top                   : '50%',
-        left                  : '50%',
-        right                 : 'auto',
-        bottom                : 'auto',
-        marginRight           : '-50%',
-        transform             : 'translate(-50%, -50%)',
-        width                 : '58%',
-        height                : '625px',
-    }
-};
-
 const customStyles = {
-	control: styles => ({...styles, borderRadius: '0px', minHeight: '15px', height: '33.5px'}),
+    control: styles => ({...styles, borderRadius: '0px', minHeight: '15px', height: '33.5px'}),
     placeholder: () => ({color: '#555'})
 };
 
@@ -83,267 +61,13 @@ const enumWidget = (props) => {
 	);
 };
 
-class GeoLocation extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            modalIsOpen: false,
-            ...props.formData
-        };
-
-        this.openModal = this.openModal.bind(this);
-        this.closeModal = this.closeModal.bind(this);
-        this.afterOpenModal = this.afterOpenModal.bind(this);
-        this.drawCreated = this.drawCreated.bind(this);
-        this.drawEdited = this.drawEdited.bind(this);
-        this.drawDeleted = this.drawDeleted.bind(this);
-        this.drawStop = this.drawStop.bind(this);
-        this.setFormData = this.setFormData.bind(this);
-        this.geoBoxID = globalGeoBoxCounter;
-        globalGeoBoxCounter++;
-    }
-
-    openModal(e) {
-        e.preventDefault();
-
-        globalThis = this; // @todo: get rid of this dirty trick
-
-        this.setState({modalIsOpen: true});
-    }
-
-    closeModal(e) {
-        e.preventDefault();
-        this.setState({modalIsOpen: false});
-    }
-
-    afterOpenModal(e) {
-        const {northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude} = this.state;
-        let map = this.refs.map.leafletElement;
-        if (typeof northBoundLatitude !== 'undefined' &&
-            typeof westBoundLongitude !== 'undefined' &&
-            typeof southBoundLatitude !== 'undefined' &&
-            typeof eastBoundLongitude !== 'undefined'
-        ) {
-            let bounds = [
-                [northBoundLatitude,       westBoundLongitude],
-                [southBoundLatitude + 0.1, eastBoundLongitude + 0.1]
-            ];
-
-            // Coordinates are a point.
-            if (northBoundLatitude == southBoundLatitude && westBoundLongitude == eastBoundLongitude) {
-                var latlng = L.latLng(northBoundLatitude, westBoundLongitude);
-                L.marker(latlng).addTo(map);
-            } else {
-                L.rectangle(bounds).addTo(map);
-            }
-            map.fitBounds(bounds, {'padding': [150, 150]});
-        }
-
-        this.fillCoordinateInputs(northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude);
-
-        $('.geoInputCoords').on('input propertychange paste', function() {
-            var boxID = $(this).attr("boxID");
-
-            // Remove earlier markers and rectangle(s)
-            map.eachLayer(function (layer) {
-                if (layer instanceof L.Marker || layer instanceof L.Rectangle) {
-                    map.removeLayer(layer);
-                }
-            });
-
-            // only make persistent when correct coordinates are added by user
-            var lat0 = Number($(".geoLat0[boxID='" + boxID + "']").val()),
-                lng0 = Number($(".geoLng0[boxID='" + boxID + "']").val()),
-                lat1 = Number($(".geoLat1[boxID='" + boxID + "']").val()),
-                lng1 = Number($(".geoLng1[boxID='" + boxID + "']").val()),
-                alertText = '';
-
-            // Validation of coordinates - resetten als dialog wordt heropend
-            if(!$.isNumeric( lng0 )){
-                alertText += ', WEST';
-            }
-            if(!$.isNumeric( lat0 )){
-                alertText = ', NORTH';
-            }
-            if(!$.isNumeric( lng1 )){
-                alertText += ', EAST';
-            }
-            if(!$.isNumeric( lat1 )){
-                alertText += ', SOUTH';
-            }
-
-            if (alertText) {
-                $('.geoAlert[boxID="' + boxID + '"]').html('Invalid coordinates: ' + alertText.substring(2));
-            } else {
-                $('.geoAlert[boxID="' + boxID + '"]').html(''); // reset the alert box -> no alert required
-                let bounds = [[lat0, lng0], [lat1 + 0.1, lng1 + 0.1]];
-
-                // Coordinates are a point.
-                if (lat0 == lat1 && lng0 == lng1) {
-                    var latlng = L.latLng(lat0, lng0);
-                    L.marker(latlng).addTo(map);
-                } else {
-                    L.rectangle(bounds).addTo(map);
-                }
-                map.fitBounds(bounds, {'padding': [150, 150]});
-
-                globalThis.setFormData('northBoundLatitude', lat0);
-                globalThis.setFormData('westBoundLongitude', lng0);
-                globalThis.setFormData('southBoundLatitude', lat1);
-                globalThis.setFormData('eastBoundLongitude', lng1);
-            }
-       });
-    }
-
-    fillCoordinateInputs(northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude) {
-        $('.geoLat0').val(northBoundLatitude);
-        $('.geoLng0').val(westBoundLongitude);
-        $('.geoLat1').val(southBoundLatitude);
-        $('.geoLng1').val(eastBoundLongitude);
-    }
-
-    drawCreated(e) {
-        let layer = e.layer;
-
-        if (layer instanceof L.Marker) {
-            this.setFormData('northBoundLatitude', layer.getLatLng().lat);
-            this.setFormData('westBoundLongitude', layer.getLatLng().lng);
-            this.setFormData('southBoundLatitude', layer.getLatLng().lat);
-            this.setFormData('eastBoundLongitude', layer.getLatLng().lng);
-
-            this.fillCoordinateInputs(
-                layer.getLatLng().lat, layer.getLatLng().lng,
-                layer.getLatLng().lat, layer.getLatLng().lng
-            );
-        } else if (layer instanceof L.Rectangle)  {
-            this.setFormData('northBoundLatitude', layer.getLatLngs()[0][2].lat);
-            this.setFormData('westBoundLongitude', layer.getLatLngs()[0][2].lng);
-            this.setFormData('southBoundLatitude', layer.getLatLngs()[0][0].lat);
-            this.setFormData('eastBoundLongitude', layer.getLatLngs()[0][0].lng);
-
-            this.fillCoordinateInputs(
-                layer.getLatLngs()[0][2].lat, layer.getLatLngs()[0][2].lng,
-                layer.getLatLngs()[0][0].lat, layer.getLatLngs()[0][0].lng
-            );
-        }
-    }
-
-    drawEdited(e) {
-        e.layers.eachLayer( (layer) => {
-            if (layer instanceof L.Marker) {
-                this.setFormData('northBoundLatitude', layer.getLatLng().lat);
-                this.setFormData('westBoundLongitude', layer.getLatLng().lng);
-                this.setFormData('southBoundLatitude', layer.getLatLng().lat);
-                this.setFormData('eastBoundLongitude', layer.getLatLng().lng);
-
-                this.fillCoordinateInputs(
-                    layer.getLatLng().lat, layer.getLatLng().lng,
-                    layer.getLatLng().lat, layer.getLatLng().lng
-                );
-            } else if (layer instanceof L.Rectangle)  {
-                this.setFormData('northBoundLatitude', layer.getLatLngs()[0][2].lat);
-                this.setFormData('westBoundLongitude', layer.getLatLngs()[0][2].lng);
-                this.setFormData('southBoundLatitude', layer.getLatLngs()[0][0].lat);
-                this.setFormData('eastBoundLongitude', layer.getLatLngs()[0][0].lng);
-
-                this.fillCoordinateInputs(
-                    layer.getLatLngs()[0][2].lat, layer.getLatLngs()[0][2].lng,
-                    layer.getLatLngs()[0][0].lat, layer.getLatLngs()[0][0].lng
-                );
-            }
-        });
-    }
-
-    drawDeleted(e) {
-        this.setFormData('northBoundLatitude', undefined);
-        this.setFormData('westBoundLongitude', undefined);
-        this.setFormData('southBoundLatitude', undefined);
-        this.setFormData('eastBoundLongitude', undefined);
-
-        this.fillCoordinateInputs("", "", "", "");
-    }
-
-    drawStop(e) {
-        let map = this.refs.map.leafletElement;
-        map.eachLayer(function (layer) {
-            if (layer instanceof L.Marker || layer instanceof L.Rectangle) {
-                map.removeLayer(layer);
-            }
-        });
-    }
-
-    setFormData(fieldName, fieldValue) {
-        this.setState({
-            [fieldName]: fieldValue
-        }, () => this.props.onChange(this.state));
-    }
-
-    render() {
-        const {northBoundLatitude, westBoundLongitude, southBoundLatitude, eastBoundLongitude} = this.state;
-        return (
-                <div class={'geoDiv' + this.geoBoxID}>
-                <label><span>Geo Location:</span></label>
-                <button class='btn' onClick={(e) => {this.openModal(e); }}>Open Map</button>
-                <br></br>
-                WN: {westBoundLongitude}, {northBoundLatitude}
-                <br></br>
-                ES: {eastBoundLongitude}, {southBoundLatitude}
-
-                <Modal
-                    isOpen={this.state.modalIsOpen}
-                    onAfterOpen={this.afterOpenModal}
-                    onRequestClose={this.closeModal}
-                    style={customModalStyles}
-                    ariaHideApp={false}
-                >
-                    <Map ref='map' center={[48.760, 13.275]} zoom={4} animate={false}>
-                        <TileLayer
-                            attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        />
-                        <FeatureGroup>
-                            <EditControl
-                                position='topright'
-                                onCreated={this.drawCreated}
-                                onEdited={this.drawEdited}
-                                onDeleted={this.drawDeleted}
-                                onDrawStart={this.drawStop}
-                                draw={{
-                                    circle: false,
-                                    polygon: false,
-                                    marker: true,
-                                    circlemarker: false,
-                                    polyline: false
-                                }}
-                            />
-                        </FeatureGroup>
-                    </Map>
-
-                    <div class='row'>
-                        <div class='col-sm-11'>
-                            <label>West:</label> <input type='text' class='geoInputCoords geoLng0' boxID={this.geoBoxID}></input>
-                            <label>North:</label> <input type='text' class='geoInputCoords geoLat0' boxID={this.geoBoxID}></input>
-                            <label>East:</label> <input type='text' class='geoInputCoords geoLng1' boxID={this.geoBoxID}></input>
-                            <label>South:</label> <input type='text' class='geoInputCoords geoLat1' boxID={this.geoBoxID}></input>
-                        </div>
-                        <div class='col-sm-1'>
-                            <button class='btn' onClick={(e) => {this.closeModal(e); }}>Close</button>
-                        </div>
-                    </div>
-                    <div class='geoAlert' boxID={this.geoBoxID}></div>
-                </Modal>
-            </div>
-        );
-    }
-}
-
 const widgets = {
     numberWidget: numberWidget,
     SelectWidget: enumWidget
 };
 
 const fields = {
-    geo: GeoLocation
+    geo: Geolocation
 };
 
 const onSubmit = ({formData}) => submitData(formData);
@@ -353,7 +77,6 @@ class YodaForm extends React.Component {
         super(props);
 
         const formContext = {
-            submit: false,
             save: false
         };
         this.state = {
@@ -368,7 +91,6 @@ class YodaForm extends React.Component {
         // Turn save mode off.
         save = false;
         const formContext = {
-            submit: false,
             save: false
         };
 
@@ -380,7 +102,6 @@ class YodaForm extends React.Component {
 
     onError(form) {
         let formContext = {...this.state.formContext};
-        formContext.submit = submit;
         formContext.save = save;
         this.setState({
             formContext: formContext
@@ -405,21 +126,12 @@ class YodaForm extends React.Component {
 
     ErrorListTemplate(props) {
         const {errors, formContext} = props;
-        if (!submit) {
-            var i = errors.length
-            while (i--) {
-                if (errors[i].name === "required"     ||
-                    errors[i].name === "dependencies") {
-                    errors.splice(i,1);
-                }
-            }
-        }
 
         if (errors.length === 0) {
             return(<div></div>);
         } else {
             // Show error list only on save or submit.
-            if (formContext.save || formContext.submit) {
+            if (formContext.save) {
                 return (
                   <div className="panel panel-warning errors">
                     <div className="panel-heading">
@@ -443,7 +155,6 @@ class YodaForm extends React.Component {
     }
 
     render () {
-
         return (
         <Form className="form form-horizontal metadata-form"
               schema={schema}
@@ -480,18 +191,6 @@ class YodaButtons extends React.Component {
         return (<button onClick={this.props.saveMetadata} type="submit" className="btn btn-primary">Save</button>);
     }
 
-    renderSaveVaultButton() {
-        return (<button onClick={this.props.saveVaultMetadata} type="submit" className="btn btn-primary">Save</button>);
-    }
-
-    renderSubmitButton() {
-        return (<button onClick={this.props.submitMetadata} type="submit" className="btn btn-primary">Submit</button>);
-    }
-
-    renderUnsubmitButton() {
-        return (<button onClick={this.props.unsubmitMetadata} type="submit" className="btn btn-primary">Unsubmit</button>);
-    }
-
     renderUpdateButton() {
         return (<button onClick={this.props.updateMetadata} type="button" className="btn btn-primary">Update metadata</button>);
     }
@@ -505,7 +204,7 @@ class YodaButtons extends React.Component {
             // Datamanager in Vault space.
             if (!updateButton && mode === "edit_in_vault") {
                 // Show 'Save' button.
-                return (<div>{this.renderSaveVaultButton()}</div>);
+                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()}</div>);
             } else if (updateButton) {
                 // Show 'Update' button.
                 return (<div>{this.renderUpdateButton()}</div>);
@@ -534,32 +233,10 @@ class Container extends React.Component {
     constructor(props) {
         super(props);
         this.saveMetadata = this.saveMetadata.bind(this);
-        this.saveVaultMetadata = this.saveVaultMetadata.bind(this);
-        this.submitMetadata = this.submitMetadata.bind(this);
-        this.unsubmitMetadata = this.unsubmitMetadata.bind(this);
     }
 
     saveMetadata() {
-        save = true
-        submit = unsubmit = false;
-        this.form.submitButton.click();
-    }
-
-    saveVaultMetadata() {
-        submit = true;
-        save = unsubmit = false;
-        this.form.submitButton.click();
-    }
-
-    submitMetadata() {
-        submit = true;
-        save = unsubmit = false;
-        this.form.submitButton.click();
-    }
-
-    unsubmitMetadata() {
-        unsubmit = true;
-        save = submit = false;
+        save = true;
         this.form.submitButton.click();
     }
 
@@ -571,15 +248,9 @@ class Container extends React.Component {
         return (
         <div>
           <YodaButtons saveMetadata={this.saveMetadata}
-                       saveVaultMetadata={this.saveVaultMetadata}
-                       submitMetadata={this.submitMetadata}
-                       unsubmitMetadata={this.unsubmitMetadata}
                        updateMetadata={this.updateMetadata} />
           <YodaForm ref={(form) => {this.form=form;}}/>
           <YodaButtons saveMetadata={this.saveMetadata}
-                       saveVaultMetadata={this.saveVaultMetadata}
-                       submitMetadata={this.submitMetadata}
-                       unsubmitMetadata={this.unsubmitMetadata}
                        updateMetadata={this.updateMetadata} />
         </div>
       );
@@ -602,12 +273,7 @@ axios.get("/vault/metadata/data?path=" + path + "&mode=" + mode)
         uiSchema          = response.data.uiSchema;
         yodaFormData      = response.data.formData;
         isDatamanager     = response.data.isDatamanager;
-        metadataExists    = response.data.metadataExists;
-        submitButton      = response.data.submitButton;
-        unsubmitButton    = response.data.unsubmitButton;
         updateButton      = response.data.updateButton;
-        locked            = response.data.locked;
-        writePermission   = response.data.writePermission;
         formDataErrors    = response.data.formDataErrors;
 
         // Check form data errors
@@ -646,11 +312,6 @@ function submitData(data)
     var bodyFormData = new FormData();
     bodyFormData.set(tokenName, tokenHash);
     bodyFormData.set('formData', JSON.stringify(data));
-    if (submit) {
-        bodyFormData.set('vault_submission', "1");
-    } else if (unsubmit) {
-        bodyFormData.set('vault_unsubmission', "1");
-    }
 
     // Store.
     axios({
@@ -678,8 +339,8 @@ function CustomFieldTemplate(props) {
 
     const hasErrors = Array.isArray(errors.props.errors) ? true : false;
 
-    // Only show error messages after submit.
-    if (formContext.submit || formContext.save) {
+    // Only show error messages after save.
+    if (formContext.save) {
       return (
         <div className={classNames}>
           <label className={'col-sm-2 control-label'}>
@@ -757,7 +418,7 @@ function ObjectFieldTemplate(props) {
         let array = props.properties;
         let output = props.properties.map((prop, i, array) => {
             return (
-                <div className="col-sm-6 field compound-field">
+                <div key={i} className="col-sm-6 field compound-field">
                     {prop.content}
                 </div>
             );
@@ -821,15 +482,15 @@ function ArrayFieldTemplate(props) {
             }
 
             return (
-                <div className="has-btn">
+                <div key={i} className="has-btn">
                     {element.children}
                     <div className={"btn-controls btn-group btn-count-" + btnCount} role="group">
                         {canRemove &&
                         <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>
-                            <i class="fa fa-minus" aria-hidden="true"></i>
+                            <i className="fa fa-minus" aria-hidden="true"></i>
                         </button>}
                         <button type="button" className="clone-btn btn btn-default" onClick={props.onAddClick}>
-                            <i class="fa fa-plus" aria-hidden="true"></i>
+                            <i className="fa fa-plus" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
@@ -837,11 +498,11 @@ function ArrayFieldTemplate(props) {
         } else {
             if (canRemove) {
                 return (
-                    <div className="has-btn">
+                    <div key={i} className="has-btn">
                         {element.children}
                         <div className="btn-controls">
                             <button type="button" className="clone-btn btn btn-default" onClick={item.onDropIndexClick(item.index)}>
-                                <i class="fa fa-minus" aria-hidden="true"></i>
+                                <i className="fa fa-minus" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>
