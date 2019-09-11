@@ -128,34 +128,6 @@ button[data-clone*="main"] {
     position: relative;
     z-index: 9999;
 }
-/*
-.subproperties {
-    padding-left: 9%;
-}
-*/
-/*
-.subproperties .form-group {
-    padding-left: 9%;
-}
-
-
-.subproperties .form-group:nth-of-type(1),
-.subproperties .form-group:first-of-type {
-    padding-left: 0%;
-}
-
-.subproperties .compound {
-    padding-left: 9%;
-}
-*/
-/*
-.subproperties .compound {
-    padding-left: 9%;
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-}
-*/
 
 .subproperties > div:not(:first-of-type) {
     padding-left: 9%;
@@ -163,10 +135,6 @@ button[data-clone*="main"] {
 
 .subproperties legend {
     display: none;
-}
-
-.subproperties .compound {
-    padding-left: 9%;
 }
 
 .subproperties .compound legend {
@@ -177,38 +145,6 @@ button[data-clone*="main"] {
     padding-top: 30px!important;
 }
 
-/*
-.compound {
-    display: inline-block;
-    width: 100%;
-}
-
-.compound legend {
-    float: left;
-    width: 15%!important;
-    margin-right: 5%;
-    padding-top: 30px!important;
-    text-align: right;
-    font-weight: bold;
-}
-
-.compound .form-group {
-    width: 40%;
-    display: inherit;
-}
-
-.compound .form-group .field-wrapper {
-    width: 100%;
-    padding-right: 5%;
-}
-
-.compound .form-group label {
-    width: 22%!important;
-}
-
-.compound div {
-}
-*/
 .has-btn {
     position: relative;
 }
@@ -225,10 +161,6 @@ button[data-clone*="main"] {
 
 .btn-controls button {
     width: 34px;
-}
-
-.yoda-structure.compound {
-    margin-bottom: 0px;
 }
 
 .compound-field .form-group label {
