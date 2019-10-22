@@ -419,7 +419,7 @@ function toggleSystemMetadata(folder)
                         html += '<li class="list-group-item"><span><strong>'
                              + htmlEncode(index)
                              + '</strong>: '
-                             + htmlEncode(value)
+                             + value
                              + '</span></li>';
                     });
                 } else {
