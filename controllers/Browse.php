@@ -129,31 +129,21 @@ class Browse extends MY_Controller
     /**
      * Retrieve system metadata of vault package.
      */
-    public function system_metadata()
-    {
-        $rodsaccount = $this->rodsuser->getRodsAccount();
-        $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $folderPath = $this->input->get('folder');
-        $fullPath = $pathStart . $folderPath;
+     public function system_metadata()
+     {
+         $rodsaccount = $this->rodsuser->getRodsAccount();
+         $pathStart = $this->pathlibrary->getPathStart($this->config);
+         $folderPath = $this->input->get('folder');
+         $fullPath = $pathStart . $folderPath;
 
-        $result = $this->filesystem->listSystemMetadata($rodsaccount, $fullPath);
+         $systemMetadata = $this->filesystem->listSystemMetadata($rodsaccount, $fullPath);
 
-        $systemMetadata = array();
-        if ($result['*status'] == 'Success') {
+         $output = array('result' => $systemMetadata);
 
-            foreach($result['*result'] as $item){
-                $systemMetadata[] = array($item[0], $item[1]);
-            }
-        }
-
-        $output = array('result' => $systemMetadata,
-	                'status' => $result['*status'],
-			'statusInfo' => $result['*statusInfo']);
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
-    }
+         $this->output
+             ->set_content_type('application/json')
+             ->set_output(json_encode($output));
+     }
 
     /**
      * @param int $restrict

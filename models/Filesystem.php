@@ -631,45 +631,27 @@ RULE;
         return array();
     }
 
-    /**
-     * List the system metadata of a folder.
-     *
-     * @param $iRodsAccount
-     * @param $folder
-     * @return array
-     */
-    function listSystemMetadata($iRodsAccount, $folder)
-    {
-        $output = array();
+     /**
+      * List the system metadata of a folder.
+      *
+      * @param $iRodsAccount
+      * @param $folder
+      * @return mixed
+      */
+     static public function listSystemMetadata($iRodsAccount, $folder) {
+         try {
+             $rule = new ProdsRule(
+                 $iRodsAccount,
+                 'myRule { iiVaultSpaceSystemMetadata(*coll); }',
+                 array('*coll' => $folder),
+                 array('ruleExecOut')
+             );
 
-        $ruleBody = <<<'RULE'
-myRule {
-    iiFrontEndSystemMetadata(*folder, *result, *status, *statusInfo);
-}
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*folder" => $folder
-                ),
-                array("*result", "*status", "*statusInfo")
-            );
-
-            $ruleResult = $rule->execute();
-
-            $output['*result'] = json_decode($ruleResult['*result'], true);
-            $output['*status'] = $ruleResult['*status'];
-            $output['*statusInfo'] = $ruleResult['*statusInfo'];
-
-            return $output;
-
-        } catch(RODSException $e) {
-            return array();
-        }
-        return array();
-    }
+             return json_decode($rule->execute()['ruleExecOut']);
+         } catch(RODSException $e) {
+             return false;
+         }
+     }
 
     /**
      * Get the category dependent JSON schema from iRODS.
