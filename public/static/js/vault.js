@@ -408,28 +408,26 @@ function toggleSystemMetadata(folder)
     if (isVisible) {
         systemMetadata.hide();
     } else {
-        // Get locks
-        $.getJSON("browse/system_metadata?folder=" + folder, function (data) {
+        // Get system metadata.
+        $.getJSON("browse/system_metadata?folder=" + folder, function(data) {
             systemMetadata.hide();
-
-            if (data.status == 'Success') {
+            if (data) {
                 var html = '<li class="list-group-item disabled">System metadata:</li>';
-                var logItems = data.result;
-                if (logItems.length) {
-                    $.each(logItems, function (index, value) {
+
+                if (data.result) {
+                    $.each(data.result, function (index, value) {
                         html += '<li class="list-group-item"><span><strong>'
-                             + htmlEncode(value[0])
+                             + htmlEncode(index)
                              + '</strong>: '
-                             + value[1]
+                             + htmlEncode(value)
                              + '</span></li>';
                     });
-                }
-                else {
+                } else {
                     html += '<li class="list-group-item">No system metadata present</li>';
                 }
                 systemMetadata.html(html).show();
             } else {
-                setMessage('error', data.statusInfo);
+                setMessage('error', 'Could not retrieve system metadata.');
             }
         });
     }
