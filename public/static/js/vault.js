@@ -454,10 +454,10 @@ function topInformation(dir, showAlert)
             }
 
             var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
+            var basename = data.result.basename;
             var metadata = data.result.userMetadata;
             var vaultStatus = data.result.vaultStatus;
             var vaultActionPending = data.result.vaultActionPending;
-            var userType = data.result.userType;
             var hasWriteRights = "yes";
             var hasDatamanager = data.result.hasDatamanager;
             var isDatamanager = data.result.isDatamanager;
@@ -556,8 +556,7 @@ function topInformation(dir, showAlert)
                 $('a.action-go-to-research').attr('research-path', researchPath);
             }
 
-            // data.basename.replace(/ /g, "&nbsp;")
-            folderName = htmlEncode(data.result.basename).replace(/ /g, "&nbsp;");
+            folderName = htmlEncode(basename).replace(/ /g, "&nbsp;");
 
             // Set status badge.
             statusText = "";
