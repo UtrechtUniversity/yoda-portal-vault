@@ -455,10 +455,8 @@ function topInformation(dir, showAlert)
 
             var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
             var metadata = data.result.userMetadata;
-            var status = data.result.folderStatus;
             var vaultStatus = data.result.vaultStatus;
             var vaultActionPending = data.result.vaultActionPending;
-            var vaultNewStatus = data.result.vaultNewStatus;
             var userType = data.result.userType;
             var hasWriteRights = "yes";
             var hasDatamanager = data.result.hasDatamanager;
