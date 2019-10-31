@@ -642,7 +642,7 @@ RULE;
          try {
              $rule = new ProdsRule(
                  $iRodsAccount,
-                 'myRule { iiVaultSpaceSystemMetadata(*coll); }',
+                 'myRule { rule_uu_vault_system_metadata(*coll); }',
                  array('*coll' => $folder),
                  array('ruleExecOut')
              );
@@ -742,7 +742,7 @@ RULE;
     {
         $rule = new ProdsRule(
             $this->rodsuser->getRodsAccount(),
-            'rule { iiGetPreservableFormatsListsJson(); }',
+            'rule { rule_uu_vault_preservable_formats_lists(); }',
             array(),
             array('ruleExecOut')
         );
@@ -761,7 +761,7 @@ RULE;
     {
         $rule = new ProdsRule(
             $this->rodsuser->getRodsAccount(),
-            'rule { iiGetUnpreservableFilesJson(*folder, *list); }',
+            'rule { rule_uu_vault_unpreservable_files(*folder, *list); }',
             array('*folder' => $fullPath, '*list' => $list),
             array('ruleExecOut')
         );
