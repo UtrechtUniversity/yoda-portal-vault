@@ -264,33 +264,23 @@ class Browse extends MY_Controller
 
                                 // Video object.
                                 if (in_array($ext, $video)) {
-                                    $rows[] = array(
-                                        '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                                        date('Y-m-d H:i:s', $row['modify_time']),
-                                        '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-video" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-video-o" aria-hidden="true"></i></a>'
-                                    );
+                                    $contextMenu = '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-video" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-video-o" aria-hidden="true"></i></a>';
                                 // Audio object.
-                            } else if (in_array($ext, $audio)) {
-                                    $rows[] = array(
-                                        '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                                        date('Y-m-d H:i:s', $row['modify_time']),
-                                        '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-audio" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-audio-o" aria-hidden="true"></i></a>'
-                                    );
+                                } else if (in_array($ext, $audio)) {
+                                    $contextMenu = '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-audio" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-audio-o" aria-hidden="true"></i></a>';
                                 // Image object.
                                 } else if (in_array($ext, $image)) {
-                                    $rows[] = array(
-                                        '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                                        date('Y-m-d H:i:s', $row['modify_time']),
-                                        '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-image" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-image-o" aria-hidden="true"></i></a>'
-                                    );
+                                    $contextMenu = '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-image" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-image-o" aria-hidden="true"></i></a>';
                                 // Other object.
                                 } else {
-                                    $rows[] = array(
-                                        '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
-                                        date('Y-m-d H:i:s', $row['modify_time']),
-                                        '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a>'
-                                    );
+                                    $contextMenu = '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a>';
                                 }
+
+                                $rows[] = array(
+                                    '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
+                                    date('Y-m-d H:i:s', $row['modify_time']),
+                                    $contextMenu
+                                );
                                 $totalItemsLeftInView--;
                             }
                         }
@@ -306,11 +296,11 @@ class Browse extends MY_Controller
         }
 
         $output = array('status' => $status,
-	                'statusInfo' => $statusInfo,
+                        'statusInfo' => $statusInfo,
                         'draw' => $draw,
-			'recordsTotal' => $totalItems,
-			'recordsFiltered' => $totalItems,
-			'data' => $rows);
+                        'recordsTotal' => $totalItems,
+                        'recordsFiltered' => $totalItems,
+                        'data' => $rows);
 
         $this->output
             ->set_content_type('application/json')
