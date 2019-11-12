@@ -262,19 +262,25 @@ class Browse extends MY_Controller
                                 $audio = array("mp3", "ogg", "wav");
                                 $image = array("jpg", "jpeg", "gif", "png");
 
+                                // Build context menu.
+                                $contextMenu = '<div class="dropdown">
+                                      <span class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                        <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
+                                      </span>
+                                      <ul class="dropdown-menu">
+                                        <li><a href="browse/download?filepath=' . rawurlencode($filePath) . '">Download</a></li>';
+
                                 // Video object.
                                 if (in_array($ext, $video)) {
-                                    $contextMenu = '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-video" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-video-o" aria-hidden="true"></i></a>';
+                                    $contextMenu .= '<li><a class="view-video" data-path="browse/download?filepath=' . rawurlencode($filePath) . '">View</a></li>';
                                 // Audio object.
                                 } else if (in_array($ext, $audio)) {
-                                    $contextMenu = '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-audio" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-audio-o" aria-hidden="true"></i></a>';
+                                    $contextMenu .= '<li><a class="view-audio" data-path="browse/download?filepath=' . rawurlencode($filePath) . '">View</a></li>';
                                 // Image object.
                                 } else if (in_array($ext, $image)) {
-                                    $contextMenu = '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a> <a class="view-image" data-path="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-file-image-o" aria-hidden="true"></i></a>';
-                                // Other object.
-                                } else {
-                                    $contextMenu = '<a href="browse/download?filepath=' . rawurlencode($filePath) . '"><i class="fa fa-download" aria-hidden="true"></i></a>';
+                                    $contextMenu .= '<li><a class="view-image" data-path="browse/download?filepath=' . rawurlencode($filePath) . '">View</a></li>';
                                 }
+                                $contextMenu .= '</ul></div>';
 
                                 $rows[] = array(
                                     '<span data-path="' . rawurlencode($filePath) . '"><i class="fa fa-file-o" aria-hidden="true"></i> ' . str_replace(' ', '&nbsp;', htmlentities(trim($row['basename'], '/'))) . '</span>',
