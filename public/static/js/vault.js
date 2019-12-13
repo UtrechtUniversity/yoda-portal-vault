@@ -527,7 +527,6 @@ function topInformation(dir, showAlert) {
     if (typeof dir != 'undefined') {
         Yoda.call('uu_vault_collection_details',
                   {path: Yoda.basePath + dir}).then((data) => {
-        }).then((data) => {
             var statusText = "";
             var basename = data.basename;
             var metadata = data.metadata;
