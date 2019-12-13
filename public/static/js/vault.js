@@ -525,8 +525,8 @@ window.addEventListener('popstate', function(e) {
 
 function topInformation(dir, showAlert) {
     if (typeof dir != 'undefined') {
-        Yoda.call('uu_vault_collection_details', {
-            path: Yoda.basePath + dir
+        Yoda.call('uu_vault_collection_details',
+                  {path: Yoda.basePath + dir}).then((data) => {
         }).then((data) => {
             var statusText = "";
             var basename = data.basename;
@@ -590,6 +590,10 @@ function topInformation(dir, showAlert) {
                             }
                         }
                     }
+
+                    // Show metadata button.
+                    $('.btn-group button.metadata-form').attr('data-path', dir);
+                    $('.btn-group button.metadata-form').show();
                 }
 
                 // Datamanager sees access buttons in vault.
@@ -685,7 +689,7 @@ function handleActionsList(actions, folder)
 
 function showMetadataForm(path)
 {
-    window.location.href = 'metadata/form?path=' + path;
+    window.location.href = 'metadata/form?path=' + encodeURIComponent(path);
 }
 
 function vaultSubmitForPublication(folder)
