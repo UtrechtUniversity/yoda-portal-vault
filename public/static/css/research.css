@@ -38,11 +38,6 @@ ol.breadcrumb li.active {
     display: none;
 }
 
-.top-info-buttons .btn-group .toggle-folder-status,
-.top-info-buttons .btn-group .metadata-form {
-    margin-right: 10px;
-}
-
 .action-list li {
     cursor: pointer;
 }
@@ -98,6 +93,36 @@ ol.breadcrumb li.active {
     padding-top: 2px;
 }
 
-.view-image, .view-audio, .view-video {
+#file-browser tr > :nth-child(1) {
+    min-width: 40%;
+}
+
+#file-browser tr > :nth-child(2) {
+    max-width: 30px;
+    text-align: right;
+}
+#file-browser tr > :nth-child(3) {
+    max-width: 40px;
+}
+#file-browser tr > :nth-child(4) {
+    max-width: 10px;
+    text-align: right;
+}
+
+#file-browser .fa {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.dropdown-toggle, .view-image, .view-audio, .view-video {
     cursor: pointer;
+}
+
+table.dataTable > tbody > tr > td {
+    padding: 5px;
+    vertical-align: baseline;
+}
+table.dataTable > tbody > tr > td i {
+    font-size: 19px;
+    vertical-align: bottom;
 }

@@ -1,3 +1,5 @@
+"use strict";
+
 $(document).ajaxSend(function(e, request, settings) {
     // Append a CSRF token to all AJAX POST requests.
     if (settings.type === 'POST' && settings.data.length) {
@@ -521,14 +523,12 @@ window.addEventListener('popstate', function(e) {
     browse('dir' in query ? query.dir : '');
 });
 
-function topInformation(dir, showAlert)
-{
+function topInformation(dir, showAlert) {
     if (typeof dir != 'undefined') {
-        Yoda.call('uu_vault_collection_details',
-                  {path: Yoda.basePath + dir}).then((data) => {
-
-            console.log(data);
-            var icon = '<i class="fa fa-folder-open-o" aria-hidden="true"></i>';
+        Yoda.call('uu_vault_collection_details', {
+            path: Yoda.basePath + dir
+        }).then((data) => {
+            var statusText = "";
             var basename = data.basename;
             var metadata = data.metadata;
             var vaultStatus = data.status;
@@ -540,13 +540,9 @@ function topInformation(dir, showAlert)
             var researchPath = data.research_path;
             var actions = [];
 
-            // User metadata
-            if (metadata == 'true') {
-                $('.btn-group button.metadata-form').attr('data-path', dir);
-                $('.btn-group button.metadata-form').show();
-            } else {
-                $('.btn-group button.metadata-form').hide();
-            }
+            $('.btn-group button.metadata-form').hide();
+            $('.top-information').hide();
+            $('.top-info-buttons').hide();
 
             // is vault package
             if (typeof vaultStatus != 'undefined') {
@@ -555,6 +551,23 @@ function topInformation(dir, showAlert)
                 // folder status (vault folder)
                 if (typeof vaultStatus != 'undefined' && typeof vaultActionPending != 'undefined') {
                     $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
+
+                    // Set status badge.
+                    if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
+                        statusText = "Submitted for publication";
+                    } else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
+                        statusText = "Approved for publication";
+                    } else if (vaultStatus == 'PUBLISHED') {
+                        statusText = "Published";
+                    } else if (vaultStatus == 'DEPUBLISHED') {
+                        statusText = "Depublished";
+                    } else if (vaultStatus == 'PENDING_DEPUBLICATION') {
+                        statusText = "Depublication pending";
+                    } else if (vaultStatus == 'PENDING_REPUBLICATION') {
+                        statusText = "Republication pending";
+                    } else {
+                        statusText = "Unpublished";
+                    }
 
                     // Set actions for datamanager and researcher.
                     if (!vaultActionPending) {
@@ -566,7 +579,7 @@ function topInformation(dir, showAlert)
                                 actions['submit-for-publication'] = 'Submit for publication';
                             } else if (vaultStatus == 'PUBLISHED') {
                                 actions['depublish-publication'] = 'Depublish publication';
-                            }  else if (vaultStatus == 'DEPUBLISHED') {
+                            } else if (vaultStatus == 'DEPUBLISHED') {
                                 actions['republish-publication'] = 'Republish publication';
                             }
                         } else if (hasDatamanager) {
@@ -588,36 +601,23 @@ function topInformation(dir, showAlert)
                         actions['revoke-vault-access'] = 'Revoke read access to research group';
                     }
                 }
-
-                // Add unpreservable files check to actions.
-                actions['check-for-unpreservable-files'] = 'Check for compliance with policy';
-            }
-
-            // Hide buttons in grp-vault groups.
-            if (typeof vaultStatus == 'undefined') {
-                $('.top-info-buttons').hide();
-            } else {
-                $('.top-info-buttons').show();
             }
 
             // Provenance action log
             $('.actionlog-items').hide();
-            actionLogIcon = ' <i class="fa fa-book actionlog-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="Provenance action log"></i>';
-            if (typeof vaultStatus == 'undefined') {
-                actionLogIcon = '';
-            }
+            let actionLogIcon = ` <i class="fa fa-book actionlog-icon" style="cursor:pointer" data-folder="${htmlEncode(dir)}" aria-hidden="true" title="Provenance action log"></i>`;
 
             // System metadata.
             $('.system-metadata-items').hide();
-            systemMetadataIcon = ' <i class="fa fa-info-circle system-metadata-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="System metadata"></i>';
-            if (typeof vaultStatus == 'undefined') {
-                systemMetadataIcon = '';
-            }
+            let systemMetadataIcon = ` <i class="fa fa-info-circle system-metadata-icon" style="cursor:pointer" data-folder="${htmlEncode(dir)}" aria-hidden="true" title="System metadata"></i>`;
 
             $('.btn-group button.folder-status').attr('data-write', hasWriteRights);
 
+            // Add unpreservable files check to actions.
+            actions['check-for-unpreservable-files'] = 'Check for compliance with policy';
+
             // Add go to research to actions.
-            if (typeof researchPath != 'undefined' ) {
+            if (typeof researchPath != 'undefined') {
                 actions['go-to-research'] = 'Go to research';
             }
 
@@ -625,38 +625,24 @@ function topInformation(dir, showAlert)
             handleActionsList(actions, dir);
 
             // Set research path.
-            if (typeof researchPath != 'undefined' ) {
+            if (typeof researchPath != 'undefined') {
                 $('a.action-go-to-research').attr('research-path', researchPath);
             }
 
-            folderName = htmlEncode(basename).replace(/ /g, "&nbsp;");
-
-            // Set status badge.
-            statusText = "";
-            if (typeof vaultStatus != 'undefined') {
-              if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
-                  statusText = "Submitted for publication";
-              } else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
-                  statusText = "Approved for publication";
-              } else if (vaultStatus == 'PUBLISHED') {
-                  statusText = "Published";
-              } else if (vaultStatus == 'DEPUBLISHED') {
-                  statusText = "Depublished";
-              } else if (vaultStatus == 'PENDING_DEPUBLICATION') {
-                  statusText = "Depublication pending";
-              } else if (vaultStatus == 'PENDING_REPUBLICATION') {
-                  statusText = "Republication pending";
-              } else {
-                  statusText = "Unpublished";
-              }
-            }
-            statusBadge = '<span id="statusBadge" class="badge">' + statusText + '</span>';
+            let folderName = htmlEncode(basename).replace(/ /g, "&nbsp;");
+            let statusBadge = '<span id="statusBadge" class="badge">' + statusText + '</span>';
 
             // Reset action dropdown.
             $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
 
+            var icon = '<i class="fa fa-folder-open-o" aria-hidden="true"></i>';
             $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + systemMetadataIcon + actionLogIcon + statusBadge);
-            $('.top-information').show();
+
+            // Show top information and buttons.
+            if (typeof vaultStatus != 'undefined') {
+                $('.top-information').show();
+                $('.top-info-buttons').show();
+            }
         });
     } else {
         $('.top-information').hide();
@@ -799,4 +785,3 @@ function vaultAccess(action, folder)
         topInformation(folder, false);
     }, "json");
 }
-
