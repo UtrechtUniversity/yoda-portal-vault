@@ -7,9 +7,20 @@ $(document).ajaxSend(function(e, request, settings) {
     }
 });
 
+let preservableFormatsLists = null;
+let currentFolder;
+
 $( document ).ready(function() {
+    // Extract current location from query string (default to '').
+    currentFolder = decodeURIComponent((/(?:\?|&)dir=([^&]*)/
+                                        .exec(window.location.search) || [0,''])[1]);
+
+    // Canonicalize path somewhat, for convenience.
+    currentFolder = currentFolder.replace(/\/+/g, '/').replace(/\/$/, '');
+
+
     if ($('#file-browser').length) {
-        startBrowsing(browseStartDir, browsePageItems);
+        startBrowsing(browsePageItems);
     }
 
     $('.btn-group button.metadata-form').click(function(){
@@ -44,68 +55,63 @@ $( document ).ready(function() {
     $("body").on("click", "a.action-check-for-unpreservable-files", function() {
         // Check for unpreservable file formats.
         // If present, show extensions to user.
-        folder = $(this).attr('data-folder');
+        let folder = $(this).attr('data-folder');
+        $("#file-formats-list").val('');
 
-        // Retrieve preservable file format lists.
-        $.getJSON("vault/preservableFormatsLists", function (data) {
-            if (Object.keys(data.lists).length > 0) {
-                lists = data.lists
+        $('#showUnpreservableFiles .help').hide();
+        $('#showUnpreservableFiles .preservable').hide();
+        $('#showUnpreservableFiles .advice').hide();
+        $('#showUnpreservableFiles .unpreservable').hide();
+        $('#showUnpreservableFiles .checking').hide();
+
+        if (preservableFormatsLists === null) {
+            // Retrieve preservable file format lists.
+            Yoda.call('uu_vault_preservable_formats_lists').then((data) => {
+                preservableFormatsLists = data;
+
                 $('#file-formats-list').html("<option value='' disabled selected>Select a file format list</option>");
-                for (var list in lists) {
-                    if (lists.hasOwnProperty(list)) {
-                        $("#file-formats-list").append(new Option(lists[list]["name"], list));
+                for (let list in data) {
+                    if (data.hasOwnProperty(list)) {
+                        $("#file-formats-list").append(new Option(data[list]['name'], list));
                     }
                 }
-                $('#showUnpreservableFiles .help').hide();
-                $('#showUnpreservableFiles .preservable').hide();
-                $('#showUnpreservableFiles .advice').hide();
-                $('#showUnpreservableFiles .unpreservable').hide();
                 $('#showUnpreservableFiles').modal('show');
-            } else {
-                setMessage('error', "Something went wrong while checking for compliance with policy.");
-            }
-        });
+            });
+        } else {
+            $('#showUnpreservableFiles').modal('show');
+        }
     });
 
     $("#file-formats-list").change(function() {
-        list = $("#file-formats-list option:selected").val();
+        let folder = $('a.action-check-for-unpreservable-files').attr('data-folder');
+        let list   = $('#file-formats-list option:selected').val();
+        if (!(list in preservableFormatsLists))
+            return;
 
-        // Retrieve preservable file format lists.
-        $.getJSON("vault/preservableFormatsLists", function (data) {
-            if (Object.keys(data.lists).length > 0) {
-                lists = data.lists
-                if (lists.hasOwnProperty(list)) {
-                        $('#showUnpreservableFiles .help').text(lists[list]["help"]);
-                        $('#showUnpreservableFiles .advice').text(lists[list]["advice"]);
-                }
-            } else {
-                setMessage('error', "Something went wrong while checking for compliance with policy.");
-            }
-        });
+        $('#showUnpreservableFiles .checking').show();
+        $('#showUnpreservableFiles .unpreservable').hide();
+        $('#showUnpreservableFiles .preservable').hide();
+        $('#showUnpreservableFiles .advice').hide();
+        $('#showUnpreservableFiles .help'  ).hide();
+
+        $('#showUnpreservableFiles .help'  ).text(preservableFormatsLists[list]["help"]);
+        $('#showUnpreservableFiles .advice').text(preservableFormatsLists[list]["advice"]);
 
         // Retrieve unpreservable files in folder.
-        $.getJSON("vault/checkForUnpreservableFiles?path=" + folder + "&list=" + list, function (data) {
-            if (data.formats) {
-                $('#showUnpreservableFiles .help').hide();
-                $('#showUnpreservableFiles .preservable').hide();
-                $('#showUnpreservableFiles .advice').hide();
-                $('#showUnpreservableFiles .unpreservable').hide();
-                if(data.formats.length > 0) {
-                    $('#showUnpreservableFiles .list-unpreservable-formats').html("");
-                    for (var i = 0; i < data.formats.length; i++) {
-                        $('#showUnpreservableFiles .list-unpreservable-formats').append("<li>" + htmlEncode(data.formats[i]) + "</li>");
-                    }
-                    $('#showUnpreservableFiles .help').show();
-                    $('#showUnpreservableFiles .advice').show();
-                    $('#showUnpreservableFiles .unpreservable').show();
-                } else {
-                    $('#showUnpreservableFiles .help').show();
-                    $('#showUnpreservableFiles .preservable').show();
-                }
-                $('#showUnpreservableFiles').modal('show');
+        Yoda.call('uu_vault_unpreservable_files',
+                  {coll: Yoda.basePath + folder, list_name: list}).then((data) => {
+            $('#showUnpreservableFiles .checking').hide();
+            $('#showUnpreservableFiles .help').show();
+            if (data.length > 0) {
+                $('#showUnpreservableFiles .list-unpreservable-formats').html('');
+                for (let ext of data)
+                    $('#showUnpreservableFiles .list-unpreservable-formats').append(`<li>${htmlEncode(ext)}</li>`);
+                $('#showUnpreservableFiles .advice').show();
+                $('#showUnpreservableFiles .unpreservable').show();
             } else {
-                setMessage('error', "Something went wrong while checking for compliance with policy.");
+                $('#showUnpreservableFiles .preservable').show();
             }
+            $('#showUnpreservableFiles').modal('show');
         });
     });
 
@@ -162,8 +168,11 @@ $( document ).ready(function() {
         toggleSystemMetadata($(this).attr('data-folder'));
     });
 
-    $("body").on("click", ".browse", function() {
+    $("body").on("click", ".browse", function(e) {
         browse($(this).attr('data-path'));
+        // Dismiss stale messages.
+        $('#messages .close').click();
+        e.preventDefault();
     });
 
     $("body").on("click", "a.action-grant-vault-access", function() {
@@ -199,53 +208,49 @@ $( document ).ready(function() {
     });
 
     $("body").on("click", "a.action-go-to-research", function() {
-        window.location.href = '/research/?dir=%2F' +  $(this).attr('research-path');
+        window.location.href = '/research/?dir=' + encodeURIComponent('/'+$(this).attr('research-path'));
     });
 });
 
-function browse(dir)
+function changeBrowserUrl(path)
 {
+    let url = window.location.pathname;
+    if (typeof path != 'undefined') {
+        url += "?dir=" + encodeURIComponent(path);
+    }
+
+    history.pushState({} , {}, url);
+}
+
+function browse(dir = '', changeHistory = false)
+{
+    currentFolder = dir;
     makeBreadcrumb(dir);
-    changeBrowserUrl(dir);
+    if (changeHistory)
+        changeBrowserUrl(dir);
     topInformation(dir, true); //only here topInformation should show its alertMessage
     buildFileBrowser(dir);
 }
 
-function makeBreadcrumb(urlEncodedDir)
+function makeBreadcrumb(dir)
 {
-    var dir = decodeURIComponent((urlEncodedDir + '').replace(/\+/g, '%20'));
+    let pathParts = dir.split('/').filter(x => x.length);
 
-    var parts = [];
-    if (typeof dir != 'undefined') {
-        if (dir.length > 0) {
-            var elements = dir.split('/');
+    // [[Crumb text, Path]] - e.g. [...['x', '/research-a/x']]
+    let crumbs = [['Home', ''],
+                  ...Array.from(pathParts.entries())
+                          .map(([i,x]) => [x, '/'+pathParts.slice(0, i+1).join('/')])];
 
-            // Remove empty elements
-            var parts = $.map(elements, function (v) {
-                return v === "" ? null : v;
-            });
-        }
-    }
+    let html = '';
+    for (let [i, [text, path]] of crumbs.entries()) {
+        let el = $('<li>');
+        text = htmlEncode(text).replace(/ /g, '&nbsp;');
+        if (i === crumbs.length-1)
+             el.addClass('active').text(text);
+        else el.html(`<a class="browse" data-path="${htmlEncode(path)}"
+                         href="?dir=${encodeURIComponent(path)}">${text}</a>`);
 
-    // Build html
-    var totalParts = parts.length;
-
-    if (totalParts > 0 && parts[0]!='undefined') {
-        var html = '<li class="browse">Home</li>';
-        var path = "";
-        $.each( parts, function( k, part ) {
-            path += "%2F" + encodeURIComponent(part);
-
-            // Active item
-            valueString = htmlEncode(part).replace(/ /g, "&nbsp;");
-            if (k == (totalParts-1)) {
-                html += '<li class="active">' + valueString + '</li>';
-            } else {
-                html += '<li class="browse" data-path="' + path + '">' + valueString + '</li>';
-            }
-        });
-    } else {
-        var html = '<li class="active">Home</li>';
+        html += el[0].outerHTML;
     }
 
     $('ol.breadcrumb').html(html);
@@ -254,60 +259,158 @@ function makeBreadcrumb(urlEncodedDir)
 function htmlEncode(value){
     //create a in-memory div, set it's inner text(which jQuery automatically encodes)
     //then grab the encoded contents back out.  The div never exists on the page.
-    return $('<div/>').text(value).html();
+    return $('<div/>').text(value).html().replace('"', '&quot;');
 }
 
-function makeBreadcrumbPath(dir)
-{
-    var parts = [];
-    if (typeof dir != 'undefined') {
-        if (dir.length > 0) {
-            var elements = dir.split('/');
-
-            // Remove empty elements
-            var parts = $.map(elements, function (v) {
-                return v === "" ? null : v;
-            });
-        }
-    }
-
-    // Build html
-    var totalParts = parts.length;
-    if (totalParts > 0) {
-        var path = "";
-        var index = 0;
-        $.each( parts, function( k, part ) {
-
-            if(index) {
-                path += "/" + part;
-            }
-            else {
-                path = part;
-            }
-            index++;
-        });
-    }
-
-    return path;
-}
-
-function buildFileBrowser(dir)
-{
-    var url = "browse/data";
-    if (typeof dir != 'undefined') {
-        url += "?dir=" +  dir;
-    }
-
-    var fileBrowser = $('#file-browser').DataTable();
-
-    fileBrowser.ajax.url(url).load();
+function buildFileBrowser(dir) {
+    let fileBrowser = $('#file-browser').DataTable();
+    getFolderContents.dropCache();
+    fileBrowser.ajax.reload();
 
     return true;
 }
 
-function startBrowsing(path, items)
+// Fetches directory contents to populate the listing table.
+let getFolderContents = (() => {
+    // Close over some state variables.
+    // -> we keep a multi-page cache handy, since getting only $page_length [=10]
+    //    results each time is wasteful and slow.
+    // A change in sort column/order or folder will invalidate the cache.
+
+    // The amount of rows to request at once.
+    // *Must* be equal to or greater than the largest datatables page length,
+    // and *should* be smaller than iRODS SQL rows per batch.
+    const batchSize = 200;
+    // (~140 B per entry in JSON returned by iRODS,
+    //  so depending on name = up to 28K to transfer for each fetch)
+
+    let total          = false; // Total subcollections / data objects.
+    let cache          = [];    // Cached result rows (may be more than shown on one page).
+    let cacheStart     = null;  // Row number of the first cache entry.
+    let cacheFolder    = null;  // Folder path of the cache.
+    let cacheSortCol   = null;  // Cached sort column nr.
+    let cacheSortOrder = null;  // Cached sort order.
+    let i = 0;                  // Keep simultaneous requests from interfering.
+
+    let get = async (args) => {
+        // Check if we can use the cache.
+        if (cache.length
+         && currentFolder        === cacheFolder
+         && args.order[0].dir    === cacheSortOrder
+         && args.order[0].column === cacheSortCol
+         && args.start               >= cacheStart
+         && args.start + args.length <= cacheStart + batchSize) {
+
+            return cache.slice(args.start - cacheStart, args.start - cacheStart + args.length);
+        } else {
+            // Nope, load new data via the API.
+            let j = ++i;
+            let result = await Yoda.call('uu_browse_folder',
+                                         {'coll':       Yoda.basePath + currentFolder,
+                                          'offset':     args.start,
+                                          'limit':      batchSize,
+                                          'sort_order': args.order[0].dir,
+                                          'sort_on':    ['name','size','modified'][args.order[0].column],
+                                          'space':      'Space.VAULT'});
+
+            // If another requests has come while we were waiting, simply drop this one.
+            if (i !== j) return null;
+
+            // Populate the 'size' of collections so datatables doesn't get confused.
+            for (let x of result.items)
+                if (x.type === 'coll')
+                    x.size = 0;
+
+            // Update cache info.
+            total          = result.total;
+            cacheStart     = args.start;
+            cache          = result.items;
+            cacheFolder    = currentFolder;
+            cacheSortCol   = args.order[0].column;
+            cacheSortOrder = args.order[0].dir;
+
+            return cache.slice(args.start - cacheStart, args.length);
+        }
+    };
+
+    // The actual function passed to datatables.
+    // (needs a non-async wrapper cause datatables won't accept it otherwise)
+    let fn = (args, cb, settings) => (async () => {
+
+        let data = await get(args);
+        if (data === null)
+            return;
+
+        cb({'data':            data,
+            'recordsTotal':    total,
+            'recordsFiltered': total });
+    })();
+
+    // Allow manually clearing results (needed during soft-reload after uploading a file).
+    fn.dropCache = () => cache = [];
+    return fn;
+})();
+
+// Functions for rendering table cells, per column.
+const tableRenderer = {
+    name: (name, _, row) => {
+         let tgt = `${currentFolder}/${name}`;
+         if (row.type === 'coll')
+              return `<a class="coll browse" href="?dir=${encodeURIComponent(tgt)}" data-path="${htmlEncode(tgt)}"><i class="fa fa-folder-o"></i> ${htmlEncode(name)}</a>`;
+         else return `<i class="fa fa-file-o"></i> ${htmlEncode(name)}`;
+    },
+    size: (size, _, row) => {
+        if (row.type === 'coll') {
+            return '';
+        } else {
+            let szs = ['B', 'kiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB'];
+            let szi = 0;
+            while (size >= 1024 && szi < szs.length-1) {
+                size /= 1024;
+                szi++;
+            }
+            return (Math.floor(size*10)/10+'') + '&nbsp;' + szs[szi];
+        }
+    },
+    date: ts => {
+         let date = new Date(ts*1000);
+         let pad = n => n < 10 ? '0'+n : ''+n;
+         let elem = $('<span>');
+         elem.text(`${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`
+                 + ` ${pad(date.getHours())}:${pad(date.getMinutes())}`);
+         elem.attr('title', date.toString()); // (should include seconds and TZ info)
+         return elem[0].outerHTML;
+     },
+    context: (_, __, row) => {
+        if (row.type === 'coll')
+            return '';
+
+        // Render context menu for files.
+        const viewExts = {image: ['jpg', 'jpeg', 'gif', 'png'],
+                          audio: ['mp3', 'ogg', 'wav'],
+                          video: ['mp4', 'ogg', 'webm']};
+        let ext = row.name.replace(/.*\./, '').toLowerCase();
+
+        let actions = $('<ul class="dropdown-menu">');
+        actions.append(`<li><a href="browse/download?filepath=${encodeURIComponent(currentFolder+'/'+row.name)}">Download</a>`);
+
+        // Generate dropdown "view" actions for different media types.
+        for (let type of Object.keys(viewExts).filter(type => (viewExts[type].includes(ext))))
+            actions.append(`<li><a class="view-${type}" data-path="${htmlEncode(currentFolder+'/'+row.name)}">View</a>`);
+
+        let dropdown = $(`<div class="dropdown">
+                            <span class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                              <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
+                            </span>`);
+        dropdown.append(actions);
+
+        return dropdown[0].outerHTML;
+    }
+};
+
+function startBrowsing(items)
 {
-    $('#file-browser').DataTable( {
+    $('#file-browser').DataTable({
         "bFilter": false,
         "bInfo": false,
         "bLengthChange": true,
@@ -315,43 +418,22 @@ function startBrowsing(path, items)
             "emptyTable": "No accessible files/folders present",
             "lengthMenu": "_MENU_"
         },
-        "dom": '<"top">rt<"bottom"lp><"clear">',
-        "ajax": {
-            url: "browse/data",
-            error: function (xhr, error, thrown) {
-                $("#file-browser_processing").hide()
-                setMessage('error', 'Something went wrong. Please try again or refresh page.');
-                return true;
-            },
-            dataSrc: function (json) {
-                jsonString = JSON.stringify(json);
-
-                resp = JSON.parse(jsonString);
-
-                //console.log(resp.draw);
-                if (resp.status == 'Success' ) {
-                    return resp.data;
-                }
-                else {
-                    setMessage('error', resp.statusInfo);
-                    return true;
-                }
-            }
-        },
-        "ordering": false,
+        "dom": '<"top">frt<"bottom"lp><"clear">',
+        'columns': [{render: tableRenderer.name,    data: 'name'},
+                    // Size and date should be orderable, but limitations
+                    // on how queries work prevent us from doing this
+                    // correctly without significant overhead.
+                    // (enabling this as is may result in duplicated results for data objects)
+                    {render: tableRenderer.size,    orderable: false, data: 'size'},
+                    {render: tableRenderer.date,    orderable: false, data: 'modify_time'},
+                    {render: tableRenderer.context, orderable: false }],
+        "ajax": getFolderContents,
         "processing": true,
         "serverSide": true,
         "iDeferLoading": 0,
-        "pageLength": items,
-        "drawCallback": function(settings) {
-        }
+        "pageLength": items
     });
-
-    if (path.length > 0) {
-        browse(path);
-    } else {
-        browse();
-    }
+    browse(currentFolder);
 }
 
 function toggleActionLogList(folder)
@@ -369,102 +451,93 @@ function toggleActionLogList(folder)
 
 function buildActionLog(folder)
 {
-    var actionList = $('.actionlog-items');
+    let actionList = $('.actionlog-items');
 
     // Get provenance information
-    $.getJSON("browse/list_actionlog?folder=" + folder, function (data) {
+    Yoda.call('uu_provenance_log',
+              {coll: Yoda.basePath + folder}).then((data) => {
         actionList.hide();
 
-        if (data.status == 'Success') {
-            var html = '<li class="list-group-item disabled">Provenance information:</li>';
-            var logItems = data.result;
-            if (logItems.length) {
-                $.each(logItems, function (index, value) {
-                    html += '<li class="list-group-item"><span>'
-                         + htmlEncode(value[2])
-                         + ' - <strong>'
-                         + htmlEncode(value[1])
-                         + '</strong> - '
-                         + htmlEncode(value[0])
-                         + '</span></li>';
-                });
-            }
-            else {
-                html += '<li class="list-group-item">No provenance information present</li>';
-            }
-            actionList.html(html).show();
-        } else {
-            setMessage('error', data.statusInfo);
+        var html = '<li class="list-group-item disabled">Provenance information:</li>';
+        var logItems = data;
+        if (logItems.length) {
+            $.each(logItems, function (index, value) {
+                html += '<li class="list-group-item"><span>'
+                     + htmlEncode(value[2])
+                     + ' - <strong>'
+                     + htmlEncode(value[1])
+                     + '</strong> - '
+                     + htmlEncode(value[0])
+                     + '</span></li>';
+            });
         }
+        else {
+            html += '<li class="list-group-item">No provenance information present</li>';
+        }
+        actionList.html(html).show();
     });
 }
 
 function toggleSystemMetadata(folder)
 {
-    var systemMetadata = $('.system-metadata-items');
-    var isVisible = systemMetadata.is(":visible");
+    let systemMetadata = $('.system-metadata-items');
+    let isVisible = systemMetadata.is(":visible");
 
     // Toggle system metadata.
     if (isVisible) {
         systemMetadata.hide();
     } else {
-        // Get system metadata.
-        $.getJSON("browse/system_metadata?folder=" + folder, function(data) {
+        // Retrieve system metadata of folder.
+        Yoda.call('uu_vault_system_metadata',
+                  {coll: Yoda.basePath + folder}).then((data) => {
             systemMetadata.hide();
-            if (data) {
-                var html = '<li class="list-group-item disabled">System metadata:</li>';
+            var html = '<li class="list-group-item disabled">System metadata:</li>';
 
-                if (data.result) {
-                    $.each(data.result, function (index, value) {
-                        html += '<li class="list-group-item"><span><strong>'
-                             + htmlEncode(index)
-                             + '</strong>: '
-                             + value
-                             + '</span></li>';
-                    });
-                } else {
-                    html += '<li class="list-group-item">No system metadata present</li>';
-                }
-                systemMetadata.html(html).show();
+            if (data) {
+                $.each(data, function(index, value) {
+                    html += '<li class="list-group-item"><span><strong>' +
+                        htmlEncode(index) +
+                        '</strong>: ' +
+                        value +
+                        '</span></li>';
+                });
             } else {
-                setMessage('error', 'Could not retrieve system metadata.');
+                html += '<li class="list-group-item">No system metadata present</li>';
             }
+            systemMetadata.html(html).show();
         });
     }
 }
 
-function changeBrowserUrl(path)
-{
-    var url = window.location.pathname;
-    if (typeof path != 'undefined') {
-        url += "?dir=" +  path;
-    }
+window.addEventListener('popstate', function(e) {
+    // Catch forward/backward navigation and reload the view.
+    let query = window.location.search.substr(1).split('&').reduce(
+        function(acc, kv) {
+            let xy = kv.split('=', 2);
+            acc[xy[0]] = xy.length == 1 || decodeURIComponent(xy[1]);
+            return acc;
+        }, {});
 
-    history.replaceState({} , {}, url);
-}
+    browse('dir' in query ? query.dir : '');
+});
 
 function topInformation(dir, showAlert)
 {
     if (typeof dir != 'undefined') {
-        $.getJSON("browse/top_data?dir=" + dir, function(data){
+        Yoda.call('uu_vault_collection_details',
+                  {path: Yoda.basePath + dir}).then((data) => {
 
-            if (data.status != 'Success' && showAlert) {
-                setMessage('error', data.statusInfo);
-                return;
-            }
-
-            var icon = '<i class="fa fa-folder-o" aria-hidden="true"></i>';
-            var basename = data.result.basename;
-            var metadata = data.result.userMetadata;
-            var vaultStatus = data.result.vaultStatus;
-            var vaultActionPending = data.result.vaultActionPending;
+            console.log(data);
+            var icon = '<i class="fa fa-folder-open-o" aria-hidden="true"></i>';
+            var basename = data.basename;
+            var metadata = data.metadata;
+            var vaultStatus = data.status;
+            var vaultActionPending = data.vault_action_pending;
             var hasWriteRights = "yes";
-            var hasDatamanager = data.result.hasDatamanager;
-            var isDatamanager = data.result.isDatamanager;
-            var isVaultPackage = data.result.isVaultPackage;
-            var researchGroupAccess = data.result.researchGroupAccess;
-            var inResearchGroup = data.result.inResearchGroup;
-            var researchPath = data.result.researchPath;
+            var hasDatamanager = data.has_datamanager;
+            var isDatamanager = data.is_datamanager;
+            var researchGroupAccess = data.research_group_access;
+            var researchPath = data.research_path;
             var actions = [];
 
             // User metadata
@@ -476,7 +549,7 @@ function topInformation(dir, showAlert)
             }
 
             // is vault package
-            if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
+            if (typeof vaultStatus != 'undefined') {
                 actions['copy-vault-package-to-research'] = 'Copy datapackage to research space';
 
                 // folder status (vault folder)
@@ -484,19 +557,19 @@ function topInformation(dir, showAlert)
                     $('.btn-group button.folder-status').attr('data-datamanager', isDatamanager);
 
                     // Set actions for datamanager and researcher.
-                    if (vaultActionPending == 'no') {
-                        if (isDatamanager == 'yes') {
+                    if (!vaultActionPending) {
+                        if (isDatamanager) {
                             if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
                                 actions['cancel-publication'] = 'Cancel publication';
                                 actions['approve-for-publication'] = 'Approve for publication';
-                            } else if (vaultStatus == 'UNPUBLISHED' && inResearchGroup  == 'yes') {
+                            } else if (vaultStatus == 'UNPUBLISHED') {
                                 actions['submit-for-publication'] = 'Submit for publication';
                             } else if (vaultStatus == 'PUBLISHED') {
                                 actions['depublish-publication'] = 'Depublish publication';
                             }  else if (vaultStatus == 'DEPUBLISHED') {
                                 actions['republish-publication'] = 'Republish publication';
                             }
-                        } else if (hasDatamanager == 'yes') {
+                        } else if (hasDatamanager) {
                             if (vaultStatus == 'UNPUBLISHED') {
                                 actions['submit-for-publication'] = 'Submit for publication';
                             } else if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
@@ -508,8 +581,8 @@ function topInformation(dir, showAlert)
 
                 // Datamanager sees access buttons in vault.
                 $('.top-info-buttons').show();
-                if (isDatamanager == 'yes') {
-                    if (researchGroupAccess == 'no') {
+                if (isDatamanager) {
+                    if (researchGroupAccess) {
                         actions['grant-vault-access'] = 'Grant read access to research group';
                     } else {
                         actions['revoke-vault-access'] = 'Revoke read access to research group';
@@ -521,7 +594,7 @@ function topInformation(dir, showAlert)
             }
 
             // Hide buttons in grp-vault groups.
-            if (typeof isVaultPackage == 'undefined') {
+            if (typeof vaultStatus == 'undefined') {
                 $('.top-info-buttons').hide();
             } else {
                 $('.top-info-buttons').show();
@@ -530,14 +603,14 @@ function topInformation(dir, showAlert)
             // Provenance action log
             $('.actionlog-items').hide();
             actionLogIcon = ' <i class="fa fa-book actionlog-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="Provenance action log"></i>';
-            if (typeof isVaultPackage == 'undefined' || isVaultPackage == 'no') {
+            if (typeof vaultStatus == 'undefined') {
                 actionLogIcon = '';
             }
 
             // System metadata.
             $('.system-metadata-items').hide();
             systemMetadataIcon = ' <i class="fa fa-info-circle system-metadata-icon" style="cursor:pointer" data-folder="' + dir + '" aria-hidden="true" title="System metadata"></i>';
-            if (typeof isVaultPackage == 'undefined' || isVaultPackage == 'no') {
+            if (typeof vaultStatus == 'undefined') {
                 systemMetadataIcon = '';
             }
 
@@ -560,7 +633,7 @@ function topInformation(dir, showAlert)
 
             // Set status badge.
             statusText = "";
-            if (typeof isVaultPackage != 'undefined' && isVaultPackage == 'yes') {
+            if (typeof vaultStatus != 'undefined') {
               if (vaultStatus == 'SUBMITTED_FOR_PUBLICATION') {
                   statusText = "Submitted for publication";
               } else if (vaultStatus == 'APPROVED_FOR_PUBLICATION') {
@@ -726,3 +799,4 @@ function vaultAccess(action, folder)
         topInformation(folder, false);
     }, "json");
 }
+

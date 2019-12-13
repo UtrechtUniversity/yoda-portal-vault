@@ -171,56 +171,6 @@ RULE;
         return array();
     }
 
-    static public function collectionDetails($iRodsAccount, $path)
-    {
-        $output = array();
-
-        $path = str_replace("`", "\\`", $path);
-
-        $ruleBody = <<<'RULE'
-myRule {
-    iiFrontCollectionDetails(*path, *result, *status, *statusInfo);
-}
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*path" => $path
-                ),
-                array("*result",
-                     "*status",
-                     "*statusInfo"
-                    )
-            );
-
-            $ruleResult = $rule->execute();
-
-            $status = $ruleResult['*status'];
-            $statusInfo = $ruleResult['*statusInfo'];
-
-            $result = json_decode($ruleResult['*result'], true);
-
-            $output = array(
-                'result' => $result,
-                'status' => $status,
-                'statusInfo' => $statusInfo
-            );
-
-            return $output;
-
-        } catch(RODSException $e) {
-            $output = array(
-                'status' => 'Error',
-                'statusInfo' => 'Something unexpected went wrong - ' . $e->rodsErrAbbrToCode($e->getCodeAbbr()). '. Please contact a system administrator'
-            );
-            return $output;
-        }
-    }
-
-
-
     static public function browseCollections($iRodsAccount, $path) {
         $ruleBody = <<<'RULE'
 myRule {
@@ -250,64 +200,6 @@ RULE;
         }
 
         return array();
-    }
-
-    static public function browse($iRodsAccount, $path, $type, $orderBy, $orderSort, $limit, $offset = 0)
-    {
-        $output = array();
-
-        $ruleBody = <<<'RULE'
-myRule {
-    *l = int(*limit);
-    *o = int(*offset);
-
-    iiBrowse(*path, *collectionOrDataObject, *orderby, *ascdesc, *l, *o, "vault", *result, *status, *statusInfo);
-}
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*path" => $path,
-                    "*collectionOrDataObject" => $type,
-                    "*orderby" => $orderBy,
-                    "*ascdesc" => $orderSort,
-                    "*limit" => $limit,
-                    "*offset" => $offset
-                ),
-                array("*result",
-                    "*status",
-                    "*statusInfo")
-            );
-
-            $ruleResult = $rule->execute();
-
-            $results = json_decode($ruleResult['*result'], true);
-
-            $status = $ruleResult['*status'];
-            $statusInfo = $ruleResult['*statusInfo'];
-
-            $summary = $results[0];
-            unset($results[0]);
-
-            $rows = $results;
-            $output = array(
-                'summary' => $summary,
-                'rows' => $rows,
-                'status' => $status,
-                'statusInfo' => $statusInfo
-            );
-
-            return $output;
-
-        } catch(RODSException $e) {
-            $output = array(
-                'status' => 'Error',
-                'statusInfo' => 'Something unexpected went wrong - ' . $e->rodsErrAbbrToCode($e->getCodeAbbr()). '. Please contact a system administrator'
-            );
-            return $output;
-        }
     }
 
     static public function browseResearch($iRodsAccount, $path, $type, $orderBy, $orderSort, $limit, $offset = 0)
@@ -417,68 +309,6 @@ RULE;
     }
 
     /**
-     * List the action log of a folder.
-     *
-     * @param $iRodsAccount
-     * @param $folder
-     * @return array
-     */
-    function listActionLog($iRodsAccount, $folder)
-    {
-        $output = array();
-
-        $ruleBody = <<<'RULE'
-myRule {
-    iiFrontEndActionLog(*folder, *result, *status, *statusInfo);
-}
-RULE;
-        try {
-            $rule = new ProdsRule(
-                $iRodsAccount,
-                $ruleBody,
-                array(
-                    "*folder" => $folder
-                ),
-                array("*result", "*status", "*statusInfo")
-            );
-
-            $ruleResult = $rule->execute();
-
-            $output['*result'] = json_decode($ruleResult['*result'], true);
-            $output['*status'] = $ruleResult['*status'];
-            $output['*statusInfo'] = $ruleResult['*statusInfo'];
-
-            return $output;
-
-        } catch(RODSException $e) {
-            return array();
-        }
-        return array();
-    }
-
-     /**
-      * List the system metadata of a folder.
-      *
-      * @param $iRodsAccount
-      * @param $folder
-      * @return mixed
-      */
-     static public function listSystemMetadata($iRodsAccount, $folder) {
-         try {
-             $rule = new ProdsRule(
-                 $iRodsAccount,
-                 'myRule { rule_uu_vault_system_metadata(*coll); }',
-                 array('*coll' => $folder),
-                 array('ruleExecOut')
-             );
-
-             return json_decode($rule->execute()['ruleExecOut']);
-         } catch(RODSException $e) {
-             return false;
-         }
-     }
-
-    /**
      * Get the category dependent JSON schema from iRODS.
      *
      * @param $iRodsAccount
@@ -556,42 +386,5 @@ RULE;
         }
 
         return array();
-    }
-
-    /**
-     * Retrieve lists of preservable file formats.
-     *
-     * @return array
-     */
-    function getPreservableFormatsLists()
-    {
-        $rule = new ProdsRule(
-            $this->rodsuser->getRodsAccount(),
-            'rule { rule_uu_vault_preservable_formats_lists(); }',
-            array(),
-            array('ruleExecOut')
-        );
-        $result = $rule->execute();
-
-        return $result['ruleExecOut'];
-    }
-
-    /**
-     * Retrieve extensions of unpreservable file formats in this folder.
-     *
-     * @param $fullPath
-     * @return array
-     */
-    function getUnpreservableFileFormats($fullPath, $list)
-    {
-        $rule = new ProdsRule(
-            $this->rodsuser->getRodsAccount(),
-            'rule { rule_uu_vault_unpreservable_files(*folder, *list); }',
-            array('*folder' => $fullPath, '*list' => $list),
-            array('ruleExecOut')
-        );
-        $result = $rule->execute();
-
-        return $result['ruleExecOut'];
     }
 }

@@ -1,6 +1,6 @@
 <script>
     var browsePageItems = <?php echo $items; ?>;
-    var browseStartDir = '<?php echo rawurlencode($dir); ?>';
+    var browseStartDir = <?php echo json_encode($dir); ?>;
     var view = 'browse';
 </script>
 
@@ -250,6 +250,7 @@
                 <thead>
                     <tr>
                         <th>Name</th>
+                        <th>Size</th>
                         <th>Modified date</th>
                         <th></th>
                     </tr>
