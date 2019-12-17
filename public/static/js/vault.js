@@ -122,7 +122,7 @@ $( document ).ready(function() {
 
         $('.action-confirm-submit-for-publication').attr( 'data-folder', $(this).attr('data-folder') );
 
-        folder = $(this).attr('data-folder');
+        let folder = $(this).attr('data-folder');
         $.getJSON("vault/terms?path=" + folder, function (data) {
             if (data.status == 'Success') {
                 $('#confirmAgreementConditions .modal-body').html(data.result);
