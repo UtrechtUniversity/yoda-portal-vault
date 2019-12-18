@@ -691,89 +691,84 @@ function showMetadataForm(path)
     window.location.href = 'metadata/form?path=' + encodeURIComponent(path);
 }
 
-function vaultSubmitForPublication(folder)
+async function vaultSubmitForPublication(folder)
 {
     var btnText = $('#statusBadge').html();
     $('#statusBadge').html('Submit for publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
-    $.post("vault/submit_for_publication", {"path" : decodeURIComponent(folder)}, function(data) {
-        if (data.status == 'Success') {
-            $('#statusBadge').html('Submitted for publication');
-        } else {
-            $('#statusBadge').html(btnText);
-            setMessage('error', data.statusInfo);
-        }
-        topInformation(folder, false);
-    }, "json");
+    try {
+        let status = await Yoda.call('uu_vault_submit',
+                                     {'coll': Yoda.basePath + folder})
+        $('#statusBadge').html('');
+    } catch(e) {
+        $('#statusBadge').html(btnText);
+    }
+    topInformation(folder, false);
 }
 
-function vaultApproveForPublication(folder)
+async function vaultApproveForPublication(folder)
 {
     var btnText = $('#statusBadge').html();
     $('#statusBadge').html('Approve for publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
-    $.post("vault/approve_for_publication", {"path" : decodeURIComponent(folder)}, function(data) {
-        if (data.status == 'Success') {
-            $('#statusBadge').html('Approved for publication');
-        } else {
-            $('#statusBadge').html(btnText);
-            setMessage('error', data.statusInfo);
-        }
-        topInformation(folder, false);
-    }, "json");
+    try {
+        let status = await Yoda.call('uu_vault_approve',
+                                     {'coll': Yoda.basePath + folder})
+        $('#statusBadge').html('');
+    } catch(e) {
+        $('#statusBadge').html(btnText);
+    }
+    topInformation(folder, false);
 }
 
-function vaultCancelPublication(folder)
+async function vaultCancelPublication(folder)
 {
     var btnText = $('#statusBadge').html();
     $('#statusBadge').html('Cancel publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
-    $.post("vault/cancel_publication", {"path" : decodeURIComponent(folder)}, function(data) {
-        if (data.status == 'Success') {
-            $('#statusBadge').html('Unpublished');
-        } else {
-            $('#statusBadge').html(btnText);
-            setMessage('error', data.statusInfo);
-        }
-        topInformation(folder, false);
-    }, "json");
+    try {
+        let status = await Yoda.call('uu_vault_cancel',
+                                     {'coll': Yoda.basePath + folder})
+        $('#statusBadge').html('');
+    } catch(e) {
+        $('#statusBadge').html(btnText);
+    }
+    topInformation(folder, false);
 }
 
-function vaultDepublishPublication(folder)
+async function vaultDepublishPublication(folder)
 {
     var btnText = $('#statusBadge').html();
     $('#statusBadge').html('Depublish publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
-    $.post("vault/depublish_publication", {"path" : decodeURIComponent(folder)}, function(data) {
-        if (data.status == 'Success') {
-            $('#statusBadge').html('Depublication pending');
-        } else {
-            $('#statusBadge').html(btnText);
-            setMessage('error', data.statusInfo);
-        }
-        topInformation(folder, false);
-    }, "json");
+    try {
+        let status = await Yoda.call('uu_vault_depublish',
+                                     {'coll': Yoda.basePath + folder})
+        $('#statusBadge').html('');
+    } catch(e) {
+        $('#statusBadge').html(btnText);
+    }
+    topInformation(folder, false);
 }
 
-function vaultRepublishPublication(folder)
+async function vaultRepublishPublication(folder)
 {
     var btnText = $('#statusBadge').html();
     $('#statusBadge').html('Republish publication <i class="fa fa-spinner fa-spin fa-fw"></i>');
     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
-    $.post("vault/republish_publication", {"path" : decodeURIComponent(folder)}, function(data) {
-        if (data.status == 'Success') {
-            $('#statusBadge').html('Republication pending');
-        } else {
-            $('#statusBadge').html(btnText);
-            setMessage('error', data.statusInfo);
-          }
-          topInformation(folder, false);
-      }, "json");
+    try {
+        let status = await Yoda.call('uu_vault_republish',
+                                     {'coll': Yoda.basePath + folder})
+        $('#statusBadge').html('');
+    } catch(e) {
+        $('#statusBadge').html(btnText);
+    }
+    topInformation(folder, false);
 }
 
 function vaultAccess(action, folder)

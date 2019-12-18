@@ -53,60 +53,6 @@ class Folder_Status_model extends CI_Model
     }
 
     /**
-     * Submit folder for publication in the vault space.
-     *
-     * @param $folder Folder to submit for publication
-     * @return status
-     */
-    function submit_for_publication($folder)
-    {
-        $outputParams = array('*status', '*statusInfo');
-        $inputParams = array('*folder' => $folder );
-
-        $this->CI->load->library('irodsrule');
-
-        $rule = $this->irodsrule->make('iiVaultSubmit', $inputParams, $outputParams);
-        $result = $rule->execute();
-        return $result;
-    }
-
-    /**
-     * Depublish folder in the vault space.
-     *
-     * @param $folder Folder to depublish
-     * @return status
-     */
-    function depublish_publication($folder)
-    {
-        $outputParams = array('*status', '*statusInfo');
-        $inputParams = array('*folder' => $folder );
-
-        $this->CI->load->library('irodsrule');
-
-        $rule = $this->irodsrule->make('iiVaultDepublish', $inputParams, $outputParams);
-        $result = $rule->execute();
-        return $result;
-    }
-
-    /**
-     * Republish folder in the vault space.
-     *
-     * @param $folder Folder to republish
-     * @return status
-     */
-    function republish_publication($folder)
-    {
-        $outputParams = array('*status', '*statusInfo');
-        $inputParams = array('*folder' => $folder );
-
-        $this->CI->load->library('irodsrule');
-
-        $rule = $this->irodsrule->make('iiVaultRepublish', $inputParams, $outputParams);
-        $result = $rule->execute();
-        return $result;
-    }
-
-    /**
      * Retrieve publication terms text from server.
      *
      * @param $folder Folder to approve for publication
@@ -121,40 +67,6 @@ class Folder_Status_model extends CI_Model
         $rule = $this->irodsrule->make('iiGetPublicationTermsText', $inputParams, $outputParams);
         $result = $rule->execute();
 
-        return $result;
-    }
-
-    /**
-     * Approve folder for publication in the vault space.
-     *
-     * @param $folder Folder to approve for publication
-     * @return status
-     */
-    function approve_for_publication($folder)
-    {
-        $outputParams = array('*status', '*statusInfo');
-        $inputParams = array('*folder' => $folder);
-
-        $this->CI->load->library('irodsrule');
-        $rule = $this->irodsrule->make('iiVaultApprove', $inputParams, $outputParams);
-        $result = $rule->execute();
-        return $result;
-    }
-
-    /**
-     * Cancel publication of folder in the vault space.
-     *
-     * @param $folder Folder to cancel for publication
-     * @return status
-     */
-    function cancel_publication($folder)
-    {
-        $outputParams = array('*status', '*statusInfo');
-        $inputParams = array('*folder' => $folder);
-
-        $this->CI->load->library('irodsrule');
-        $rule = $this->irodsrule->make('iiVaultCancel', $inputParams, $outputParams);
-        $result = $rule->execute();
         return $result;
     }
 }
