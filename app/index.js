@@ -1,24 +1,20 @@
 import React, { Component } from "react";
-import axios from 'axios';
 import { render } from "react-dom";
 import Form from "react-jsonschema-form";
 import Select from 'react-select';
 import Geolocation from "./Geolocation"
 
-var globalGeoBoxCounter = 0; // Additions for being able to manually add geoBoxes
-var globalThis = null;
+const path = $('#form').attr('data-path');
 
-var schema = {};
-var uiSchema = {};
-var yodaFormData = {};
+let schema       = {};
+let uiSchema     = {};
+let yodaFormData = {};
 
-var isDatamanager     = false;
-var updateButton      = false;
-var save              = false;
-var formDataErrors    = [];
+let formProperties;
 
-var form = document.getElementById('form');
-var path = form.dataset.path;
+let saving = false;
+
+let form = document.getElementById('form');
 
 const customStyles = {
     control: styles => ({...styles, borderRadius: '0px', minHeight: '15px', height: '33.5px'}),
@@ -26,26 +22,22 @@ const customStyles = {
 };
 
 const enumWidget = (props) => {
-	var enumArray = props["schema"]["enum"];
-	var enumNames = props["schema"]["enumNames"];
+    let enumArray = props['schema']['enum'];
+    let enumNames = props['schema']['enumNames'];
 
-	if (enumNames == null) {
+    if (enumNames == null)
         enumNames = enumArray;
-    }
 
-	var i = enumArray.indexOf(props["value"]);
-	var placeholder = enumNames[i] == null ? " " : enumNames[i];
+    let i = enumArray.indexOf(props['value']);
+    let placeholder = enumNames[i] == null ? ' ' : enumNames[i];
 
-	return (
-		<Select
-		className={"select-box"}
-		placeholder={placeholder}
-		required={props.required}
-		isDisabled={props.readonly}
-		onChange={(event) => props.onChange(event.value)}
-		options={props["options"]["enumOptions"]}
-		styles={customStyles} />
-	);
+    return (<Select className={'select-box'}
+                    placeholder={placeholder}
+                    required={props.required}
+                    isDisabled={props.readonly}
+                    onChange={(event) => props.onChange(event.value)}
+                    options={props['options']['enumOptions']}
+                    styles={customStyles} />);
 };
 
 const widgets = {
@@ -63,7 +55,7 @@ class YodaForm extends React.Component {
         super(props);
 
         const formContext = {
-            save: false
+            saving: false
         };
         this.state = {
             formData: yodaFormData,
@@ -72,13 +64,11 @@ class YodaForm extends React.Component {
     }
 
     onChange(form) {
-        formCompleteness();
+        updateCompleteness();
 
         // Turn save mode off.
-        save = false;
-        const formContext = {
-            save: false
-        };
+        saving = false;
+        const formContext = { saving: false };
 
         this.setState({
             formData: form.formData,
@@ -88,36 +78,26 @@ class YodaForm extends React.Component {
 
     onError(form) {
         let formContext = {...this.state.formContext};
-        formContext.save = save;
-        this.setState({
-            formContext: formContext
-        });
+        formContext.saving = saving;
+        this.setState({ formContext: formContext });
     }
 
     transformErrors(errors) {
-        console.log(errors);
-        // Only strip errors when saving.
-        if (save) {
-            var i = errors.length
-            while (i--) {
-                if (errors[i].name === "required"     ||
-                    errors[i].name === "dependencies") {
-                    errors.splice(i,1);
-                }
-            }
-        }
-
+        // Strip errors when saving.
+        if (saving)
+            return errors.filter((e) => e.name !== 'required' && e.name !== 'dependencies');
         return errors;
     }
 
     ErrorListTemplate(props) {
-        const {errors, formContext} = props;
+        let {errors, formContext} = props;
+        errors = errors.filter((e) => e.name !== 'required' && e.name !== 'dependencies');
 
         if (errors.length === 0) {
             return(<div></div>);
         } else {
-            // Show error list only on save or submit.
-            if (formContext.save) {
+            // Show error list only on save.
+            if (formContext.saving) {
                 return (
                   <div className="panel panel-warning errors">
                     <div className="panel-heading">
@@ -182,23 +162,23 @@ class YodaButtons extends React.Component {
     }
 
     renderFormCompleteness() {
-        return (<span className="form-completeness add-pointer" aria-hidden="true" data-toggle="tooltip" title=""></span>);
+        return (<span className="form-completeness" aria-hidden="true" data-toggle="tooltip" title=""></span>);
     }
 
     renderButtons() {
-        if (isDatamanager) {
-            // Datamanager in Vault space.
-            if (!updateButton && mode === "edit_in_vault") {
-                // Show 'Save' button.
-                return (<div>{this.renderSaveButton()} {this.renderFormCompleteness()}</div>);
-            } else if (updateButton) {
-                // Show 'Update' button.
-                return (<div>{this.renderUpdateButton()}</div>);
-            }
-        } else {
-            // Show no buttons.
-            return (<div></div>);
+        let buttons = [];
+
+        if (formProperties.data.can_edit) {
+            buttons.push(this.renderSaveButton());
+            buttons.push(this.renderFormCompleteness());
+
+            // Delete and clone are mutually exclusive.
+            if (formProperties.data.metadata !== null)
+                buttons.push(this.renderDeleteButton());
+            else if (formProperties.data.can_clone)
+                buttons.push(this.renderCloneButton());
         }
+        return (<div>{buttons}</div>);
     }
 
     render() {
@@ -222,7 +202,7 @@ class Container extends React.Component {
     }
 
     saveMetadata() {
-        save = true;
+        saving = true;
         this.form.submitButton.click();
     }
 
@@ -243,101 +223,131 @@ class Container extends React.Component {
     }
 };
 
+/**
+ * Returns to the browse view for the current collection.
+ */
+function browse() {
+    window.location.href = '/research/browse?dir=' + encodeURIComponent(path);
+}
 
-var tokenName = form.dataset.csrf_token_name;
-var tokenHash = form.dataset.csrf_token_hash;
-axios.defaults.headers.common = {
-    'X-Requested-With': 'XMLHttpRequest',
-    'X-CSRF-TOKEN' : tokenHash
-};
-axios.defaults.xsrfCookieName = tokenName;
-axios.defaults.xsrfHeaderName = tokenHash;
 
-axios.get("/vault/metadata/data?path=" + path + "&mode=" + mode)
-    .then(function (response) {
-        schema            = response.data.schema;
-        uiSchema          = response.data.uiSchema;
-        yodaFormData      = response.data.formData;
-        isDatamanager     = response.data.isDatamanager;
-        updateButton      = response.data.updateButton;
-        formDataErrors    = response.data.formDataErrors;
+function loadForm(properties) {
+    formProperties = properties;
+    console.log('Form properties:', formProperties);
 
-        // Check form data errors
-        if (formDataErrors.length > 0) {
-            var text = '';
-            $.each(formDataErrors, function( key, field ) {
-                text +='- ' + field + '<br />';
-            });
-            $('.form-data-errors .error-fields').html(text);
+    // Inhibit "loading" text.
+    formLoaded = true;
 
-            $('.form-data-errors').removeClass('hide');
-            $('.metadata-form').addClass('hide');
-        } else {
-            render(<Container/>,
-                document.getElementById("form")
-            );
-
-            formCompleteness();
-        }
-    })
-    .catch(function (error) {
-        console.log(error);
+    if (formProperties.data !== null) {
+        // These ary only present when there is a form to show (i.e. no
+        // validation errors, and no transformation needed).
+        schema       = formProperties.data.schema;
+        uiSchema     = formProperties.data.uischema;
+        yodaFormData = formProperties.data.metadata === null ? undefined : formProperties.data.metadata;
     }
-);
 
-function submitData(data)
-{
-    var path = form.dataset.path;
-    var tokenName = form.dataset.csrf_token_name;
-    var tokenHash = form.dataset.csrf_token_hash;
+    if (formProperties.status === 'error_transformation_needed') {
+        // Transformation is necessary. Show transformation prompt.
+        $('#transformation-text').html(formProperties.data.transformation_html);
+        if (formProperties.data.can_edit) {
+            $('#transformation-buttons').removeClass('hide')
+            $('#transformation-text').html(formProperties.data.transformation_html);
+        } else {
+            $('#transformation .close-button').removeClass('hide')
+        }
+        $('.transformation-accept').on('click', async () => {
+            $('.transformation-accept').attr('disabled', true);
 
-    // Disable buttons.
-    $('.yodaButtons button').attr("disabled", true);
+            await Yoda.call('uu_transform_metadata',
+                            {coll: Yoda.basePath+path},
+                            {errorPrefix: 'Metadata could not be transformed'});
 
-    // Create form data.
-    var bodyFormData = new FormData();
-    bodyFormData.set(tokenName, tokenHash);
-    bodyFormData.set('formData', JSON.stringify(data));
-
-    // Store.
-    axios({
-        method: 'post',
-        url: "/vault/metadata/store?path=" + path,
-        data: bodyFormData,
-        config: { headers: {'Content-Type': 'multipart/form-data' }}
-        })
-        .then(function (response) {
-            window.location.href = "/vault/metadata/form?path=" + path;
-        })
-        .catch(function (error) {
-            //handle error
-            console.log('ERROR:');
-            console.log(error);
+            window.location.reload();
         });
+        $('#transformation').removeClass('hide');
+
+    } else if (formProperties.status !== 'ok') {
+        // Errors exist - show those instead of loading a form.
+        let text = '';
+        if (formProperties.status === 'error_validation') {
+            // Validation errors? show a list.
+            $.each(formProperties.data.errors, (key, field) => {
+                text += '<li>' + $('<div>').text(field.replace('->', '→')).html();
+            });
+        } else {
+            // Structural / misc error? Show status info.
+            text += '<li>' + $('<div>').text(formProperties.status_info).html();
+        }
+        $('.delete-all-metadata-btn').on('click', deleteMetadata);
+        $('#form-errors .error-fields').html(text);
+        $('#form-errors').removeClass('hide');
+
+    } else if (formProperties.data.metadata === null && !formProperties.data.can_edit) {
+        // No metadata present and no write access. Do not show a form.
+        $('#form').addClass('hide');
+        $('#no-metadata').removeClass('hide');
+
+    } else {
+        // Metadata present or user has write access, load the form.
+        if (!formProperties.data.can_edit)
+            uiSchema['ui:readonly'] = true;
+
+        render(<Container/>, document.getElementById('form'));
+
+        // Form may already be visible (with "loading" text).
+        if ($('#metadata-form').hasClass('hide')) {
+            // Avoid flashing things on screen.
+            $('#metadata-form').fadeIn(220);
+            $('#metadata-form').removeClass('hide');
+        }
+
+        updateCompleteness();
+    }
+}
+
+$(_ => loadForm(JSON.parse(atob($('#form-properties').text()))));
+
+async function submitData(data) {
+    // Disable buttons.
+    $('.yodaButtons button').attr('disabled', true);
+
+    // Save.
+    try {
+        await Yoda.call('uu_meta_form_save',
+                        {coll: Yoda.basePath+path, metadata: data},
+                        {errorPrefix: 'Metadata could not be saved'});
+
+        Yoda.message('success', `Updated metadata of folder <${path}>`);
+        browse();
+    } catch (e) {
+        // Allow retry.
+        $('.yodaButtons button').attr('disabled', false);
+    }
 }
 
 function CustomFieldTemplate(props) {
-    const {id, classNames, label, help, hidden, required, description, errors, rawErrors, children, displayLabel, formContext, readonly} = props;
+    const {id, classNames, label, help, hidden, required, description, errors,
+           rawErrors, children, displayLabel, formContext, readonly} = props;
 
     if (hidden || !displayLabel) {
         return children;
     }
 
-    const hasErrors = Array.isArray(errors.props.errors) ? true : false;
+    const hasErrors = Array.isArray(errors.props.errors);
 
-    // Only show error messages after save.
-    if (formContext.save) {
+    // Only show error messages after submit.
+    if (formContext.saving) {
       return (
         <div className={classNames}>
           <label className={'col-sm-2 control-label'}>
-            <span data-toggle="tooltip" title="" data-original-title="">{label}</span>
+            <span data-toggle="tooltip" title={help.props.help}>{label}</span>
           </label>
 
           {required ? (
             <span className={'fa-stack col-sm-1'}>
-              <i className={'fa fa-lock safe fa-stack-1x'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Required for the vault"></i>
+              <i className={'fa fa-lock safe fa-stack-1x'} aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
               {!hasErrors ? (
-                <i className={'fa fa-check fa-stack-1x checkmark-green-top-right'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Filled out correctly for the vault"></i>
+                <i className={'fa fa-check fa-stack-1x checkmark-green-top-right'} aria-hidden="true" data-toggle="tooltip" title="Filled out correctly for the vault"></i>
               ) : (
                 null
               )}
@@ -353,7 +363,6 @@ function CustomFieldTemplate(props) {
               </div>
             </div>
             {errors}
-            {help}
           </div>
         </div>
       );
@@ -361,14 +370,14 @@ function CustomFieldTemplate(props) {
        return (
         <div className={classNames}>
           <label className={'col-sm-2 control-label'}>
-            <span data-toggle="tooltip" title="" data-original-title="">{label}</span>
+            <span data-toggle="tooltip" title={help.props.help}>{label}</span>
           </label>
 
           {required && !readonly ? (
             <span className={'fa-stack col-sm-1'}>
-              <i className={'fa fa-lock safe fa-stack-1x'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Required for the vault"></i>
+              <i className={'fa fa-lock safe fa-stack-1x'} aria-hidden="true" data-toggle="tooltip" title="Required for the vault"></i>
               {!hasErrors ? (
-                <i className={'fa fa-check fa-stack-1x checkmark-green-top-right'} aria-hidden="true" data-toggle="tooltip" title="" data-original-title="Filled out correctly for the vault"></i>
+                <i className={'fa fa-check fa-stack-1x checkmark-green-top-right'} aria-hidden="true" data-toggle="tooltip" title="Filled out correctly for the vault"></i>
               ) : (
                 null
               )}
@@ -383,7 +392,6 @@ function CustomFieldTemplate(props) {
                 {children}
               </div>
             </div>
-            {help}
           </div>
          </div>
       );
@@ -393,16 +401,16 @@ function CustomFieldTemplate(props) {
 function ObjectFieldTemplate(props) {
     const { TitleField, DescriptionField } = props;
 
-    var structureClass;
-    var structure;
+    let structureClass;
+    let structure;
     if ('yoda:structure' in props.schema) {
-        var structureClass = 'yoda-structure ' + props.schema['yoda:structure'];
-        var structure = props.schema['yoda:structure'];
+        structureClass = `yoda-structure ${props.schema['yoda:structure']}`;
+        structure = props.schema['yoda:structure'];
     }
 
     if (structure === 'compound') {
-        let array = props.properties;
-        let output = props.properties.map((prop, i, array) => {
+        var array = props.properties;
+        var output = props.properties.map((prop, i, array) => {
             return (
                 <div key={i} className="col-sm-6 field compound-field">
                     {prop.content}
@@ -411,9 +419,9 @@ function ObjectFieldTemplate(props) {
         });
 
         return (
-            <div className={"form-group " + structureClass}>
+            <div className={`form-group ${structureClass}`}>
                 <label className="col-sm-2 combined-main-label control-label">
-                    <span>{props.title}</span>
+                    <span data-toggle="tooltip" title={props.uiSchema["ui:help"]}>{props.title}</span>
                 </label>
                 <span className="fa-stack col-sm-1"></span>
                 <div className="col-sm-9">
@@ -450,22 +458,18 @@ function ObjectFieldTemplate(props) {
 
 function ArrayFieldTemplate(props) {
     let array = props.items;
-    let canRemove = true;
-    if (array.length === 1) {
-        canRemove = false;
-    }
+    let canRemove = array.length !== 1;
     let output = props.items.map((element, i, array) => {
         // Read only view
-        if (props.readonly) {
+        if (props.readonly || props.disabled) {
             return element.children;
         }
 
         let item = props.items[i];
         if (array.length - 1 === i) {
-            let btnCount = 1;
-            if (canRemove) {
-                btnCount = 2;
-            }
+            // Render "add" button only on the last item.
+
+            let btnCount = 1 + canRemove;
 
             return (
                 <div key={i} className="has-btn">
@@ -499,37 +503,26 @@ function ArrayFieldTemplate(props) {
         }
     });
 
-    return (
-        <div>
-            {output}
-        </div>
-    );
+    if (props.disabled)
+        return (<div className="hide">{output}</div>);
+    else
+        return (<div>{output}</div>);
 }
 
 
-function formCompleteness()
+function updateCompleteness()
 {
-    var mandatoryTotal = $('.fa-lock.safe:visible').length;
-    var mandatoryFilled = $('.fa-stack .checkmark-green-top-right:visible').length;
+    const mandatoryTotal  = $('.fa-lock.safe:visible').length;
+    const mandatoryFilled = $('.fa-stack .checkmark-green-top-right:visible').length;
 
-    if (mandatoryTotal == 0) {
-        var metadataCompleteness = 100;
-    } else {
-        var metadataCompleteness = Math.ceil(100 * mandatoryFilled / mandatoryTotal);
-    }
+    const completeness = mandatoryTotal == 0 ? 1 : mandatoryFilled / mandatoryTotal;
 
-    var html = '<i class="fa fa-check ' + (metadataCompleteness > 19 ? "form-required-present" : "form-required-missing") + '"</i>' +
-    '<i class="fa fa-check ' + (metadataCompleteness > 19 ? "form-required-present" : "form-required-missing") + '"></i>' +
-    '<i class="fa fa-check ' + (metadataCompleteness > 59 ? "form-required-present" : "form-required-missing") + '"></i>' +
-    '<i class="fa fa-check ' + (metadataCompleteness > 79 ? "form-required-present" : "form-required-missing") + '"></i>' +
-    '<i class="fa fa-check ' + (metadataCompleteness > 99 ? "form-required-present" : "form-required-missing") + '"></i>';
+    const html = ' '
+               + '<i class="fa fa-check form-required-present"></i>'.repeat(  Math.floor(completeness*5))
+               + '<i class="fa fa-check form-required-missing"></i>'.repeat(5-Math.floor(completeness*5));
 
-    $('.form-completeness').attr('title', 'Required for the vault: '+mandatoryTotal+', currently filled required fields: ' + mandatoryFilled);
+    $('.form-completeness').attr('title', `Required for the vault: ${mandatoryTotal}, currently filled required fields: ${mandatoryFilled}`);
     $('.form-completeness').html(html);
 
-    if (mandatoryTotal == mandatoryFilled) {
-        return true;
-    }
-
-    return false;
+    return mandatoryTotal == mandatoryFilled;
 }
