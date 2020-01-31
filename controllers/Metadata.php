@@ -41,7 +41,7 @@ class Metadata extends MY_Controller
         $tokenHash = $this->security->get_csrf_hash();
 
         $formProperties = $this->api->call('uu_meta_form_load', ['coll' => $fullPath]);
-
+        
         $viewParams = array(
             'styleIncludes' => array(
                 'lib/font-awesome/css/font-awesome.css',
