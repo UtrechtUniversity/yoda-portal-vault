@@ -6,10 +6,23 @@ import Geolocation from "./Geolocation"
 
 const path = $('#form').attr('data-path');
 
+
+$('#btn-update-metadata').click(
+    function() {
+        //console.log(JSON.parse(atob($('#form-properties').text())));
+
+        formProperties = JSON.parse(atob($('#form-properties').text()));
+        formProperties.data.can_edit = true;
+        $(_ => loadForm(formProperties));
+        alert( "Form reloaded" );
+    }
+);
+
 let schema       = {};
 let uiSchema     = {};
 let yodaFormData = {};
 
+let actual_edit_mode = false; // if can edit, it is not diretly shown.
 let formProperties;
 
 let saving = false;
@@ -167,17 +180,27 @@ class YodaButtons extends React.Component {
 
     renderButtons() {
         let buttons = [];
+        console.log('WE ZITTEN IN RENDER!');
+        if (formProperties.data.can_edit) { // komt can_edit goed binnen via PHP
+            // buttons.push(this.renderSaveButton());
+            buttons.push(this.renderFormCompleteness());  // Have it present already given timing issues later
 
-        if (formProperties.data.can_edit) {
-            buttons.push(this.renderSaveButton());
-            buttons.push(this.renderFormCompleteness());
+            if (!actual_edit_mode) {
+                buttons.push(this.renderUpdateButton());
+            }else {
+                //buttons.push(this.renderFormCompleteness());
+                buttons.push(this.renderSaveButton());
+            }
 
             // Delete and clone are mutually exclusive.
-            if (formProperties.data.metadata !== null)
-                buttons.push(this.renderDeleteButton());
-            else if (formProperties.data.can_clone)
-                buttons.push(this.renderCloneButton());
+            //if (formProperties.data.metadata !== null) {
+             //   buttons.push(this.renderDeleteButton());
+            //else if (formProperties.data.can_clone)
+            //    buttons.push(this.renderCloneButton());
         }
+        // else { // dit is geinlijk niet juist hier nu - voor test purposes
+        //     buttons.push(this.renderUpdateButton());
+        // }
         return (<div>{buttons}</div>);
     }
 
@@ -194,7 +217,6 @@ class YodaButtons extends React.Component {
     }
 }
 
-
 class Container extends React.Component {
     constructor(props) {
         super(props);
@@ -207,7 +229,9 @@ class Container extends React.Component {
     }
 
     updateMetadata() {
-        window.location.href = '/vault/metadata/form?path=' + path + '&mode=edit_in_vault';
+        actual_edit_mode = true;
+        $(_ => loadForm(JSON.parse(atob($('#form-properties').text()))));
+//        window.location.href = '/vault/metadata/form?path=' + path + '&mode=edit_in_vault';
     }
 
     render() {
@@ -227,12 +251,16 @@ class Container extends React.Component {
  * Returns to the browse view for the current collection.
  */
 function browse() {
-    window.location.href = '/research/browse?dir=' + encodeURIComponent(path);
+    window.location.href = '/vault/browse?dir=' + encodeURIComponent(path);
 }
 
 
 function loadForm(properties) {
     formProperties = properties;
+
+
+    console.log('Form properties.data.can_edit: ', formProperties.data.can_edit);
+    console.log('actual_edit_mode: ' + actual_edit_mode);
     console.log('Form properties:', formProperties);
 
     // Inhibit "loading" text.
@@ -278,7 +306,8 @@ function loadForm(properties) {
             // Structural / misc error? Show status info.
             text += '<li>' + $('<div>').text(formProperties.status_info).html();
         }
-        $('.delete-all-metadata-btn').on('click', deleteMetadata);
+        // HdR The delete button does not exist in vault
+        //$('.delete-all-metadata-btn').on('click', deleteMetadata);
         $('#form-errors .error-fields').html(text);
         $('#form-errors').removeClass('hide');
 
@@ -288,9 +317,21 @@ function loadForm(properties) {
         $('#no-metadata').removeClass('hide');
 
     } else {
-        // Metadata present or user has write access, load the form.
-        if (!formProperties.data.can_edit)
+        // Metadata present or user has write access, load the form and must be in actual_edit_mode as chosen by user
+        console.log('WE ZIJN BY editable/niet');
+        if (!formProperties.data.can_edit || !actual_edit_mode) {
             uiSchema['ui:readonly'] = true;
+        }
+        else
+        {
+            uiSchema = formProperties.data.uischema; // take over original ui-shema again- not the readonly one
+            // As we open metadataform in the vault, the completeness must be 100%
+            // This is dealt with in this way as timing issues occur when doing this where it is done like in research area.
+            // Due to that,
+            const html = ' '
+                + '<i class="fa fa-check form-required-present"></i>'.repeat(5);
+            $('.form-completeness').html(html);
+        }
 
         render(<Container/>, document.getElementById('form'));
 
@@ -300,8 +341,6 @@ function loadForm(properties) {
             $('#metadata-form').fadeIn(220);
             $('#metadata-form').removeClass('hide');
         }
-
-        updateCompleteness();
     }
 }
 
@@ -309,6 +348,10 @@ $(_ => loadForm(JSON.parse(atob($('#form-properties').text()))));
 
 async function submitData(data) {
     // Disable buttons.
+
+    console.log(data);
+    //return;
+
     $('.yodaButtons button').attr('disabled', true);
 
     // Save.

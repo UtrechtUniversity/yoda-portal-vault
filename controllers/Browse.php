@@ -149,7 +149,7 @@ class Browse extends MY_Controller
 
         // Generic error handling intialisation
         $status = 'Success';
-        $statusInformation = '';
+        $statusInfo = '';
 
         $totalItemsLeftInView = $length;
 
