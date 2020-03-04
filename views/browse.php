@@ -225,7 +225,7 @@
             <div class="col-md-3">
                 <div class="top-info-buttons">
                     <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-default metadata-form" data-path="">Metadata</button>
+                        <button type="button" class="btn btn-default metadata-form" data-path="" title="Show metadata form">Metadata</button>
                     </div>
 
                     <div class="btn-group">
