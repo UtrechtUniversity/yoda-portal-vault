@@ -1,7 +1,5 @@
 <div class="col-md-12">
     <div class="row">
-<!--        <div class="panel panel-default">-->
-<!--            <div class="panel-body">-->
                 <?php if (!$collectionExists): ?>
                     <i class="fa fa-exclamation-circle"></i> This collection no longer exists.
                 <?php endif; ?>
@@ -26,7 +24,7 @@
                                     <?php echo $row['org_original_filesize'] ?> bytes
                                 </td>
                                 <td>
-                                    <divclass="btn-group" role="group" aria-label="...">
+                                    <div class="btn-group" role="group" aria-label="...">
                                         <button type="button" class="btn btn-default btn-revision-select-dialog"
                                                 data-orgfilename="<?php echo rawurlencode($orgFileName); ?>"
                                                 data-objectid="<?php echo $row['id']; ?>"
@@ -37,14 +35,10 @@
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-
             </div>
-<!--        </div>-->
-<!--    </div>-->
 </div>
 <script>
     $( document ).ready(function() {
-
         $('.btn-revision-select-dialog').on('click', function(){
             var id = $(this).data('objectid'),
                 path = $(this).data('path'),
@@ -52,7 +46,5 @@
 
             window.parent.showFolderSelectDialog(id, path, orgFileName);
         });
-
     });
-
 </script>

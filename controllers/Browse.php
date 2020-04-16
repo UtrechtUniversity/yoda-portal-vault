@@ -159,8 +159,6 @@ class Browse extends MY_Controller
         // Collections
         if ($restrict=='collections' OR !$restrict) {
             // Get the actual total for the Collections
-
-
             $testCollections = $this->filesystem->browseResearch($rodsaccount, $path, "Collection", $orderColumns[$orderColumn], $orderDir, $length, 0);
             $status = $testCollections['status'];
             if ($status=='Success') {
