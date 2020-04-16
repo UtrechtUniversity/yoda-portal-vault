@@ -16,20 +16,6 @@ class Filesystem extends CI_Model {
         $this->CI =& get_instance();
     }
 
-    /**
-     * Write XML string to yoda-metadata.xml in iRODS.
-     *
-     * @param $rodsaccount
-     * @param $path
-     * @param $xmlString
-     */
-    function writeXml($rodsaccount, $path, $xmlString)
-    {
-        $metedataFile = new ProdsFile($rodsaccount, $path);
-        $metedataFile->open("w+");
-        $metedataFile->write($xmlString);
-        $metedataFile->close();
-    }
 
     /**
      * Read a file from iRODS.
@@ -146,6 +132,8 @@ class Filesystem extends CI_Model {
 
     static public function browseResearch($iRodsAccount, $path, $type, $orderBy, $orderSort, $limit, $offset = 0)
     {
+        //echo 'ik kom hier: ' . $path;
+
         $output = array();
 
         $ruleBody = <<<'RULE'

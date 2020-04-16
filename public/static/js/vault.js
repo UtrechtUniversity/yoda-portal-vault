@@ -248,7 +248,7 @@ function makeBreadcrumb(dir)
         let el = $('<li>');
         text = htmlEncode(text).replace(/ /g, '&nbsp;');
         if (i === crumbs.length-1)
-             el.addClass('active').text(text);
+             el.addClass('active').html(text);
         else el.html(`<a class="browse" data-path="${htmlEncode(path)}"
                          href="?dir=${encodeURIComponent(path)}">${text}</a>`);
 

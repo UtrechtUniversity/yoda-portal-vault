@@ -33,8 +33,9 @@ class Search extends MY_Controller
 
     public function set_session()
     {
-        $value = $this->input->get('value');
-        $type = $this->input->get('type');
+        $value = $this->input->post('value');
+        $type = $this->input->post('type');
+
         if ($type == 'status') {
             $this->session->set_userdata('research-search-status-value', $value);
         } else {
