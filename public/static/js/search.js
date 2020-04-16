@@ -62,6 +62,7 @@ $(document).ready(function() {
         currentSearchString = $(this).val();
         currentSearchType = 'status';
         currentSearchItems = $(".search-btn").attr('data-items-per-page');
+
         search();
         saveSearchRequest();
     });
@@ -79,11 +80,13 @@ let getSearchResults = (() => {
     let get = async (args) => {
         // Load new data via the API.
         let j = ++i;
+
+        // Latest selection length is required
         let result = await Yoda.call('uu_search', {
             'search_string': currentSearchString,
             'search_type': currentSearchType,
             'offset': args.start,
-            'limit': currentSearchItems,
+            'limit': $("select[name='search_length']").val(), //currentSearchItems, //$(".search-btn").attr('data-items-per-page')
             'sort_order': args.order[0].dir,
             'sort_on': ['name', 'size', 'modified'][args.order[0].column]
         });
@@ -98,6 +101,8 @@ let getSearchResults = (() => {
     // The actual function passed to datatables.
     // (needs a non-async wrapper cause datatables won't accept it otherwise)
     let fn = (args, cb, settings) => (async () => {
+
+        args.start = parseInt(args.start);
 
         let data = await get(args);
         if (data === null)
@@ -229,7 +234,7 @@ function search() {
             "ajax": getSearchResults,
             "processing": true,
             "serverSide": true,
-            "pageLength": currentSearchItems,
+            "pageLength": $("select[name='search_length']").val(),
             "drawCallback": function(settings) {
                 $(".browse-search").on("click", function() {
                     var path = $(this).attr('data-path');
@@ -286,7 +291,7 @@ function saveSearchRequest() {
                     $('#search').hide();
                     $('.search-results').hide();
 
-                    window.location.href = "revision?filter=" + encodeURIComponent(currentSearchString, );
+                    window.location.href = "/research/revision?filter=" + encodeURIComponent(currentSearchString);
                     return false;
                 }
 
@@ -298,6 +303,7 @@ function saveSearchRequest() {
                 showSearchResults();
             }
         });
+
         showSearchResults();
     }
 }

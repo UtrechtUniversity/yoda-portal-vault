@@ -26,7 +26,7 @@
                                     <?php echo $row['org_original_filesize'] ?> bytes
                                 </td>
                                 <td>
-                                    <div class="btn-group" role="group" aria-label="...">
+                                    <divclass="btn-group" role="group" aria-label="...">
                                         <button type="button" class="btn btn-default btn-revision-select-dialog"
                                                 data-orgfilename="<?php echo rawurlencode($orgFileName); ?>"
                                                 data-objectid="<?php echo $row['id']; ?>"
