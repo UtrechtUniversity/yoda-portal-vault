@@ -7,14 +7,6 @@ import Geolocation from "./Geolocation"
 const path = $('#form').attr('data-path');
 
 
-$('#btn-update-metadata').click(
-    function() {
-        formProperties = JSON.parse(atob($('#form-properties').text()));
-        formProperties.data.can_edit = true;
-        $(_ => loadForm(formProperties));
-    }
-);
-
 let schema       = {};
 let uiSchema     = {};
 let yodaFormData = {};
@@ -308,7 +300,7 @@ function loadForm(properties) {
             // Due to that,
             const html = ' '
                 + '<i class="fa fa-check form-required-present"></i>'.repeat(5);
-            $('.form-c').html(html);
+            $('.form-completeness').html(html);
         }
 
         render(<Container/>, document.getElementById('form'));
@@ -319,6 +311,8 @@ function loadForm(properties) {
             $('#metadata-form').fadeIn(220);
             $('#metadata-form').removeClass('hide');
         }
+
+        updateCompleteness();
     }
 }
 
