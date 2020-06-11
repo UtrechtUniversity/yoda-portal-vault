@@ -42,25 +42,6 @@ class Vault extends MY_Controller
             ->set_output(json_encode($output));
     }
 
-    // Get the text of the terms a researcher has to confirm
-    public function terms()
-    {
-        $path = $this->input->get('path');
-        $pathStart = $this->pathlibrary->getPathStart($this->config);
-        $fullPath =  $pathStart . $path;
-
-        $this->load->model('Folder_Status_model');
-        $result = $this->Folder_Status_model->getTermsText($fullPath);
-
-        // welk model moet license komen??
-        $output = array('status' => $result['*status'],
-	                'statusInfo' => $result['*statusInfo'],
-                        'result' => $result['*result']);
-
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($output));
-    }
 
      /// Dit moet naar DataRequst Controller???
      //copyVaultPackageToDynamicArea

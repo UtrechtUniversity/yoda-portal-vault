@@ -122,21 +122,14 @@ $( document ).ready(function() {
 
         $('.action-confirm-submit-for-publication').attr( 'data-folder', $(this).attr('data-folder') );
 
-        let folder = $(this).attr('data-folder');
-        $.getJSON("vault/terms?path=" + folder, function (data) {
-            if (data.status == 'Success') {
-                $('#confirmAgreementConditions .modal-body').html(data.result);
+        Yoda.call('uu_vault_get_publication_terms', {}).then((data) => {
+            $('#confirmAgreementConditions .modal-body').html(data);
 
-                // set default status and show dialog
-                $(".action-confirm-submit-for-publication").prop('disabled', true);
-                $("#confirmAgreementConditions .confirm-conditions").prop('checked', false);
+            // Set default status and show dialog.
+            $(".action-confirm-submit-for-publication").prop('disabled', true);
+            $("#confirmAgreementConditions .confirm-conditions").prop('checked', false);
 
-                $('#confirmAgreementConditions').modal('show');
-            } else {
-                setMessage('error', data.statusInfo);
-
-                return;
-            }
+            $('#confirmAgreementConditions').modal('show');
         });
     });
 

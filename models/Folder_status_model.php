@@ -51,22 +51,4 @@ class Folder_Status_model extends CI_Model
         $result = $rule->execute();
         return $result;
     }
-
-    /**
-     * Retrieve publication terms text from server.
-     *
-     * @param $folder Folder to approve for publication
-     * @return status
-     */
-    function getTermsText($fullPath)
-    {
-        $outputParams = array('*result', '*status', '*statusInfo');
-        $inputParams = array('*folder' => $fullPath);
-
-        $this->CI->load->library('irodsrule');
-        $rule = $this->irodsrule->make('iiGetPublicationTermsText', $inputParams, $outputParams);
-        $result = $rule->execute();
-
-        return $result;
-    }
 }
