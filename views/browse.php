@@ -149,16 +149,16 @@
                         <option value="" disabled selected>Select a file format list</option>
                     </select>
                 </div>
-                <div class="help"></div><br />
-                <div class="advice"></div>
-                <div class="preservable">
+                <p class="help"></p><br />
+                <p class="advice"></p>
+                <p class="preservable">
                     This folder does not contain files that are likely to become unusable in the future.
-                </div>
-                <div class="unpreservable">
+                </p>
+                <p class="unpreservable">
                     Following unpreservable file extensions were found in your dataset:
                     <br />
                     <ul class="list-unpreservable-formats"></ul>
-                </div>
+                </p>
             </div>
 
             <div class="modal-footer">
