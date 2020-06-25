@@ -435,7 +435,7 @@ function toggleActionLogList(folder)
 {
     let actionList = $('.actionlog-items');
 
-    // toggle locks list
+     // Toggle provenance log list.
     if (actionList.is(":visible")) {
         actionList.hide();
     } else {
@@ -492,7 +492,7 @@ function toggleSystemMetadata(folder)
                     html += '<li class="list-group-item"><span><strong>' +
                         htmlEncode(index) +
                         '</strong>: ' +
-                        htmlEncode(value) +
+                        value +
                         '</span></li>';
                 });
             } else {
