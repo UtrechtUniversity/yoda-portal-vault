@@ -631,7 +631,7 @@ function topInformation(dir, showAlert) {
             $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
 
             var icon = '<i class="fa fa-folder-open-o" aria-hidden="true"></i>';
-            $('.top-information h1').html(`<span class="icon">${icon}</span> ${folderName}${lockIcon}${systemMetadataIcon}${actionLogIcon}${statusBadge}`);
+            $('.top-information h1').html(`<span class="icon">${icon}</span> ${folderName}${systemMetadataIcon}${actionLogIcon}${statusBadge}`);
 
             // Show top information and buttons.
             if (typeof vaultStatus != 'undefined') {
