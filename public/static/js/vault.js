@@ -12,7 +12,7 @@ $(document).ajaxSend(function(e, request, settings) {
 let preservableFormatsLists = null;
 let currentFolder;
 
-$( document ).ready(function() {
+$(function() {
     // Extract current location from query string (default to '').
     currentFolder = decodeURIComponent((/(?:\?|&)dir=([^&]*)/
                                         .exec(window.location.search) || [0,''])[1]);
@@ -30,27 +30,27 @@ $( document ).ready(function() {
     });
 
     $("body").on("click", "a.view-video", function() {
-        path = $(this).attr('data-path');
-        viewerHtml = '<video width="570" controls autoplay><source src="' + path + '"></video>';
+        let path = $(this).attr('data-path');
+        let viewerHtml = `<video width="570" controls autoplay><source src="browse/download?filepath=${htmlEncode(encodeURIComponent(path))}"></video>`;
         $('#viewer').html(viewerHtml);
         $('#viewMedia').modal('show');
     });
 
     $("body").on("click", "a.view-audio", function() {
-        path = $(this).attr('data-path');
-        viewerHtml = '<audio width="570" controls autoplay><source src="' + path + '"></audio>';
+        let path = $(this).attr('data-path');
+        let viewerHtml = `<audio width="570" controls autoplay><source src="browse/download?filepath=${htmlEncode(encodeURIComponent(path))}"></audio>`;
         $('#viewer').html(viewerHtml);
         $('#viewMedia').modal('show');
     });
 
     $("body").on("click", "a.view-image", function() {
-        path = $(this).attr('data-path');
-        viewerHtml = '<img width="570" src="' + path + '" />';
+        let path = $(this).attr('data-path');
+        let viewerHtml = `<img width="570" src="browse/download?filepath=${htmlEncode(encodeURIComponent(path))}" />`;
         $('#viewer').html(viewerHtml);
         $('#viewMedia').modal('show');
     });
 
-    $("#viewMedia.modal").on("hidden.bs.modal", function(){
+    $("#viewMedia.modal").on("hidden.bs.modal", function() {
         $("#viewer").html("");
     });
 
@@ -164,7 +164,7 @@ $( document ).ready(function() {
     });
 
     $("body").on("click", ".browse", function(e) {
-        browse($(this).attr('data-path'));
+        browse($(this).attr('data-path'), true);
         // Dismiss stale messages.
         $('#messages .close').click();
         e.preventDefault();
@@ -433,11 +433,10 @@ function startBrowsing(items)
 
 function toggleActionLogList(folder)
 {
-    var actionList = $('.actionlog-items'),
-        isVisible = actionList.is(":visible");
+    let actionList = $('.actionlog-items');
 
-    // Toggle provenance log list.
-    if (isVisible) {
+    // toggle locks list
+    if (actionList.is(":visible")) {
         actionList.hide();
     } else {
         buildActionLog(folder);
@@ -493,7 +492,7 @@ function toggleSystemMetadata(folder)
                     html += '<li class="list-group-item"><span><strong>' +
                         htmlEncode(index) +
                         '</strong>: ' +
-                        value +
+                        htmlEncode(value) +
                         '</span></li>';
                 });
             } else {
@@ -632,7 +631,7 @@ function topInformation(dir, showAlert) {
             $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
 
             var icon = '<i class="fa fa-folder-open-o" aria-hidden="true"></i>';
-            $('.top-information h1').html('<span class="icon">' + icon + '</span> ' + folderName + systemMetadataIcon + actionLogIcon + statusBadge);
+            $('.top-information h1').html(`<span class="icon">${icon}</span> ${folderName}${lockIcon}${systemMetadataIcon}${actionLogIcon}${statusBadge}`);
 
             // Show top information and buttons.
             if (typeof vaultStatus != 'undefined') {
@@ -660,13 +659,13 @@ function handleActionsList(actions, folder)
 
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
-            html += '<li><a class="action-' + value + '" data-folder="' + folder + '">' + actions[value] + '</a></li>';
+            html += '<li><a class="action-' + value + '" data-folder="' + htmlEncode(folder) + '">' + actions[value] + '</a></li>';
         }
     });
 
     $.each(possibleVaultActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
-            vaultHtml += '<li><a class="action-' + value + '" data-folder="' + folder + '">' + actions[value] + '</a></li>';
+            vaultHtml += '<li><a class="action-' + value + '" data-folder="' + htmlEncode(folder) + '">' + actions[value] + '</a></li>';
         }
     });
 
