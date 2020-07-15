@@ -72,7 +72,7 @@ async function copyVaultPackageToDynamic(urlEncodedOrigin, urlEncodedTarget)
     //window.location.href = '/research/?dir=' + dlgCurrentFolder;
 
     try {
-        let result = await Yoda.call('uu_vault_copy_to_research',
+        let result = await Yoda.call('vault_copy_to_research',
             {
                 'coll_target': Yoda.basePath + dlgCurrentFolder,
                 'coll_origin': Yoda.basePath + urlEncodedOrigin
@@ -207,7 +207,7 @@ let getFolderContents2 = (() => {
 
             console.log('NONE CACHE' + Yoda.basePath + dlgCurrentFolder);
             // + currentFolder
-            let result = await Yoda.call('uu_browse_collections',
+            let result = await Yoda.call('browse_collections',
                 {'coll':       Yoda.basePath + dlgCurrentFolder,
                     'offset':     args.start,
                     'limit':      batchSize,

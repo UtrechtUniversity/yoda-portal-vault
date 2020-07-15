@@ -68,7 +68,7 @@ $(function() {
 
         if (preservableFormatsLists === null) {
             // Retrieve preservable file format lists.
-            Yoda.call('uu_vault_preservable_formats_lists').then((data) => {
+            Yoda.call('vault_preservable_formats_lists').then((data) => {
                 preservableFormatsLists = data;
 
                 $('#file-formats-list').html("<option value='' disabled selected>Select a file format list</option>");
@@ -100,7 +100,7 @@ $(function() {
         $('#showUnpreservableFiles .advice').text(preservableFormatsLists[list]["advice"]);
 
         // Retrieve unpreservable files in folder.
-        Yoda.call('uu_vault_unpreservable_files',
+        Yoda.call('vault_unpreservable_files',
                   {coll: Yoda.basePath + folder, list_name: list}).then((data) => {
             $('#showUnpreservableFiles .checking').hide();
             $('#showUnpreservableFiles .help').show();
@@ -122,7 +122,7 @@ $(function() {
 
         $('.action-confirm-submit-for-publication').attr( 'data-folder', $(this).attr('data-folder') );
 
-        Yoda.call('uu_vault_get_publication_terms', {}).then((data) => {
+        Yoda.call('vault_get_publication_terms', {}).then((data) => {
             $('#confirmAgreementConditions .modal-body').html(data);
 
             // Set default status and show dialog.
@@ -300,7 +300,7 @@ let getFolderContents = (() => {
         } else {
             // Nope, load new data via the API.
             let j = ++i;
-            let result = await Yoda.call('uu_browse_folder',
+            let result = await Yoda.call('browse_folder',
                                          {'coll':       Yoda.basePath + currentFolder,
                                           'offset':     args.start,
                                           'limit':      batchSize,
@@ -448,7 +448,7 @@ function buildActionLog(folder)
     let actionList = $('.actionlog-items');
 
     // Get provenance information
-    Yoda.call('uu_provenance_log',
+    Yoda.call('provenance_log',
               {coll: Yoda.basePath + folder}).then((data) => {
         actionList.hide();
 
@@ -482,7 +482,7 @@ function toggleSystemMetadata(folder)
         systemMetadata.hide();
     } else {
         // Retrieve system metadata of folder.
-        Yoda.call('uu_vault_system_metadata',
+        Yoda.call('vault_system_metadata',
                   {coll: Yoda.basePath + folder}).then((data) => {
             systemMetadata.hide();
             var html = '<li class="list-group-item disabled">System metadata:</li>';
@@ -517,7 +517,7 @@ window.addEventListener('popstate', function(e) {
 
 function topInformation(dir, showAlert) {
     if (typeof dir != 'undefined') {
-        Yoda.call('uu_vault_collection_details',
+        Yoda.call('vault_collection_details',
                   {path: Yoda.basePath + dir}).then((data) => {
             var statusText = "";
             var basename = data.basename;
@@ -690,7 +690,7 @@ async function vaultSubmitForPublication(folder)
     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
     try {
-        let status = await Yoda.call('uu_vault_submit',
+        let status = await Yoda.call('vault_submit',
                                      {'coll': Yoda.basePath + folder})
         $('#statusBadge').html('');
     } catch(e) {
@@ -706,7 +706,7 @@ async function vaultApproveForPublication(folder)
     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
     try {
-        let status = await Yoda.call('uu_vault_approve',
+        let status = await Yoda.call('vault_approve',
                                      {'coll': Yoda.basePath + folder})
         $('#statusBadge').html('');
     } catch(e) {
@@ -722,7 +722,7 @@ async function vaultCancelPublication(folder)
     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
     try {
-        let status = await Yoda.call('uu_vault_cancel',
+        let status = await Yoda.call('vault_cancel',
                                      {'coll': Yoda.basePath + folder})
         $('#statusBadge').html('');
     } catch(e) {
@@ -738,7 +738,7 @@ async function vaultDepublishPublication(folder)
     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
     try {
-        let status = await Yoda.call('uu_vault_depublish',
+        let status = await Yoda.call('vault_depublish',
                                      {'coll': Yoda.basePath + folder})
         $('#statusBadge').html('');
     } catch(e) {
@@ -754,7 +754,7 @@ async function vaultRepublishPublication(folder)
     $('.btn-group button.folder-status').prop("disabled", true).next().prop("disabled", true);
 
     try {
-        let status = await Yoda.call('uu_vault_republish',
+        let status = await Yoda.call('vault_republish',
                                      {'coll': Yoda.basePath + folder})
         $('#statusBadge').html('');
     } catch(e) {
