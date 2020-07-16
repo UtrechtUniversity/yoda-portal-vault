@@ -257,7 +257,7 @@ function loadForm(properties) {
         $('.transformation-accept').on('click', async () => {
             $('.transformation-accept').attr('disabled', true);
 
-            await Yoda.call('uu_transform_metadata',
+            await Yoda.call('transform_metadata',
                             {coll: Yoda.basePath+path},
                             {errorPrefix: 'Metadata could not be transformed'});
 
@@ -324,7 +324,7 @@ async function submitData(data) {
 
     // Save.
     try {
-        await Yoda.call('uu_meta_form_save',
+        await Yoda.call('meta_form_save',
                         {coll: Yoda.basePath+path, metadata: data},
                         {errorPrefix: 'Metadata could not be saved'});
 

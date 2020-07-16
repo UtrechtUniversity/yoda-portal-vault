@@ -82,7 +82,7 @@ let getSearchResults = (() => {
         let j = ++i;
 
         // Latest selection length is required
-        let result = await Yoda.call('uu_search', {
+        let result = await Yoda.call('search', {
             'search_string': currentSearchString,
             'search_type': currentSearchType,
             'offset': args.start,

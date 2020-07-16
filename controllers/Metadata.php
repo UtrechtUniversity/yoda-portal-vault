@@ -40,7 +40,7 @@ class Metadata extends MY_Controller
         $tokenName = $this->security->get_csrf_token_name();
         $tokenHash = $this->security->get_csrf_hash();
 
-        $formProperties = $this->api->call('uu_meta_form_load', ['coll' => $fullPath]);
+        $formProperties = $this->api->call('meta_form_load', ['coll' => $fullPath]);
 
         $viewParams = array(
             'styleIncludes' => array(
