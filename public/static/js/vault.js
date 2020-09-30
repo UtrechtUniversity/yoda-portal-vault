@@ -556,8 +556,10 @@ function topInformation(dir, showAlert) {
                         statusText = "Depublication pending";
                     } else if (vaultStatus == 'PENDING_REPUBLICATION') {
                         statusText = "Republication pending";
+                    } else if (vaultStatus == 'UNPUBLISHED') {
+                            statusText = "Unpublished";
                     } else {
-                        statusText = "Unpublished";
+                        statusText = "Incomplete";
                     }
 
                     // Set actions for datamanager and researcher.
