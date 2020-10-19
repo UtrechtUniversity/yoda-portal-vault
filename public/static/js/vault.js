@@ -238,7 +238,7 @@ function makeBreadcrumb(dir)
 
     let html = '';
     for (let [i, [text, path]] of crumbs.entries()) {
-        let el = $('<li>');
+        let el = $('<li class="breadcrumb-item">');
         text = htmlEncode(text).replace(/ /g, '&nbsp;');
         if (i === crumbs.length-1)
              el.addClass('active').html(text);
@@ -386,17 +386,17 @@ const tableRenderer = {
                           video: ['mp4', 'ogg', 'webm']};
         let ext = row.name.replace(/.*\./, '').toLowerCase();
 
-        let actions = $('<ul class="dropdown-menu">');
-        actions.append(`<li><a href="browse/download?filepath=${encodeURIComponent(currentFolder+'/'+row.name)}">Download</a>`);
+        let actions = $('<div class="dropdown-menu">');
+        actions.append(`<a class="dropdown-item" href="browse/download?filepath=${encodeURIComponent(currentFolder+'/'+row.name)}">Download</a>`);
 
         // Generate dropdown "view" actions for different media types.
         for (let type of Object.keys(viewExts).filter(type => (viewExts[type].includes(ext))))
             actions.append(`<li><a class="view-${type}" data-path="${htmlEncode(currentFolder+'/'+row.name)}">View</a>`);
 
         let dropdown = $(`<div class="dropdown">
-                            <span class="dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                              <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
-                            </span>`);
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+                            </button>`);
         dropdown.append(actions);
 
         return dropdown[0].outerHTML;
@@ -556,10 +556,8 @@ function topInformation(dir, showAlert) {
                         statusText = "Depublication pending";
                     } else if (vaultStatus == 'PENDING_REPUBLICATION') {
                         statusText = "Republication pending";
-                    } else if (vaultStatus == 'UNPUBLISHED') {
-                            statusText = "Unpublished";
                     } else {
-                        statusText = "Incomplete";
+                        statusText = "Unpublished";
                     }
 
                     // Set actions for datamanager and researcher.
@@ -627,13 +625,13 @@ function topInformation(dir, showAlert) {
             }
 
             let folderName = htmlEncode(basename).replace(/ /g, "&nbsp;");
-            let statusBadge = '<span id="statusBadge" class="badge">' + statusText + '</span>';
+            let statusBadge = '<span id="statusBadge" class="ml-1 badge badge-secondary">' + statusText + '</span>';
 
             // Reset action dropdown.
             $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
 
             var icon = '<i class="fa fa-folder-open-o" aria-hidden="true"></i>';
-            $('.top-information h1').html(`<span class="icon">${icon}</span> ${folderName}${systemMetadataIcon}${actionLogIcon}${statusBadge}`);
+            $('.top-information h2').html(`<span class="icon">${icon}</span> ${folderName}${systemMetadataIcon}${actionLogIcon}${statusBadge}`);
 
             // Show top information and buttons.
             if (typeof vaultStatus != 'undefined') {

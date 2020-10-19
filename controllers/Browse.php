@@ -64,12 +64,11 @@ class Browse extends MY_Controller
         $viewParams = array(
             'styleIncludes' => array(
                 'css/research.css',
-                'lib/datatables/css/dataTables.bootstrap.min.css',
+                'lib/datatables/css/datatables.min.css',
                 'lib/font-awesome/css/font-awesome.css'
             ),
             'scriptIncludes' => array(
-                'lib/datatables/js/jquery.dataTables.min.js',
-                'lib/datatables/js/dataTables.bootstrap.min.js',
+                'lib/datatables/js/datatables.min.js',
                 'js/vault.js',
                 'js/search.js',
                 'js/dlgSelectCollection.js'

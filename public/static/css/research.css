@@ -126,3 +126,17 @@ table.dataTable > tbody > tr > td i {
     font-size: 19px;
     vertical-align: bottom;
 }
+
+/* Table */
+.yoda-table th {
+    background-color: #dcdcdc;
+    border-color: #ddd;
+    border-bottom: 1px solid transparent!important;
+    color: #333;
+    font-family: inherit;
+    font-weight: 500;
+}
+
+.yoda-table tr.odd {
+    background-color: transparent !important;
+}

@@ -19,7 +19,7 @@ $(document).ready(function() {
         }
     }
 
-    $(".search-panel .dropdown-menu li a").click(function() {
+    $(".search-panel .dropdown-menu a").click(function() {
         $("#search_concept").html($(this).text());
         $("#search_concept").attr('data-type', $(this).attr('data-type'));
 

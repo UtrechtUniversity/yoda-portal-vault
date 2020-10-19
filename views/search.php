@@ -9,32 +9,34 @@
 </script>
 
 <div class="row">
-    <div class="input-group" style="margin-bottom:20px;">
-        <div class="input-group-btn search-panel">
+    <div class="input-group mb-3">
+        <div class="input-group-prepend search-panel">
             <?php if ($searchType == 'revision') { ?>
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    <span id="search_concept" data-type="<?php echo $searchType; ?>">Search revision by name</span> <span class="caret"></span>
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span id="search_concept" data-type="<?php echo $searchType; ?>">Search revision by name</span>
                 </button>
             <?php } else { ?>
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    <span id="search_concept" data-type="<?php echo $searchType; ?>">Search by <?php echo $searchType; ?></span> <span class="caret"></span>
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span id="search_concept" data-type="<?php echo $searchType; ?>">Search by <?php echo $searchType; ?></span>
                 </button>
             <?php } ?>
-            <ul class="dropdown-menu" role="menu">
-                <li><a href="#" data-type="filename">Search by filename</a></li>
-                <li><a href="#" data-type="folder">Search by folder</a></li>
-                <li><a href="#" data-type="metadata">Search by metadata</a></li>
-                <li><a href="#" data-type="status">Search by status</a></li>
-                <li><a href="#" data-type="revision">Search revision by name</a></li>
-            </ul>
+            <div class="dropdown-menu">
+                <a href="#" class="dropdown-item" data-type="filename">Search by filename</a>
+                <a href="#" class="dropdown-item" data-type="folder">Search by folder</a>
+                <a href="#" class="dropdown-item" data-type="metadata">Search by metadata</a>
+                <a href="#" class="dropdown-item" data-type="status">Search by status</a>
+                <a href="#" class="dropdown-item" data-type="revision">Search revision by name</a>
+            </div>
         </div>
         <div class="search-term">
             <input type="hidden" name="search_param" value="all" id="search_param">
         </div>
         <input type="text" class="form-control search-term<?php echo $showStatus ? ' hide' : ''; ?>" id="search-filter" placeholder="Search term..." value="<?php echo htmlentities($searchTerm); ?>" maxlength="255">
-        <span class="input-group-btn search-term<?php echo $showStatus ? ' hide' : ''; ?>">
-            <button class="btn btn-default search-btn" data-items-per-page="<?php echo $searchItemsPerPage; ?>" type="button"><span class="glyphicon glyphicon-search"></span></button>
-        </span>
+        <div class="input-group-append search-term<?php echo $showStatus ? ' hide' : ''; ?>">
+            <button class="btn btn-outline-secondary" data-items-per-page="<?php echo $searchItemsPerPage; ?>" type="button">
+                <i class="fa fa-search" aria-hidden="true"></i>
+            </button>
+        </div>
 
         <select name="status" class="form-control search-status<?php echo $showTerm ? ' hide' : ''; ?>">
             <option style="display:none" disabled selected value>Select status...</option>
