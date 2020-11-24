@@ -625,7 +625,7 @@ function topInformation(dir, showAlert) {
             }
 
             let folderName = htmlEncode(basename).replace(/ /g, "&nbsp;");
-            let statusBadge = '<span id="statusBadge" class="ml-1 badge badge-secondary">' + statusText + '</span>';
+            let statusBadge = '<span id="statusBadge" class="ml-2 badge badge-pill badge-primary">' + statusText + '</span>';
 
             // Reset action dropdown.
             $('.btn-group button.folder-status').prop("disabled", false).next().prop("disabled", false);
