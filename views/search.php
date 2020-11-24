@@ -57,22 +57,22 @@
         </select>
     </div>
 
-    <div class="panel panel-default search-results">
-        <div class="panel-heading clearfix">
-            <h3 class="panel-title pull-left">Search results for '<span class="search-string"></span>'</h3>
-
-            <button class="btn btn-default pull-right close-search-results input-group-sm has-feedback">Close</button>
-            <div class="clearfix"></div>
-        </div>
-        <div class="panel-body">
-            <table class="table yoda-table table-bordered" id="search" width="100%">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Location</th>
-                </tr>
-                </thead>
-            </table>
+    <div class="col-sm-12">
+        <div class="row card panel-default search-results">
+            <div class="card-header clearfix">
+                <h5 class="mt-1 pull-left">Search results for '<span class="search-string"></span>'</h5>
+                <button class="btn btn-secondary float-right clearfix close-search-results">Close</button>
+            </div>
+            <div class="card-body">
+                <table class="table yoda-table table-bordered" id="search" width="100%">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Location</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
         </div>
     </div>
 </div>
