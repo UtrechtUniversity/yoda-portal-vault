@@ -659,18 +659,18 @@ function handleActionsList(actions, folder)
 
     $.each(possibleActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
-            html += '<li><a class="action-' + value + '" data-folder="' + htmlEncode(folder) + '">' + actions[value] + '</a></li>';
+            html += '<a class="dropdown-item action-' + value + '" data-folder="' + htmlEncode(folder) + '">' + actions[value] + '</a>';
         }
     });
 
     $.each(possibleVaultActions, function( index, value ) {
         if (actions.hasOwnProperty(value)) {
-            vaultHtml += '<li><a class="action-' + value + '" data-folder="' + htmlEncode(folder) + '">' + actions[value] + '</a></li>';
+            vaultHtml += '<a class="dropdown-item action-' + value + '" data-folder="' + htmlEncode(folder) + '">' + actions[value] + '</a>';
         }
     });
 
     if (html != '' && vaultHtml != '') {
-        html += '<li class="divider"></li>' + vaultHtml;
+        html += '<div class="dropdown-divider"></div>' + vaultHtml;
     } else if (vaultHtml != '') {
         html += vaultHtml;
     }
