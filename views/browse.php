@@ -136,11 +136,11 @@
     </div>
 </div>
 
-<div class="modal" id="showUnpreservableFiles">
+<div class="modal" tabindex="-1" role="dialog" id="showUnpreservableFiles">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
-                <h3>File formats compliance with policy</h3>
+                <h3 class="modal-title">File formats compliance with policy</h3>
                 <div class="form-group">
                     <label for="file-formats-list">Select preservable file format list:</label>
                     <select class="form-control" id="file-formats-list">
@@ -149,18 +149,18 @@
                 </div>
                 <p class="help"></p><br />
                 <p class="advice"></p>
+                <p class="checking">Checking files <i class="fa fa-spinner fa-spin fa-fw"></i></p>
                 <p class="preservable">
                     This folder does not contain files that are likely to become unusable in the future.
                 </p>
-                <p class="unpreservable">
-                    Following unpreservable file extensions were found in your dataset:
-                    <br />
+                <div class="unpreservable">
+                    <p>The following unpreservable file extensions were found in your dataset:</p>
                     <ul class="list-unpreservable-formats"></ul>
-                </p>
+                </div>
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-default grey cancel" data-dismiss="modal">Close</button>
+                <button class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
