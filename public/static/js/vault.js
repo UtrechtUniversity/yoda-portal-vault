@@ -448,13 +448,13 @@ function toggleActionLogList(folder)
             var html = '';
             if (data.length) {
                 $.each(data, function (index, value) {
-                    html += '<a class="list-group-item list-group-item-action"><span>'
+                    html += '<a class="list-group-item list-group-item-action">'
                          + htmlEncode(value[2])
                          + ' - <strong>'
                          + htmlEncode(value[1])
                          + '</strong> - '
                          + htmlEncode(value[0])
-                         + '</span></a>';
+                         + '</a>';
                 });
             } else {
                 html += '<a class="list-group-item list-group-item-action">No provenance information present</a>';
