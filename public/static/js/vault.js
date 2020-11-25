@@ -477,7 +477,7 @@ function toggleSystemMetadata(folder)
         systemMetadata.hide();
     } else {
         // Retrieve system metadata of folder.
-        Yoda.call('research_system_metadata', {coll: Yoda.basePath + folder}).then((data) => {
+        Yoda.call('vault_system_metadata', {coll: Yoda.basePath + folder}).then((data) => {
             systemMetadata.hide();
             var html = '';
             if (data) {
