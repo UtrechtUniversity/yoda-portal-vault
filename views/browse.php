@@ -116,13 +116,20 @@
             <div class="modal-body">
             </div>
             <div class="modal-footer">
-                <fieldset>
-                    <input type="checkbox" class="confirm-conditions" id="checkbox-confirm-conditions">
-                    <label for="checkbox-confirm-conditions">Please confirm that you agree with the above</label>
-                </fieldset>
-                <hr />
-                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button class='btn btn-primary action-confirm-submit-for-publication'>Confirm agreement</button>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <fieldset>
+                            <input type="checkbox" class="confirm-conditions" id="checkbox-confirm-conditions">
+                            <label for="checkbox-confirm-conditions">Please confirm that you agree with the above</label>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="row">
+                   <div class="col-sm-12">
+                        <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button class='btn btn-primary ml-2 action-confirm-submit-for-publication'>Confirm agreement</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
