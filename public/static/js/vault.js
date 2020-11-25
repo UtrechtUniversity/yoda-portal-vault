@@ -482,11 +482,11 @@ function toggleSystemMetadata(folder)
             var html = '';
             if (data) {
                 $.each(data, function(index, value) {
-                    html += '<a class="list-group-item list-group-item-action"><span>' +
+                    html += '<span class="list-group-item list-group-item-action"><strong>' +
                         htmlEncode(index) +
                         '</strong>: ' +
                         value +
-                        '</span></a>';
+                        '</span>';
                 });
             } else {
                 html += '<a class="list-group-item list-group-item-action">No system metadata present</a>';
