@@ -110,20 +110,19 @@
     </div>
 </div>
 
-<div class="modal" id="confirmAgreementConditions">
+<div class="modal" tabindex="-1" role="dialog" id="confirmAgreementConditions">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
             </div>
-
             <div class="modal-footer">
                 <fieldset>
                     <input type="checkbox" class="confirm-conditions" id="checkbox-confirm-conditions">
                     <label for="checkbox-confirm-conditions">Please confirm that you agree with the above</label>
                 </fieldset>
-                <hr>
-                <button class='action-confirm-submit-for-publication btn btn-default'>Confirm agreement</button>
-                <button class="btn btn-default grey cancel" data-dismiss="modal">Cancel</button>
+                <hr />
+                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button class='btn btn-primary action-confirm-submit-for-publication'>Confirm agreement</button>
             </div>
         </div>
     </div>
@@ -159,45 +158,42 @@
     </div>
 </div>
 
-<div class="modal" id="confirmDepublish">
+<div class="modal" tabindex="-1" role="dialog" id="confirmDepublish">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
                 <p>Please confirm that you agree to depublish this datapackage.</p>
             </div>
-
             <div class="modal-footer">
-                <button class='action-confirm-depublish-publication btn btn-default'>Confirm depublish</button>
-                <button class="btn btn-default grey cancel" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button class='btn btn-primary action-confirm-depublish-publication'>Confirm depublish</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal" id="confirmRepublish">
+<div class="modal" tabindex="-1" role="dialog" id="confirmRepublish">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
                 <p>Please confirm that you agree to republish this datapackage.</p>
             </div>
-
             <div class="modal-footer">
-                <button class='action-confirm-republish-publication btn btn-default'>Confirm republish</button>
-                <button class="btn btn-default grey cancel" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button class='btn btn-primary action-confirm-republish-publication'>Confirm republish</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal" id="viewMedia">
+<div class="modal" tabindex="-1" role="dialog" id="viewMedia">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
                 <div id="viewer"></div>
             </div>
-
             <div class="modal-footer">
-                <button class="btn btn-default grey cancel" data-dismiss="modal">Close</button>
+                <button class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
