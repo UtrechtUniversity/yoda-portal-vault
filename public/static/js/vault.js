@@ -485,7 +485,7 @@ function toggleSystemMetadata(folder)
                     html += '<a class="list-group-item list-group-item-action"><span>' +
                         htmlEncode(index) +
                         '</strong>: ' +
-                        htmlEncode(value) +
+                        value +
                         '</span></a>';
                 });
             } else {
