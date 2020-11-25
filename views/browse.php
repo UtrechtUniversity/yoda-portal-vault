@@ -4,13 +4,6 @@
     var view = 'browse';
 </script>
 
-<script>
-    // Added for selection of target for vault package @TODO names to be changed and to be added by controller
-//    var revisionItemsPerPage = <?php echo $items; ?>;
-    var browseDlgPageItems = <?php echo $items; //$dlgPageItems; ?>;
-//    var view = 'revision';
-</script>
-
 <div class="modal" id="dlg-select-folder">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -243,9 +236,14 @@
             </div>
         </div>
 
-        <ul class="list-group lock-items"></ul>
-        <ul class="list-group system-metadata-items"></ul>
-        <ul class="list-group actionlog-items"></ul>
+        <div class="card system-metadata">
+            <div class="card-header">System metadata</div>
+            <div class="list-group system-metadata-items"></div>
+        </div>
+        <div class="card actionlog">
+            <div class="card-header">Provenance information</div>
+            <div class="list-group actionlog-items"></div>
+        </div>
     </div>
 
     <div class="col-md-12">

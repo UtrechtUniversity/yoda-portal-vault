@@ -433,48 +433,43 @@ function startBrowsing(items)
 
 function toggleActionLogList(folder)
 {
-    let actionList = $('.actionlog-items');
+    let actionList = $('.actionlog');
+    let actionListItems = $('.actionlog-items');
 
-     // Toggle provenance log list.
-    if (actionList.is(":visible")) {
+    let isVisible = actionList.is(":visible");
+
+    // toggle locks list
+    if (isVisible) {
         actionList.hide();
     } else {
-        buildActionLog(folder);
+        // Get provenance information
+        Yoda.call('provenance_log', {coll: Yoda.basePath + folder}).then((data) => {
+            actionList.hide();
+            var html = '';
+            if (data.length) {
+                $.each(data, function (index, value) {
+                    html += '<a class="list-group-item list-group-item-action"><span>'
+                         + htmlEncode(value[2])
+                         + ' - <strong>'
+                         + htmlEncode(value[1])
+                         + '</strong> - '
+                         + htmlEncode(value[0])
+                         + '</span></a>';
+                });
+            } else {
+                html += '<a class="list-group-item list-group-item-action">No provenance information present</a>';
+            }
+            actionListItems.html(html)
+            actionList.show();
+        });
     }
-}
-
-function buildActionLog(folder)
-{
-    let actionList = $('.actionlog-items');
-
-    // Get provenance information
-    Yoda.call('provenance_log',
-              {coll: Yoda.basePath + folder}).then((data) => {
-        actionList.hide();
-
-        var html = '<li class="list-group-item disabled">Provenance information:</li>';
-        var logItems = data;
-        if (logItems.length) {
-            $.each(logItems, function (index, value) {
-                html += '<li class="list-group-item"><span>'
-                     + htmlEncode(value[2])
-                     + ' - <strong>'
-                     + htmlEncode(value[1])
-                     + '</strong> - '
-                     + htmlEncode(value[0])
-                     + '</span></li>';
-            });
-        }
-        else {
-            html += '<li class="list-group-item">No provenance information present</li>';
-        }
-        actionList.html(html).show();
-    });
 }
 
 function toggleSystemMetadata(folder)
 {
-    let systemMetadata = $('.system-metadata-items');
+    let systemMetadata = $('.system-metadata');
+    let systemMetadataItems = $('.system-metadata-items');
+
     let isVisible = systemMetadata.is(":visible");
 
     // Toggle system metadata.
@@ -482,23 +477,22 @@ function toggleSystemMetadata(folder)
         systemMetadata.hide();
     } else {
         // Retrieve system metadata of folder.
-        Yoda.call('vault_system_metadata',
-                  {coll: Yoda.basePath + folder}).then((data) => {
+        Yoda.call('research_system_metadata', {coll: Yoda.basePath + folder}).then((data) => {
             systemMetadata.hide();
-            var html = '<li class="list-group-item disabled">System metadata:</li>';
-
+            var html = '';
             if (data) {
                 $.each(data, function(index, value) {
-                    html += '<li class="list-group-item"><span><strong>' +
+                    html += '<a class="list-group-item list-group-item-action"><span>' +
                         htmlEncode(index) +
                         '</strong>: ' +
-                        value +
-                        '</span></li>';
+                        htmlEncode(value) +
+                        '</span></a>';
                 });
             } else {
-                html += '<li class="list-group-item">No system metadata present</li>';
+                html += '<a class="list-group-item list-group-item-action">No system metadata present</a>';
             }
-            systemMetadata.html(html).show();
+            systemMetadataItems.html(html);
+            systemMetadata.show();
         });
     }
 }
