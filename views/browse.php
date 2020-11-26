@@ -1,33 +1,29 @@
 <script>
     var browsePageItems = <?php echo $items; ?>;
     var browseStartDir = <?php echo json_encode($dir); ?>;
-    var browseDlgPageItems = <?php echo $items; ?>;    
+    var browseDlgPageItems = <?php echo $items; ?>;
     var view = 'browse';
 </script>
 
 <div class="modal" id="dlg-select-folder">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="panel-body">
+            <div class="card-body">
                 <div class="alert alert-warning hide" id="dlg-select-alert-panel">
                     <span></span>
                 </div>
 
-                <div class="panel panel-default">
-                    <div class="panel-heading clearfix">
-                        <h3 class="panel-title pull-left">
+                <div class="card card-default">
+                    <div class="card-header clearfix">
+                        <h5 class="card-title pull-left">
                             Select folder to copy current datapackage
-                        </h3>
-
-                        <div class="input-group-sm has-feedback pull-right">
-                            <button class="btn btn-default" data-dismiss="modal">Close</button>
-                        </div>
+                        </h5>
                     </div>
 
                     <input type="hidden" id="restoration-objectid" value="">
 
-                    <div class="panel revision-restore-dialog">
-                        <div class="panel-body">
+                    <div class="card revision-restore-dialog">
+                        <div class="card-body">
                             <ol class="breadcrumb dlg-breadcrumb">
                                 <li class="active">Home</li>
                             </ol>
@@ -46,7 +42,8 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-default" id="btn-copy-package"><i class="fa fa-copy" aria-hidden="true"></i> Copy package to research area</button>
+                <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" id="btn-copy-package"><i class="fa fa-copy" aria-hidden="true"></i> Copy package to research area</button>
             </div>
 
             <div id="coverAll" class="cover restore-exists hide">
