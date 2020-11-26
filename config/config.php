@@ -13,13 +13,6 @@ $config['browser-items-per-page'] = 10;
  */
 $config['search-items-per-page'] = 10;
 
-/**
- * Revision config
- */
-
-$config['revision-items-per-page'] = 25;
-$config['revision-dialog-items-per-page'] = 5;
-
 
 if (file_exists(dirname(__FILE__) . '/config_local.php'))
     include(    dirname(__FILE__) . '/config_local.php');

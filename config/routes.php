@@ -40,7 +40,6 @@
 $module = 'vault';
 
 $route[$module]                        = 'browse';
-$route[$module. '/revision']           = 'revision';
 
 
 /* End of file routes.php */

@@ -303,7 +303,5 @@ function saveSearchRequest() {
                 showSearchResults();
             }
         });
-
-        showSearchResults();
     }
 }
