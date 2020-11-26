@@ -1,6 +1,6 @@
 <div id="form-errors" class="row hide">
     <div class="col-md-12">
-        <div class="card card-default">
+        <div class="card">
             <div class="card-header clearfix">
                 <h3 class="card-title pull-left">
                     Metadata form - <?php echo str_replace(' ', '&nbsp;', htmlentities(trim($path))); ?>
@@ -25,7 +25,7 @@
 
 <div id="metadata-form" class="row hide">
     <div class="col-md-12">
-        <div class="card card-default">
+        <div class="card">
             <div class="card-header clearfix">
                 <h5 class="card-title pull-left">
                     Metadata form - <?php echo str_replace(' ', '&nbsp;', htmlentities(trim($path))); ?>

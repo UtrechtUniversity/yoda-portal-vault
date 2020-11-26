@@ -13,7 +13,7 @@
                     <span></span>
                 </div>
 
-                <div class="card card-default">
+                <div class="card">
                     <div class="card-header clearfix">
                         <h5 class="card-title pull-left">
                             Select folder to copy current datapackage

@@ -58,7 +58,7 @@
     </div>
 
     <div class="col-sm-12">
-        <div class="row card panel-default search-results">
+        <div class="row card search-results">
             <div class="card-header clearfix">
                 <h5 class="mt-1 pull-left">Search results for '<span class="search-string"></span>'</h5>
                 <button class="btn btn-secondary float-right clearfix close-search-results">Close</button>
