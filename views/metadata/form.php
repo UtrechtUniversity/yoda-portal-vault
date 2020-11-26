@@ -27,9 +27,9 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header clearfix">
-                <h5 class="card-title pull-left">
+                <h3 class="card-title pull-left">
                     Metadata form - <?php echo str_replace(' ', '&nbsp;', htmlentities(trim($path))); ?>
-                </h5>
+                </h3>
                 <div class="input-group-sm has-feedback pull-right close-button">
                     <a class="btn btn-secondary" href="/vault/browse?dir=<?php echo rawurlencode($path); ?>">Close</a>
                 </div>
