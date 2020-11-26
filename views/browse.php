@@ -45,65 +45,6 @@
                 <button class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button class="btn btn-primary" id="btn-copy-package"><i class="fa fa-copy" aria-hidden="true"></i> Copy package to research area</button>
             </div>
-
-            <div id="coverAll" class="cover restore-exists hide">
-                <div class="panel panel-default">
-                    <div class="panel-heading clearfix">
-                        <h3 class="panel-title pull-left">
-                            Restore revision in selected folder
-                        </h3>
-
-                        <div class="input-group-sm has-feedback pull-right">
-                            <button class="btn btn-default" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div class="mode-dlg-exists hide">
-                            <div class="alert alert-warning">
-                                The file <strong><span class="orgFileName"></span></strong> (location: <span class='dlg-path'> </span>) already exists.
-                            </div>
-
-                            <div class="alert alert-danger hide" id="alertBox">
-                                The file <span id="duplicate"></span> The renamed file already you try to add already exists.
-                            </div>
-
-                            <div class="panel-body">
-                                <div class="row">
-                                    <form id="form-restore-overwrite" class="form-inline pull-left">
-                                        <p>Overwrite this file</p>
-                                        <button class="btn btn-danger" id="btn-restore-overwrite">Overwrite</button>
-                                    </form>
-
-                                    <form class="form-inline pull-right">
-                                        <p>Enter new name for the revision you want to restore</p>
-                                        <div class="form-group">
-                                            <label for="newFileName">New filename</label>
-                                            <input type="text"  class="form-control" placeholder="Enter new filename" id="newFileName">
-                                        </div>
-                                        <button  class="btn btn-primary" id="btn-restore-next-to">Restore with a new filename</button>
-                                    </form>
-                                </div>
-                                <div class="row">
-                                    <hr>
-                                    <button class="btn btn-default pull-right"  id="btn-cancel-overwrite-dialog" >Cancel</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mode-dlg-locked hide">
-                            <div class="alert alert-danger">
-                                Revision of the file <strong><span class="orgFileName"></span></strong> can not be placed in location: <strong><span class='path'> </span></strong>.
-                                <br>
-                                <br>
-                                <br>This folder is in a locked state and can therefore not be changed.
-                                <br>
-                                <br>Please select another folder for placement of your revision.
-                            </div>
-
-                            <button class="btn btn-default pull-right"  id="btn-select-other-folder" >Select other folder...</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>

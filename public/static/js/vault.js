@@ -585,9 +585,9 @@ function topInformation(dir, showAlert) {
                 $('.top-info-buttons').show();
                 if (isDatamanager) {
                     if (researchGroupAccess) {
-                        actions['grant-vault-access'] = 'Grant read access to research group';
+                        actions['revoke-vault-access'] = 'Revoke read access to research group';                        
                     } else {
-                        actions['revoke-vault-access'] = 'Revoke read access to research group';
+                        actions['grant-vault-access'] = 'Grant read access to research group';
                     }
                 }
             }
