@@ -1,6 +1,7 @@
 <script>
     var browsePageItems = <?php echo $items; ?>;
     var browseStartDir = <?php echo json_encode($dir); ?>;
+    var browseDlgPageItems = <?php echo $items; ?>;    
     var view = 'browse';
 </script>
 
