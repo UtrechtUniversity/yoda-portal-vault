@@ -122,10 +122,10 @@ let getSearchResults = (() => {
 const resultsRenderer = {
     name: (name, _, row) => {
         if (row.type === 'coll') {
-            return `<span class="browse-search" data-path="${htmlEncode(name)}"><i class="fa fa-folder-o"></i> ${htmlEncode(name)}</span>`;
+            return `<a class="browse-search" data-path="${htmlEncode(name)}"><i class="fa fa-folder-o"></i> ${htmlEncode(name)}</a>`;
         } else {
             let tgt = name.split("/").slice(0, -1).join("/");
-            return `<span class="browse-search" data-path="${htmlEncode(tgt)}"><i class="fa fa-file-o"></i> ${htmlEncode(name)}</span>`;
+            return `<a class="browse-search" data-path="${htmlEncode(tgt)}"><i class="fa fa-file-o"></i> ${htmlEncode(name)}</a>`;
         }
     },
     size: (size, _, row) => {
