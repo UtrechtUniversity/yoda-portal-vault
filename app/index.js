@@ -17,11 +17,6 @@ let saving = false;
 
 let form = document.getElementById('form');
 
-const customStyles = {
-    control: styles => ({...styles, borderRadius: '0px', minHeight: '15px', height: '33.5px'}),
-    placeholder: () => ({color: '#555'})
-};
-
 const enumWidget = (props) => {
     let enumArray = props['schema']['enum'];
     let enumNames = props['schema']['enumNames'];
@@ -32,9 +27,23 @@ const enumWidget = (props) => {
     let i = enumArray.indexOf(props['value']);
     let placeholder = enumNames[i] == null ? ' ' : enumNames[i];
 
+    let title = props.label || props.uiSchema["ui:title"]
+    let label = <label className="form-label">{title}</label>
+    let customStyles = {
+        control: styles => ({...styles})
+    };
+    if (props.required && props.value == null) {
+        label = <label className="text-danger form-label select-required">{title}*</label>
+        customStyles = {
+            control: styles => ({...styles, borderColor: '#dc3545'})
+        };
+    } else if (props.required) {
+        label = <label className="form-label select-required select-filled">{title}*</label>
+    }
+
     return (
         <div>
-            <label className="form-label">{props.label || props.uiSchema["ui:title"]}</label>
+            {label}
             <Select className={'select-box'}
                     placeholder={placeholder}
                     required={props.required}
@@ -532,6 +541,13 @@ function updateCompleteness()
                 mandatoryFilled++;
             }
         }
+    });
+
+    $(".select-required").each(function() {
+        mandatoryTotal++;
+    });
+    $(".select-filled").each(function() {
+        mandatoryFilled++;
     });
 
     let percent = (mandatoryFilled / mandatoryTotal) * 100;
