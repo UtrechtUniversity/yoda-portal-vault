@@ -30,12 +30,27 @@ const enumWidget = (props) => {
     let title = props.label || props.uiSchema["ui:title"]
     let label = <label className="form-label">{title}</label>
     let customStyles = {
-        control: styles => ({...styles})
+        control: styles => ({
+            ...styles,
+            border: '1px solid #ced4da',
+            boxShadow: 'none',
+            '&:hover': {
+                border: '1px solid #ced4da',
+            }
+        })
     };
+
     if (props.required && props.value == null) {
         label = <label className="text-danger form-label select-required">{title}*</label>
         customStyles = {
-            control: styles => ({...styles, borderColor: '#dc3545'})
+            control: styles => ({
+                ...styles,
+                border: '1px solid #dc3545',
+                boxShadow: 'none',
+                '&:hover': {
+                    border: '1px solid #dc3545',
+                }
+            })
         };
     } else if (props.required) {
         label = <label className="form-label select-required select-filled">{title}*</label>
