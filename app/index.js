@@ -40,7 +40,9 @@ const enumWidget = (props) => {
         })
     };
 
-    if (props.required && props.value == null) {
+    let error = "should be equal to one of the allowed values";
+    
+    if((props.rawErrors !== undefined && props.rawErrors.indexOf(error) >= 0) || (props.required && props.value == null)) {
         label = <label className="text-danger form-label select-required">{title}*</label>
         customStyles = {
             control: styles => ({
@@ -423,9 +425,12 @@ function ObjectFieldTemplate(props) {
         });
 
         return (
-            <div className={`form-row ${structureClass}`}>
-                {output}
-            </div>
+            <fieldset class="yoda-array-field">
+                <legend>{props.schema['title']}</legend>
+                <div className={`form-row ${structureClass}`}>
+                    {output}
+                </div>
+            </fieldset>
         );
     }
 
