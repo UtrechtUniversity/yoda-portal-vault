@@ -422,11 +422,18 @@ function ObjectFieldTemplate(props) {
             );
         });
 
-        return (
-            <div className={`form-row ${structureClass}`}>
-                {output}
-            </div>
-        );
+        if(props.title) {
+            return (
+                <fieldset className="yoda-array-field border rounded mb-4">
+                    <legend>{props.title}</legend>
+                    <div className="d-flex">{output} </div>
+                </fieldset>
+            );
+        } else {
+            return (
+                <div className="d-flex">{output}</div>
+            );
+        }
     }
 
     return (
