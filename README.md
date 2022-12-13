@@ -1,16 +1,21 @@
-yoda-portal-research
+yoda-portal-vault
 ====================
+
+The code of the Yoda vault module has been integrated into the main Yoda repositories. The code in this repository is obsolete. The current code can be found in the following repositories:
+
+- https://github.com/UtrechtUniversity/yoda-portal
+- https://github.com/UtrechtUniversity/yoda-ruleset
 
 NAME
 ----
 
-yoda-portal-research - Research module for Yoda.
+yoda-portal-vault - Vault module for Yoda.
 
 DESCRIPTION
 ---
-This research module was created for the Institutions I-lab project, but can be configured to allow the module to work for other projects that wish to make use of Yoda.
+This vault module was created for the Institutions I-lab project, but can be configured to allow the module to work for other projects that wish to make use of Yoda.
 
-The module allows defining a schema in XML format, that generates a highly versatile meta data editor form for online editing of iRODS metadata. 
+The module allows defining a schema in XML format, that generates a highly versatile meta data editor form for online editing of iRODS metadata.
 
 The module provides a detailed file overview of all projects a user is a member of inside the Yoda environment.
 
@@ -37,4 +42,3 @@ Copyright (c) 2015-2018, Utrecht University. All rights reserved.
 This project is licensed under the GPLv3 license.
 
 The full license text can be found in [LICENSE](LICENSE).
-
